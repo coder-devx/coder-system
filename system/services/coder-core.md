@@ -12,12 +12,15 @@ region: europe-west1
 url: https://coder-core-8534948335.europe-west1.run.app
 depends_on:
   services: []
-  integrations: [github, gcp, slack, notion, anthropic]
-  data_stores: [postgres]
+  integrations: [github, gcp, cloud-sql, slack, notion, anthropic]
+  data_stores: [cloud-sql]
 exposes:
   - protocol: http
     port: 8080
     path: /v1/health
+  - protocol: http
+    port: 8080
+    path: /v1/projects
 implements_designs: ["0001", "0002", "0004"]
 decided_by: ["0005", "0006", "0010"]
 ---
@@ -46,22 +49,24 @@ acts across projects without an explicit fan-out.
 - **Impersonation**: mint short-lived, role-scoped tokens for local agents.
 - **Admin Panel backend**: status, override, debug surfaces.
 
-## Current state (as of commit #2 · 2026-04-08)
+## Current state (as of commit #3 · 2026-04-08)
 
-- **v0.0.1 walking skeleton** — deployed to Cloud Run. `GET /v1/health` only.
+- **v0.0.2** — deployed to Cloud Run. Health + projects CRUD.
 - URL: <https://coder-core-8534948335.europe-west1.run.app>
-- First revision: `coder-core-00001-9lp`
-- Runtime SA: `coder-core-sa@vibedevx.iam.gserviceaccount.com` with `logging.logWriter` + `monitoring.metricWriter` only.
+- Live revision: `coder-core-00004-qvm`
+- Runtime SA: `coder-core-sa@vibedevx.iam.gserviceaccount.com` with `logging.logWriter`, `monitoring.metricWriter`, `cloudsql.client`, `cloudsql.instanceUser`.
 - Ingress: `allow-unauthenticated` (auth gating lands in commit #4).
+- DB: `coder-core-db` Cloud SQL Postgres 17 (europe-west1, db-g1-small, IAM auth only — zero passwords in the service). See [`../integrations/cloud-sql.md`](../integrations/cloud-sql.md).
+- Seeded projects: `coder` (the project Coder uses to manage itself).
 
 ## Planned API surface
 
 | Method | Path | Commit | Purpose |
 |---|---|---|---|
 | GET  | `/v1/health` | **#1** ✓ | Liveness |
-| GET  | `/v1/projects` | #3 | List projects user has access to |
-| POST | `/v1/projects` | #3 | Create a project |
-| GET  | `/v1/projects/{id}` | #3 | Project detail |
+| GET  | `/v1/projects` | **#3** ✓ | List projects user has access to |
+| POST | `/v1/projects` | **#3** ✓ | Create a project |
+| GET  | `/v1/projects/{id}` | **#3** ✓ | Project detail |
 | GET  | `/v1/projects/{id}/knowledge/{path}` | #4 | Read project knowledge repo |
 | GET  | `/v1/projects/{id}/workers` | post-#5 | List workers in this project's team |
 | POST | `/v1/projects/{id}/tasks` | post-#5 | Submit a task to the pipeline |
@@ -69,8 +74,8 @@ acts across projects without an explicit fan-out.
 | POST | `/v1/projects/{id}/chat` | post-#5 | SSE — interactive agent for the project |
 
 Auth: per-project ACL enforced via static API key per project (commit #4).
-Google OAuth + impersonation token minting land later. See
-[ADR 0005](../adrs/0005-multi-tenant-coder-core.md).
+Today everything is unauthenticated. Google OAuth + impersonation token
+minting land later. See [ADR 0005](../adrs/0005-multi-tenant-coder-core.md).
 
 ## Data model
 
@@ -94,13 +99,15 @@ flowchart LR
 
 ## Operational notes
 
-- **Runtime SA**: `coder-core-sa@vibedevx.iam.gserviceaccount.com`. Current
-  roles: `logging.logWriter`, `monitoring.metricWriter`. New roles are
-  added in the commit that introduces the need — never preemptively.
+- **Runtime SA**: `coder-core-sa@vibedevx.iam.gserviceaccount.com`. Current roles: `logging.logWriter`, `monitoring.metricWriter`, `cloudsql.client`, `cloudsql.instanceUser`. New roles are added in the commit that introduces the need — never preemptively.
 - **Image registry**: `europe-west1-docker.pkg.dev/vibedevx/coder-core`.
 - **Secrets storage convention**: `coder/{managed_project_id}/{secret_name}` in `vibedevx` Secret Manager.
 - **Deployment**: Cloud Run, region `europe-west1`, project `vibedevx`.
-- **Deploy runbook**: [`runbooks/deploy-coder-core.md`](../runbooks/deploy-coder-core.md) (manual until commit #5 adds push-to-main CD).
+- **Database**: Cloud SQL Postgres 17 (`coder-core-db` in `vibedevx`). IAM auth via the Cloud SQL Python Connector — no DB passwords in the service. See [`../integrations/cloud-sql.md`](../integrations/cloud-sql.md).
+- **Runbooks**:
+  - [`deploy-coder-core.md`](../runbooks/deploy-coder-core.md) — manual Cloud Run deploy (until commit #5 adds push-to-main CD).
+  - [`cloud-sql-bootstrap.md`](../runbooks/cloud-sql-bootstrap.md) — how `coder-core-db` was stood up.
+  - [`run-migration-coder-core.md`](../runbooks/run-migration-coder-core.md) — how to apply an alembic migration against the prod DB.
 
 ## Open questions
 

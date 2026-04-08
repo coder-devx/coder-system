@@ -4,25 +4,33 @@
 integrations:
   - id: github
     name: GitHub
-    auth: pat
+    auth: github-app
     secret_storage: gcp-secret-manager
-    used_by_services: [coder-agent]
-    used_by_roles: [software-architect, developer, release-manager]
+    used_by_services: [coder-core]
+    used_by_roles: [software-architect, developer, reviewer, release-manager]
     file: github.md
 
   - id: gcp
     name: Google Cloud Platform
     auth: service-account
     secret_storage: workload-identity
-    used_by_services: [coder-agent, coder-agent-admin]
+    used_by_services: [coder-core, coder-admin]
     used_by_roles: [system-admin, sre, release-manager]
     file: gcp.md
+
+  - id: cloud-sql
+    name: Cloud SQL
+    auth: iam-service-account
+    secret_storage: none
+    used_by_services: [coder-core]
+    used_by_roles: [system-admin, developer]
+    file: cloud-sql.md
 
   - id: slack
     name: Slack
     auth: bot-token + socket-mode
     secret_storage: gcp-secret-manager
-    used_by_services: [coder-agent]
+    used_by_services: [coder-core]
     used_by_roles: [team-manager, sre, release-manager]
     file: slack.md
 
@@ -30,7 +38,7 @@ integrations:
     name: Notion
     auth: integration-token
     secret_storage: gcp-secret-manager
-    used_by_services: [coder-agent]
+    used_by_services: [coder-core]
     used_by_roles: [product-manager, software-architect]
     file: notion.md
 
@@ -38,6 +46,6 @@ integrations:
     name: Anthropic API
     auth: api-key
     secret_storage: gcp-secret-manager
-    used_by_services: [coder-agent]
+    used_by_services: [coder-core]
     used_by_roles: []
     file: anthropic.md
