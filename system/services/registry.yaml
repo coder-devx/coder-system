@@ -11,21 +11,25 @@
 services:
   - id: coder-core
     name: Coder Core
-    status: planned
+    status: active
     owner: ro
     tier: core
     repos: [coder-core]
     tech: [python, fastapi]
     runtime: cloud-run
     region: europe-west1
+    url: https://coder-core-8534948335.europe-west1.run.app
     depends_on:
       services: []
       integrations: [github, gcp, slack, notion, anthropic]
       data_stores: [postgres]
     file: coder-core.md
     notes: >
-      Multi-tenant orchestrator. Owns projects, dispatches work to
-      role-typed workers, serves knowledge repo contents.
+      v0.0.1 walking skeleton deployed 2026-04-08. GET /v1/health only.
+      Multi-tenant orchestrator — owns projects, dispatches work to
+      role-typed workers, serves knowledge repo contents. See
+      designs/wip/0001-generalize-coder-from-vibetrade.md for the
+      build plan.
 
   - id: coder-admin
     name: Coder Admin Panel

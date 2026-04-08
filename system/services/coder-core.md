@@ -2,35 +2,24 @@
 id: coder-core
 name: Coder Core
 type: service
-status: planned
+status: active
 owner: ro
 tier: core
 repos: [coder-core]
 tech: [python, fastapi]
 runtime: cloud-run
 region: europe-west1
+url: https://coder-core-8534948335.europe-west1.run.app
 depends_on:
   services: []
   integrations: [github, gcp, slack, notion, anthropic]
   data_stores: [postgres]
 exposes:
   - protocol: http
-    port: 8001
-    path: /v1/projects
-  - protocol: http
-    port: 8001
-    path: /v1/knowledge
-  - protocol: http
-    port: 8001
-    path: /v1/workers
-  - protocol: http
-    port: 8001
-    path: /v1/impersonate
-  - protocol: http
-    port: 8001
-    path: /v1/chat
+    port: 8080
+    path: /v1/health
 implements_designs: ["0001", "0002", "0004"]
-decided_by: ["0005", "0006"]
+decided_by: ["0005", "0006", "0010"]
 ---
 
 # Coder Core
@@ -57,22 +46,31 @@ acts across projects without an explicit fan-out.
 - **Impersonation**: mint short-lived, role-scoped tokens for local agents.
 - **Admin Panel backend**: status, override, debug surfaces.
 
-## API surface (sketch)
+## Current state (as of commit #2 · 2026-04-08)
 
-| Method | Path | Purpose |
-|---|---|---|
-| GET    | `/v1/projects` | List projects user has access to |
-| POST   | `/v1/projects` | Create a project |
-| GET    | `/v1/projects/{id}` | Project detail |
-| GET    | `/v1/projects/{id}/knowledge/*` | Read project knowledge repo |
-| GET    | `/v1/projects/{id}/workers` | List workers in this project's team |
-| POST   | `/v1/projects/{id}/tasks` | Submit a task to the pipeline |
-| POST   | `/v1/projects/{id}/impersonate` | Mint a token for a local agent acting as a role |
-| POST   | `/v1/projects/{id}/chat` | SSE — interactive agent for the project |
-| GET    | `/v1/health` | Liveness |
+- **v0.0.1 walking skeleton** — deployed to Cloud Run. `GET /v1/health` only.
+- URL: <https://coder-core-8534948335.europe-west1.run.app>
+- First revision: `coder-core-00001-9lp`
+- Runtime SA: `coder-core-sa@vibedevx.iam.gserviceaccount.com` with `logging.logWriter` + `monitoring.metricWriter` only.
+- Ingress: `allow-unauthenticated` (auth gating lands in commit #4).
 
-Auth: per-project ACL. Every request is checked against the requesting
-identity's allowed projects + role.
+## Planned API surface
+
+| Method | Path | Commit | Purpose |
+|---|---|---|---|
+| GET  | `/v1/health` | **#1** ✓ | Liveness |
+| GET  | `/v1/projects` | #3 | List projects user has access to |
+| POST | `/v1/projects` | #3 | Create a project |
+| GET  | `/v1/projects/{id}` | #3 | Project detail |
+| GET  | `/v1/projects/{id}/knowledge/{path}` | #4 | Read project knowledge repo |
+| GET  | `/v1/projects/{id}/workers` | post-#5 | List workers in this project's team |
+| POST | `/v1/projects/{id}/tasks` | post-#5 | Submit a task to the pipeline |
+| POST | `/v1/projects/{id}/impersonate` | post-#5 | Mint a token for a local agent acting as a role |
+| POST | `/v1/projects/{id}/chat` | post-#5 | SSE — interactive agent for the project |
+
+Auth: per-project ACL enforced via static API key per project (commit #4).
+Google OAuth + impersonation token minting land later. See
+[ADR 0005](../adrs/0005-multi-tenant-coder-core.md).
 
 ## Data model
 
@@ -96,11 +94,13 @@ flowchart LR
 
 ## Operational notes
 
-- Service account: `coder-core@{gcp-project}.iam.gserviceaccount.com`
-  with **minimum** roles needed to broker access. Each role-worker has
-  its own service account (see [ADR 0006](../adrs/0006-per-role-service-accounts.md)).
-- Secrets storage convention: `coder/{project_id}/{secret_name}`.
-- Deployment: container image, Cloud Run, region `europe-west1` (default).
+- **Runtime SA**: `coder-core-sa@vibedevx.iam.gserviceaccount.com`. Current
+  roles: `logging.logWriter`, `monitoring.metricWriter`. New roles are
+  added in the commit that introduces the need — never preemptively.
+- **Image registry**: `europe-west1-docker.pkg.dev/vibedevx/coder-core`.
+- **Secrets storage convention**: `coder/{managed_project_id}/{secret_name}` in `vibedevx` Secret Manager.
+- **Deployment**: Cloud Run, region `europe-west1`, project `vibedevx`.
+- **Deploy runbook**: [`runbooks/deploy-coder-core.md`](../runbooks/deploy-coder-core.md) (manual until commit #5 adds push-to-main CD).
 
 ## Open questions
 
