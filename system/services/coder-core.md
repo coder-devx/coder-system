@@ -21,6 +21,9 @@ exposes:
   - protocol: http
     port: 8080
     path: /v1/projects
+  - protocol: http
+    port: 8080
+    path: /v1/projects/{id}/knowledge/{path}
 implements_designs: ["0001", "0002", "0004"]
 decided_by: ["0005", "0006", "0010"]
 ---
@@ -49,33 +52,47 @@ acts across projects without an explicit fan-out.
 - **Impersonation**: mint short-lived, role-scoped tokens for local agents.
 - **Admin Panel backend**: status, override, debug surfaces.
 
-## Current state (as of commit #3 · 2026-04-08)
+## Current state (as of commit #4 · 2026-04-08)
 
-- **v0.0.2** — deployed to Cloud Run. Health + projects CRUD.
+- **v0.0.3** — deployed to Cloud Run. Health + projects CRUD + authenticated **knowledge API**.
 - URL: <https://coder-core-8534948335.europe-west1.run.app>
-- Live revision: `coder-core-00004-qvm`
-- Runtime SA: `coder-core-sa@vibedevx.iam.gserviceaccount.com` with `logging.logWriter`, `monitoring.metricWriter`, `cloudsql.client`, `cloudsql.instanceUser`.
-- Ingress: `allow-unauthenticated` (auth gating lands in commit #4).
-- DB: `coder-core-db` Cloud SQL Postgres 17 (europe-west1, db-g1-small, IAM auth only — zero passwords in the service). See [`../integrations/cloud-sql.md`](../integrations/cloud-sql.md).
-- Seeded projects: `coder` (the project Coder uses to manage itself).
+- Live revision: `coder-core-00005-5xc`
+- Runtime SA: `coder-core-sa@vibedevx.iam.gserviceaccount.com` — roles: `logging.logWriter`, `monitoring.metricWriter`, `cloudsql.client`, `cloudsql.instanceUser`, `secretmanager.secretAccessor` (on `GITHUB_TOKEN` only).
+- Ingress: `allow-unauthenticated`. `/v1/health`, `/v1/projects` list/get/create are public. **`/v1/projects/{id}/knowledge/{path}` requires the per-project `X-Api-Key` header.**
+- DB: `coder-core-db` Cloud SQL Postgres 17 (IAM auth only). Migration `0002` adds `api_key_hash` column. See [`../integrations/cloud-sql.md`](../integrations/cloud-sql.md).
+- Secrets mounted: `GITHUB_TOKEN` from Secret Manager, used by the knowledge API to read GitHub.
+- Seeded projects: `coder` — API key plaintext is in the user's 1Password (not recoverable from the hash).
+
+## Walking-skeleton milestone — reached
+
+```
+curl -H "X-Api-Key: ck_..." \
+  https://coder-core-8534948335.europe-west1.run.app/v1/projects/coder/knowledge/system/services/REGISTRY.md
+```
+
+...returns the actual contents of `coder-system/system/services/REGISTRY.md` from this very repo, served by `coder-core` reading from GitHub, after validating a per-project API key against a SHA-256 hash in Cloud SQL.
+
+That's the end-to-end goal from the start of implementation.
 
 ## Planned API surface
 
-| Method | Path | Commit | Purpose |
-|---|---|---|---|
-| GET  | `/v1/health` | **#1** ✓ | Liveness |
-| GET  | `/v1/projects` | **#3** ✓ | List projects user has access to |
-| POST | `/v1/projects` | **#3** ✓ | Create a project |
-| GET  | `/v1/projects/{id}` | **#3** ✓ | Project detail |
-| GET  | `/v1/projects/{id}/knowledge/{path}` | #4 | Read project knowledge repo |
-| GET  | `/v1/projects/{id}/workers` | post-#5 | List workers in this project's team |
-| POST | `/v1/projects/{id}/tasks` | post-#5 | Submit a task to the pipeline |
-| POST | `/v1/projects/{id}/impersonate` | post-#5 | Mint a token for a local agent acting as a role |
-| POST | `/v1/projects/{id}/chat` | post-#5 | SSE — interactive agent for the project |
+| Method | Path | Commit | Auth | Purpose |
+|---|---|---|---|---|
+| GET  | `/v1/health` | **#1** ✓ | none | Liveness |
+| GET  | `/v1/projects` | **#3** ✓ | none | List projects user has access to |
+| POST | `/v1/projects` | **#3** ✓ | none* | Create a project and mint its API key (returned once) |
+| GET  | `/v1/projects/{id}` | **#3** ✓ | none | Project detail |
+| GET  | `/v1/projects/{id}/knowledge/{path}` | **#4** ✓ | `X-Api-Key` | Read project knowledge repo |
+| POST | `/v1/projects/{id}/rotate-api-key` | #4+ | `X-Api-Key` | Rotate the per-project static key |
+| GET  | `/v1/projects/{id}/workers` | post-#5 | `X-Api-Key` | List workers in this project's team |
+| POST | `/v1/projects/{id}/tasks` | post-#5 | `X-Api-Key` | Submit a task to the pipeline |
+| POST | `/v1/projects/{id}/impersonate` | post-#5 | `X-Api-Key` | Mint a token for a local agent acting as a role |
+| POST | `/v1/projects/{id}/chat` | post-#5 | `X-Api-Key` | SSE — interactive agent for the project |
 
-Auth: per-project ACL enforced via static API key per project (commit #4).
-Today everything is unauthenticated. Google OAuth + impersonation token
-minting land later. See [ADR 0005](../adrs/0005-multi-tenant-coder-core.md).
+\* `POST /v1/projects` is unauthenticated in the walking skeleton. It will be gated by a Coder-admin token once multi-user lands.
+
+Auth model: per-project static API key (`X-Api-Key` header, SHA-256 hash stored in the `projects` table). Keys are returned in plaintext on `POST /v1/projects` exactly once. Losing a key means rotating it. Google OAuth + short-lived impersonation tokens land post-#5.
+See [ADR 0005](../adrs/0005-multi-tenant-coder-core.md).
 
 ## Data model
 

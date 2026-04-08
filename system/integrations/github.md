@@ -30,13 +30,18 @@ an org with Coder itself. See [ADR 0009](../adrs/0009-per-managed-project-cloud-
 ## Auth model
 
 - **GitHub App** is the planned long-term mechanism (PATs don't scale to
-  per-project installation). The Coder GitHub App is installed once into
-  the `coder-devx` org and again into each managed project's org.
-- The app's installation token is short-lived; Coder Core mints a fresh
-  one per request, scoped to the relevant installation (i.e., the
+  per-project installation). The Coder GitHub App will be installed once
+  into the `coder-devx` org and again into each managed project's org.
+- The app's installation token is short-lived; Coder Core will mint a
+  fresh one per request, scoped to the relevant installation (i.e., the
   managed project being acted on).
-- Until the GitHub App is built, a PAT (`GITHUB_TOKEN` in
-  `vibedevx` Secret Manager) is the fallback. Flagged in design `0004`.
+
+### Current state (as of commit #4 · 2026-04-08)
+
+- **Classic PAT fallback** — `GITHUB_TOKEN` in `vibedevx` Secret Manager, mounted into `coder-core` via `--set-secrets=GITHUB_TOKEN=GITHUB_TOKEN:latest` at deploy time.
+- The runtime service account `coder-core-sa@vibedevx.iam` has `roles/secretmanager.secretAccessor` **scoped only to the `GITHUB_TOKEN` secret** (not project-wide).
+- **Scope problem**: the current PAT has extremely broad classic scopes (`admin:org`, `repo`, `workflow`, `admin:repo_hook`, …). This is a holdover from `coder-agent`. **Security follow-up:** rotate it to a fine-grained PAT scoped to `coder-devx/coder-system:contents:read` before we onboard any managed project that isn't VibeTrade. Best moment is the GitHub App migration — same change, same test cycle.
+- Used by: the knowledge API in `coder-core` (`src/coder_core/integrations/github.py`) reads repo file contents via the `Accept: application/vnd.github.raw` trick on `GET /repos/{org}/{repo}/contents/{path}`.
 
 ## Surface used
 
