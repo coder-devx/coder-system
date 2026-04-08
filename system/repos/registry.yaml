@@ -1,0 +1,57 @@
+# Source of truth for the repos registry.
+# REGISTRY.md is generated from this file.
+#
+# Status policy:
+#   planned  — name reserved, not yet created
+#   active   — exists on GitHub, used
+#   archived — kept for history, not in use
+
+repos:
+  - id: coder-core
+    name: coder-core
+    status: planned
+    owner: ro
+    github: coder-devx/coder-core
+    default_branch: main
+    hosts_services: [coder-core]
+    language: python
+    ci:
+      provider: github-actions
+      workflows: [test, lint, build]
+    cd:
+      target: cloud-run
+      trigger: push-to-main
+    file: coder-core.md
+
+  - id: coder-admin
+    name: coder-admin
+    status: planned
+    owner: ro
+    github: coder-devx/coder-admin
+    default_branch: main
+    hosts_services: [coder-admin]
+    language: javascript
+    ci:
+      provider: github-actions
+      workflows: [test, lint, build]
+    cd:
+      target: cloud-run
+      trigger: push-to-main
+    file: coder-admin.md
+
+  - id: coder-system
+    name: coder-system
+    status: active
+    owner: ro
+    github: coder-devx/coder-system
+    default_branch: main
+    hosts_services: []
+    language: markdown
+    ci:
+      provider: github-actions
+      workflows: [validate]
+    cd:
+      target: none
+      trigger: none
+    file: coder-system.md
+    notes: This knowledge repository.

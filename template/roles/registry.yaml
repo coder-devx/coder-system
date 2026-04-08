@@ -1,0 +1,4 @@
+# Project-specific role customizations.
+# Standard roles are inherited from coder-system/system/roles/registry.yaml.
+
+roles: []

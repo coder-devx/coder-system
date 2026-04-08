@@ -1,0 +1,48 @@
+# Source of truth for the designs registry across active/wip/deprecated.
+# REGISTRY.md is generated from this file.
+
+designs:
+  - id: "0001"
+    title: System Overview
+    status: active
+    owner: ro
+    folder: active
+    file: active/0001-system-overview.md
+    affects_services: [coder-core, coder-admin]
+    decided_by: ["0001"]
+
+  - id: "0002"
+    title: Worker Roles & Impersonation
+    status: active
+    owner: ro
+    folder: active
+    file: active/0002-worker-roles-and-impersonation.md
+    affects_services: []
+    decided_by: ["0006", "0007"]
+
+  - id: "0003"
+    title: Knowledge Repo Model
+    status: active
+    owner: ro
+    folder: active
+    file: active/0003-knowledge-repo-model.md
+    affects_services: []
+    decided_by: ["0001", "0002", "0003", "0004", "0008"]
+
+  - id: "0004"
+    title: Clean rebuild — coder-core + coder-admin
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0001-generalize-coder-from-vibetrade.md
+    affects_services: [coder-core, coder-admin]
+    decided_by: ["0005", "0006", "0007", "0008"]
+
+  - id: "0005"
+    title: Competitive Intelligence Pipeline
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0002-competitive-intelligence-pipeline.md
+    affects_services: [coder-core]
+    decided_by: []

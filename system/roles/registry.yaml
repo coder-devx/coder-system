@@ -1,0 +1,83 @@
+# Source of truth for the roles registry.
+# REGISTRY.md is generated from this file.
+
+roles:
+  # ── User-defined ────────────────────────────────────────────────
+  - id: system-admin
+    name: System Admin
+    status: defined
+    owner: ro
+    file: system-admin.md
+
+  - id: software-architect
+    name: Software Architect
+    status: defined
+    owner: ro
+    file: software-architect.md
+
+  - id: team-manager
+    name: Team Manager
+    status: defined
+    owner: ro
+    file: team-manager.md
+
+  - id: product-manager
+    name: Product Manager
+    status: defined
+    owner: ro
+    file: product-manager.md
+
+  - id: developer
+    name: Developer
+    status: defined
+    owner: ro
+    file: developer.md
+
+  - id: reviewer
+    name: Reviewer
+    status: defined
+    owner: ro
+    file: reviewer.md
+
+  - id: consultant
+    name: Consultant
+    status: defined
+    owner: ro
+    file: consultant.md
+
+  # ── Proposed (review and accept/reject) ─────────────────────────
+  - id: qa-engineer
+    name: QA Engineer
+    status: proposed
+    owner: ro
+    file: qa-engineer.md
+
+  - id: sre
+    name: Site Reliability Engineer
+    status: proposed
+    owner: ro
+    file: sre.md
+
+  - id: security-officer
+    name: Security Officer
+    status: proposed
+    owner: ro
+    file: security-officer.md
+
+  - id: release-manager
+    name: Release Manager
+    status: proposed
+    owner: ro
+    file: release-manager.md
+
+  - id: data-engineer
+    name: Data Engineer
+    status: proposed
+    owner: ro
+    file: data-engineer.md
+
+  - id: doc-writer
+    name: Documentation Writer
+    status: proposed
+    owner: ro
+    file: doc-writer.md

@@ -1,0 +1,14 @@
+---
+description: Rules for this project's knowledge repo
+globs:
+  - "**/*.md"
+  - "**/*.yaml"
+alwaysApply: true
+---
+
+# Cursor rules
+
+This repo follows a cross-agent contract defined in [`AGENTS.md`](../../AGENTS.md)
+at the repository root.
+
+**Read `AGENTS.md` before editing anything here.**

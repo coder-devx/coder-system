@@ -1,0 +1,4 @@
+# Source of truth for the services registry.
+# REGISTRY.md is generated from this file.
+
+services: []

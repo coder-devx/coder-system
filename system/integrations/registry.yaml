@@ -1,0 +1,43 @@
+# Source of truth for the integrations registry.
+# REGISTRY.md is generated from this file.
+
+integrations:
+  - id: github
+    name: GitHub
+    auth: pat
+    secret_storage: gcp-secret-manager
+    used_by_services: [coder-agent]
+    used_by_roles: [software-architect, developer, release-manager]
+    file: github.md
+
+  - id: gcp
+    name: Google Cloud Platform
+    auth: service-account
+    secret_storage: workload-identity
+    used_by_services: [coder-agent, coder-agent-admin]
+    used_by_roles: [system-admin, sre, release-manager]
+    file: gcp.md
+
+  - id: slack
+    name: Slack
+    auth: bot-token + socket-mode
+    secret_storage: gcp-secret-manager
+    used_by_services: [coder-agent]
+    used_by_roles: [team-manager, sre, release-manager]
+    file: slack.md
+
+  - id: notion
+    name: Notion
+    auth: integration-token
+    secret_storage: gcp-secret-manager
+    used_by_services: [coder-agent]
+    used_by_roles: [product-manager, software-architect]
+    file: notion.md
+
+  - id: anthropic
+    name: Anthropic API
+    auth: api-key
+    secret_storage: gcp-secret-manager
+    used_by_services: [coder-agent]
+    used_by_roles: []
+    file: anthropic.md

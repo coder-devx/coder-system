@@ -1,0 +1,20 @@
+---
+description: Rules for working in the coder-system knowledge repo
+globs:
+  - "**/*.md"
+  - "**/*.yaml"
+alwaysApply: true
+---
+
+# Cursor rules for coder-system
+
+This repo follows a cross-agent contract defined in [`AGENTS.md`](../../AGENTS.md)
+at the repository root.
+
+**Read `AGENTS.md` before editing anything in this repo.** It defines the
+hard rules for frontmatter, registries, ADR append-only semantics, design
+lifecycle, numbering, and cross-link integrity.
+
+This `.mdc` file is intentionally a thin pointer. The single source of truth
+for agent behavior in this repo lives in `AGENTS.md` so that Claude Code,
+Cursor, and any future agent obey the same rules.

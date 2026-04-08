@@ -1,0 +1,66 @@
+# Source of truth for the ADRs registry.
+# REGISTRY.md is generated from this file. ADRs are append-only.
+
+adrs:
+  - id: "0001"
+    title: Knowledge repo layout — system + template
+    status: accepted
+    date: 2026-04-08
+    file: 0001-knowledge-repo-layout.md
+    relates_to_designs: ["0003"]
+
+  - id: "0002"
+    title: YAML registries with generated Markdown views
+    status: accepted
+    date: 2026-04-08
+    file: 0002-yaml-registries.md
+    relates_to_designs: ["0003"]
+
+  - id: "0003"
+    title: Mermaid for all diagrams
+    status: accepted
+    date: 2026-04-08
+    file: 0003-mermaid-for-diagrams.md
+    relates_to_designs: ["0003"]
+
+  - id: "0004"
+    title: AGENTS.md as the cross-agent contract
+    status: accepted
+    date: 2026-04-08
+    file: 0004-agents-md-cross-agent-contract.md
+    relates_to_designs: ["0003"]
+
+  - id: "0005"
+    title: Multi-tenant Coder Core, project-aware in every call
+    status: accepted
+    date: 2026-04-08
+    file: 0005-multi-tenant-coder-core.md
+    relates_to_designs: ["0001", "0004"]
+
+  - id: "0006"
+    title: Each role-worker gets its own GCP service account
+    status: accepted
+    date: 2026-04-08
+    file: 0006-per-role-service-accounts.md
+    relates_to_designs: ["0002", "0004"]
+
+  - id: "0007"
+    title: Reviewer is a separate role from Product Manager
+    status: accepted
+    date: 2026-04-08
+    file: 0007-reviewer-separated-from-pm.md
+    relates_to_designs: ["0002"]
+
+  - id: "0008"
+    title: CI validation of the knowledge repo
+    status: accepted
+    date: 2026-04-08
+    file: 0008-ci-validation-of-knowledge-repo.md
+    relates_to_designs: ["0003"]
+
+  - id: "0009"
+    title: Each managed project has its own GCP project and GitHub org
+    status: accepted
+    date: 2026-04-08
+    file: 0009-per-managed-project-cloud-account-and-github-org.md
+    relates_to_designs: ["0001", "0004"]

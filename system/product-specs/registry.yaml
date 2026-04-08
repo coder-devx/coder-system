@@ -1,0 +1,12 @@
+# Source of truth for the product specs registry.
+# REGISTRY.md is generated from this file.
+
+specs: []
+# Example entry:
+# - id: "0001"
+#   title: Multi-project switcher
+#   status: wip
+#   owner: ro
+#   folder: wip
+#   file: 0001-multi-project-switcher.md
+#   served_by_designs: ["0004"]

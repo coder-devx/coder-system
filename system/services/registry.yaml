@@ -1,0 +1,45 @@
+# Source of truth for the services registry.
+# REGISTRY.md is generated from this file.
+#
+# Schema: see _TEMPLATE.md frontmatter.
+#
+# Status policy:
+#   planned  — designed but not yet running
+#   active   — running in some environment
+#   deprecated — kept for history, not running
+
+services:
+  - id: coder-core
+    name: Coder Core
+    status: planned
+    owner: ro
+    tier: core
+    repos: [coder-core]
+    tech: [python, fastapi]
+    runtime: cloud-run
+    region: europe-west1
+    depends_on:
+      services: []
+      integrations: [github, gcp, slack, notion, anthropic]
+      data_stores: [postgres]
+    file: coder-core.md
+    notes: >
+      Multi-tenant orchestrator. Owns projects, dispatches work to
+      role-typed workers, serves knowledge repo contents.
+
+  - id: coder-admin
+    name: Coder Admin Panel
+    status: planned
+    owner: ro
+    tier: core
+    repos: [coder-admin]
+    tech: [javascript, react, vite, tailwind]
+    runtime: cloud-run
+    region: europe-west1
+    depends_on:
+      services: [coder-core]
+      integrations: [gcp]
+      data_stores: []
+    file: coder-admin.md
+    notes: >
+      User-facing surface. Project switcher, worker status grid, override.
