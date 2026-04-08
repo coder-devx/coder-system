@@ -64,3 +64,10 @@ adrs:
     date: 2026-04-08
     file: 0009-per-managed-project-cloud-account-and-github-org.md
     relates_to_designs: ["0001", "0004"]
+
+  - id: "0010"
+    title: Every repo (code and knowledge) contains an AGENTS.md
+    status: accepted
+    date: 2026-04-08
+    file: 0010-agents-md-in-every-repo.md
+    relates_to_designs: ["0001"]

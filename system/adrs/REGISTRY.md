@@ -13,3 +13,4 @@
 | 0007 | Reviewer is a separate role from Product Manager | accepted | 2026-04-08 | [0007-reviewer-separated-from-pm.md](./0007-reviewer-separated-from-pm.md) |
 | 0008 | CI validation of the knowledge repo | accepted | 2026-04-08 | [0008-ci-validation-of-knowledge-repo.md](./0008-ci-validation-of-knowledge-repo.md) |
 | 0009 | Each managed project has its own GCP project and GitHub org | accepted | 2026-04-08 | [0009-per-managed-project-cloud-account-and-github-org.md](./0009-per-managed-project-cloud-account-and-github-org.md) |
+| 0010 | Every repo (code and knowledge) contains an AGENTS.md | accepted | 2026-04-08 | [0010-agents-md-in-every-repo.md](./0010-agents-md-in-every-repo.md) |
