@@ -9,7 +9,7 @@
 repos:
   - id: coder-core
     name: coder-core
-    status: planned
+    status: active
     owner: ro
     github: coder-devx/coder-core
     default_branch: main
@@ -17,10 +17,10 @@ repos:
     language: python
     ci:
       provider: github-actions
-      workflows: [test, lint, build]
+      workflows: [ci]
     cd:
       target: cloud-run
-      trigger: push-to-main
+      trigger: manual  # push-to-main comes in commit #5
     file: coder-core.md
 
   - id: coder-admin

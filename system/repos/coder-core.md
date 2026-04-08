@@ -2,7 +2,7 @@
 id: coder-core
 name: coder-core
 type: repo
-status: planned
+status: active
 owner: ro
 github: coder-devx/coder-core
 default_branch: main
@@ -10,11 +10,11 @@ hosts_services: [coder-core]
 language: python
 ci:
   provider: github-actions
-  workflows: [test, lint, build]
+  workflows: [ci]
 cd:
   target: cloud-run
-  trigger: push-to-main
-decided_by: ["0005", "0006"]
+  trigger: manual
+decided_by: ["0005", "0006", "0010"]
 ---
 
 # coder-core
@@ -53,10 +53,18 @@ migrations/            alembic
 tests/
 ```
 
+## Current state (as of commit #1 · 2026-04-08)
+
+- Repo exists at [`github.com/coder-devx/coder-core`](https://github.com/coder-devx/coder-core) on GitHub.
+- v0.0.1 walking skeleton: FastAPI on Python 3.12, `GET /v1/health` only.
+- Uses **uv** for dependency management. `pip` is banned per this repo's `AGENTS.md`.
+- Follows ADR 0010: `AGENTS.md` at root, `CLAUDE.md` and `.cursor/rules/coder-core.mdc` as thin pointers.
+- Not yet deployed. Commit #2 adds the manual Cloud Run deploy.
+
 ## CI / CD
 
-- **CI**: lint, type-check, unit + integration tests on every PR.
-- **CD**: push to `main` builds and deploys to Cloud Run.
+- **CI** (`ci` workflow): `ruff check`, `ruff format --check`, `mypy src` (strict), `pytest`, `docker buildx build`. Runs on every PR and push to `main`. Passed clean on the first push.
+- **CD**: not wired yet. Manual `make deploy` runbook lands in commit #2; push-to-main CD lands in commit #5.
 
 ## Branching
 
