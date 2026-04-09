@@ -2,7 +2,7 @@
 id: "0006"
 title: Pipeline UI in admin
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-09
 updated: 2026-04-09
@@ -15,7 +15,7 @@ related_specs: ["0003", "0004", "0008"]
 # Pipeline UI in admin
 
 **Phase:** Next (first real work gets done)
-**Progress:** 0 / 6 acceptance criteria
+**Progress:** 6 / 6 acceptance criteria
 
 ## Problem
 
@@ -71,16 +71,16 @@ agents can watch and inspect runs.
 
 ## Acceptance criteria
 
-- [ ] The pipeline tab shows all tasks for the currently selected
+- [x] The pipeline tab shows all tasks for the currently selected
       project and nothing from other projects.
-- [ ] A task moving from `running` to `succeeded` is reflected in the
+- [x] A task moving from `running` to `succeeded` is reflected in the
       UI within 2 seconds without a manual refresh.
-- [ ] Opening a task shows its streamed logs with newest lines
+- [x] Opening a task shows its streamed logs with newest lines
       appearing as they're written.
-- [ ] Filtering by `role=developer` and `status=failed` narrows the
+- [x] Filtering by `role=developer` and `status=failed` narrows the
       list correctly.
-- [ ] A failed task's error is visible without opening the database.
-- [ ] Clicking a task's linked commit opens the correct GitHub URL for
+- [x] A failed task's error is visible without opening the database.
+- [x] Clicking a task's linked commit opens the correct GitHub URL for
       that project's repo.
 
 ## Metrics

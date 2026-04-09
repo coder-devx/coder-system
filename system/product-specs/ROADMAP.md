@@ -11,7 +11,7 @@
 Updating a spec's acceptance-criteria checkboxes is what moves its
 progress bar here — keep the two in sync when you edit.
 
-Last updated: 2026-04-09 (spec 0004 shipped)
+Last updated: 2026-04-09 (spec 0006 shipped)
 
 ---
 
@@ -19,10 +19,10 @@ Last updated: 2026-04-09 (spec 0004 shipped)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 4 | 26 | 26 | `██████████` 100% |
-| Next — first real work | 2 | 0 | 12 | `░░░░░░░░░░` 0% |
+| Shipped | 5 | 32 | 32 | `██████████` 100% |
+| Next — first real work | 1 | 0 | 6 | `░░░░░░░░░░` 0% |
 | Later — humans, local agents, scale | 2 | 0 | 13 | `░░░░░░░░░░` 0% |
-| **Total** | **8** | **26** | **51** | `█████░░░░░` **51%** |
+| **Total** | **8** | **32** | **51** | `██████░░░░` **63%** |
 
 ---
 
@@ -92,12 +92,37 @@ real repo clone, opening PRs and writing back outcome + logs.
   per AC5. Timeouts are a distinct `timed_out` lifecycle state with
   the per-task tempdir cleaned up via `try/finally`.
 
+### [0006 — Pipeline UI in admin](./active/0006-pipeline-ui-in-admin.md)
+
+Pipeline tab in `coder-admin`. Live task list, captured logs, status
+filters. Still read-only.
+
+- **Status:** active
+- **Progress:** `██████████` 6 / 6 AC ✅
+- **What shipped:** `coder-core` `GET /v1/projects/{id}/tasks` now
+  accepts `?role=` and `?status=` filters (status validated against
+  `TaskStatus`, 422 + `invalid_status` on garbage). The developer
+  worker captures the workspace HEAD via `git rev-parse` after each
+  successful run and the dispatcher persists it as `commit_sha` on
+  the task row (new `0006_tasks_commit_sha` migration). `coder-admin`
+  ships a typed `listTasks` / `getTask` / `getTaskLogs` client and a
+  shared `StatusChip` component, plus two new routes:
+  `/projects/:id/pipeline` (filtered task list with role + status
+  query-param controls and 1s polling) and
+  `/projects/:id/pipeline/:taskId` (per-task detail with status,
+  prompt, error, result, captured logs, and a clickable GitHub commit
+  link built from `project.github_org` + `task.repo` + `task.commit_sha`).
+  Both pages re-use the per-project `X-Api-Key` flow, clear the stored
+  key on 401, and skip polling on the needs-key screen. Vitest covers
+  the list happy path, role+status URL round-trip, polling cadence,
+  the failed-error inline render, the commit-link target, and the
+  needs-key states.
+
 ---
 
 ## Next — first real work gets done
 
-> Workers carry least-privilege identities and humans can watch runs in
-> the UI.
+> Workers carry least-privilege identities.
 
 ### [0005 — Per-role service accounts](./wip/0005-per-role-service-accounts.md)
 
@@ -109,16 +134,6 @@ short-lived tokens. Developer worker stops using stub creds.
 - **Depends on:** 0001, 0004
 - **Blocks:** 0007, 0008
 - **Linked ADR:** [0006 — Per-role service accounts](../adrs/0006-per-role-service-accounts.md)
-
-### [0006 — Pipeline UI in admin](./wip/0006-pipeline-ui-in-admin.md)
-
-Pipeline tab in `coder-admin`. Live task list, streamed logs, status
-filters. Still read-only.
-
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 6 AC
-- **Depends on:** 0003, 0004
-- **Blocks:** 0007 (labels), 0008
 
 ---
 
@@ -180,8 +195,8 @@ flowchart TB
   classDef now fill:#e8f5e9,stroke:#2e7d32
   classDef next fill:#fff8e1,stroke:#f9a825
   classDef later fill:#e3f2fd,stroke:#1565c0
-  class s1,s2,s3,s4 shipped
-  class s5,s6 next
+  class s1,s2,s3,s4,s6 shipped
+  class s5 next
   class s7,s8 later
 ```
 
