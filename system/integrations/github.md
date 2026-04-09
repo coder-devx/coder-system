@@ -36,13 +36,16 @@ an org with Coder itself. See [ADR 0009](../adrs/0009-per-managed-project-cloud-
   fresh one per request, scoped to the relevant installation (i.e., the
   managed project being acted on).
 
-### Current state (as of commit #4 · 2026-04-08)
+### Current state (as of 2026-04-09)
 
-- **Classic PAT fallback** — `coder-coder-github-pat` in `vibedevx` Secret Manager, mounted into `coder-core` as env var `GITHUB_TOKEN` via `--update-secrets=GITHUB_TOKEN=coder-coder-github-pat:N`. Cloud Run is **pinned to a specific version**, not `:latest`, because Cloud Run doesn't re-read `:latest` on running instances — pinning makes each rotation force a fresh revision.
+- **Fine-grained PAT** — `coder-coder-github-pat` in `vibedevx` Secret Manager, mounted into `coder-core` as env var `GITHUB_TOKEN` via `--update-secrets=GITHUB_TOKEN=coder-coder-github-pat:N`. Cloud Run is **pinned to a specific version**, not `:latest`, because Cloud Run doesn't re-read `:latest` on running instances — pinning makes each rotation force a fresh revision.
 - The runtime service account `coder-core-sa@vibedevx.iam` has `roles/secretmanager.secretAccessor` **scoped only to `coder-coder-github-pat`** (not project-wide).
 - A legacy secret `GITHUB_TOKEN` from `coder-agent` days still exists in Secret Manager but is orphaned — Cloud Run doesn't reference it and the runtime SA no longer has access to it. Safe to delete once the new secret is proven.
-- **Scope problem**: the PAT currently stored has extremely broad classic scopes (`admin:org`, `repo`, `workflow`, `admin:repo_hook`, …). This is a holdover from `coder-agent`. **Security follow-up:** rotate it to a fine-grained PAT scoped to `coder-devx/coder-system:contents:read` before we onboard any managed project that isn't VibeTrade. The mechanics are already in place — see the rotation workflow below.
-- Used by: the knowledge API in `coder-core` (`src/coder_core/integrations/github.py`) reads repo file contents via the `Accept: application/vnd.github.raw` trick on `GET /repos/{org}/{repo}/contents/{path}`.
+- **Current scopes** (version 4, rotated 2026-04-09): fine-grained PAT scoped to `coder-devx/{coder-core,coder-admin,coder-system}` with `Contents: Read and write`, `Pull requests: Read and write`, `Metadata: Read`. Earlier read-only scopes were broadened so the developer worker can push branches and open PRs from a per-task clone — see [coder-core dispatcher workspace path](../services/coder-core.md). Earlier broad classic scopes (`admin:org`, `repo`, `workflow`) were retired in the same rotation.
+- **Used by two callers in the same service:**
+  - The **knowledge API** in `coder-core` (`src/coder_core/integrations/github.py`) reads repo file contents via the `Accept: application/vnd.github.raw` trick on `GET /repos/{org}/{repo}/contents/{path}`. Only ever issues GETs; doesn't need the write scopes but inherits them.
+  - The **developer worker** in `coder-core` (`src/coder_core/workers/workspace.py`) writes the same token into a per-task `.netrc` so `git clone`, `git push`, and `gh pr create` (via `GH_TOKEN`) authenticate without ever putting the token on a command line.
+- **Single-secret follow-up**: Sharing one PAT between the knowledge API (read-only need) and the developer worker (write need) means the knowledge API runs with broader scopes than it uses. Cleaner split is two secrets — `coder-coder-github-pat-readonly` for the knowledge API, `coder-coder-github-pat-worker` for the dispatcher — keyed off two different settings in `coder_core.config`. Worth doing before we onboard any managed project beyond the `coder` project itself, since each managed project will already be minting its own `coder-{project_id}-github-pat` secret via the per-project template.
 
 ### Rotating the PAT
 
