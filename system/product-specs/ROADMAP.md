@@ -11,7 +11,7 @@
 Updating a spec's acceptance-criteria checkboxes is what moves its
 progress bar here — keep the two in sync when you edit.
 
-Last updated: 2026-04-09 (post GitHub-App migration)
+Last updated: 2026-04-09 (spec 0003 shipped)
 
 ---
 
@@ -19,11 +19,11 @@ Last updated: 2026-04-09 (post GitHub-App migration)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 1 | 6 | 6 | `██████████` 100% |
-| Now — foundation | 2 | 2 | 13 | `██░░░░░░░░` 15% |
+| Shipped | 3 | 19 | 19 | `██████████` 100% |
+| Now — foundation | 0 | 0 | 0 | `░░░░░░░░░░` —   |
 | Next — first real work | 3 | 4 | 19 | `██░░░░░░░░` 21% |
 | Later — humans, local agents, scale | 2 | 0 | 13 | `░░░░░░░░░░` 0% |
-| **Total** | **8** | **12** | **51** | `██░░░░░░░░` **24%** |
+| **Total** | **8** | **23** | **51** | `████░░░░░░` **45%** |
 
 ---
 
@@ -40,41 +40,38 @@ per-project API keys with rotate.
 - **Status:** active
 - **Progress:** `██████████` 6 / 6 AC ✅
 
----
-
-## Now — foundation
-
-> Unblocks everything else. Core exists, knowledge is readable, humans can see it.
-
-### [0002 — Knowledge repo read API](./wip/0002-knowledge-repo-read-api.md)
+### [0002 — Knowledge repo read API](./active/0002-knowledge-repo-read-api.md)
 
 Single authoritative `GET` surface for a project's knowledge artifacts
 with parsed frontmatter and resolvable cross-links.
 
-- **Status:** wip
-- **Progress:** `█░░░░░░░░░` 1 / 7 AC
-- **Depends on:** 0001
-- **Blocks:** 0003, 0004, 0008
-- **Reality check:** what shipped is a raw-bytes `GET /v1/projects/{id}/knowledge/{path}`
-  proxy used by the dispatcher (`system/repos.yaml`, system prompts).
-  The parsed-registry / typed-frontmatter / cross-link-resolution
-  surface this spec describes does **not** exist yet — only the
-  per-project isolation AC is satisfied.
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** typed routes `GET /v1/projects/{id}/knowledge/{type}`
+  and `GET /v1/projects/{id}/knowledge/{type}/{id}` returning parsed
+  pydantic models, cross-link resolution with broken-link surfacing,
+  in-memory TTL cache with `knowledge_cache_hit_total` metric exposed
+  at `/v1/projects/{id}/knowledge/_metrics`. Bytes-passthrough relocated
+  to `/knowledge/_files/{path}` as the escape hatch.
 
-### [0003 — Admin Panel v0 (read-only)](./wip/0003-admin-panel-read-only.md)
+### [0003 — Admin Panel v0 (read-only)](./active/0003-admin-panel-read-only.md)
 
 React/Vite SPA. Project switcher, project list, knowledge browser.
 Zero mutations.
 
-- **Status:** wip
-- **Progress:** `██░░░░░░░░` 1 / 6 AC
-- **Depends on:** 0001, 0002
-- **Blocks:** 0006
-- **Reality check:** `coder-admin` is a walking skeleton — Vite/React/TS
-  app deployed to Cloud Run that calls `GET /v1/health` and renders the
-  response. No project list, switcher, knowledge browser, or markdown
-  rendering yet. Only "zero direct GitHub calls" is satisfied (by
-  construction).
+- **Status:** active
+- **Progress:** `██████████` 6 / 6 AC ✅
+- **What shipped:** `coder-admin` now has a typed API client over the
+  full project + knowledge surface, per-project API-key prompt with
+  `localStorage` persistence, project list (`/`) and project detail
+  (`/projects/:id`) views, registry list (`/projects/:id/:type`), and
+  artifact detail (`/projects/:id/:type/:artifactId`) with parsed
+  frontmatter table, react-markdown body, lazy-loaded mermaid diagram
+  rendering, and knowledge cross-links rewritten to in-app router
+  navigation. Project switcher in the header. Vitest covers the
+  cross-link rewriter, projects list + click-through, and the artifact
+  page (frontmatter, mermaid placeholder, intra-app navigation, and
+  the missing-API-key path).
 
 ---
 
@@ -181,8 +178,7 @@ flowchart TB
   classDef now fill:#e8f5e9,stroke:#2e7d32
   classDef next fill:#fff8e1,stroke:#f9a825
   classDef later fill:#e3f2fd,stroke:#1565c0
-  class s1 shipped
-  class s2,s3 now
+  class s1,s2,s3 shipped
   class s4,s5,s6 next
   class s7,s8 later
 ```

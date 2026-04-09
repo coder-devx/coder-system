@@ -12,18 +12,18 @@ specs:
 
   - id: "0002"
     title: Knowledge repo read API
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0002-knowledge-repo-read-api.md
+    folder: active
+    file: active/0002-knowledge-repo-read-api.md
     served_by_designs: ["0004"]
 
   - id: "0003"
     title: Admin Panel v0 (read-only)
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0003-admin-panel-read-only.md
+    folder: active
+    file: active/0003-admin-panel-read-only.md
     served_by_designs: ["0004"]
 
   - id: "0004"

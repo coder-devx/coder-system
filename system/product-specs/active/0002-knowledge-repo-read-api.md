@@ -2,7 +2,7 @@
 id: "0002"
 title: Knowledge repo read API
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-09
 updated: 2026-04-09
@@ -15,7 +15,7 @@ related_specs: ["0001", "0003"]
 # Knowledge repo read API
 
 **Phase:** Now (foundation)
-**Progress:** 1 / 7 acceptance criteria
+**Progress:** 7 / 7 acceptance criteria
 
 ## Problem
 
@@ -74,18 +74,18 @@ goes through.
 
 ## Acceptance criteria
 
-- [ ] `GET /projects/{id}/knowledge/specs` returns every entry in that
+- [x] `GET /projects/{id}/knowledge/specs` returns every entry in that
       project's `product-specs/registry.yaml` with parsed fields.
-- [ ] Fetching an artifact returns a typed object with `frontmatter` and
+- [x] Fetching an artifact returns a typed object with `frontmatter` and
       `body_markdown`, never raw YAML.
-- [ ] A cross-link from spec → design resolves to a valid reference the
+- [x] A cross-link from spec → design resolves to a valid reference the
       caller can pass straight back into the API.
 - [x] A request for an artifact that exists in one project is 404 when
       queried from a different project.
-- [ ] An artifact whose frontmatter fails schema validation returns a
+- [x] An artifact whose frontmatter fails schema validation returns a
       structured error naming the offending field, not a 500.
-- [ ] Cache hit ratio is measurable via a metric (`knowledge_cache_hit_total`).
-- [ ] A missing cross-link (broken reference) is surfaced in the response
+- [x] Cache hit ratio is measurable via a metric (`knowledge_cache_hit_total`).
+- [x] A missing cross-link (broken reference) is surfaced in the response
       rather than silently dropped.
 
 ## Metrics

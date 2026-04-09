@@ -2,7 +2,7 @@
 id: "0003"
 title: Admin Panel v0 (read-only)
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-09
 updated: 2026-04-09
@@ -15,7 +15,7 @@ related_specs: ["0001", "0002", "0006"]
 # Admin Panel v0 (read-only)
 
 **Phase:** Now (foundation)
-**Progress:** 1 / 6 acceptance criteria
+**Progress:** 6 / 6 acceptance criteria
 
 ## Problem
 
@@ -73,13 +73,13 @@ confidence in the data model before exposing mutations.
 
 ## Acceptance criteria
 
-- [ ] Loading the app against a seeded Core shows the project list.
-- [ ] Switching projects updates the URL and the visible knowledge
+- [x] Loading the app against a seeded Core shows the project list.
+- [x] Switching projects updates the URL and the visible knowledge
       without a full reload.
-- [ ] Opening a spec shows its parsed frontmatter and the rendered
+- [x] Opening a spec shows its parsed frontmatter and the rendered
       markdown body.
-- [ ] A Mermaid diagram inside an active design renders in the browser.
-- [ ] A cross-link inside an artifact body (e.g. "ADR 0005") is a
+- [x] A Mermaid diagram inside an active design renders in the browser.
+- [x] A cross-link inside an artifact body (e.g. "ADR 0005") is a
       clickable link that routes to the linked artifact.
 - [x] The app makes zero direct calls to GitHub — all reads go through
       `coder-core`.
