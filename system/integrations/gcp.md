@@ -70,14 +70,38 @@ See [ADR 0009](../adrs/0009-per-managed-project-cloud-account-and-github-org.md)
 - Cloud Run cold starts ~1-3s for the Python container.
 - IAM propagation can take up to a minute when granting cross-project bindings.
 
+## Secret Manager naming convention
+
+GCP Secret Manager IDs only allow `[A-Za-z0-9_-]`, so the slash-style
+path `coder/{project_id}/{name}` from [ADR 0009](../adrs/0009-per-managed-project-cloud-account-and-github-org.md)
+is rendered with hyphens in practice:
+
+```
+coder-{managed_project_id}-{secret_name}
+```
+
+For Coder operating on itself the project id is literally `coder`, so the
+prefix doubles. That's expected, not a bug.
+
+| Secret | Owner | Holds | Notes |
+|---|---|---|---|
+| `coder-coder-api-key` | project `coder` | The `coder` project's static API key for `coder-core`'s authenticated endpoints. Plaintext is the source of truth here; `coder-core-db.projects.api_key_hash` stores only the SHA-256. | Read with `gcloud secrets versions access latest --secret=coder-coder-api-key --project=vibedevx`. Rotation is manual until `POST /v1/projects/{id}/rotate-api-key` lands. |
+| `GITHUB_TOKEN` | (legacy name) | Classic PAT used by the knowledge API to read GitHub. Mounted into `coder-core` via `--set-secrets`. | Pre-dates the new naming convention — kept as-is so the existing Cloud Run config keeps working. **Security follow-up:** rotate to a fine-grained PAT and rename to `coder-coder-github-pat` in the same change. |
+
+Secrets that belong to the **managed product itself** (e.g. VibeTrade's
+own DB password, its API keys to third parties) live in **that project's
+own GCP Secret Manager**, not in `vibedevx`. Coder never co-mingles its
+control-plane secrets with a managed project's data-plane secrets.
+
+The Coder System Admin worker is the only role with write access to
+`vibedevx` Secret Manager. Other workers get scoped read access via
+`roles/secretmanager.secretAccessor` bound to specific secrets, granted
+in the same commit that introduces the need.
+
 ## Notes
 
 - Default region for Coder's control plane: `europe-west1` (`vibedevx`).
   Managed projects pick their own region.
-- Secret naming convention: `coder/{managed_project_id}/{secret_name}` for
-  any secret Coder stores about a managed project on Coder's behalf.
-  Secrets that belong to the managed product itself live in that project's
-  own GCP Secret Manager.
 - A new managed-project onboarding flow MUST create the GCP project,
   enable required APIs, create the project's Artifact Registry, and grant
   the Coder System Admin worker the agreed scoped roles before any other
