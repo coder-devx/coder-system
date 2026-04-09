@@ -30,7 +30,7 @@ except ImportError:
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Files that are NOT knowledge artifacts even though they're MD.
-SKIP_FILENAMES = {"README.md", "REGISTRY.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md"}
+SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md"}
 
 # Required frontmatter fields per artifact type.
 REQUIRED_FIELDS: dict[str, set[str]] = {
@@ -151,8 +151,14 @@ def validate_section(section_root: Path, section_label: str) -> None:
         return
 
     registries = collect_registries(section_root)
-    # Build {registry_name: set of all known ids} for cross-link checks.
-    known_ids = {name: set(entries.keys()) for name, entries in registries.items()}
+    # Build {registry_key: set of all known ids} for cross-link checks.
+    # Note: CROSS_LINKS target values are registry *keys* (e.g. "specs"), not
+    # folder names (e.g. "product-specs"), so key this dict by the YAML key
+    # via REGISTRY_KEYS rather than by folder name.
+    known_ids = {
+        REGISTRY_KEYS[name]: set(entries.keys())
+        for name, entries in registries.items()
+    }
 
     # Track files referenced by registries so we can detect orphans.
     referenced: dict[str, set[Path]] = {name: set() for name in REGISTRY_KEYS}

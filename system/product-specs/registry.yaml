@@ -1,12 +1,67 @@
 # Source of truth for the product specs registry.
 # REGISTRY.md is generated from this file.
 
-specs: []
-# Example entry:
-# - id: "0001"
-#   title: Multi-project switcher
-#   status: wip
-#   owner: ro
-#   folder: wip
-#   file: 0001-multi-project-switcher.md
-#   served_by_designs: ["0004"]
+specs:
+  - id: "0001"
+    title: Multi-tenant project CRUD
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0001-multi-tenant-project-crud.md
+    served_by_designs: ["0004"]
+
+  - id: "0002"
+    title: Knowledge repo read API
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0002-knowledge-repo-read-api.md
+    served_by_designs: ["0004"]
+
+  - id: "0003"
+    title: Admin Panel v0 (read-only)
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0003-admin-panel-read-only.md
+    served_by_designs: ["0004"]
+
+  - id: "0004"
+    title: Developer worker v1
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0004-developer-worker-v1.md
+    served_by_designs: ["0004"]
+
+  - id: "0005"
+    title: Per-role service accounts
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0005-per-role-service-accounts.md
+    served_by_designs: ["0004"]
+
+  - id: "0006"
+    title: Pipeline UI in admin
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0006-pipeline-ui-in-admin.md
+    served_by_designs: ["0004"]
+
+  - id: "0007"
+    title: Local agent impersonation
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0007-local-agent-impersonation.md
+    served_by_designs: ["0004"]
+
+  - id: "0008"
+    title: Onboard first two projects
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0008-onboard-first-two-projects.md
+    served_by_designs: ["0004"]
