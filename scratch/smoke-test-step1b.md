@@ -1,0 +1,1 @@
+smoke test for two-secret split (worker uses coder-coder-github-pat-worker)
