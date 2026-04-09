@@ -33,11 +33,11 @@ services:
 
   - id: coder-admin
     name: Coder Admin Panel
-    status: planned
+    status: active
     owner: ro
     tier: core
     repos: [coder-admin]
-    tech: [javascript, react, vite, tailwind]
+    tech: [typescript, react, vite, tailwind]
     runtime: cloud-run
     region: europe-west1
     depends_on:
@@ -46,4 +46,7 @@ services:
       data_stores: []
     file: coder-admin.md
     notes: >
-      User-facing surface. Project switcher, worker status grid, override.
+      Walking skeleton deployed 2026-04-09. Single page calls
+      coder-core /v1/health to prove cross-origin reachability and the
+      CD pipeline. Project switcher, worker grid, knowledge browser
+      come next.

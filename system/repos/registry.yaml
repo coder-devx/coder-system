@@ -20,20 +20,20 @@ repos:
       workflows: [ci]
     cd:
       target: cloud-run
-      trigger: manual  # push-to-main comes in commit #5
+      trigger: push-to-main
     file: coder-core.md
 
   - id: coder-admin
     name: coder-admin
-    status: planned
+    status: active
     owner: ro
     github: coder-devx/coder-admin
     default_branch: main
     hosts_services: [coder-admin]
-    language: javascript
+    language: typescript
     ci:
       provider: github-actions
-      workflows: [test, lint, build]
+      workflows: [ci]
     cd:
       target: cloud-run
       trigger: push-to-main

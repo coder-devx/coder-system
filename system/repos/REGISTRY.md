@@ -4,8 +4,8 @@
 
 | ID | GitHub | Status | Hosts | Language | CI | CD | File |
 |---|---|---|---|---|---|---|---|
-| `coder-core` | coder-devx/coder-core | active | coder-core | python | github-actions (ci) | cloud-run (manual) | [coder-core.md](./coder-core.md) |
-| `coder-admin` | coder-devx/coder-admin | planned | coder-admin | javascript | github-actions | cloud-run (push-to-main) | [coder-admin.md](./coder-admin.md) |
+| `coder-core` | coder-devx/coder-core | active | coder-core | python | github-actions (ci) | cloud-run (push-to-main) | [coder-core.md](./coder-core.md) |
+| `coder-admin` | coder-devx/coder-admin | active | coder-admin | typescript | github-actions (ci) | cloud-run (push-to-main) | [coder-admin.md](./coder-admin.md) |
 | `coder-system` | coder-devx/coder-system | active | — | markdown | github-actions (validate) | none | [coder-system.md](./coder-system.md) |
 
 ## Notes

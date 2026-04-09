@@ -5,7 +5,7 @@
 | ID | Name | Status | Owner | Tier | Tech | Runtime | File |
 |---|---|---|---|---|---|---|---|
 | `coder-core` | Coder Core | active | ro | core | python · fastapi | cloud-run (europe-west1) | [coder-core.md](./coder-core.md) |
-| `coder-admin` | Coder Admin Panel | planned | ro | core | javascript · react · vite · tailwind | cloud-run (europe-west1) | [coder-admin.md](./coder-admin.md) |
+| `coder-admin` | Coder Admin Panel | active | ro | core | typescript · react · vite · tailwind | cloud-run (europe-west1) | [coder-admin.md](./coder-admin.md) |
 
 ## Notes
 
