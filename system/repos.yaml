@@ -1,0 +1,39 @@
+# Workspace contract for coder-core's role workers.
+#
+# This file is read by the coder-core dispatcher every time a developer
+# task is picked up. It declares the set of repositories that workers
+# operating against the `coder` project are allowed to clone, branch,
+# commit, and open PRs against.
+#
+# Why this lives here (instead of in coder-core's database):
+#   * The set is a project-level decision that the project's operators
+#     own — adding or renaming a repo should be a knowledge-repo PR, not
+#     a coder-core deploy or DB write.
+#   * Versioned alongside the role docs under `system/roles/`, so an
+#     analyst can `git show` the exact repo set in effect when a past
+#     task ran.
+#
+# Schema (the dispatcher's parser is in
+# `coder-core/src/coder_core/integrations/repos_config.py`):
+#
+#   repos:
+#     - name: <repo-name>          # required, must match GitHub repo name
+#       default_branch: <branch>   # optional, defaults to "main"
+#
+# The org is taken from the project row (`projects.github_org`), not
+# from this file — every repo here must live under that org.
+#
+# To grant the workers access to a new repo:
+#   1. Add the repo here.
+#   2. Make sure the per-project GitHub PAT in Secret Manager
+#      (`coder-coder-github-pat` for the `coder` project) has push +
+#      pull-request scope on it.
+#   3. Open a PR in this repo.
+
+repos:
+  - name: coder-core
+    default_branch: main
+  - name: coder-admin
+    default_branch: main
+  - name: coder-system
+    default_branch: main
