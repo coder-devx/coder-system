@@ -1,0 +1,1 @@
+smoke test for coder-core step 1 (workspace clone + PR)
