@@ -2,7 +2,7 @@
 id: "0004"
 title: Developer worker v1
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-09
 updated: 2026-04-09
@@ -14,8 +14,8 @@ related_specs: ["0001", "0002", "0005", "0006"]
 
 # Developer worker v1
 
-**Phase:** Next (first real work gets done)
-**Progress:** 4 / 7 acceptance criteria
+**Phase:** Shipped
+**Progress:** 7 / 7 acceptance criteria
 
 ## Problem
 
@@ -83,12 +83,12 @@ anything to react to, and the rebuild can't prove parity with the old
       project's repo with test output captured.
 - [x] A failing task transitions to `failed` with a captured error and
       does not block subsequent tasks.
-- [ ] Two workers running against the same queue never double-claim a
+- [x] Two workers running against the same queue never double-claim a
       task (tested under contention).
-- [ ] Structured logs for a task can be fetched from the Core API and
+- [x] Structured logs for a task can be fetched from the Core API and
       contain `project_id`, `task_id`, and `role=developer` on every
       line.
-- [ ] A task that exceeds its timeout is terminated and marked
+- [x] A task that exceeds its timeout is terminated and marked
       `timed_out`, with the workspace cleaned up.
 - [x] The worker's git operations use a credential scoped to the
       developer role's service account (stub in v1, real in spec `0005`).

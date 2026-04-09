@@ -28,10 +28,10 @@ specs:
 
   - id: "0004"
     title: Developer worker v1
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0004-developer-worker-v1.md
+    folder: active
+    file: active/0004-developer-worker-v1.md
     served_by_designs: ["0004"]
 
   - id: "0005"

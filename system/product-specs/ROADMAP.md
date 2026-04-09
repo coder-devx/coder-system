@@ -11,7 +11,7 @@
 Updating a spec's acceptance-criteria checkboxes is what moves its
 progress bar here — keep the two in sync when you edit.
 
-Last updated: 2026-04-09 (spec 0003 shipped)
+Last updated: 2026-04-09 (spec 0004 shipped)
 
 ---
 
@@ -19,11 +19,10 @@ Last updated: 2026-04-09 (spec 0003 shipped)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 3 | 19 | 19 | `██████████` 100% |
-| Now — foundation | 0 | 0 | 0 | `░░░░░░░░░░` —   |
-| Next — first real work | 3 | 4 | 19 | `██░░░░░░░░` 21% |
+| Shipped | 4 | 26 | 26 | `██████████` 100% |
+| Next — first real work | 2 | 0 | 12 | `░░░░░░░░░░` 0% |
 | Later — humans, local agents, scale | 2 | 0 | 13 | `░░░░░░░░░░` 0% |
-| **Total** | **8** | **23** | **51** | `████░░░░░░` **45%** |
+| **Total** | **8** | **26** | **51** | `█████░░░░░` **51%** |
 
 ---
 
@@ -73,29 +72,32 @@ Zero mutations.
   page (frontmatter, mermaid placeholder, intra-app navigation, and
   the missing-API-key path).
 
+### [0004 — Developer worker v1](./active/0004-developer-worker-v1.md)
+
+In-process `developer` worker running `claude` against a project's
+real repo clone, opening PRs and writing back outcome + logs.
+
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** the dispatcher leases queued tasks with
+  `SELECT ... FOR UPDATE SKIP LOCKED` (race-free even with concurrent
+  workers), shells out to `claude` against a per-task workspace clone
+  authed by a fresh GitHub-App installation token, captures the JSONL
+  session transcript, and records success/failure/`timed_out`
+  back onto the row. Logs emitted while the worker runs are buffered
+  via a contextvar-aware logging handler and drained into a new
+  `task_logs` table on completion (one transaction with the outcome
+  write). New `GET /v1/projects/{id}/tasks/{task_id}/logs` endpoint
+  surfaces them with `project_id`, `task_id`, and `role` on every line
+  per AC5. Timeouts are a distinct `timed_out` lifecycle state with
+  the per-task tempdir cleaned up via `try/finally`.
+
 ---
 
 ## Next — first real work gets done
 
-> The developer worker actually runs, workers carry least-privilege
-> identities, and humans can watch runs in the UI.
-
-### [0004 — Developer worker v1](./wip/0004-developer-worker-v1.md)
-
-In-process `developer` worker running `enrich → execute → fix → test`
-against a project's real repos.
-
-- **Status:** wip
-- **Progress:** `██████░░░░` 4 / 7 AC
-- **Depends on:** 0001, 0002
-- **Blocks:** 0005, 0006, 0008
-- **Reality check:** the dispatcher runs `claude` against a real
-  workspace clone with a GitHub-App-scoped token, opens PRs, and
-  records success/failure into the `tasks` row. End-to-end proven by
-  PR #3 on `coder-devx/coder-system`. **Remaining:** contention test
-  for the leasing path (no polling loop yet — the dispatcher is
-  fire-and-forget from POST), a `task_logs` API for streamed logs,
-  and a real `TIMED_OUT` state distinct from `FAILED`.
+> Workers carry least-privilege identities and humans can watch runs in
+> the UI.
 
 ### [0005 — Per-role service accounts](./wip/0005-per-role-service-accounts.md)
 
@@ -178,8 +180,8 @@ flowchart TB
   classDef now fill:#e8f5e9,stroke:#2e7d32
   classDef next fill:#fff8e1,stroke:#f9a825
   classDef later fill:#e3f2fd,stroke:#1565c0
-  class s1,s2,s3 shipped
-  class s4,s5,s6 next
+  class s1,s2,s3,s4 shipped
+  class s5,s6 next
   class s7,s8 later
 ```
 
