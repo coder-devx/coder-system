@@ -29,50 +29,82 @@ an org with Coder itself. See [ADR 0009](../adrs/0009-per-managed-project-cloud-
 
 ## Auth model
 
-- **GitHub App** is the planned long-term mechanism (PATs don't scale to
-  per-project installation). The Coder GitHub App will be installed once
-  into the `coder-devx` org and again into each managed project's org.
-- The app's installation token is short-lived; Coder Core will mint a
-  fresh one per request, scoped to the relevant installation (i.e., the
-  managed project being acted on).
+Coder Core authenticates to GitHub as a **GitHub App**. There are no
+PATs anywhere in the system. The same app identity covers both
+read paths (knowledge API fetching files from a project's knowledge
+repo) and write paths (developer worker cloning, pushing branches,
+opening PRs).
 
-### Current state (as of 2026-04-09)
+The app is owned by the `@coder-devx` user account on github.com. App
+ID: `3325027`. Source of truth for app config is GitHub's app settings
+page; this doc records the operational facts you need to reason about
+the running system.
 
-The two callers inside `coder-core` now hold tokens in **two separate secrets**, even though they currently share the same underlying PAT value.
+### Token lifecycle
 
-| Secret | Loaded by | How | Current scopes |
+  1. Coder Core holds the app's RSA private key in
+     `coder-github-app-private-key` (vibedevx Secret Manager). Mounted
+     into Cloud Run as the `GITHUB_APP_PRIVATE_KEY` env var alongside
+     `GITHUB_APP_ID=3325027`.
+  2. When the knowledge API or the developer worker needs to call
+     GitHub for an `(owner, repo)`, `coder_core.integrations.github_app.GitHubAppTokenProvider`:
+     - signs an "app JWT" with the private key (RS256, 9-minute expiry,
+       `iss=app_id`),
+     - looks up the installation id for `owner` via
+       `GET /repos/{owner}/{repo}/installation` (cached per-owner for
+       the process lifetime; installation ids are stable),
+     - exchanges the JWT for an **installation token** via
+       `POST /app/installations/{id}/access_tokens` (cached per
+       installation until ~5 minutes before its ~1h expiry).
+  3. The knowledge API uses the installation token in an
+     `Authorization: Bearer …` header on a per-request basis. The
+     developer worker writes the same token into a per-task
+     `$HOME/.netrc` and `$GH_TOKEN` so `git clone`, `git push`, and
+     `gh pr create` authenticate without ever putting the token on a
+     command line.
+
+There is **no rotation chore**. The only credential is the app private
+key, which has no expiry. If the key is ever compromised, generate a
+new one from the app's settings page, replace
+`coder-github-app-private-key` with `gcloud secrets versions add`, and
+Cloud Run picks it up on the next revision (or immediately on a
+restart, since the secret is mounted from `:latest`).
+
+### Installations
+
+The app currently has three installations, all minted automatically
+the first time `get_token_for_repo` was called for each owner:
+
+| Installation | Account | Type | Scope |
 |---|---|---|---|
-| `coder-coder-github-pat` | knowledge API (`src/coder_core/integrations/github.py`) | Cloud Run env var `GITHUB_TOKEN` mounted via `--update-secrets=GITHUB_TOKEN=coder-coder-github-pat:N`. Pinned to a specific version because Cloud Run doesn't re-read `:latest` on running instances; pinning makes each rotation force a fresh revision. | Fine-grained, `coder-devx/{coder-core,coder-admin,coder-system}`, `Contents: Read and write`, `Pull requests: Read and write`, `Metadata: Read`. Inherits write scopes from the worker rotation pending the narrow-PAT follow-up below. |
-| `coder-coder-github-pat-worker` | developer worker / dispatcher (`src/coder_core/workers/workspace.py`) | Loaded at task pickup time via `gcloud secrets versions access latest` through the Secret Manager API (no env-var mount, no pinning needed — every task fetches latest). The token is then written into a per-task `$HOME/.netrc` and `$GH_TOKEN`, so `git clone`, `git push`, and `gh pr create` authenticate without ever putting the token on a command line. | Same fine-grained PAT (Contents + PRs read/write) — populated from `coder-coder-github-pat:4` on 2026-04-09 to bootstrap the split. |
+| 122610957 | `coder-devx` | User | All repos |
+| 122611031 | `acordly` | Organization | All repos |
+| 122611051 | `ViberTrade` | Organization | Selected repos |
 
-- The runtime service account `coder-core-sa@vibedevx.iam` has `roles/secretmanager.secretAccessor` **scoped only to those two secrets** (not project-wide).
-- Earlier broad classic scopes (`admin:org`, `repo`, `workflow`, …) — a holdover from `coder-agent` days — were retired in the 2026-04-09 rotation.
-- **Narrow-rotation follow-up:** The knowledge-API secret (`coder-coder-github-pat`) doesn't actually need write scopes — only the worker does. Once a fine-grained read-only PAT is minted (`Contents: Read`, `Metadata: Read`, same three repos), pipe it through `scripts/rotate-github-pat.sh` to rotate `coder-coder-github-pat` down to read-only. The worker secret is unaffected. After that, the knowledge API runs with the principle of least privilege and worker compromise can no longer leak read access from a different code path.
-- The convention `coder-{project_id}-github-pat-worker` is the new default for the per-project secret template (`coder_core.config.project_github_token_secret_template`). When we onboard a second managed project, its worker secret will follow the same `…-worker` suffix and get its own `…-github-pat` (read-only) for the same reasons.
+Onboarding a new managed project = ask the operator to install the
+Coder DevX app on their GitHub account/org and grant access to the
+project's repos. There is no per-project secret to mint, no env var to
+add, no Cloud Run redeploy. Coder Core discovers the new installation
+on its first API call to that owner.
 
-### Rotating the PAT
+### Permissions
 
-The repo ships `coder-core/scripts/rotate-github-pat.sh`. It:
+Set on the app itself in github.com → Settings → Developer settings →
+GitHub Apps → Coder DevX. Current per-installation permissions:
 
-1. Reads the new PAT from stdin (never touches disk)
-2. Sanity-checks it against `GET /repos/coder-devx/coder-system` before touching GCP
-3. Adds a new version to `coder-coder-github-pat`
-4. Pins Cloud Run to the new version via `gcloud run services update --update-secrets=...` (forces a fresh revision)
-5. Smoke-tests the knowledge endpoint end-to-end
-6. Prints the active version + revision, plus a one-liner to disable older versions
+  * Repository: `contents: read+write`, `pull_requests: read+write`,
+    `issues: read+write`, `metadata: read`.
 
-```sh
-# Paste + Ctrl-D
-scripts/rotate-github-pat.sh
+Adding a new permission requires editing the app and then **each
+installation must accept the permission update** before the new scope
+is granted — GitHub holds installations at the version they were
+installed at until the operator clicks "Review request".
 
-# Or from a file
-scripts/rotate-github-pat.sh < new-pat.txt
+### Rate limits
 
-# Or from a password manager
-op read 'op://Coder/github-pat/token' | scripts/rotate-github-pat.sh
-```
-
-Older versions stay enabled until you explicitly disable them, so you can roll back in seconds.
+Per-installation: 15,000 requests/hour, vs. 5,000/hour for a single
+PAT. Each installation gets its own bucket, so fanning out across
+managed projects scales linearly with no per-app coordination needed.
 
 ## Surface used
 
