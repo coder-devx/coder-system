@@ -47,3 +47,4 @@ Each knowledge type lives in its own folder under `system/` (and mirrored under 
 - Looking for a service? → [`system/services/REGISTRY.md`](./system/services/REGISTRY.md)
 - Want to know why we did X? → [`system/adrs/REGISTRY.md`](./system/adrs/REGISTRY.md)
 - Setting up a new project under Coder? → copy [`template/`](./template/) into the project's own `coder-system` repo.
+app-mode smoke-test 2026-04-09
