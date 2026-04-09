@@ -2,7 +2,7 @@
 id: "0001"
 title: Multi-tenant project CRUD
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-09
 updated: 2026-04-09
@@ -15,7 +15,7 @@ related_specs: ["0002", "0003"]
 # Multi-tenant project CRUD
 
 **Phase:** Now (foundation)
-**Progress:** 4 / 6 acceptance criteria
+**Progress:** 6 / 6 acceptance criteria
 
 ## Problem
 
@@ -78,9 +78,9 @@ and pipeline runs all need a `project_id` to attach to.
       `400` (never falls through to a default).
 - [x] Two projects created in the same test can be fetched independently;
       neither appears in the other's scoped queries.
-- [ ] Every log line emitted during a project-scoped request contains
+- [x] Every log line emitted during a project-scoped request contains
       `project_id` as a structured field.
-- [ ] Archiving a project hides it from default listings but preserves
+- [x] Archiving a project hides it from default listings but preserves
       audit history.
 
 ## Metrics

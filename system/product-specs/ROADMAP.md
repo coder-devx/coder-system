@@ -19,28 +19,32 @@ Last updated: 2026-04-09 (post GitHub-App migration)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Now — foundation | 3 | 6 | 19 | `███░░░░░░░` 32% |
+| Shipped | 1 | 6 | 6 | `██████████` 100% |
+| Now — foundation | 2 | 2 | 13 | `██░░░░░░░░` 15% |
 | Next — first real work | 3 | 4 | 19 | `██░░░░░░░░` 21% |
 | Later — humans, local agents, scale | 2 | 0 | 13 | `░░░░░░░░░░` 0% |
-| **Total** | **8** | **10** | **51** | `██░░░░░░░░` **20%** |
+| **Total** | **8** | **12** | **51** | `██░░░░░░░░` **24%** |
+
+---
+
+## Shipped
+
+> Specs that have hit 100% AC and been promoted from `wip/` to `active/`.
+
+### [0001 — Multi-tenant project CRUD](./active/0001-multi-tenant-project-crud.md)
+
+`project_id` is a first-class dimension on every call. Create, list,
+fetch, archive, structured per-request logging carrying `project_id`,
+per-project API keys with rotate.
+
+- **Status:** active
+- **Progress:** `██████████` 6 / 6 AC ✅
 
 ---
 
 ## Now — foundation
 
 > Unblocks everything else. Core exists, knowledge is readable, humans can see it.
-
-### [0001 — Multi-tenant project CRUD](./wip/0001-multi-tenant-project-crud.md)
-
-`project_id` becomes a first-class dimension on every call. Create,
-list, fetch, archive.
-
-- **Status:** wip
-- **Progress:** `███████░░░` 4 / 6 AC
-- **Blocks:** 0002, 0003, 0004, 0005, 0006, 0007, 0008
-- **Remaining:** structured per-request logging carrying `project_id`;
-  `POST /projects/{id}:archive` endpoint (column + read-side filter
-  already exist).
 
 ### [0002 — Knowledge repo read API](./wip/0002-knowledge-repo-read-api.md)
 
@@ -173,10 +177,12 @@ flowchart TB
   s6 --> s8
   s7 --> s8
 
+  classDef shipped fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
   classDef now fill:#e8f5e9,stroke:#2e7d32
   classDef next fill:#fff8e1,stroke:#f9a825
   classDef later fill:#e3f2fd,stroke:#1565c0
-  class s1,s2,s3 now
+  class s1 shipped
+  class s2,s3 now
   class s4,s5,s6 next
   class s7,s8 later
 ```

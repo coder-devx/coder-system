@@ -4,13 +4,14 @@
 
 ## Active
 
-_None yet._
+| ID | Title | Owner | Served by designs |
+|---|---|---|---|
+| [0001](./active/0001-multi-tenant-project-crud.md) | Multi-tenant project CRUD | ro | [0004](../designs/wip/0001-generalize-coder-from-vibetrade.md) |
 
 ## WIP
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0001](./wip/0001-multi-tenant-project-crud.md) | Multi-tenant project CRUD | ro | [0004](../designs/wip/0001-generalize-coder-from-vibetrade.md) |
 | [0002](./wip/0002-knowledge-repo-read-api.md) | Knowledge repo read API | ro | [0004](../designs/wip/0001-generalize-coder-from-vibetrade.md) |
 | [0003](./wip/0003-admin-panel-read-only.md) | Admin Panel v0 (read-only) | ro | [0004](../designs/wip/0001-generalize-coder-from-vibetrade.md) |
 | [0004](./wip/0004-developer-worker-v1.md) | Developer worker v1 | ro | [0004](../designs/wip/0001-generalize-coder-from-vibetrade.md) |
