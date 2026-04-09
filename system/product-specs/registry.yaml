@@ -36,10 +36,10 @@ specs:
 
   - id: "0005"
     title: Per-role service accounts
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0005-per-role-service-accounts.md
+    folder: active
+    file: active/0005-per-role-service-accounts.md
     served_by_designs: ["0004"]
 
   - id: "0006"

@@ -11,7 +11,7 @@
 Updating a spec's acceptance-criteria checkboxes is what moves its
 progress bar here — keep the two in sync when you edit.
 
-Last updated: 2026-04-09 (spec 0006 shipped)
+Last updated: 2026-04-09 (spec 0005 shipped)
 
 ---
 
@@ -19,10 +19,9 @@ Last updated: 2026-04-09 (spec 0006 shipped)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 5 | 32 | 32 | `██████████` 100% |
-| Next — first real work | 1 | 0 | 6 | `░░░░░░░░░░` 0% |
+| Shipped | 6 | 38 | 38 | `██████████` 100% |
 | Later — humans, local agents, scale | 2 | 0 | 13 | `░░░░░░░░░░` 0% |
-| **Total** | **8** | **32** | **51** | `██████░░░░` **63%** |
+| **Total** | **8** | **38** | **51** | `███████░░░` **75%** |
 
 ---
 
@@ -92,6 +91,36 @@ real repo clone, opening PRs and writing back outcome + logs.
   per AC5. Timeouts are a distinct `timed_out` lifecycle state with
   the per-task tempdir cleaned up via `try/finally`.
 
+### [0005 — Per-role service accounts](./active/0005-per-role-service-accounts.md)
+
+Every role has a dedicated GCP service account. Dispatcher fetches
+per-project Anthropic keys through a broker-downscoped token instead
+of a single process-wide env var.
+
+- **Status:** active
+- **Progress:** `██████████` 6 / 6 AC ✅
+- **What shipped:** seven `coder-{role}@vibedevx.iam.gserviceaccount.com`
+  service accounts provisioned by `coder-core/infra/terraform` with
+  state in `gs://vibedevx-coder-core-tfstate`. `roles.yaml` is the
+  single source of truth; both `roles.tf` (`yamldecode(file(...))`)
+  and `capability_matrix.py` read it so the IAM surface and the
+  human-readable `CAPABILITY_MATRIX.md` cannot drift. CI runs
+  `capability_matrix.py --check` + `tofu fmt -check` + `tofu validate`
+  on every PR (AC6). In `coder-core`, a new `BrokerClient` protocol
+  with `LocalBroker` (HS256 JWT envelope for dev/tests) and
+  `GcpBroker` (envelope + downscoped GCP access token via
+  `iamcredentials.generateAccessToken` and a Credential Access
+  Boundary restricted to `coder-{project_id}-{role}-` Secret Manager
+  resources). New `POST /v1/projects/{id}/impersonate/{role}`
+  endpoint authed with `X-Api-Key`, role-allowlisted against the
+  dispatcher's `_RUNNERS`, project-claim stamped by the broker so
+  ADR-0005 multi-tenant invariants hold. Dispatcher calls
+  `fetch_project_anthropic_key` before building `WorkerInput` and
+  hard-fails the task on a `SecretReadError` (no silent fallback to
+  the process-wide key). See the spec's "What shipped / what's
+  deferred" section for the integration-test and onboarding items
+  tracked as follow-up work.
+
 ### [0006 — Pipeline UI in admin](./active/0006-pipeline-ui-in-admin.md)
 
 Pipeline tab in `coder-admin`. Live task list, captured logs, status
@@ -117,23 +146,6 @@ filters. Still read-only.
   the list happy path, role+status URL round-trip, polling cadence,
   the failed-error inline render, the commit-link target, and the
   needs-key states.
-
----
-
-## Next — first real work gets done
-
-> Workers carry least-privilege identities.
-
-### [0005 — Per-role service accounts](./wip/0005-per-role-service-accounts.md)
-
-Each role gets a GCP SA per project. SysAdmin broker issues
-short-lived tokens. Developer worker stops using stub creds.
-
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 6 AC
-- **Depends on:** 0001, 0004
-- **Blocks:** 0007, 0008
-- **Linked ADR:** [0006 — Per-role service accounts](../adrs/0006-per-role-service-accounts.md)
 
 ---
 
@@ -192,11 +204,8 @@ flowchart TB
   s7 --> s8
 
   classDef shipped fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
-  classDef now fill:#e8f5e9,stroke:#2e7d32
-  classDef next fill:#fff8e1,stroke:#f9a825
   classDef later fill:#e3f2fd,stroke:#1565c0
-  class s1,s2,s3,s4,s6 shipped
-  class s5 next
+  class s1,s2,s3,s4,s5,s6 shipped
   class s7,s8 later
 ```
 
