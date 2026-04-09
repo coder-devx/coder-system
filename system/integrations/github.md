@@ -38,10 +38,35 @@ an org with Coder itself. See [ADR 0009](../adrs/0009-per-managed-project-cloud-
 
 ### Current state (as of commit #4 · 2026-04-08)
 
-- **Classic PAT fallback** — `GITHUB_TOKEN` in `vibedevx` Secret Manager, mounted into `coder-core` via `--set-secrets=GITHUB_TOKEN=GITHUB_TOKEN:latest` at deploy time.
-- The runtime service account `coder-core-sa@vibedevx.iam` has `roles/secretmanager.secretAccessor` **scoped only to the `GITHUB_TOKEN` secret** (not project-wide).
-- **Scope problem**: the current PAT has extremely broad classic scopes (`admin:org`, `repo`, `workflow`, `admin:repo_hook`, …). This is a holdover from `coder-agent`. **Security follow-up:** rotate it to a fine-grained PAT scoped to `coder-devx/coder-system:contents:read` before we onboard any managed project that isn't VibeTrade. Best moment is the GitHub App migration — same change, same test cycle.
+- **Classic PAT fallback** — `coder-coder-github-pat` in `vibedevx` Secret Manager, mounted into `coder-core` as env var `GITHUB_TOKEN` via `--update-secrets=GITHUB_TOKEN=coder-coder-github-pat:N`. Cloud Run is **pinned to a specific version**, not `:latest`, because Cloud Run doesn't re-read `:latest` on running instances — pinning makes each rotation force a fresh revision.
+- The runtime service account `coder-core-sa@vibedevx.iam` has `roles/secretmanager.secretAccessor` **scoped only to `coder-coder-github-pat`** (not project-wide).
+- A legacy secret `GITHUB_TOKEN` from `coder-agent` days still exists in Secret Manager but is orphaned — Cloud Run doesn't reference it and the runtime SA no longer has access to it. Safe to delete once the new secret is proven.
+- **Scope problem**: the PAT currently stored has extremely broad classic scopes (`admin:org`, `repo`, `workflow`, `admin:repo_hook`, …). This is a holdover from `coder-agent`. **Security follow-up:** rotate it to a fine-grained PAT scoped to `coder-devx/coder-system:contents:read` before we onboard any managed project that isn't VibeTrade. The mechanics are already in place — see the rotation workflow below.
 - Used by: the knowledge API in `coder-core` (`src/coder_core/integrations/github.py`) reads repo file contents via the `Accept: application/vnd.github.raw` trick on `GET /repos/{org}/{repo}/contents/{path}`.
+
+### Rotating the PAT
+
+The repo ships `coder-core/scripts/rotate-github-pat.sh`. It:
+
+1. Reads the new PAT from stdin (never touches disk)
+2. Sanity-checks it against `GET /repos/coder-devx/coder-system` before touching GCP
+3. Adds a new version to `coder-coder-github-pat`
+4. Pins Cloud Run to the new version via `gcloud run services update --update-secrets=...` (forces a fresh revision)
+5. Smoke-tests the knowledge endpoint end-to-end
+6. Prints the active version + revision, plus a one-liner to disable older versions
+
+```sh
+# Paste + Ctrl-D
+scripts/rotate-github-pat.sh
+
+# Or from a file
+scripts/rotate-github-pat.sh < new-pat.txt
+
+# Or from a password manager
+op read 'op://Coder/github-pat/token' | scripts/rotate-github-pat.sh
+```
+
+Older versions stay enabled until you explicitly disable them, so you can roll back in seconds.
 
 ## Surface used
 
