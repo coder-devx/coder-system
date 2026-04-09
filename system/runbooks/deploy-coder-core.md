@@ -1,42 +1,23 @@
 ---
 id: deploy-coder-core
-title: Deploy coder-core to Cloud Run (manual)
+title: Deploy coder-core to Cloud Run
 type: runbook
 status: active
 owner: ro
 created: 2026-04-08
-updated: 2026-04-08
+updated: 2026-04-09
 applies_to_services: [coder-core]
-applies_to_integrations: [gcp]
+applies_to_integrations: [gcp, github]
 ---
 
-# Deploy coder-core to Cloud Run (manual)
+# Deploy coder-core to Cloud Run
 
 ## When to run this
 
-You want to ship a new revision of `coder-core`. This is the **manual**
-deploy path, used until push-to-main CD lands (commit #5 of
-[design 0004](../designs/wip/0001-generalize-coder-from-vibetrade.md)).
-
-## Who can run this
-
-Anyone with:
-
-- `coder@vibedevx.com` gcloud login with the following roles in `vibedevx`:
-  - `roles/run.admin`
-  - `roles/iam.serviceAccountUser`
-  - `roles/artifactregistry.writer`
-- `uv` and `podman` installed locally
-- This repo (`coder-core`) cloned
-
-In practice today, that's the user (`ro`) or the Coder System Admin worker.
-
-## Prerequisites
-
-- Working tree is clean (or at least has no changes you don't want shipped).
-- `make check` passes locally (lint, format, typecheck, tests).
-- `gcloud auth list` shows `coder@vibedevx.com` as the active account.
-- `podman machine` is running.
+You want to ship a new revision of `coder-core`. **The normal path is to
+merge to `main` and let CI deploy** — see [Automatic deploy](#automatic-deploy).
+A manual escape hatch is documented at the bottom for break-glass cases when
+GitHub Actions is unavailable.
 
 ## What gets deployed
 
@@ -46,68 +27,79 @@ In practice today, that's the user (`ro`) or the Coder System Admin worker.
 | GCP project | `vibedevx` |
 | Region | `europe-west1` |
 | Runtime SA | `coder-core-sa@vibedevx.iam.gserviceaccount.com` |
-| Image | `europe-west1-docker.pkg.dev/vibedevx/coder-core/coder-core:{VERSION}` |
-| Version | Read from `pyproject.toml` (`project.version`) |
+| Image | `europe-west1-docker.pkg.dev/vibedevx/coder-core/coder-core:{git-sha}` (also tagged `:latest`) |
 | Port | 8080 |
 | Memory / CPU | 512 MiB / 1 vCPU |
 | Min / max instances | 0 / 3 |
-| Env vars | `ENVIRONMENT=prod` |
-| Ingress | `allow-unauthenticated` (for now — `/v1/health` is public; auth comes in commit #4) |
+| Env vars | `ENVIRONMENT`, `CLOUD_SQL_INSTANCE`, `CLOUD_SQL_USER`, `CLOUD_SQL_DATABASE`, plus `GITHUB_TOKEN` from Secret Manager (`coder-coder-github-pat`) |
+| Cloud SQL | `vibedevx:europe-west1:coder-core-db` |
+| Ingress | `allow-unauthenticated` (knowledge endpoints gate themselves with `X-Api-Key`) |
 
-## Steps
+CI only updates the **image**. Everything else (env vars, secret mounts,
+Cloud SQL connection, scaling, runtime SA) is preserved by using
+`gcloud run services update --image=…` rather than `gcloud run deploy`. If
+you need to change one of those, do it manually with `gcloud run services
+update` and document the change.
 
-From the `coder-core` repo root:
+## Automatic deploy
+
+The pipeline lives in [`coder-core/.github/workflows/ci.yml`](https://github.com/coder-devx/coder-core/blob/main/.github/workflows/ci.yml).
+
+Trigger:
 
 ```sh
-# 1. Verify you're about to ship what you think you are
-git status
-git log --oneline -5
-make check
-
-# 2. Authenticate podman against Artifact Registry (short-lived token)
-make ar-login
-
-# 3. Build, tag, push, deploy, smoke-test — all in one
-make deploy
+# from the coder-core repo
+git push origin main
 ```
 
-`make deploy` runs:
+Pipeline stages:
 
-1. `podman build --platform linux/amd64 -t coder-core:dev .`
-2. Tag the image as `europe-west1-docker.pkg.dev/vibedevx/coder-core/coder-core:{VERSION}` and `:latest`
-3. Push both tags
-4. `gcloud run deploy coder-core --image=...:{VERSION} --service-account=coder-core-sa@... ...`
-5. `curl https://coder-core-…run.app/v1/health` to confirm 200
+1. **check** — `ruff`, `ruff format --check`, `mypy`, `pytest`. Runs on
+   every PR and every push.
+2. **build** — builds the image with Buildx + GHA cache. On PRs the image
+   is loaded but not pushed (smoke-checks the Dockerfile). On main pushes
+   the image is pushed to Artifact Registry tagged with the 12-char git
+   SHA and `:latest`.
+3. **deploy** (main only) — `gcloud run services update coder-core
+   --image=…:{sha}`, then `curl /v1/health`.
 
-The exact flags are in the `deploy` target of [`Makefile`](https://github.com/coder-devx/coder-core/blob/main/Makefile).
+GitHub auths to GCP via Workload Identity Federation:
 
-## Success condition
+| Thing | Value |
+|---|---|
+| Pool | `projects/8534948335/locations/global/workloadIdentityPools/github-pool` |
+| Provider | `…/providers/github-provider` (OIDC, scoped to `coder-devx` org) |
+| Deploy SA | `gha-deployer@vibedevx.iam.gserviceaccount.com` |
+| Repo binding | `principalSet://…/attribute.repository/coder-devx/coder-core` → `roles/iam.workloadIdentityUser` on `gha-deployer` |
+| Roles on `gha-deployer` | `roles/run.developer`, `roles/artifactregistry.writer`, `roles/iam.serviceAccountUser` (on `coder-core-sa`), plus the legacy `cloudbuild.builds.editor`, `logging.logWriter`, `serviceusage.serviceUsageConsumer`, `storage.objectUser` |
 
-The `make deploy` command finishes with:
+There are **no long-lived deploy keys** anywhere — GitHub mints a
+short-lived OIDC token per run and exchanges it for a GCP access token
+via WIF.
+
+### Watching a deploy
+
+```sh
+gh run list --limit 5
+gh run watch <run-id>
+```
+
+Or in the browser: <https://github.com/coder-devx/coder-core/actions>.
+
+### Success condition
+
+The `Smoke test /v1/health` step prints:
 
 ```
 {"ok":true,"service":"coder-core","version":"X.Y.Z","environment":"prod"}
 ```
 
-Check the service in the Cloud Run console:
+Confirm in the Cloud Run console:
 <https://console.cloud.google.com/run/detail/europe-west1/coder-core/metrics?project=vibedevx>
-
-The new revision should be serving 100% of traffic within ~30s of the command finishing.
-
-## If something goes wrong
-
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| `podman login` fails with "unauthorized" | gcloud token expired | `gcloud auth login --account=coder@vibedevx.com`, retry |
-| `podman push` returns 403 | SA lacks `artifactregistry.writer` | Add the role to your user (not the runtime SA) |
-| `gcloud run deploy` returns "Permission denied" on `iam.serviceAccounts.actAs` | Your user lacks `iam.serviceAccountUser` on `coder-core-sa` | Add the role or ask a project admin |
-| Deploy succeeds but `/v1/health` returns 500 | Image pushed for wrong arch, or app crash at startup | Check `gcloud run services logs read coder-core --project=vibedevx --region=europe-west1 --limit=50` |
-| Image pulled but container won't start ("manifest unknown") | Arch mismatch — the image wasn't built as `linux/amd64` | Rebuild with `--platform linux/amd64` (the Makefile's `build` target does this) |
-| `/v1/health` returns the OLD revision's output | Traffic didn't route to the new revision | Check `gcloud run services describe coder-core --project=vibedevx --region=europe-west1 --format='value(status.traffic)'` |
 
 ## Rollback
 
-Revert to the previous revision:
+Revert to a previous revision (no rebuild needed):
 
 ```sh
 # List revisions
@@ -120,11 +112,68 @@ gcloud run revisions list \
 gcloud run services update-traffic coder-core \
   --project=vibedevx \
   --region=europe-west1 \
-  --to-revisions=coder-core-00001-9lp=100
+  --to-revisions=coder-core-00006-qsr=100
 ```
+
+If the bad revision came from a bad commit, also revert the commit on
+`main` so the next push doesn't redeploy it.
+
+## Manual escape hatch (`make deploy`)
+
+Use this **only** when GitHub Actions is unavailable or you need to deploy
+an uncommitted local image (debugging the runtime, not normal flow).
+
+### Who can run it
+
+- `coder@vibedevx.com` gcloud login with `roles/run.admin`,
+  `roles/iam.serviceAccountUser` on `coder-core-sa`, and
+  `roles/artifactregistry.writer` in `vibedevx`
+- `uv` and `podman` installed locally
+
+### Steps
+
+```sh
+# 1. Verify what you're shipping
+git status
+git log --oneline -5
+make check
+
+# 2. Authenticate podman against Artifact Registry (short-lived token)
+make ar-login
+
+# 3. Build, tag, push, deploy, smoke-test — all in one
+make deploy
+```
+
+The exact flags are in the `deploy` target of [`Makefile`](https://github.com/coder-devx/coder-core/blob/main/Makefile).
+
+> ⚠ `make deploy` uses `gcloud run deploy` with explicit env-var flags,
+> which **replaces** the env-var set on the service. If you've changed
+> env vars or secret mounts via `gcloud run services update` since the
+> Makefile was last edited, `make deploy` will silently lose them.
+> Reconcile by editing the Makefile target before using it.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| GitHub Action fails at "Authenticate to GCP" with `Permission 'iam.serviceAccounts.getAccessToken' denied` | The repo isn't bound to `gha-deployer` via WIF, or the binding is on a different repo path | `gcloud iam service-accounts get-iam-policy gha-deployer@vibedevx.iam.gserviceaccount.com` and confirm the principalSet for `coder-devx/coder-core` is present |
+| `gcloud run services update` returns "Permission denied" on `iam.serviceAccounts.actAs` | `gha-deployer` lacks `iam.serviceAccountUser` on `coder-core-sa` | Re-grant: `gcloud iam service-accounts add-iam-policy-binding coder-core-sa@vibedevx.iam.gserviceaccount.com --role=roles/iam.serviceAccountUser --member=serviceAccount:gha-deployer@vibedevx.iam.gserviceaccount.com` |
+| Build push to AR returns 403 | `gha-deployer` lacks `roles/artifactregistry.writer` | Re-grant the role on `vibedevx` |
+| Deploy succeeds but `/v1/health` returns 500 | App crashed at startup | `gcloud run services logs read coder-core --project=vibedevx --region=europe-west1 --limit=100` |
+| `/v1/health` returns the OLD revision's output | Traffic didn't route to the new revision | `gcloud run services describe coder-core --project=vibedevx --region=europe-west1 --format='value(status.traffic)'` and route traffic with `update-traffic` |
+| Manual `podman push` returns 403 | gcloud token expired | `make ar-login` again |
+| Image pulled but container won't start ("manifest unknown") | Arch mismatch — image not built as `linux/amd64` | Rebuild with `--platform linux/amd64` (Makefile `build` target and CI both do this) |
 
 ## Notes
 
-- **This runbook will be retired** when push-to-main CD lands in commit #5 of design 0004. After that, `main` merges auto-deploy and this is reserved for break-glass rollbacks.
-- **First deployment** (2026-04-08): `coder-core-00001-9lp` — v0.0.1 walking skeleton, `GET /v1/health` only.
-- **Service account** `coder-core-sa@vibedevx.iam.gserviceaccount.com` has exactly `roles/logging.logWriter` and `roles/monitoring.metricWriter`. When the service needs Secret Manager, Cloud SQL, etc., add roles in the same commit that adds the feature — never preemptively.
+- **First automated deploy:** TBD on the next merge to `main` after
+  commit #5 lands. Update this line with the revision name once it ships.
+- **First deployment** (2026-04-08): `coder-core-00001-9lp` — v0.0.1
+  walking skeleton, `GET /v1/health` only.
+- **Runtime SA roles** (`coder-core-sa`): `roles/logging.logWriter`,
+  `roles/monitoring.metricWriter`, `roles/cloudsql.client`,
+  `roles/cloudsql.instanceUser`, plus
+  `roles/secretmanager.secretAccessor` scoped to the
+  `coder-coder-github-pat` secret only. Add roles in the same commit that
+  adds the feature — never preemptively.
