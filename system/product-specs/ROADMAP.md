@@ -11,7 +11,7 @@
 Updating a spec's acceptance-criteria checkboxes is what moves its
 progress bar here — keep the two in sync when you edit.
 
-Last updated: 2026-04-09 (spec 0005 shipped)
+Last updated: 2026-04-09 (spec 0007 shipped)
 
 ---
 
@@ -19,9 +19,9 @@ Last updated: 2026-04-09 (spec 0005 shipped)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 6 | 38 | 38 | `██████████` 100% |
-| Later — humans, local agents, scale | 2 | 0 | 13 | `░░░░░░░░░░` 0% |
-| **Total** | **8** | **38** | **51** | `███████░░░` **75%** |
+| Shipped | 7 | 44 | 44 | `██████████` 100% |
+| Later — onboarding | 1 | 0 | 7 | `░░░░░░░░░░` 0% |
+| **Total** | **8** | **44** | **51** | `████████░░` **86%** |
 
 ---
 
@@ -147,22 +147,26 @@ filters. Still read-only.
   the failed-error inline render, the commit-link target, and the
   needs-key states.
 
----
-
-## Later — humans, local agents, and scale
-
-> Local agents become first-class actors, then we prove the whole
-> system works with two projects in parallel.
-
-### [0007 — Local agent impersonation](./wip/0007-local-agent-impersonation.md)
+### [0007 — Local agent impersonation](./active/0007-local-agent-impersonation.md)
 
 Short-lived role-scoped tokens so Claude Code / Cursor can act as a
 role for a project. Audit trail tied to the authorising human.
 
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 6 AC
-- **Depends on:** 0001, 0005, 0006
-- **Blocks:** 0008 (final AC)
+- **Status:** active
+- **Progress:** `██████████` 6 / 6 AC ✅
+- **What shipped:** dual auth (`X-Api-Key` + `Authorization: Bearer`)
+  in `require_project_auth`, actor tracking on tasks (`actor`,
+  `actor_type`, `actor_token_id` columns), `impersonation_sessions`
+  table with immediate revocation (no cache), `coder` CLI with
+  `impersonate` / `token` / `status` commands writing to
+  `~/.config/coder/token.json`, and violet impersonation badges in
+  `coder-admin` pipeline list + task detail views. 166 tests green.
+
+---
+
+## Later — onboarding
+
+> Prove the system works with two real projects running in parallel.
 
 ### [0008 — Onboard first two projects](./wip/0008-onboard-first-two-projects.md)
 
@@ -205,8 +209,8 @@ flowchart TB
 
   classDef shipped fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
   classDef later fill:#e3f2fd,stroke:#1565c0
-  class s1,s2,s3,s4,s5,s6 shipped
-  class s7,s8 later
+  class s1,s2,s3,s4,s5,s6,s7 shipped
+  class s8 later
 ```
 
 ---

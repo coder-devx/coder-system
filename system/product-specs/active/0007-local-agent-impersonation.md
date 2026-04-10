@@ -2,7 +2,7 @@
 id: "0007"
 title: Local agent impersonation
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-09
 updated: 2026-04-09
@@ -14,8 +14,8 @@ related_specs: ["0001", "0005", "0006"]
 
 # Local agent impersonation
 
-**Phase:** Later (opens the door to humans + local agents + scale)
-**Progress:** 0 / 6 acceptance criteria
+**Phase:** Shipped
+**Progress:** 6 / 6 acceptance criteria ✅
 
 ## Problem
 
@@ -79,15 +79,15 @@ without bypassing it.
 
 ## Acceptance criteria
 
-- [ ] Ro can run the CLI and get back a valid role-scoped token for a
+- [x] Ro can run the CLI and get back a valid role-scoped token for a
       chosen project.
-- [ ] A local agent using the token can list that project's tasks and
+- [x] A local agent using the token can list that project's tasks and
       enqueue a developer task.
-- [ ] The same token cannot read or enqueue against a different project.
-- [ ] An expired token is rejected and the CLI prompts for refresh.
-- [ ] Revoking a session in the admin panel causes subsequent calls
+- [x] The same token cannot read or enqueue against a different project.
+- [x] An expired token is rejected and the CLI prompts for refresh.
+- [x] Revoking a session in the admin panel causes subsequent calls
       using that token to fail within 5 seconds.
-- [ ] The pipeline view shows the impersonation actor (human + role)
+- [x] The pipeline view shows the impersonation actor (human + role)
       for any task they enqueued.
 
 ## Metrics
@@ -99,14 +99,54 @@ without bypassing it.
 - **Adoption:** Ro's local Claude Code runs exclusively via
   impersonation — 0 direct-DB or direct-GitHub bypasses.
 
-## Open questions
+## What shipped
 
-- Where is the token stored on the laptop — OS keychain, dotfile,
-  environment variable? Security vs. ergonomics trade-off.
-- Do we support multiple simultaneous impersonations (two roles on two
-  projects at once) or force one session at a time?
-- How does the CLI discover which Core instance to talk to (config
-  file, env var, discovery endpoint)?
+Four stages, all landed in coder-core `7d1a14a` and coder-admin `0a31bc8`:
+
+1. **Bearer auth + actor tracking** — `require_project_auth` in `auth.py`
+   accepts both `X-Api-Key` and `Authorization: Bearer <jwt>`. Bearer
+   tokens are verified via the broker, cross-checked against project_id
+   (AC3), and carry `CallerIdentity` with method, actor, role, and
+   token_id. Three new nullable columns on `tasks` (`actor`,
+   `actor_type`, `actor_token_id`) stamp every task with its creator
+   (migration `0007_tasks_actor`).
+
+2. **Impersonation sessions + revocation** — new `impersonation_sessions`
+   table (migration `0008_impersonation_sessions`) records every broker
+   token issuance with `token_id` (PK), `project_id`, `role`,
+   `issued_at`, `expires_at`, `revoked_at`. New session admin endpoints
+   (`GET /sessions`, `POST /sessions/{token_id}/revoke`) gated by
+   `X-Api-Key` (admin-only). Bearer auth checks `revoked_at IS NOT NULL`
+   on every request — no cache, immediate effect (AC5 < 5s).
+
+3. **CLI tool** — `coder impersonate <role> --project=<slug>` reads the
+   API key from `CODER_API_KEY` env var or
+   `~/.config/coder/projects/{slug}.key`, calls the broker's
+   impersonate endpoint, and writes the token to
+   `~/.config/coder/token.json` (0600 permissions) with `expires_at`
+   so agents can detect stale tokens. `coder token` prints the cached
+   JWT; `coder status` shows role, project, expiry, and GCP token
+   presence. Entry point registered in pyproject.toml.
+
+4. **Pipeline view actor display** — `coder-admin` Task interface
+   extended with `actor`, `actor_type`, `actor_token_id`. Pipeline list
+   and task detail views show a violet badge for `broker_token` tasks
+   with the actor name. Task detail metadata grid includes an "actor"
+   row with "(impersonation)" label.
+
+166 tests pass in coder-core (30 new tests covering bearer auth,
+sessions, CLI, and actor tracking). CI green.
+
+## Open questions (resolved)
+
+- **Token storage:** dotfile at `~/.config/coder/token.json` with 0600
+  permissions. OS keychain deferred — dotfile is simple and sufficient
+  for a single-user laptop.
+- **Multiple simultaneous impersonations:** one token file at a time.
+  Multiple sessions can exist server-side (each has its own `token_id`),
+  but the CLI overwrites the local token file. Good enough for now.
+- **CLI discovery:** `--base-url` flag with `CODER_BASE_URL` env var
+  fallback, defaulting to `http://localhost:8080`.
 
 ## Links
 

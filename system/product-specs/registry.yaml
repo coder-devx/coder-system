@@ -52,10 +52,10 @@ specs:
 
   - id: "0007"
     title: Local agent impersonation
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0007-local-agent-impersonation.md
+    folder: active
+    file: active/0007-local-agent-impersonation.md
     served_by_designs: ["0004"]
 
   - id: "0008"
