@@ -1,0 +1,11 @@
+# Project-specific roles.
+# The developer role is required for the developer worker to load its
+# system prompt. Add more roles as needed.
+
+roles:
+  - id: developer
+    name: Developer
+    status: defined
+    owner: ro
+    seniority: mid
+    file: developer.md

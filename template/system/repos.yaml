@@ -1,0 +1,9 @@
+# Repos the developer worker is allowed to clone for this project.
+# Add entries here before enqueuing developer tasks.
+#
+# Format:
+#   repos:
+#     - name: my-repo
+#       default_branch: main
+
+repos: []
