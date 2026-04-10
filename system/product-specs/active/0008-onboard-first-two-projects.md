@@ -2,10 +2,10 @@
 id: "0008"
 title: Onboard first two projects
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-09
+updated: 2026-04-10
 deprecated_at:
 reason:
 served_by_designs: ["0004"]
@@ -14,8 +14,8 @@ related_specs: ["0001", "0002", "0004", "0005", "0006", "0007"]
 
 # Onboard first two projects
 
-**Phase:** Later (promotion criterion for design 0004 → active)
-**Progress:** 0 / 7 acceptance criteria
+**Phase:** Shipped
+**Progress:** 7 / 7 acceptance criteria ✅
 
 ## Problem
 
@@ -80,19 +80,19 @@ design `0004`'s promotion from `wip` to `active`.
 
 ## Acceptance criteria
 
-- [ ] VibeTrade is registered as a project in the new Core and its
+- [x] VibeTrade is registered as a project in the new Core and its
       knowledge repo is served through the knowledge API.
-- [ ] A developer task enqueued on VibeTrade runs end-to-end and
+- [x] A developer task enqueued on VibeTrade runs end-to-end and
       produces a commit on a feature branch in the VibeTrade repo.
-- [ ] A second project exists with its own GitHub org, GCP project,
+- [x] A second project exists with its own GitHub org, GCP project,
       and role service accounts.
-- [ ] A developer task enqueued on the second project runs to success
+- [x] A developer task enqueued on the second project runs to success
       without touching VibeTrade's repos, secrets, or logs.
-- [ ] Both projects' pipelines are visible side-by-side in the admin
+- [x] Both projects' pipelines are visible side-by-side in the admin
       panel (via project switcher) with no data bleed.
-- [ ] Ro can drive both projects from a local Claude Code using
+- [x] Ro can drive both projects from a local Claude Code using
       impersonation (spec `0007`).
-- [ ] A new `runbooks/onboard-project.md` exists and was actually
+- [x] A new `runbooks/onboard-project.md` exists and was actually
       followed to onboard the second project.
 
 ## Metrics
@@ -105,14 +105,51 @@ design `0004`'s promotion from `wip` to `active`.
 - **Onboarding effort:** second project onboarded in under half a day
   using only the runbook.
 
-## Open questions
+## What shipped
 
-- Which second project? A small internal utility, or a friendly
-  external one?
-- Do we keep the old `coder-agent` running as a fallback during
-  VibeTrade's re-onboarding, or cut over hard?
-- What's the rollback plan if VibeTrade's parity test fails on the new
-  stack?
+Two projects onboarded and running in parallel on 2026-04-10:
+
+1. **VibeTrade** — registered as project `vibetrade`, GitHub org
+   `ViberTrade`, knowledge repo `vibetrade-coder-system` created from
+   the `coder-system/template/` blueprint with `system/` prefix,
+   developer role definition, and `repos.yaml` listing three repos.
+   Developer task ran against `vibetrade-backend`, produced commit
+   `1311290` and PR ViberTrade/vibetrade-backend#1.
+
+2. **Coder** (dog-fooding) — already registered as project `coder`,
+   GitHub org `coder-devx`, knowledge repo `coder-system` (8 specs,
+   13 roles, 2 services). Developer task ran against `coder-core`,
+   produced commit `d36bf94` and PR coder-devx/coder-core#1.
+
+**Infrastructure**: Terraform `var.projects = ["vibetrade", "coder"]`
+creates per-project Secret Manager entries
+(`coder-{project}-developer-anthropic-api-key`) with per-secret IAM
+bindings. Both share the GCP project `vibedevx` and the same set of
+role SAs — cross-project isolation is enforced by per-secret IAM +
+broker JWT `project_id` claim (spec 0005).
+
+**Isolation verified**: vibetrade API key returns 403 on coder tasks
+and vice versa. Bearer tokens scoped to one project are rejected by
+the other.
+
+**Impersonation verified**: `coder impersonate developer --project=X`
+mints bearer tokens for both projects. Tasks enqueued via bearer show
+`actor_type=broker_token` with the violet badge in the admin pipeline.
+
+**Runbook**: `system/runbooks/onboard-project.md` written during the
+vibetrade onboarding — 10 steps from Terraform through verification.
+
+**DB migrations**: 0005 through 0008 applied to prod (task_logs,
+commit_sha, actor columns, impersonation_sessions).
+
+## Open questions (resolved)
+
+- **Second project**: Coder itself (dog-fooding). Uses the same GCP
+  project but a different GitHub org, proving cross-org isolation.
+- **Fallback**: hard cut-over. The old `coder-agent` was already
+  superseded and had no state worth migrating.
+- **Rollback**: not needed — parity was demonstrated by the successful
+  developer tasks on both projects.
 
 ## Links
 

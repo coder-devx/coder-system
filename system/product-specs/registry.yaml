@@ -60,8 +60,8 @@ specs:
 
   - id: "0008"
     title: Onboard first two projects
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0008-onboard-first-two-projects.md
+    folder: active
+    file: active/0008-onboard-first-two-projects.md
     served_by_designs: ["0004"]

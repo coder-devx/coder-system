@@ -11,7 +11,7 @@
 Updating a spec's acceptance-criteria checkboxes is what moves its
 progress bar here — keep the two in sync when you edit.
 
-Last updated: 2026-04-09 (spec 0007 shipped)
+Last updated: 2026-04-10 (spec 0008 shipped — all specs complete)
 
 ---
 
@@ -19,9 +19,8 @@ Last updated: 2026-04-09 (spec 0007 shipped)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 7 | 44 | 44 | `██████████` 100% |
-| Later — onboarding | 1 | 0 | 7 | `░░░░░░░░░░` 0% |
-| **Total** | **8** | **44** | **51** | `████████░░` **86%** |
+| Shipped | 8 | 51 | 51 | `██████████` 100% |
+| **Total** | **8** | **51** | **51** | `██████████` **100%** |
 
 ---
 
@@ -162,20 +161,19 @@ role for a project. Audit trail tied to the authorising human.
   `~/.config/coder/token.json`, and violet impersonation badges in
   `coder-admin` pipeline list + task detail views. 166 tests green.
 
----
+### [0008 — Onboard first two projects](./active/0008-onboard-first-two-projects.md)
 
-## Later — onboarding
+VibeTrade + Coder (dog-fooding) onboarded end-to-end, running in
+parallel with demonstrable isolation.
 
-> Prove the system works with two real projects running in parallel.
-
-### [0008 — Onboard first two projects](./wip/0008-onboard-first-two-projects.md)
-
-VibeTrade re-onboarded end-to-end + a second project running in
-parallel. Satisfies design `0004`'s promotion criteria.
-
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 7 AC
-- **Depends on:** 0001, 0002, 0004, 0005, 0006, 0007
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** VibeTrade registered as `vibetrade` (GitHub org
+  `ViberTrade`, knowledge repo `vibetrade-coder-system`). Coder
+  registered as `coder` (GitHub org `coder-devx`, knowledge repo
+  `coder-system`). Both run developer tasks to success against their
+  own repos with per-secret IAM isolation. Impersonation works on both.
+  Onboarding runbook written and followed.
 - **Promotes:** design [`0004`](../designs/wip/0001-generalize-coder-from-vibetrade.md) from `wip` to `active`
 
 ---
@@ -208,9 +206,7 @@ flowchart TB
   s7 --> s8
 
   classDef shipped fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
-  classDef later fill:#e3f2fd,stroke:#1565c0
-  class s1,s2,s3,s4,s5,s6,s7 shipped
-  class s8 later
+  class s1,s2,s3,s4,s5,s6,s7,s8 shipped
 ```
 
 ---

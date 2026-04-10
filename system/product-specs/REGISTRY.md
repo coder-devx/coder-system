@@ -13,12 +13,11 @@
 | [0005](./active/0005-per-role-service-accounts.md) | Per-role service accounts | ro | [0004](../designs/wip/0001-generalize-coder-from-vibetrade.md) |
 | [0006](./active/0006-pipeline-ui-in-admin.md) | Pipeline UI in admin | ro | [0004](../designs/wip/0001-generalize-coder-from-vibetrade.md) |
 | [0007](./active/0007-local-agent-impersonation.md) | Local agent impersonation | ro | [0004](../designs/wip/0001-generalize-coder-from-vibetrade.md) |
+| [0008](./active/0008-onboard-first-two-projects.md) | Onboard first two projects | ro | [0004](../designs/wip/0001-generalize-coder-from-vibetrade.md) |
 
 ## WIP
 
-| ID | Title | Owner | Served by designs |
-|---|---|---|---|
-| [0008](./wip/0008-onboard-first-two-projects.md) | Onboard first two projects | ro | [0004](../designs/wip/0001-generalize-coder-from-vibetrade.md) |
+_None — all specs shipped._
 
 ## Deprecated
 
