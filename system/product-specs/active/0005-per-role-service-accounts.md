@@ -5,7 +5,7 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-09
+updated: 2026-04-10
 deprecated_at:
 reason:
 served_by_designs: ["0004"]
@@ -55,9 +55,10 @@ and have every worker use them.
   keys on disk.
 - Per-project isolation: a developer role operating on project A cannot
   access project B's secrets, bucket, or GitHub org. This is enforced
-  by the broker's `project_id` token claim plus the existing
-  multi-tenant guard on every coder-core endpoint (ADR 0005), not by
-  having a separate SA per project.
+  by per-secret IAM bindings (the role SA has no project-level Secret
+  Manager grant; see `infra/terraform/secrets.tf`) plus the broker's
+  `project_id` token claim and the existing multi-tenant guard on every
+  coder-core endpoint (ADR 0005), not by having a separate SA per project.
 - The scope of each role's account is documented and testable.
 
 ## Non-goals
@@ -106,42 +107,66 @@ and have every worker use them.
 ## What shipped / what's deferred
 
 Per-role service accounts are live in `vibedevx` and the dispatcher
-resolves Anthropic keys through a broker-issued downscoped token
-instead of a single process-wide env var. The code + infra path is
-end-to-end, but the prod-data evidence for some of the ACs lands as
-follow-up work — captured here so future readers know exactly how
-much of "done" is "done right now" vs "wired and waiting for
-onboarding".
+resolves Anthropic keys through a broker-issued impersonated token
+instead of a single process-wide env var. All code, infra, and
+enforcement paths are end-to-end verified in prod.
+
+### Architecture revision (2026-04-10)
+
+The original spec designed AC3 enforcement around
+[Credential Access Boundaries](https://cloud.google.com/iam/docs/downscoping-short-lived-credentials)
+(CABs) on the runtime GCP access token — the idea was to downscope
+each developer token to `coder-{project}-{role}-*` at mint time.
+**This does not work:** CABs only support Cloud Storage; Secret
+Manager is not a supported resource. `sts.googleapis.com` rejects
+the exchange with `invalid_request`. Discovered during the first
+end-to-end prod validation (`337d5d1`).
+
+The replacement enforcement model is **per-secret IAM bindings**:
+
+- `roles.yaml` gives the developer SA **no project-level Secret
+  Manager grant** (`permissions: []`).
+- `secrets.tf` grants `secretAccessor` only on each specific
+  `coder-{project}-developer-*` secret resource, so a developer
+  token can only read secrets that have an explicit binding.
+- Cross-project reads fail at GCP IAM (403 `IAM_PERMISSION_DENIED`),
+  not in coder-core code.
+- The `project_id` JWT claim in the broker envelope is the second
+  layer, enforced by coder-core endpoints.
+
+This is strictly equivalent to the CAB design in terms of what a
+runtime token can read; it's simpler (no STS exchange) and actually
+works against Secret Manager.
 
 ### Fully landed
 
 - **AC1** — seven `coder-{role}@vibedevx.iam.gserviceaccount.com`
   service accounts created by `coder-core/infra/terraform` (one per
   role in `roles.yaml`), with state in `gs://vibedevx-coder-core-tfstate`.
+- **AC2** — `coder_core.workers.dispatcher` calls
+  `fetch_project_anthropic_key(broker=…, gcp_project_id=…, project_id=…)`
+  before building a `WorkerInput` and hard-fails the task on a
+  `SecretReadError` (no silent fallback to `settings.anthropic_api_key`).
+  **Prod-verified 2026-04-10:** created `brokertest` project, provisioned
+  `coder-brokertest-developer-anthropic-api-key` via Terraform +
+  `gcloud secrets versions add`, minted a broker token via
+  `POST /v1/projects/brokertest/impersonate/developer`, and successfully
+  read the secret value via the Secret Manager REST API using the
+  impersonated `coder-developer@` access token.
+- **AC3** — **Prod-verified 2026-04-10:** Using the same `brokertest`
+  developer token, attempted to read:
+  1. `coder-core-broker-signing-key` (unrelated existing secret) → 403
+  2. `coder-nonexistent-developer-*` (non-provisioned project) → 403
+  Both returned `IAM_PERMISSION_DENIED` at the Secret Manager API,
+  confirming the per-secret IAM model blocks cross-project reads at
+  the GCP layer.
 - **AC6** — `capability_matrix.py` regenerates `CAPABILITY_MATRIX.md`
   from `roles.yaml`. The `coder-core` CI workflow runs
   `capability_matrix.py --check` alongside `tofu fmt -check` /
   `tofu validate` on every PR, failing the build on drift.
 
-### Wired, waiting for prod evidence
+### Wired, waiting for downstream consumer
 
-- **AC2** — `coder_core.workers.dispatcher` calls
-  `fetch_project_anthropic_key(broker=…, gcp_project_id=…, project_id=…)`
-  before building a `WorkerInput` and hard-fails the task on a
-  `SecretReadError` (no silent fallback to `settings.anthropic_api_key`).
-  Unit tests cover both broker modes and the failure paths. The
-  `var.projects` list in Terraform is still empty, so the first
-  real exercise of the code path lands when we onboard a project
-  and push a `coder-{project}-developer-anthropic-api-key` version.
-- **AC3** — `GcpBroker._mint_downscoped_token` wraps the minted
-  impersonated credential in a
-  `google.auth.downscoped.Credentials` with a `CredentialAccessBoundary`
-  whose availability condition is
-  `resource.name.startsWith("projects/vibedevx/secrets/coder-{project_id}-{role}-")`.
-  A developer token for project A physically cannot read a secret
-  under project B — enforcement at GCP IAM, not in our code. The
-  cross-project integration test needs two real projects with real
-  secrets; deferred until the second onboarding lands.
 - **AC5** — `LocalBroker.verify` rejects expired tokens (covered in
   `test_broker.test_local_broker_verify_rejects_expired_token`). No
   downstream coder-core endpoint currently *consumes* a broker token,
@@ -160,14 +185,11 @@ onboarding".
 
 ### Follow-up tasks (tracked outside this spec)
 
-1. Onboard the first project and provision its
-   `coder-{id}-developer-anthropic-api-key` so AC2 gets a real
-   `secret_fetch_skipped_local_broker` → `secret_fetch_succeeded`
-   transition in logs.
-2. Once a second project exists, add an integration test that asserts
-   a developer-for-A broker token cannot read secret-for-B.
-3. When spec `0007` lands, add the broker-token verifier to the
+1. When spec `0007` lands, add the broker-token verifier to the
    impersonated endpoints and exercise the expiry→401 path.
+2. Once a second real project is onboarded, exercise the dispatcher's
+   secret-fetch path end-to-end in the live pipeline and observe the
+   `secret_fetch_succeeded` structured log.
 
 ## Metrics
 
