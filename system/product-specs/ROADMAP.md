@@ -7,7 +7,7 @@
 > **Phase** reflects sequencing, not a calendar. A spec moves forward
 > only when its prerequisites are `active`.
 
-**All current specs trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/wip/0001-generalize-coder-from-vibetrade.md).**
+**All current specs trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).**
 Updating a spec's acceptance-criteria checkboxes is what moves its
 progress bar here — keep the two in sync when you edit.
 
@@ -174,7 +174,7 @@ parallel with demonstrable isolation.
   `coder-system`). Both run developer tasks to success against their
   own repos with per-secret IAM isolation. Impersonation works on both.
   Onboarding runbook written and followed.
-- **Promotes:** design [`0004`](../designs/wip/0001-generalize-coder-from-vibetrade.md) from `wip` to `active`
+- **Promotes:** design [`0004`](../designs/active/0001-generalize-coder-from-vibetrade.md) from `wip` to `active`
 
 ---
 

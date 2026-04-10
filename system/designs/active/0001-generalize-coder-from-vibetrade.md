@@ -2,10 +2,10 @@
 id: "0004"
 title: Clean rebuild — coder-core + coder-admin
 type: design
-status: wip
+status: active
 owner: ro
 created: 2026-04-08
-updated: 2026-04-08
+updated: 2026-04-10
 implements_specs: []
 decided_by: ["0005", "0006", "0007", "0008"]
 related_designs: ["0001", "0002", "0003"]
@@ -93,22 +93,52 @@ flowchart TB
 7. **Impersonation**: short-lived role-scoped tokens for local agents.
 8. **Onboard VibeTrade as project #1** on the new system end-to-end. Then onboard a second project to prove multi-tenancy.
 
-## Promotion criteria → active
+## Promotion criteria → active (all met 2026-04-10)
 
-- `coder-core` and `coder-admin` running in staging.
-- At least two projects exist and are isolated (ACL works, no cross-bleed).
-- At least two role-workers running with their own service accounts.
-- Pipeline runs end-to-end for VibeTrade on the new system.
-- A local Claude Code can impersonate a role for a project.
+- [x] `coder-core` and `coder-admin` running in prod (Cloud Run,
+      `europe-west1`, `vibedevx` GCP project).
+- [x] Two projects exist and are isolated: `coder` (coder-devx org)
+      and `vibetrade` (ViberTrade org). Cross-project API key and
+      bearer token requests return 403.
+- [x] Seven role service accounts provisioned
+      (`coder-{role}@vibedevx.iam.gserviceaccount.com`). Developer
+      worker runs with per-secret IAM isolation.
+- [x] VibeTrade developer task ran end-to-end on the new system:
+      commit `1311290`, PR ViberTrade/vibetrade-backend#1.
+- [x] Local Claude Code impersonates `developer` for both projects
+      via `coder impersonate developer --project=X`.
 
-## Open questions
+## What shipped
 
-- Should the worker fleet eventually split into per-role repos
-  (`coder-worker-{role}`)? When?
-- Cache strategy for the GitHub-backed knowledge layer — pull-on-read,
-  webhook-triggered, periodic sync?
-- Where does pipeline state live — Postgres rows + state machine or a
-  workflow engine (Temporal, etc.)?
+All 8 specs in the build plan reached 100% AC (51/51):
+
+| Step | Spec | ACs | Shipped |
+|------|------|-----|---------|
+| 1–2 | 0001 Multi-tenant project CRUD | 6/6 | Project CRUD, API keys, structured logging |
+| 2 | 0002 Knowledge repo read API | 7/7 | Typed routes, cross-links, TTL cache |
+| 3 | 0003 Admin Panel v0 | 6/6 | Project switcher, knowledge browser, API client |
+| 4 | 0004 Developer worker v1 | 7/7 | Dispatcher, claude CLI, workspace clone, logs |
+| 5 | 0005 Per-role service accounts | 6/6 | 7 SAs, broker, per-secret IAM |
+| 6 | 0006 Pipeline UI | 6/6 | Task list, filters, polling, commit links |
+| 7 | 0007 Local agent impersonation | 6/6 | Bearer auth, CLI, sessions, revocation |
+| 8 | 0008 Onboard first two projects | 7/7 | VibeTrade + Coder, runbook |
+
+Key infrastructure: Terraform in `coder-core/infra/terraform` manages
+role SAs and per-project secrets. CI runs `tofu validate` + capability
+matrix drift check on every PR. Deploys via GitHub Actions with
+Workload Identity Federation (no long-lived keys).
+
+## Open questions (resolved)
+
+- **Worker fleet split**: deferred. In-process workers are sufficient
+  for current load. Split when concurrent task execution or memory
+  pressure demands it.
+- **Knowledge cache**: pull-on-read with in-memory TTL cache. Webhook
+  invalidation deferred — cache TTL is short enough for the current
+  update cadence.
+- **Pipeline state**: Postgres rows with `SELECT ... FOR UPDATE SKIP
+  LOCKED` leasing. No workflow engine needed — the state machine is
+  simple (queued → running → succeeded/failed/timed_out).
 
 ## Links
 

@@ -31,10 +31,10 @@ designs:
 
   - id: "0004"
     title: Clean rebuild — coder-core + coder-admin
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0001-generalize-coder-from-vibetrade.md
+    folder: active
+    file: active/0001-generalize-coder-from-vibetrade.md
     affects_services: [coder-core, coder-admin]
     decided_by: ["0005", "0006", "0007", "0008"]
 
