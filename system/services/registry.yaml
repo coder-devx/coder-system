@@ -18,18 +18,18 @@ services:
     tech: [python, fastapi]
     runtime: cloud-run
     region: europe-west1
-    url: https://coder-core-8534948335.europe-west1.run.app
+    url: https://coder-core-ql732k45va-ew.a.run.app
     depends_on:
       services: []
       integrations: [github, gcp, slack, notion, anthropic]
       data_stores: [postgres]
     file: coder-core.md
     notes: >
-      v0.0.1 walking skeleton deployed 2026-04-08. GET /v1/health only.
-      Multi-tenant orchestrator — owns projects, dispatches work to
-      role-typed workers, serves knowledge repo contents. See
-      designs/wip/0001-generalize-coder-from-vibetrade.md for the
-      build plan.
+      v0.0.3 — full multi-tenant orchestrator. All 8 design-0004 specs
+      shipped (51/51 ACs). Projects, knowledge API, developer worker,
+      per-role service accounts, pipeline UI, impersonation, CLI with
+      onboard/doctor commands. 181 tests. 2 projects live (coder,
+      vibetrade). DB at migration 0008.
 
   - id: coder-admin
     name: Coder Admin Panel
@@ -46,7 +46,6 @@ services:
       data_stores: []
     file: coder-admin.md
     notes: >
-      Walking skeleton deployed 2026-04-09. Single page calls
-      coder-core /v1/health to prove cross-origin reachability and the
-      CD pipeline. Project switcher, worker grid, knowledge browser
-      come next.
+      React/Vite SPA deployed 2026-04-09. Project switcher, knowledge
+      browser, pipeline view with task list/detail/logs, impersonation
+      badges. Auth via per-project API key in localStorage.

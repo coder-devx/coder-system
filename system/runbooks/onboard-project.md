@@ -35,7 +35,26 @@ wires up the knowledge repo, and verifies the full loop.
 - An Anthropic API key for the project (can share the org-wide key).
 - The Coder DevX GitHub App installed on the target GitHub org.
 
-## Steps
+## Quick path (CLI)
+
+As of `coder-core` `7c07ba6`, the CLI can automate steps 1–5:
+
+```sh
+coder project onboard <slug> --github-org=<Org>
+```
+
+After onboarding, verify the full stack:
+
+```sh
+coder project doctor <slug>
+```
+
+The CLI handles Terraform edits, Secret Manager checks, project
+registration, knowledge repo creation from template, and GitHub App
+verification. Use the manual steps below if you need finer control or
+the CLI reports errors to fix.
+
+## Steps (manual)
 
 ### 1. Add the project to Terraform
 
@@ -193,6 +212,7 @@ git push
 - A developer task runs to `succeeded` with a commit SHA.
 - The task appears in the admin pipeline view.
 - `coder impersonate developer --project={project}` mints a token.
+- `coder project doctor {project}` passes all checks.
 
 ## If something goes wrong
 

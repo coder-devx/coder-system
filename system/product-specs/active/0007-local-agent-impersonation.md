@@ -126,7 +126,10 @@ Four stages, all landed in coder-core `7d1a14a` and coder-admin `0a31bc8`:
    `~/.config/coder/token.json` (0600 permissions) with `expires_at`
    so agents can detect stale tokens. `coder token` prints the cached
    JWT; `coder status` shows role, project, expiry, and GCP token
-   presence. Entry point registered in pyproject.toml.
+   presence. Entry point registered in pyproject.toml. Post-ship DX
+   addition (`7c07ba6`): `coder project onboard <slug>` automates
+   runbook steps 1–5, `coder project doctor <slug>` runs an 8-point
+   health check against a live project.
 
 4. **Pipeline view actor display** — `coder-admin` Task interface
    extended with `actor`, `actor_type`, `actor_token_id`. Pipeline list
@@ -135,7 +138,8 @@ Four stages, all landed in coder-core `7d1a14a` and coder-admin `0a31bc8`:
    row with "(impersonation)" label.
 
 166 tests pass in coder-core (30 new tests covering bearer auth,
-sessions, CLI, and actor tracking). CI green.
+sessions, CLI, and actor tracking). CI green. Post-ship DX additions
+bring the count to 181 tests.
 
 ## Open questions (resolved)
 
@@ -150,6 +154,6 @@ sessions, CLI, and actor tracking). CI green.
 
 ## Links
 
-- Designs: [`0004`](../../designs/wip/0001-generalize-coder-from-vibetrade.md) (build plan step 7), [`0002`](../../designs/active/0002-worker-roles-and-impersonation.md)
+- Designs: [`0004`](../../designs/active/0001-generalize-coder-from-vibetrade.md) (build plan step 7), [`0002`](../../designs/active/0002-worker-roles-and-impersonation.md)
 - ADRs: [`0006`](../../adrs/0006-per-role-service-accounts.md)
 - Related specs: [`0001`](./0001-multi-tenant-project-crud.md), [`0005`](./0005-per-role-service-accounts.md), [`0006`](./0006-pipeline-ui-in-admin.md)

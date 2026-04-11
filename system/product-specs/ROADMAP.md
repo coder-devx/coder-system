@@ -11,7 +11,7 @@
 Updating a spec's acceptance-criteria checkboxes is what moves its
 progress bar here — keep the two in sync when you edit.
 
-Last updated: 2026-04-10 (spec 0008 shipped — all specs complete)
+Last updated: 2026-04-11 (post-rebuild DX: onboard/doctor CLI + error hints)
 
 ---
 
@@ -160,6 +160,8 @@ role for a project. Audit trail tied to the authorising human.
   `impersonate` / `token` / `status` commands writing to
   `~/.config/coder/token.json`, and violet impersonation badges in
   `coder-admin` pipeline list + task detail views. 166 tests green.
+  Post-ship DX (`7c07ba6`): `coder project onboard` / `doctor` CLI
+  commands + actionable `hint` field on knowledge API errors. 181 tests.
 
 ### [0008 — Onboard first two projects](./active/0008-onboard-first-two-projects.md)
 

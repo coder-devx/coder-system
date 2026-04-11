@@ -9,7 +9,7 @@ repos: [coder-core]
 tech: [python, fastapi]
 runtime: cloud-run
 region: europe-west1
-url: https://coder-core-8534948335.europe-west1.run.app
+url: https://coder-core-ql732k45va-ew.a.run.app
 depends_on:
   services: []
   integrations: [github, gcp, cloud-sql, slack, notion, anthropic]
@@ -52,16 +52,24 @@ acts across projects without an explicit fan-out.
 - **Impersonation**: mint short-lived, role-scoped tokens for local agents.
 - **Admin Panel backend**: status, override, debug surfaces.
 
-## Current state (as of commit #4 · 2026-04-08)
+## Current state (as of 2026-04-11)
 
-- **v0.0.3** — deployed to Cloud Run. Health + projects CRUD + authenticated **knowledge API**.
-- URL: <https://coder-core-8534948335.europe-west1.run.app>
-- Live revision: `coder-core-00005-5xc`
-- Runtime SA: `coder-core-sa@vibedevx.iam.gserviceaccount.com` — roles: `logging.logWriter`, `monitoring.metricWriter`, `cloudsql.client`, `cloudsql.instanceUser`, `secretmanager.secretAccessor` (on `GITHUB_TOKEN` only).
-- Ingress: `allow-unauthenticated`. `/v1/health`, `/v1/projects` list/get/create are public. **`/v1/projects/{id}/knowledge/{path}` requires the per-project `X-Api-Key` header.**
-- DB: `coder-core-db` Cloud SQL Postgres 17 (IAM auth only). Migration `0002` adds `api_key_hash` column. See [`../integrations/cloud-sql.md`](../integrations/cloud-sql.md).
-- Secrets mounted: `GITHUB_TOKEN` from Secret Manager, used by the knowledge API to read GitHub.
-- Seeded projects: `coder` — API key plaintext is in the user's 1Password (not recoverable from the hash).
+- **v0.0.3** — deployed to Cloud Run. Full multi-tenant orchestrator with
+  all 8 design-0004 specs shipped (51/51 ACs).
+- URL: <https://coder-core-ql732k45va-ew.a.run.app>
+- Runtime SA: `coder-core-sa@vibedevx.iam.gserviceaccount.com`
+- Ingress: `allow-unauthenticated`. Public endpoints: `/v1/health`,
+  `/v1/projects` list/get/create. Authenticated (per-project `X-Api-Key`
+  or `Authorization: Bearer`): knowledge API, tasks, impersonation,
+  sessions.
+- DB: `coder-core-db` Cloud SQL Postgres 17 (IAM auth only). Migration
+  `0008` (head). See [`../integrations/cloud-sql.md`](../integrations/cloud-sql.md).
+- Auth: GitHub App (Coder DevX, app ID 3325027) for repo access. Per-project
+  Anthropic API keys in Secret Manager for worker dispatch.
+- Projects: `coder` (coder-devx org), `vibetrade` (ViberTrade org).
+- CLI: `coder impersonate`, `coder token`, `coder status`,
+  `coder project onboard`, `coder project doctor`.
+- Tests: 181 passing.
 
 ## Walking-skeleton milestone — reached
 
@@ -74,25 +82,33 @@ curl -H "X-Api-Key: ck_..." \
 
 That's the end-to-end goal from the start of implementation.
 
-## Planned API surface
+## API surface
 
-| Method | Path | Commit | Auth | Purpose |
-|---|---|---|---|---|
-| GET  | `/v1/health` | **#1** ✓ | none | Liveness |
-| GET  | `/v1/projects` | **#3** ✓ | none | List projects user has access to |
-| POST | `/v1/projects` | **#3** ✓ | none* | Create a project and mint its API key (returned once) |
-| GET  | `/v1/projects/{id}` | **#3** ✓ | none | Project detail |
-| GET  | `/v1/projects/{id}/knowledge/{path}` | **#4** ✓ | `X-Api-Key` | Read project knowledge repo |
-| POST | `/v1/projects/{id}/rotate-api-key` | #4+ | `X-Api-Key` | Rotate the per-project static key |
-| GET  | `/v1/projects/{id}/workers` | post-#5 | `X-Api-Key` | List workers in this project's team |
-| POST | `/v1/projects/{id}/tasks` | post-#5 | `X-Api-Key` | Submit a task to the pipeline |
-| POST | `/v1/projects/{id}/impersonate` | post-#5 | `X-Api-Key` | Mint a token for a local agent acting as a role |
-| POST | `/v1/projects/{id}/chat` | post-#5 | `X-Api-Key` | SSE — interactive agent for the project |
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET  | `/v1/health` | none | Liveness |
+| GET  | `/v1/projects` | none | List non-archived projects |
+| POST | `/v1/projects` | none* | Create project, mint API key (returned once) |
+| GET  | `/v1/projects/{id}` | none | Project detail |
+| POST | `/v1/projects/{id}/archive` | `X-Api-Key` | Soft-archive a project |
+| POST | `/v1/projects/{id}/rotate-api-key` | `X-Api-Key` | Rotate API key (old key invalidated immediately) |
+| GET  | `/v1/projects/{id}/knowledge/{type}` | `X-Api-Key` / Bearer | List registry entries for an artifact type |
+| GET  | `/v1/projects/{id}/knowledge/{type}/{artifact_id}` | `X-Api-Key` / Bearer | Fetch artifact with frontmatter + cross-links |
+| GET  | `/v1/projects/{id}/knowledge/_files/{path}` | `X-Api-Key` / Bearer | Raw file passthrough from knowledge repo |
+| GET  | `/v1/projects/{id}/knowledge/_metrics` | `X-Api-Key` | Cache hit/miss counters |
+| POST | `/v1/projects/{id}/tasks` | `X-Api-Key` / Bearer | Enqueue a task |
+| GET  | `/v1/projects/{id}/tasks` | `X-Api-Key` / Bearer | List tasks (filterable by `?role=` `?status=`) |
+| GET  | `/v1/projects/{id}/tasks/{task_id}` | `X-Api-Key` / Bearer | Task detail |
+| GET  | `/v1/projects/{id}/tasks/{task_id}/logs` | `X-Api-Key` / Bearer | Task logs |
+| POST | `/v1/projects/{id}/impersonate/{role}` | `X-Api-Key` | Mint role-scoped bearer token |
+| GET  | `/v1/projects/{id}/sessions` | `X-Api-Key` | List impersonation sessions |
+| POST | `/v1/projects/{id}/sessions/{token_id}/revoke` | `X-Api-Key` | Revoke a session |
 
-\* `POST /v1/projects` is unauthenticated in the walking skeleton. It will be gated by a Coder-admin token once multi-user lands.
+\* `POST /v1/projects` is unauthenticated while single-user.
 
-Auth model: per-project static API key (`X-Api-Key` header, SHA-256 hash stored in the `projects` table). Keys are returned in plaintext on `POST /v1/projects` exactly once. Losing a key means rotating it. Google OAuth + short-lived impersonation tokens land post-#5.
-See [ADR 0005](../adrs/0005-multi-tenant-coder-core.md).
+Auth model: per-project API key (`X-Api-Key` header, SHA-256 hash in
+the `projects` table) or short-lived bearer JWT issued via the
+impersonate endpoint. See [ADR 0005](../adrs/0005-multi-tenant-coder-core.md).
 
 ## Data model
 
@@ -126,11 +142,13 @@ flowchart LR
   - [`cloud-sql-bootstrap.md`](../runbooks/cloud-sql-bootstrap.md) — how `coder-core-db` was stood up.
   - [`run-migration-coder-core.md`](../runbooks/run-migration-coder-core.md) — how to apply an alembic migration against the prod DB.
 
-## Open questions
+## Open questions (resolved)
 
-- Where does pipeline state live during a run — Postgres rows + state
-  machine, or a real workflow engine?
-- How are workers actually launched? Long-running per-role services that
-  pull tasks, or short-lived job runners spawned by Core?
-- Cache strategy for the GitHub-backed knowledge layer — pull-on-read,
-  webhook-triggered refresh, or a periodic sync?
+- **Pipeline state:** Postgres rows with a state machine
+  (`queued → running → succeeded / failed / timed_out`). No external
+  workflow engine — `asyncio.create_task` dispatches workers in-process.
+- **Worker launch:** in-process modules inside coder-core. The dispatcher
+  leases tasks with `SELECT ... FOR UPDATE SKIP LOCKED` and shells out
+  to `claude`. Splitting into separate repos deferred until scale demands.
+- **Knowledge cache:** pull-on-read with a 60-second in-memory TTL cache.
+  `_metrics` endpoint exposes hit/miss counters.

@@ -153,5 +153,5 @@ commit_sha, actor columns, impersonation_sessions).
 
 ## Links
 
-- Designs: [`0004`](../../designs/wip/0001-generalize-coder-from-vibetrade.md) (build plan step 8 + promotion criteria)
+- Designs: [`0004`](../../designs/active/0001-generalize-coder-from-vibetrade.md) (build plan step 8 + promotion criteria)
 - Related specs: [`0001`](./0001-multi-tenant-project-crud.md), [`0002`](./0002-knowledge-repo-read-api.md), [`0004`](./0004-developer-worker-v1.md), [`0005`](./0005-per-role-service-accounts.md), [`0006`](./0006-pipeline-ui-in-admin.md), [`0007`](./0007-local-agent-impersonation.md)
