@@ -65,3 +65,89 @@ specs:
     folder: active
     file: active/0008-onboard-first-two-projects.md
     served_by_designs: ["0004"]
+
+  # ── Now — close the dev loop ──────────────────────────────────────
+
+  - id: "0009"
+    title: Reviewer worker v1
+    status: active
+    owner: ro
+    folder: active
+    file: active/0009-reviewer-worker-v1.md
+    served_by_designs: []
+
+  - id: "0010"
+    title: Task orchestration v1
+    status: active
+    owner: ro
+    folder: active
+    file: active/0010-task-orchestration-v1.md
+    served_by_designs: []
+
+  - id: "0011"
+    title: Continuous deployment
+    status: active
+    owner: ro
+    folder: active
+    file: active/0011-continuous-deployment.md
+    served_by_designs: []
+
+  - id: "0012"
+    title: Admin panel auth and mutations
+    status: active
+    owner: ro
+    folder: active
+    file: active/0012-admin-auth-and-mutations.md
+    served_by_designs: []
+
+  # ── Next — autonomous planning ────────────────────────────────────
+
+  - id: "0013"
+    title: Team Manager worker v1
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0013-team-manager-worker-v1.md
+    served_by_designs: []
+
+  - id: "0014"
+    title: Knowledge write API
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0014-knowledge-write-api.md
+    served_by_designs: []
+
+  - id: "0015"
+    title: Worker-to-worker communication
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0015-worker-communication.md
+    served_by_designs: []
+
+  # ── Later — full self-hosting ─────────────────────────────────────
+
+  - id: "0016"
+    title: PM worker v1 (spec and acceptance)
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0016-pm-worker-v1.md
+    served_by_designs: []
+
+  - id: "0017"
+    title: Architect worker v1
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0017-architect-worker-v1.md
+    served_by_designs: []
+
+  - id: "0018"
+    title: Observability and cost tracking
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0018-observability-and-cost-tracking.md
+    served_by_designs: []

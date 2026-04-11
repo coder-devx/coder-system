@@ -7,11 +7,13 @@
 > **Phase** reflects sequencing, not a calendar. A spec moves forward
 > only when its prerequisites are `active`.
 
-**All current specs trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).**
-Updating a spec's acceptance-criteria checkboxes is what moves its
-progress bar here — keep the two in sync when you edit.
+**North star:** Coder manages its own development end-to-end. The human
+is in an approval/override role, not a task-authoring role.
 
-Last updated: 2026-04-11 (post-rebuild DX: onboard/doctor CLI + error hints)
+**Shipped specs** (0001–0012) all trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).
+**Planned specs** (0013–0018) extend the system toward full self-hosting.
+
+Last updated: 2026-04-11 (6–12 month roadmap: self-hosting vision)
 
 ---
 
@@ -19,8 +21,94 @@ Last updated: 2026-04-11 (post-rebuild DX: onboard/doctor CLI + error hints)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 8 | 51 | 51 | `██████████` 100% |
-| **Total** | **8** | **51** | **51** | `██████████` **100%** |
+| Shipped | 12 | 78 | 78 | `██████████` 100% |
+| Next — autonomous planning | 3 | 0 | 19 | `░░░░░░░░░░` 0% |
+| Later — full self-hosting | 3 | 0 | 21 | `░░░░░░░░░░` 0% |
+| **Total** | **18** | **78** | **118** | `██████░░░░` **66%** |
+
+---
+
+## Next — autonomous planning
+
+> The dev loop is closed. Coder needs to plan its own work. These specs
+> give the Team Manager a worker, give workers the ability to update
+> knowledge, and wire structured communication between roles.
+
+### [0013 — Team Manager worker v1](./wip/0013-team-manager-worker-v1.md)
+
+Given a spec and its designs, break it into sequenced developer tasks
+with clear prompts, dependency ordering, and complexity estimates.
+Plans are reviewable before execution.
+
+- **Status:** wip
+- **Progress:** `░░░░░░░░░░` 0 / 7 AC
+- **Depends on:** [`0010`](./active/0010-task-orchestration-v1.md) ✅, [`0012`](./active/0012-admin-auth-and-mutations.md) ✅
+- **Unlocks:** [`0016`](./wip/0016-pm-worker-v1.md) (PM needs TM to execute specs it drafts)
+
+### [0014 — Knowledge write API](./wip/0014-knowledge-write-api.md)
+
+Workers can create and update knowledge artifacts (specs, designs, ADRs)
+via the API. Changes committed to the Git-backed repo with frontmatter
+validation and audit trail.
+
+- **Status:** wip
+- **Progress:** `░░░░░░░░░░` 0 / 6 AC
+- **Depends on:** [`0002`](./active/0002-knowledge-repo-read-api.md)
+- **Unlocks:** [`0016`](./wip/0016-pm-worker-v1.md), [`0017`](./wip/0017-architect-worker-v1.md) (both need to write knowledge)
+
+### [0015 — Worker-to-worker communication](./wip/0015-worker-communication.md)
+
+Structured message passing between workers on a task: review feedback,
+clarification requests, acceptance decisions, human overrides. Full
+conversation visible in admin panel.
+
+- **Status:** wip
+- **Progress:** `░░░░░░░░░░` 0 / 6 AC
+- **Depends on:** [`0010`](./active/0010-task-orchestration-v1.md) ✅
+- **Unlocks:** [`0016`](./wip/0016-pm-worker-v1.md) (PM communicates acceptance decisions)
+
+---
+
+## Later — full self-hosting
+
+> The final three specs complete the product lifecycle: PM drafts specs
+> and runs acceptance, Architect designs solutions, and the system
+> monitors its own health and costs. When these ship, Coder manages
+> Coder.
+
+### [0016 — PM worker v1 (spec and acceptance)](./wip/0016-pm-worker-v1.md)
+
+PM drafts product specs from problem statements and runs acceptance
+testing on delivered work. Specs require human approval before entering
+the pipeline. Acceptance produces per-AC verdicts with evidence.
+
+- **Status:** wip
+- **Progress:** `░░░░░░░░░░` 0 / 7 AC
+- **Depends on:** [`0013`](./wip/0013-team-manager-worker-v1.md), [`0014`](./wip/0014-knowledge-write-api.md), [`0015`](./wip/0015-worker-communication.md)
+- **Unlocks:** self-hosting milestone (PM + TM + Dev + Reviewer = full lifecycle)
+
+### [0017 — Architect worker v1](./wip/0017-architect-worker-v1.md)
+
+Given an approved spec, produce a design document with components,
+data flow, Mermaid diagrams, and rollout plan. Draft ADRs for
+non-obvious decisions. Maintain architectural consistency with
+existing decisions.
+
+- **Status:** wip
+- **Progress:** `░░░░░░░░░░` 0 / 7 AC
+- **Depends on:** [`0014`](./wip/0014-knowledge-write-api.md)
+- **Unlocks:** higher-quality TM planning (designs give better task context)
+
+### [0018 — Observability and cost tracking](./wip/0018-observability-and-cost-tracking.md)
+
+Per-project cost attribution (Anthropic tokens, compute, API calls).
+Pipeline health metrics (success rate, stage durations). Threshold
+alerts via Slack. Dashboard in admin panel.
+
+- **Status:** wip
+- **Progress:** `░░░░░░░░░░` 0 / 7 AC
+- **Depends on:** [`0010`](./active/0010-task-orchestration-v1.md) ✅, [`0011`](./active/0011-continuous-deployment.md) ✅
+- **Unlocks:** Consultant worker (needs metrics to observe)
 
 ---
 
@@ -105,20 +193,7 @@ of a single process-wide env var.
   and `capability_matrix.py` read it so the IAM surface and the
   human-readable `CAPABILITY_MATRIX.md` cannot drift. CI runs
   `capability_matrix.py --check` + `tofu fmt -check` + `tofu validate`
-  on every PR (AC6). In `coder-core`, a new `BrokerClient` protocol
-  with `LocalBroker` (HS256 JWT envelope for dev/tests) and
-  `GcpBroker` (envelope + downscoped GCP access token via
-  `iamcredentials.generateAccessToken` and a Credential Access
-  Boundary restricted to `coder-{project_id}-{role}-` Secret Manager
-  resources). New `POST /v1/projects/{id}/impersonate/{role}`
-  endpoint authed with `X-Api-Key`, role-allowlisted against the
-  dispatcher's `_RUNNERS`, project-claim stamped by the broker so
-  ADR-0005 multi-tenant invariants hold. Dispatcher calls
-  `fetch_project_anthropic_key` before building `WorkerInput` and
-  hard-fails the task on a `SecretReadError` (no silent fallback to
-  the process-wide key). See the spec's "What shipped / what's
-  deferred" section for the integration-test and onboarding items
-  tracked as follow-up work.
+  on every PR (AC6).
 
 ### [0006 — Pipeline UI in admin](./active/0006-pipeline-ui-in-admin.md)
 
@@ -128,23 +203,9 @@ filters. Still read-only.
 - **Status:** active
 - **Progress:** `██████████` 6 / 6 AC ✅
 - **What shipped:** `coder-core` `GET /v1/projects/{id}/tasks` now
-  accepts `?role=` and `?status=` filters (status validated against
-  `TaskStatus`, 422 + `invalid_status` on garbage). The developer
-  worker captures the workspace HEAD via `git rev-parse` after each
-  successful run and the dispatcher persists it as `commit_sha` on
-  the task row (new `0006_tasks_commit_sha` migration). `coder-admin`
+  accepts `?role=` and `?status=` filters. `coder-admin`
   ships a typed `listTasks` / `getTask` / `getTaskLogs` client and a
-  shared `StatusChip` component, plus two new routes:
-  `/projects/:id/pipeline` (filtered task list with role + status
-  query-param controls and 1s polling) and
-  `/projects/:id/pipeline/:taskId` (per-task detail with status,
-  prompt, error, result, captured logs, and a clickable GitHub commit
-  link built from `project.github_org` + `task.repo` + `task.commit_sha`).
-  Both pages re-use the per-project `X-Api-Key` flow, clear the stored
-  key on 401, and skip polling on the needs-key screen. Vitest covers
-  the list happy path, role+status URL round-trip, polling cadence,
-  the failed-error inline render, the commit-link target, and the
-  needs-key states.
+  shared `StatusChip` component, plus pipeline list and detail routes.
 
 ### [0007 — Local agent impersonation](./active/0007-local-agent-impersonation.md)
 
@@ -154,14 +215,9 @@ role for a project. Audit trail tied to the authorising human.
 - **Status:** active
 - **Progress:** `██████████` 6 / 6 AC ✅
 - **What shipped:** dual auth (`X-Api-Key` + `Authorization: Bearer`)
-  in `require_project_auth`, actor tracking on tasks (`actor`,
-  `actor_type`, `actor_token_id` columns), `impersonation_sessions`
-  table with immediate revocation (no cache), `coder` CLI with
-  `impersonate` / `token` / `status` commands writing to
-  `~/.config/coder/token.json`, and violet impersonation badges in
-  `coder-admin` pipeline list + task detail views. 166 tests green.
-  Post-ship DX (`7c07ba6`): `coder project onboard` / `doctor` CLI
-  commands + actionable `hint` field on knowledge API errors. 181 tests.
+  in `require_project_auth`, actor tracking on tasks, `coder` CLI with
+  `impersonate` / `token` / `status` commands, violet impersonation
+  badges in `coder-admin`. 181 tests.
 
 ### [0008 — Onboard first two projects](./active/0008-onboard-first-two-projects.md)
 
@@ -170,13 +226,65 @@ parallel with demonstrable isolation.
 
 - **Status:** active
 - **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** VibeTrade registered as `vibetrade` (GitHub org
-  `ViberTrade`, knowledge repo `vibetrade-coder-system`). Coder
-  registered as `coder` (GitHub org `coder-devx`, knowledge repo
-  `coder-system`). Both run developer tasks to success against their
-  own repos with per-secret IAM isolation. Impersonation works on both.
-  Onboarding runbook written and followed.
+- **What shipped:** VibeTrade (`vibetrade`) and Coder (`coder`) both
+  running developer tasks with per-secret IAM isolation.
 - **Promotes:** design [`0004`](../designs/active/0001-generalize-coder-from-vibetrade.md) from `wip` to `active`
+
+### [0009 — Reviewer worker v1](./active/0009-reviewer-worker-v1.md)
+
+Automated code review on PRs. Fetches the diff, loads project knowledge
+(conventions, ADRs, designs), posts structured review comments on
+GitHub, submits approve/request-changes.
+
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** `workers/reviewer.py` following the developer
+  subprocess pattern. System prompt instructs claude to `gh pr diff`,
+  load conventions, analyze, and `gh pr review`. New `review_verdict`
+  and `review_url` columns on tasks (migration 0009). Live review on
+  [coder-devx/coder-core#2](https://github.com/coder-devx/coder-core/pull/2)
+  caught a real convention violation. 12 new tests.
+
+### [0010 — Task orchestration v1](./active/0010-task-orchestration-v1.md)
+
+End-to-end pipeline: enrich → execute → test → review → accept, with
+fix loops on failure. State machine in Postgres. Human override at
+any stage.
+
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** Migration 0010 adds `stage`, `fix_attempts`, and
+  `fix_context` columns plus `ix_tasks_stage` index. `TaskStage` enum
+  covers the full lifecycle. `workers/orchestrator.py` implements the
+  `orchestrate_task` loop with stage transitions, fix loops (max 3),
+  and structured logging. Dispatcher prepends `fix_context` to prompt
+  for fix attempts. API: `stage=queued` on create, `?stage=` filter on
+  list, `POST /{task_id}/override` (pause/resume/retry/skip_to_stage/
+  reject). 19 new tests, 214 total passing.
+
+### [0011 — Continuous deployment](./active/0011-continuous-deployment.md)
+
+Push-to-main deploys for `coder-core` and `coder-admin` with canary
+pattern, automated migrations, and Slack notifications.
+
+- **Status:** active
+- **Progress:** `██████████` 6 / 6 AC ✅
+- **What shipped:** Canary deploy pattern for both repos: deploy with
+  `--no-traffic --tag=canary`, health-check the canary URL, shift
+  traffic only on success. `coder-core-migrate` Cloud Run Job runs
+  Alembic migrations before traffic shift. Slack webhook notifications
+  on success/failure (graceful degradation if not configured). Runbooks
+  updated for both services.
+
+### [0012 — Admin panel auth and mutations](./active/0012-admin-auth-and-mutations.md)
+
+Google OAuth for the admin panel. Write operations: create tasks,
+override pipeline decisions, approve merges, edit knowledge artifacts.
+Real-time pipeline updates via SSE.
+
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** Google OAuth login with email allowlist, admin JWT (HS256, `coder-core/admin` audience) with cross-project access, `admin_sessions` audit table, SSE event bus for real-time pipeline updates, task merge endpoint (squash merge via GitHub API), knowledge checkbox editing via GitHub Contents API. Frontend: login page, auth guard, Bearer auth on all API calls, create task form, override buttons, approve-merge action, SSE hook, interactive checkboxes. 227 backend tests, 19 frontend tests.
 
 ---
 
@@ -184,15 +292,34 @@ parallel with demonstrable isolation.
 
 ```mermaid
 flowchart TB
-  s1["0001 Project CRUD"]
-  s2["0002 Knowledge API"]
-  s3["0003 Admin v0"]
-  s4["0004 Developer worker v1"]
-  s5["0005 Role service accounts"]
-  s6["0006 Pipeline UI"]
-  s7["0007 Local impersonation"]
-  s8["0008 Onboard 2 projects"]
+  subgraph shipped [Shipped]
+    s1["0001 Project CRUD"]
+    s2["0002 Knowledge API"]
+    s3["0003 Admin v0"]
+    s4["0004 Developer worker"]
+    s5["0005 Role SAs"]
+    s6["0006 Pipeline UI"]
+    s7["0007 Impersonation"]
+    s8["0008 Onboard 2 projects"]
+    s9["0009 Reviewer worker"]
+    s10["0010 Task orchestration"]
+    s11["0011 Continuous deployment"]
+    s12["0012 Admin auth + mutations"]
+  end
 
+  subgraph next ["Next — autonomous planning"]
+    s13["0013 Team Manager worker"]
+    s14["0014 Knowledge write API"]
+    s15["0015 Worker communication"]
+  end
+
+  subgraph later ["Later — full self-hosting"]
+    s16["0016 PM worker"]
+    s17["0017 Architect worker"]
+    s18["0018 Observability"]
+  end
+
+  %% Shipped internal deps
   s1 --> s2
   s1 --> s3
   s1 --> s4
@@ -207,9 +334,57 @@ flowchart TB
   s6 --> s8
   s7 --> s8
 
+  %% Now deps
+  s4 --> s9
+  s4 --> s10
+  s9 --> s10
+  s8 --> s11
+  s3 --> s12
+  s10 --> s12
+
+  %% Next deps
+  s10 --> s13
+  s12 --> s13
+  s2 --> s14
+  s10 --> s15
+
+  %% Later deps
+  s13 --> s16
+  s14 --> s16
+  s15 --> s16
+  s14 --> s17
+  s10 --> s18
+  s11 --> s18
+
   classDef shipped fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
-  class s1,s2,s3,s4,s5,s6,s7,s8 shipped
+  classDef next fill:#bbdefb,stroke:#1565c0,stroke-width:2px
+  classDef later fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
+
+  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12 shipped
+  class s13,s14,s15 next
+  class s16,s17,s18 later
 ```
+
+---
+
+## Self-hosting milestone
+
+When specs 0009–0018 are all `active`, the following loop runs without
+human authoring:
+
+1. **PM** drafts a spec from a problem statement → human approves.
+2. **Architect** produces a design → human approves.
+3. **Team Manager** breaks the design into tasks → human reviews plan.
+4. **Developer** executes each task (code + tests + PR).
+5. **Reviewer** reviews each PR (approve or request changes).
+6. **Orchestrator** manages the pipeline (fix loops, retries, escalation).
+7. **CD** ships merged code to production.
+8. **PM** runs acceptance against the ACs → spec moves to `active`.
+9. **Observability** tracks cost, health, and trends throughout.
+
+The human's role becomes: approve specs, approve designs, review task
+plans, and intervene when the system gets stuck. Everything else is
+autonomous.
 
 ---
 
@@ -222,6 +397,6 @@ flowchart TB
 4. If a spec ships: move the file from `wip/` to `active/`, update
    `status:` in its frontmatter, update `folder:` and `status:` in
    `registry.yaml`, regenerate `REGISTRY.md`, and move its section
-   here under a new "Shipped" heading.
+   here under "Shipped".
 5. If a spec is dropped: move to `deprecated/` with `deprecated_at`
    and `reason` per `AGENTS.md` rule 5.
