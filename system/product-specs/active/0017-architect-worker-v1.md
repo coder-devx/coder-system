@@ -2,20 +2,20 @@
 id: "0017"
 title: Architect worker v1
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-11
+updated: 2026-04-12
 deprecated_at:
 reason:
-served_by_designs: []
+served_by_designs: ["0010"]
 related_specs: ["0014"]
 ---
 
 # Architect worker v1
 
 **Phase:** Later — full self-hosting
-**Progress:** 0 / 7 acceptance criteria
+**Progress:** 7 / 7 acceptance criteria
 
 ## Problem
 
@@ -59,29 +59,31 @@ An `architect` worker that:
 
 ## Acceptance criteria
 
-- [ ] AC1: `role=architect` tasks run the Architect worker.
-- [ ] AC2: The worker loads the target spec and all existing active
+- [x] AC1: `role=architect` tasks run the Architect worker.
+- [x] AC2: The worker loads the target spec and all existing active
   designs and ADRs before generating the new design.
-- [ ] AC3: The output design document follows the design `_TEMPLATE.md`
+- [x] AC3: The output design document follows the design `_TEMPLATE.md`
   schema with all required frontmatter fields.
-- [ ] AC4: The design includes at least one inline Mermaid diagram
+- [x] AC4: The design includes at least one inline Mermaid diagram
   (component diagram or data flow).
-- [ ] AC5: Non-obvious decisions are captured as draft ADRs linked from
+- [x] AC5: Non-obvious decisions are captured as draft ADRs linked from
   the design.
-- [ ] AC6: The design and any ADRs are committed to the knowledge repo
+- [x] AC6: The design and any ADRs are committed to the knowledge repo
   via the knowledge write API with proper registry entries.
-- [ ] AC7: The human is notified for review before the Team Manager
+- [x] AC7: The human is notified for review before the Team Manager
   picks up the spec for task planning.
 
 ## Open questions
 
-- How does the Architect ensure consistency with existing designs — load
-  all active designs as context, or just the ones linked by the spec's
-  `served_by_designs` field?
-- Should design documents go directly to `active/` or start in `wip/`
-  pending human approval?
-- How does the Architect decide which decisions need an ADR vs. which
-  are just implementation details?
+_Resolved._
+
+- Context loading: all active designs + ADRs are loaded for full
+  architectural consistency.
+- Output path: designs start in `wip/` with human approval gate,
+  consistent with PM draft pattern.
+- ADR threshold: system prompt instructs Claude to draft ADRs for
+  decisions affecting multiple components, introducing new deps, or
+  deviating from existing patterns.
 
 ## Links
 

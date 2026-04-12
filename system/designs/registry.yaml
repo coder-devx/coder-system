@@ -82,3 +82,12 @@ designs:
     file: active/0009-pm-worker.md
     affects_services: [coder-core]
     decided_by: []
+
+  - id: "0010"
+    title: Architect Worker
+    status: active
+    owner: ro
+    folder: active
+    file: active/0010-architect-worker.md
+    affects_services: [coder-core]
+    decided_by: []

@@ -138,11 +138,11 @@ specs:
 
   - id: "0017"
     title: Architect worker v1
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0017-architect-worker-v1.md
-    served_by_designs: []
+    folder: active
+    file: active/0017-architect-worker-v1.md
+    served_by_designs: ["0010"]
 
   - id: "0018"
     title: Observability and cost tracking

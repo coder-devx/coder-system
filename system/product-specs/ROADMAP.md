@@ -10,8 +10,8 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**Shipped specs** (0001–0016) all trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).
-**Planned specs** (0017–0018) extend the system toward full self-hosting.
+**Shipped specs** (0001–0017) all trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).
+**Planned specs** (0018) extends the system toward full self-hosting.
 
 Last updated: 2026-04-12 (6–12 month roadmap: self-hosting vision)
 
@@ -21,29 +21,16 @@ Last updated: 2026-04-12 (6–12 month roadmap: self-hosting vision)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 16 | 104 | 104 | `██████████` 100% |
-| Later — full self-hosting | 2 | 0 | 14 | `░░░░░░░░░░` 0% |
-| **Total** | **18** | **104** | **118** | `████████░░` **88%** |
+| Shipped | 17 | 111 | 111 | `██████████` 100% |
+| Later — full self-hosting | 1 | 0 | 7 | `░░░░░░░░░░` 0% |
+| **Total** | **18** | **111** | **118** | `█████████░` **94%** |
 
 ---
 
 ## Later — full self-hosting
 
-> The final two specs complete the product lifecycle: Architect designs
-> solutions and the system monitors its own health and costs. When these
-> ship, Coder manages Coder.
-
-### [0017 — Architect worker v1](./wip/0017-architect-worker-v1.md)
-
-Given an approved spec, produce a design document with components,
-data flow, Mermaid diagrams, and rollout plan. Draft ADRs for
-non-obvious decisions. Maintain architectural consistency with
-existing decisions.
-
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 7 AC
-- **Depends on:** [`0014`](./active/0014-knowledge-write-api.md)
-- **Unlocks:** higher-quality TM planning (designs give better task context)
+> The final spec completes the product lifecycle: the system monitors
+> its own health and costs. When this ships, Coder manages Coder.
 
 ### [0018 — Observability and cost tracking](./wip/0018-observability-and-cost-tracking.md)
 
@@ -303,6 +290,22 @@ the pipeline. Acceptance produces per-AC verdicts with evidence.
   both modes. Design [`0009`](../designs/active/0009-pm-worker.md).
   285 backend tests, 14 new.
 
+### [0017 — Architect worker v1](./active/0017-architect-worker-v1.md)
+
+Given an approved spec, produce a design document with components,
+data flow, Mermaid diagrams, and rollout plan. Draft ADRs for
+non-obvious decisions. Maintain architectural consistency with
+existing decisions.
+
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** `workers/architect.py` with built-in system prompt
+  instructing Claude to output design JSON with frontmatter, body
+  (including Mermaid diagrams), and optional ADR list. Dispatcher
+  Phase 4 writes designs to `wip/` and ADRs via GitHub Contents API.
+  Design [`0010`](../designs/active/0010-architect-worker.md).
+  295 backend tests, 10 new.
+
 ---
 
 ## Dependency graph
@@ -326,10 +329,10 @@ flowchart TB
     s14["0014 Knowledge write API"]
     s15["0015 Worker communication"]
     s16["0016 PM worker"]
+    s17["0017 Architect worker"]
   end
 
   subgraph later ["Later — full self-hosting"]
-    s17["0017 Architect worker"]
     s18["0018 Observability"]
   end
 
@@ -374,8 +377,8 @@ flowchart TB
   classDef next fill:#bbdefb,stroke:#1565c0,stroke-width:2px
   classDef later fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
 
-  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16 shipped
-  class s17,s18 later
+  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17 shipped
+  class s18 later
 ```
 
 ---

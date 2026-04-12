@@ -14,6 +14,7 @@
 | 0007 | Knowledge Write API | ro | coder-core | [active/0007-knowledge-write-api.md](./active/0007-knowledge-write-api.md) |
 | 0008 | Worker-to-Worker Communication | ro | coder-core, coder-admin | [active/0008-worker-communication.md](./active/0008-worker-communication.md) |
 | 0009 | PM Worker | ro | coder-core | [active/0009-pm-worker.md](./active/0009-pm-worker.md) |
+| 0010 | Architect Worker | ro | coder-core | [active/0010-architect-worker.md](./active/0010-architect-worker.md) |
 
 ## WIP
 
