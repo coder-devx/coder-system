@@ -156,8 +156,8 @@ specs:
 
   - id: "0019"
     title: Task retry endpoint
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0019-task-retry-endpoint.md
+    folder: active
+    file: active/0019-task-retry-endpoint.md
     served_by_designs: []

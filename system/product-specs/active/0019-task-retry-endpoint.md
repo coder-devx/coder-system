@@ -2,7 +2,7 @@
 id: "0019"
 title: "Task retry endpoint"
 type: spec
-status: wip
+status: active
 owner: ro
 created: "2026-04-12"
 updated: "2026-04-12"
@@ -14,8 +14,8 @@ related_specs: ["0010", "0013"]
 
 # Task retry endpoint
 
-**Phase:** wip
-**Progress:** 0 / 7 acceptance criteria
+**Phase:** active
+**Progress:** 7 / 7 acceptance criteria
 
 ## Problem
 
@@ -69,18 +69,18 @@ the original.
 
 ## Acceptance criteria
 
-- [ ] AC1: `POST /v1/projects/{id}/tasks/{task_id}/retry` returns `201 Created` with a
+- [x] AC1: `POST /v1/projects/{id}/tasks/{task_id}/retry` returns `201 Created` with a
   `TaskCreated` body (including a fresh `worker_token`) when the original is retryable.
-- [ ] AC2: The new task's `original_task_id` equals the source task's `id`; `role`,
+- [x] AC2: The new task's `original_task_id` equals the source task's `id`; `role`,
   `prompt`, `repo`, and `spec_id` match exactly.
-- [ ] AC3: New task starts with `status=queued`, `stage=queued`, `fix_attempts=0`;
+- [x] AC3: New task starts with `status=queued`, `stage=queued`, `fix_attempts=0`;
   all execution-state fields are `null`.
-- [ ] AC4: Returns `422` with `code=task_not_retryable` when the original is in a
+- [x] AC4: Returns `422` with `code=task_not_retryable` when the original is in a
   non-retryable state (`queued`, `running`, `succeeded`, `accepted`, `rejected`).
-- [ ] AC5: Returns `404` when the task does not exist or belongs to a different project.
-- [ ] AC6: The original task row is not mutated; a `task_log` entry with
+- [x] AC5: Returns `404` when the task does not exist or belongs to a different project.
+- [x] AC6: The original task row is not mutated; a `task_log` entry with
   `triggered_by=retry` and the `original_task_id` is written for audit.
-- [ ] AC7: Migration 0015 adds `original_task_id` (nullable FK -> tasks.id SET NULL) and
+- [x] AC7: Migration 0015 adds `original_task_id` (nullable FK -> tasks.id SET NULL) and
   the column appears in `TaskRead` responses.
 
 ## Open questions

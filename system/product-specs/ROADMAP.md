@@ -10,9 +10,10 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**All 18 specs shipped.** The system manages its own development end-to-end.
+**All 19 specs shipped.** The system manages its own development end-to-end.
+Spec 0019 was the first PM-drafted, pipeline-built spec.
 
-Last updated: 2026-04-12 (self-hosting milestone reached)
+Last updated: 2026-04-12
 
 ---
 
@@ -20,7 +21,7 @@ Last updated: 2026-04-12 (self-hosting milestone reached)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 18 | 118 | 118 | `██████████` 100% |
+| Shipped | 19 | 125 | 125 | `██████████` 100% |
 
 ---
 
@@ -303,6 +304,22 @@ alerts via Slack. Dashboard in admin panel.
   cost table. Design [`0011`](../designs/active/0011-observability-and-cost-tracking.md).
   304 backend tests, 9 new.
 
+### [0019 — Task retry endpoint](./active/0019-task-retry-endpoint.md)
+
+One-click retry for failed/stuck tasks. Creates a fresh queued task
+cloned from the original with audit trail linking via `original_task_id`.
+
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** `POST /v1/projects/{id}/tasks/{task_id}/retry`
+  endpoint cloning role/prompt/repo/spec_id from failed/timed_out/stuck
+  tasks. Migration 0015 adds `original_task_id` column with index.
+  Retryable-state gate (422 for non-terminal). Cross-tenant isolation
+  (404). Audit log entry with `triggered_by=retry`. Fire-and-forget
+  dispatch. First spec drafted by the PM worker and built through the
+  full pipeline (PM → Architect → TM → Developer → Reviewer).
+  329 backend tests, 11 new.
+
 ---
 
 ## Dependency graph
@@ -330,6 +347,7 @@ flowchart TB
   end
 
     s18["0018 Observability"]
+    s19["0019 Task retry"]
 
   %% Shipped internal deps
   s1 --> s2
@@ -367,12 +385,14 @@ flowchart TB
   s14 --> s17
   s10 --> s18
   s11 --> s18
+  s10 --> s19
+  s13 --> s19
 
   classDef shipped fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
   classDef next fill:#bbdefb,stroke:#1565c0,stroke-width:2px
   classDef later fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
 
-  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18 shipped
+  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19 shipped
 ```
 
 ---
