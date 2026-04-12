@@ -10,8 +10,8 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**19 specs shipped.** 3 new specs drafted for the "Close the Loop" phase —
-making the pipeline produce real PRs and chain steps automatically.
+**22 specs shipped.** "Close the Loop" phase complete — the pipeline now
+produces real PRs, has approval gates, and chains steps automatically.
 
 Last updated: 2026-04-12
 
@@ -21,9 +21,8 @@ Last updated: 2026-04-12
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 19 | 125 | 125 | `██████████` 100% |
-| Close the Loop | 3 | 7 | 20 | `███░░░░░░░` 35% |
-| **Total** | **22** | **132** | **145** | |
+| Shipped | 22 | 145 | 145 | `██████████` 100% |
+| **Total** | **22** | **145** | **145** | |
 
 ---
 
@@ -342,23 +341,32 @@ Reviewer reviews the real PR. Merge endpoint closes the loop.
   extracts PR URL from developer output. Orchestrator prepends PR URL to
   reviewer prompt. 7 new tests, 336 total.
 
-### [0022 — Spec and design approval gates](./wip/0022-spec-design-approval-gates.md)
+### [0022 — Spec and design approval gates](./active/0022-spec-design-approval-gates.md)
 
 Formal approve/reject for PM-drafted specs and Architect-drafted designs.
 Extends the task plan approval pattern (spec 0013) to knowledge artifacts.
 
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 7 AC
-- **Depends on:** 0012, 0013, 0014
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** `POST /knowledge/{type}/{id}/approve` promotes wip→active
+  (file move, frontmatter update, registry update). `POST /knowledge/{type}/{id}/reject`
+  records feedback and optionally creates a revision task (PM for specs, Architect
+  for designs). 422 guards for non-wip artifacts. SSE events for both actions.
+  13 new tests, 346 total.
 
-### [0021 — Pipeline chaining](./wip/0021-pipeline-chaining.md)
+### [0021 — Pipeline chaining](./active/0021-pipeline-chaining.md)
 
 Automatic task creation between pipeline steps. PM→Architect→TM→Dev→PM
 flows hands-free with human approval gates between steps.
 
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 6 AC
-- **Depends on:** 0010, 0013, 0016, 0017, 0020, 0022
+- **Status:** active
+- **Progress:** `██████████` 6 / 6 AC ✅
+- **What shipped:** `pipeline_runs` table (migration 0017) tracks end-to-end
+  pipeline state. Chain hooks in approve endpoints (spec→architect,
+  design→TM) and orchestrator (all dev accepted→PM acceptance). Auto-create
+  pipeline run for `draft:` PM tasks. REST endpoints: list, get, override
+  (pause/resume/cancel). Paused runs don't chain. SSE events for overrides.
+  17 new tests, 363 total.
 
 ---
 
@@ -453,8 +461,7 @@ flowchart TB
   classDef shipped fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
   classDef closeloopStyle fill:#bbdefb,stroke:#1565c0,stroke-width:2px
 
-  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19 shipped
-  class s20,s21,s22 closeloopStyle
+  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22 shipped
 ```
 
 ---

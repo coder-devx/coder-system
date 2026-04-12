@@ -2,7 +2,7 @@
 id: "0021"
 title: "Pipeline chaining"
 type: spec
-status: wip
+status: active
 owner: ro
 created: "2026-04-12"
 updated: "2026-04-12"
@@ -14,8 +14,8 @@ related_specs: ["0010", "0013", "0016", "0017", "0020", "0022"]
 
 # Pipeline chaining
 
-**Phase:** wip
-**Progress:** 0 / 6 acceptance criteria
+**Phase:** active
+**Progress:** 6 / 6 acceptance criteria
 
 ## Problem
 
@@ -80,22 +80,22 @@ check if a pipeline_run exists and advance it.
 
 ## Acceptance criteria
 
-- [ ] AC1: Approving a wip spec that has an associated `pipeline_run`
+- [x] AC1: Approving a wip spec that has an associated `pipeline_run`
   automatically creates an Architect task for that spec. The task prompt includes
   the full spec content.
-- [ ] AC2: Approving a wip design that has an associated `pipeline_run`
+- [x] AC2: Approving a wip design that has an associated `pipeline_run`
   automatically creates a Team Manager task. The task prompt includes both the
   spec and design content.
-- [ ] AC3: When all developer tasks created from a TM plan reach `accepted`
+- [x] AC3: When all developer tasks created from a TM plan reach `accepted`
   stage, the system automatically creates a PM acceptance task (`accept:
   {spec_id}`).
-- [ ] AC4: `pipeline_runs` table tracks the current step, status, and linked
+- [x] AC4: `pipeline_runs` table tracks the current step, status, and linked
   task IDs for each spec's pipeline run. Visible via
   `GET /v1/projects/{id}/pipeline-runs`.
-- [ ] AC5: An operator can pause or cancel a pipeline run via
+- [x] AC5: An operator can pause or cancel a pipeline run via
   `POST /v1/projects/{id}/pipeline-runs/{id}/override`. Paused runs do not
   create new tasks until resumed.
-- [ ] AC6: Each automatic task creation is logged as a `task_log` entry with
+- [x] AC6: Each automatic task creation is logged as a `task_log` entry with
   `triggered_by=pipeline_chain` and the `pipeline_run_id`.
 
 ## Open questions

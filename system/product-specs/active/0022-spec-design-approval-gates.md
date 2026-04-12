@@ -2,7 +2,7 @@
 id: "0022"
 title: "Spec and design approval gates"
 type: spec
-status: wip
+status: active
 owner: ro
 created: "2026-04-12"
 updated: "2026-04-12"
@@ -14,8 +14,8 @@ related_specs: ["0012", "0013", "0014", "0016", "0017"]
 
 # Spec and design approval gates
 
-**Phase:** wip
-**Progress:** 0 / 7 acceptance criteria
+**Phase:** active
+**Progress:** 7 / 7 acceptance criteria
 
 ## Problem
 
@@ -87,21 +87,21 @@ checkpoints.
 
 ## Acceptance criteria
 
-- [ ] AC1: `POST /v1/projects/{id}/knowledge/specs/{spec_id}/approve` promotes
+- [x] AC1: `POST /v1/projects/{id}/knowledge/specs/{spec_id}/approve` promotes
   a wip spec to active — frontmatter updated, file moved to `active/`,
   registry.yaml updated. Returns the updated artifact.
-- [ ] AC2: `POST /v1/projects/{id}/knowledge/specs/{spec_id}/reject` records
+- [x] AC2: `POST /v1/projects/{id}/knowledge/specs/{spec_id}/reject` records
   feedback. Returns 200 with the rejection receipt.
-- [ ] AC3: Same approve/reject endpoints work for designs at
+- [x] AC3: Same approve/reject endpoints work for designs at
   `/knowledge/designs/{design_id}/approve|reject`.
-- [ ] AC4: Approving a non-wip artifact returns 422 with
+- [x] AC4: Approving a non-wip artifact returns 422 with
   `code=not_approvable`. Rejecting a non-wip artifact returns 422 with
   `code=not_rejectable`.
-- [ ] AC5: Reject with `create_revision_task: true` creates a PM task (for
+- [x] AC5: Reject with `create_revision_task: true` creates a PM task (for
   specs) or Architect task (for designs) with the feedback in the prompt.
-- [ ] AC6: Admin panel shows approve/reject buttons on wip spec and design
+- [x] AC6: Admin panel shows approve/reject buttons on wip spec and design
   detail pages. Reject shows a feedback textarea.
-- [ ] AC7: Approval and rejection publish SSE events (`knowledge_approved`,
+- [x] AC7: Approval and rejection publish SSE events (`knowledge_approved`,
   `knowledge_rejected`) with the artifact type, id, and actor.
 
 ## Open questions
