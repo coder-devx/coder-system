@@ -10,8 +10,8 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**All 19 specs shipped.** The system manages its own development end-to-end.
-Spec 0019 was the first PM-drafted, pipeline-built spec.
+**19 specs shipped.** 3 new specs drafted for the "Close the Loop" phase —
+making the pipeline produce real PRs and chain steps automatically.
 
 Last updated: 2026-04-12
 
@@ -22,6 +22,8 @@ Last updated: 2026-04-12
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
 | Shipped | 19 | 125 | 125 | `██████████` 100% |
+| Close the Loop | 3 | 0 | 20 | `░░░░░░░░░░` 0% |
+| **Total** | **22** | **125** | **145** | |
 
 ---
 
@@ -322,6 +324,41 @@ cloned from the original with audit trail linking via `original_task_id`.
 
 ---
 
+## Close the Loop
+
+> Make the pipeline produce real artifacts and chain steps automatically.
+> After this phase, typing a problem statement results in shipped code
+> with human approval at 3 gates (spec, design, plan).
+
+### [0020 — Developer PR flow](./wip/0020-developer-pr-flow.md)
+
+Developer worker creates a feature branch, commits, pushes, opens a PR.
+Reviewer reviews the real PR. Merge endpoint closes the loop.
+
+- **Status:** wip
+- **Progress:** `░░░░░░░░░░` 0 / 7 AC
+- **Depends on:** 0004, 0009, 0010, 0012
+
+### [0022 — Spec and design approval gates](./wip/0022-spec-design-approval-gates.md)
+
+Formal approve/reject for PM-drafted specs and Architect-drafted designs.
+Extends the task plan approval pattern (spec 0013) to knowledge artifacts.
+
+- **Status:** wip
+- **Progress:** `░░░░░░░░░░` 0 / 7 AC
+- **Depends on:** 0012, 0013, 0014
+
+### [0021 — Pipeline chaining](./wip/0021-pipeline-chaining.md)
+
+Automatic task creation between pipeline steps. PM→Architect→TM→Dev→PM
+flows hands-free with human approval gates between steps.
+
+- **Status:** wip
+- **Progress:** `░░░░░░░░░░` 0 / 6 AC
+- **Depends on:** 0010, 0013, 0016, 0017, 0020, 0022
+
+---
+
 ## Dependency graph
 
 ```mermaid
@@ -348,6 +385,13 @@ flowchart TB
 
     s18["0018 Observability"]
     s19["0019 Task retry"]
+  end
+
+  subgraph closeloop ["Close the Loop"]
+    s20["0020 Developer PR flow"]
+    s22["0022 Approval gates"]
+    s21["0021 Pipeline chaining"]
+  end
 
   %% Shipped internal deps
   s1 --> s2
@@ -388,11 +432,26 @@ flowchart TB
   s10 --> s19
   s13 --> s19
 
+  %% Close the Loop deps
+  s4 --> s20
+  s9 --> s20
+  s10 --> s20
+  s12 --> s20
+  s12 --> s22
+  s13 --> s22
+  s14 --> s22
+  s20 --> s21
+  s22 --> s21
+  s10 --> s21
+  s13 --> s21
+  s16 --> s21
+  s17 --> s21
+
   classDef shipped fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
-  classDef next fill:#bbdefb,stroke:#1565c0,stroke-width:2px
-  classDef later fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
+  classDef closeloopStyle fill:#bbdefb,stroke:#1565c0,stroke-width:2px
 
   class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19 shipped
+  class s20,s21,s22 closeloopStyle
 ```
 
 ---

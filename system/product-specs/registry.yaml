@@ -161,3 +161,29 @@ specs:
     folder: active
     file: active/0019-task-retry-endpoint.md
     served_by_designs: []
+
+  # ── Next — close the loop ────────────────────────────────────────
+
+  - id: "0020"
+    title: Developer PR flow
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0020-developer-pr-flow.md
+    served_by_designs: []
+
+  - id: "0021"
+    title: Pipeline chaining
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0021-pipeline-chaining.md
+    served_by_designs: []
+
+  - id: "0022"
+    title: Spec and design approval gates
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0022-spec-design-approval-gates.md
+    served_by_designs: []
