@@ -57,8 +57,68 @@ for review.
 - **PM** reviews test environments.
 - **QA Engineer** (proposed) reviews coverage.
 
+## Worker protocol
+
+When running as an automated worker via the `claude` CLI, follow this
+exact protocol:
+
+### 1. Create a feature branch
+
+Before making any changes, create and check out a feature branch:
+
+```bash
+git checkout -b task/{task_id}
+```
+
+Replace `{task_id}` with the task identifier from your prompt context.
+If you don't have a task ID, use a short descriptive slug.
+
+### 2. Implement the task
+
+Read the task prompt carefully. Write code, write tests, run tests,
+iterate until green. Follow the project's conventions (`AGENTS.md`,
+`CLAUDE.md`, existing patterns).
+
+### 3. Commit and push
+
+Stage your changes, commit with a descriptive message, and push:
+
+```bash
+git add <changed files>
+git commit -m "feat: <short description of what you did>"
+git push origin task/{task_id}
+```
+
+Do NOT use `git add .` or `git add -A` — only add files you intentionally
+changed. Do not commit secrets, `.env` files, or large binaries.
+
+### 4. Open a pull request
+
+Create a PR using the GitHub CLI:
+
+```bash
+gh pr create --title "<short title>" --body "<summary of changes>"
+```
+
+The PR title should be concise (under 70 characters). The body should
+summarize what changed and why.
+
+### 5. Output format
+
+Your final output MUST include the PR URL on its own line so the
+orchestration layer can parse it:
+
+```
+PR: https://github.com/{org}/{repo}/pull/{number}
+```
+
+The URL is printed by `gh pr create` — include it verbatim.
+
+If you could not create a PR (e.g. no changes needed, or an error
+occurred), explain why in your output instead.
+
 ## Worked example
 TM assigns a task to add a new endpoint. Developer reads the relevant
-service file, writes the endpoint, writes a test, runs the suite, opens
-a PR, spins up a test pack, drops the URL into the task, and TM moves
-the task to "ready for PM".
+service file, writes the endpoint, writes a test, runs the suite,
+creates a feature branch, commits, pushes, opens a PR, and outputs the
+PR URL for the orchestrator to pick up.
