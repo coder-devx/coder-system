@@ -166,10 +166,10 @@ specs:
 
   - id: "0020"
     title: Developer PR flow
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0020-developer-pr-flow.md
+    folder: active
+    file: active/0020-developer-pr-flow.md
     served_by_designs: []
 
   - id: "0021"

@@ -22,8 +22,8 @@ Last updated: 2026-04-12
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
 | Shipped | 19 | 125 | 125 | `██████████` 100% |
-| Close the Loop | 3 | 0 | 20 | `░░░░░░░░░░` 0% |
-| **Total** | **22** | **125** | **145** | |
+| Close the Loop | 3 | 7 | 20 | `███░░░░░░░` 35% |
+| **Total** | **22** | **132** | **145** | |
 
 ---
 
@@ -330,14 +330,17 @@ cloned from the original with audit trail linking via `original_task_id`.
 > After this phase, typing a problem statement results in shipped code
 > with human approval at 3 gates (spec, design, plan).
 
-### [0020 — Developer PR flow](./wip/0020-developer-pr-flow.md)
+### [0020 — Developer PR flow](./active/0020-developer-pr-flow.md)
 
 Developer worker creates a feature branch, commits, pushes, opens a PR.
 Reviewer reviews the real PR. Merge endpoint closes the loop.
 
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 7 AC
-- **Depends on:** 0004, 0009, 0010, 0012
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** Worker protocol in developer.md instructs Claude to
+  branch/commit/push/PR. Migration 0016 adds `pr_url` column. Dispatcher
+  extracts PR URL from developer output. Orchestrator prepends PR URL to
+  reviewer prompt. 7 new tests, 336 total.
 
 ### [0022 — Spec and design approval gates](./wip/0022-spec-design-approval-gates.md)
 
