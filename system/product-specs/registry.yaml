@@ -151,3 +151,13 @@ specs:
     folder: active
     file: active/0018-observability-and-cost-tracking.md
     served_by_designs: ["0011"]
+
+  # ── Dog-food — PM-drafted specs ────────────────────────────────────
+
+  - id: "0019"
+    title: Task retry endpoint
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0019-task-retry-endpoint.md
+    served_by_designs: []
