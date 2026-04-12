@@ -20,12 +20,12 @@
 | [0012](./active/0012-admin-auth-and-mutations.md) | Admin panel auth and mutations | ro | — |
 | [0013](./active/0013-team-manager-worker-v1.md) | Team Manager worker v1 | ro | [0006](../designs/active/0006-team-manager-worker.md) |
 | [0014](./active/0014-knowledge-write-api.md) | Knowledge write API | ro | [0007](../designs/active/0007-knowledge-write-api.md) |
+| [0015](./active/0015-worker-communication.md) | Worker-to-worker communication | ro | [0008](../designs/active/0008-worker-communication.md) |
 
 ## WIP
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0015](./wip/0015-worker-communication.md) | Worker-to-worker communication | ro | — |
 | [0016](./wip/0016-pm-worker-v1.md) | PM worker v1 (spec and acceptance) | ro | — |
 | [0017](./wip/0017-architect-worker-v1.md) | Architect worker v1 | ro | — |
 | [0018](./wip/0018-observability-and-cost-tracking.md) | Observability and cost tracking | ro | — |

@@ -120,11 +120,11 @@ specs:
 
   - id: "0015"
     title: Worker-to-worker communication
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0015-worker-communication.md
-    served_by_designs: []
+    folder: active
+    file: active/0015-worker-communication.md
+    served_by_designs: ["0008"]
 
   # ── Later — full self-hosting ─────────────────────────────────────
 

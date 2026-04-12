@@ -2,20 +2,20 @@
 id: "0015"
 title: Worker-to-worker communication
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-11
+updated: 2026-04-12
 deprecated_at:
 reason:
-served_by_designs: []
+served_by_designs: ["0008"]
 related_specs: ["0010", "0016"]
 ---
 
 # Worker-to-worker communication
 
 **Phase:** Next — autonomous planning
-**Progress:** 0 / 6 acceptance criteria
+**Progress:** 6 / 6 acceptance criteria
 
 ## Problem
 
@@ -65,25 +65,29 @@ A `task_messages` table and API:
 
 ## Acceptance criteria
 
-- [ ] AC1: A `task_messages` table stores structured messages between
+- [x] AC1: A `task_messages` table stores structured messages between
   workers on a task.
-- [ ] AC2: Workers can post messages via `POST /tasks/{id}/messages` and
+- [x] AC2: Workers can post messages via `POST /tasks/{id}/messages` and
   read them in their next prompt.
-- [ ] AC3: The reviewer's request-changes message causes the orchestrator
+- [x] AC3: The reviewer's request-changes message causes the orchestrator
   to route the task back to the developer fix loop.
-- [ ] AC4: Human overrides posted via the admin panel appear as messages
+- [x] AC4: Human overrides posted via the admin panel appear as messages
   in the task thread.
-- [ ] AC5: The admin panel shows the full message thread for a task.
-- [ ] AC6: Messages are included in SSE events so the thread updates in
+- [x] AC5: The admin panel shows the full message thread for a task.
+- [x] AC6: Messages are included in SSE events so the thread updates in
   real-time without polling.
 
-## Open questions
+## Decisions
 
-- Should messages be in the same SSE stream as stage transitions, or a
-  separate channel?
-- How does the reviewer communicate a structured verdict vs. free-form
-  feedback — separate `verdict` field or parsed from body?
+- **Same SSE stream.** Messages use the existing `PipelineEvent` bus
+  with `event_type="message_created"`. One subscription per project in
+  the admin panel — no new channel needed.
+- **Separate verdict field.** Messages carry an optional `verdict`
+  field (approve/request_changes/reject) alongside the free-form
+  `body`. The orchestrator reads the structured verdict; the developer
+  reads the body for context. Mirrors the existing `review_verdict` +
+  `fix_context` pattern.
 
 ## Links
 
-- Related specs: [`0010`](../active/0010-task-orchestration-v1.md), [`0016`](./0016-pm-worker-v1.md)
+- Related specs: [`0010`](./0010-task-orchestration-v1.md), [`0016`](../wip/0016-pm-worker-v1.md)

@@ -12,6 +12,7 @@
 | 0004 | Clean rebuild — coder-core + coder-admin | ro | coder-core, coder-admin | [active/0001-generalize-coder-from-vibetrade.md](./active/0001-generalize-coder-from-vibetrade.md) |
 | 0006 | Team Manager Worker | ro | coder-core, coder-admin | [active/0006-team-manager-worker.md](./active/0006-team-manager-worker.md) |
 | 0007 | Knowledge Write API | ro | coder-core | [active/0007-knowledge-write-api.md](./active/0007-knowledge-write-api.md) |
+| 0008 | Worker-to-Worker Communication | ro | coder-core, coder-admin | [active/0008-worker-communication.md](./active/0008-worker-communication.md) |
 
 ## WIP
 

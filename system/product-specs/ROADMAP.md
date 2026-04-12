@@ -10,8 +10,8 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**Shipped specs** (0001–0014) all trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).
-**Planned specs** (0015–0018) extend the system toward full self-hosting.
+**Shipped specs** (0001–0015) all trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).
+**Planned specs** (0016–0018) extend the system toward full self-hosting.
 
 Last updated: 2026-04-12 (6–12 month roadmap: self-hosting vision)
 
@@ -21,29 +21,9 @@ Last updated: 2026-04-12 (6–12 month roadmap: self-hosting vision)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 14 | 91 | 91 | `██████████` 100% |
-| Next — autonomous planning | 1 | 0 | 6 | `░░░░░░░░░░` 0% |
+| Shipped | 15 | 97 | 97 | `██████████` 100% |
 | Later — full self-hosting | 3 | 0 | 21 | `░░░░░░░░░░` 0% |
-| **Total** | **18** | **91** | **118** | `████████░░` **77%** |
-
----
-
-## Next — autonomous planning
-
-> The dev loop is closed. Coder needs to plan its own work. These specs
-> give the Team Manager a worker, give workers the ability to update
-> knowledge, and wire structured communication between roles.
-
-### [0015 — Worker-to-worker communication](./wip/0015-worker-communication.md)
-
-Structured message passing between workers on a task: review feedback,
-clarification requests, acceptance decisions, human overrides. Full
-conversation visible in admin panel.
-
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 6 AC
-- **Depends on:** [`0010`](./active/0010-task-orchestration-v1.md) ✅
-- **Unlocks:** [`0016`](./wip/0016-pm-worker-v1.md) (PM communicates acceptance decisions)
+| **Total** | **18** | **97** | **118** | `████████░░` **82%** |
 
 ---
 
@@ -62,7 +42,7 @@ the pipeline. Acceptance produces per-AC verdicts with evidence.
 
 - **Status:** wip
 - **Progress:** `░░░░░░░░░░` 0 / 7 AC
-- **Depends on:** [`0013`](./active/0013-team-manager-worker-v1.md), [`0014`](./active/0014-knowledge-write-api.md), [`0015`](./wip/0015-worker-communication.md)
+- **Depends on:** [`0013`](./active/0013-team-manager-worker-v1.md) ✅, [`0014`](./active/0014-knowledge-write-api.md) ✅, [`0015`](./active/0015-worker-communication.md) ✅
 - **Unlocks:** self-hosting milestone (PM + TM + Dev + Reviewer = full lifecycle)
 
 ### [0017 — Architect worker v1](./wip/0017-architect-worker-v1.md)
@@ -301,6 +281,24 @@ validation and audit trail.
   with `create_file` and `delete_file` methods. 259 backend tests,
   14 new.
 
+### [0015 — Worker-to-worker communication](./active/0015-worker-communication.md)
+
+Structured message passing between workers on a task: review feedback,
+clarification requests, acceptance decisions, human overrides. Full
+conversation visible in admin panel with real-time SSE updates.
+
+- **Status:** active
+- **Progress:** `██████████` 6 / 6 AC ✅
+- **What shipped:** `task_messages` table (migration 0013) with
+  `from_role`, `to_role`, `msg_type` (feedback/question/decision/
+  override), optional `verdict` (approve/request_changes/reject), and
+  `body`. POST + GET endpoints with tenant isolation and validation.
+  Orchestrator reads verdict messages as fallback for stage transitions;
+  `_build_fix_context` includes recent messages so the developer sees
+  reviewer feedback. SSE `message_created` events. Admin panel message
+  thread with color-coded type and verdict chips. 271 backend tests,
+  12 new.
+
 ---
 
 ## Dependency graph
@@ -322,9 +320,6 @@ flowchart TB
     s12["0012 Admin auth + mutations"]
     s13["0013 Team Manager worker"]
     s14["0014 Knowledge write API"]
-  end
-
-  subgraph next ["Next — autonomous planning"]
     s15["0015 Worker communication"]
   end
 
@@ -375,8 +370,7 @@ flowchart TB
   classDef next fill:#bbdefb,stroke:#1565c0,stroke-width:2px
   classDef later fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
 
-  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14 shipped
-  class s15 next
+  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15 shipped
   class s16,s17,s18 later
 ```
 
