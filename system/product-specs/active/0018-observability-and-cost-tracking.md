@@ -2,20 +2,20 @@
 id: "0018"
 title: Observability and cost tracking
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-11
+updated: 2026-04-12
 deprecated_at:
 reason:
-served_by_designs: []
+served_by_designs: ["0011"]
 related_specs: ["0010", "0011"]
 ---
 
 # Observability and cost tracking
 
 **Phase:** Later — full self-hosting
-**Progress:** 0 / 7 acceptance criteria
+**Progress:** 7 / 7 acceptance criteria ✅
 
 ## Problem
 
@@ -62,19 +62,19 @@ identify which specs are expensive to implement.
 
 ## Acceptance criteria
 
-- [ ] AC1: Token spend (input + output) is recorded per task when a
+- [x] AC1: Token spend (input + output) is recorded per task when a
   worker completes.
-- [ ] AC2: Stage durations are recorded for every stage transition on
+- [x] AC2: Stage durations are recorded for every stage transition on
   every task.
-- [ ] AC3: Per-project daily cost is aggregated and queryable via the
+- [x] AC3: Per-project daily cost is aggregated and queryable via the
   API.
-- [ ] AC4: A `/metrics` dashboard in the admin panel shows cost and
+- [x] AC4: A `/metrics` dashboard in the admin panel shows cost and
   pipeline health charts.
-- [ ] AC5: Slack alerts fire when daily cost exceeds the configured
+- [x] AC5: Slack alerts fire when daily cost exceeds the configured
   threshold.
-- [ ] AC6: Slack alerts fire when the pipeline success rate drops below
+- [x] AC6: Slack alerts fire when the pipeline success rate drops below
   the configured threshold over a rolling 24-hour window.
-- [ ] AC7: All metrics are attributed to the originating project and
+- [x] AC7: All metrics are attributed to the originating project and
   spec, enabling per-spec cost comparison.
 
 ## Open questions

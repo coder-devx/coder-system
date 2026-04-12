@@ -91,3 +91,12 @@ designs:
     file: active/0010-architect-worker.md
     affects_services: [coder-core]
     decided_by: []
+
+  - id: "0011"
+    title: Observability and Cost Tracking
+    status: active
+    owner: ro
+    folder: active
+    file: active/0011-observability-and-cost-tracking.md
+    affects_services: [coder-core, coder-admin]
+    decided_by: []

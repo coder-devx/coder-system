@@ -10,10 +10,9 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**Shipped specs** (0001–0017) all trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).
-**Planned specs** (0018) extends the system toward full self-hosting.
+**All 18 specs shipped.** The system manages its own development end-to-end.
 
-Last updated: 2026-04-12 (6–12 month roadmap: self-hosting vision)
+Last updated: 2026-04-12 (self-hosting milestone reached)
 
 ---
 
@@ -21,27 +20,7 @@ Last updated: 2026-04-12 (6–12 month roadmap: self-hosting vision)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 17 | 111 | 111 | `██████████` 100% |
-| Later — full self-hosting | 1 | 0 | 7 | `░░░░░░░░░░` 0% |
-| **Total** | **18** | **111** | **118** | `█████████░` **94%** |
-
----
-
-## Later — full self-hosting
-
-> The final spec completes the product lifecycle: the system monitors
-> its own health and costs. When this ships, Coder manages Coder.
-
-### [0018 — Observability and cost tracking](./wip/0018-observability-and-cost-tracking.md)
-
-Per-project cost attribution (Anthropic tokens, compute, API calls).
-Pipeline health metrics (success rate, stage durations). Threshold
-alerts via Slack. Dashboard in admin panel.
-
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 7 AC
-- **Depends on:** [`0010`](./active/0010-task-orchestration-v1.md) ✅, [`0011`](./active/0011-continuous-deployment.md) ✅
-- **Unlocks:** Consultant worker (needs metrics to observe)
+| Shipped | 18 | 118 | 118 | `██████████` 100% |
 
 ---
 
@@ -306,6 +285,24 @@ existing decisions.
   Design [`0010`](../designs/active/0010-architect-worker.md).
   295 backend tests, 10 new.
 
+### [0018 — Observability and cost tracking](./active/0018-observability-and-cost-tracking.md)
+
+Per-project cost attribution (Anthropic tokens, compute, API calls).
+Pipeline health metrics (success rate, stage durations). Threshold
+alerts via Slack. Dashboard in admin panel.
+
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** `task_stage_durations` table (migration 0014)
+  records per-stage timing via orchestrator hooks. `GET /v1/projects/
+  {id}/metrics?period=` returns daily cost, success rate, per-spec cost
+  breakdown, and avg stage durations. Slack webhook alerts with per-type
+  rate limiting (1/hour) fire after every task completion when cost or
+  success-rate thresholds are breached. Admin panel metrics dashboard
+  with period selector, summary cards, CSS bar charts, and per-spec
+  cost table. Design [`0011`](../designs/active/0011-observability-and-cost-tracking.md).
+  304 backend tests, 9 new.
+
 ---
 
 ## Dependency graph
@@ -332,9 +329,7 @@ flowchart TB
     s17["0017 Architect worker"]
   end
 
-  subgraph later ["Later — full self-hosting"]
     s18["0018 Observability"]
-  end
 
   %% Shipped internal deps
   s1 --> s2
@@ -377,8 +372,7 @@ flowchart TB
   classDef next fill:#bbdefb,stroke:#1565c0,stroke-width:2px
   classDef later fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
 
-  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17 shipped
-  class s18 later
+  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18 shipped
 ```
 
 ---
