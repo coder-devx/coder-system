@@ -2,10 +2,10 @@
 id: "0012"
 title: Admin panel auth and mutations
 type: spec
-status: active
+status: shipped
 owner: ro
 created: 2026-04-11
-updated: 2026-04-11
+updated: 2026-04-12
 served_by_designs: []
 related_specs: ["0003", "0010"]
 ---

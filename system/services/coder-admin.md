@@ -58,21 +58,22 @@ flowchart LR
 
 - Static assets served from a Cloud Run container running `nginx:1.27-alpine`
   on port 8080. SPA fallback to `/index.html`. `/healthz` returns `ok`.
-- Auth: not implemented yet (walking skeleton). Planned: Google OAuth,
-  allow-listed identities mapped to project ACLs in Core.
+- Auth: Google OAuth 2.0 via Google Identity Services. Admin JWT
+  (HS256, `coder-core/admin` audience) stored in localStorage.
+  Allowed emails configured via `ADMIN_ALLOWED_EMAILS` on `coder-core`.
 - `VITE_API_BASE_URL` is **build-time** — baked into the bundle by Vite.
   Per-environment values live in `.env.development` and `.env.production`
   in the repo. Changing the API base URL requires a rebuild + redeploy.
 - Cross-origin: the browser hits `coder-core` directly, so `coder-core`'s
   `CORS_ALLOWED_ORIGINS` must include this service's URL.
 
-## Current state (2026-04-09)
+## Current state (2026-04-12)
 
-Walking skeleton: a single page (`Home`) that calls `GET /v1/health` on
-`coder-core` on mount and renders the response. Proves the SPA can reach
-core cross-origin and that the deploy pipeline works end-to-end. Project
-list, switcher, worker grid, pipeline view, and knowledge browser come
-next.
+Fully functional admin panel with Google OAuth login, project list,
+pipeline view with real-time SSE updates, task creation and lifecycle
+overrides (pause/resume/retry/reject), approve-merge, knowledge browser
+with interactive acceptance-criteria checkboxes, and per-artifact
+cross-link navigation. All specs through 0012 shipped.
 
 ## Open questions
 

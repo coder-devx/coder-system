@@ -65,7 +65,8 @@ acts across projects without an explicit fan-out.
 - DB: `coder-core-db` Cloud SQL Postgres 17 (IAM auth only). Migration
   `0008` (head). See [`../integrations/cloud-sql.md`](../integrations/cloud-sql.md).
 - Auth: GitHub App (Coder DevX, app ID 3325027) for repo access. Per-project
-  Anthropic API keys in Secret Manager for worker dispatch.
+  Anthropic API keys in Secret Manager for worker dispatch. Admin JWT
+  (Google OAuth) for admin panel operations (spec 0012).
 - Projects: `coder` (coder-devx org), `vibetrade` (ViberTrade org).
 - CLI: `coder impersonate`, `coder token`, `coder status`,
   `coder project onboard`, `coder project doctor`.
@@ -103,12 +104,27 @@ That's the end-to-end goal from the start of implementation.
 | POST | `/v1/projects/{id}/impersonate/{role}` | `X-Api-Key` | Mint role-scoped bearer token |
 | GET  | `/v1/projects/{id}/sessions` | `X-Api-Key` | List impersonation sessions |
 | POST | `/v1/projects/{id}/sessions/{token_id}/revoke` | `X-Api-Key` | Revoke a session |
+| POST | `/v1/admin/login` | none | Exchange Google ID token for admin JWT |
+| GET  | `/v1/admin/me` | Admin JWT | Current admin email |
+| POST | `/v1/admin/sse-ticket` | Admin JWT | Mint single-use SSE ticket |
+| POST | `/v1/projects/{id}/tasks/{task_id}/override` | `X-Api-Key` / Admin JWT | Pause/resume/retry/reject task |
+| POST | `/v1/projects/{id}/tasks/{task_id}/merge` | `X-Api-Key` / Admin JWT | Squash-merge task PR |
+| PATCH | `/v1/projects/{id}/knowledge/{type}/{artifact_id}/checkboxes` | `X-Api-Key` / Admin JWT | Toggle AC checkboxes |
+| GET  | `/v1/projects/{id}/pipeline/events` | SSE ticket / Admin JWT | SSE stream of pipeline events |
 
 \* `POST /v1/projects` is unauthenticated while single-user.
 
-Auth model: per-project API key (`X-Api-Key` header, SHA-256 hash in
-the `projects` table) or short-lived bearer JWT issued via the
-impersonate endpoint. See [ADR 0005](../adrs/0005-multi-tenant-coder-core.md).
+Auth model: three token types, all project-scoped:
+
+1. **Per-project API key** (`X-Api-Key` header, SHA-256 hash in the
+   `projects` table) — for scripts and the impersonate endpoint.
+2. **Impersonation JWT** (`Authorization: Bearer`) — short-lived,
+   role-scoped, minted via `/v1/projects/{id}/impersonate/{role}`.
+3. **Admin JWT** (`Authorization: Bearer`, audience `coder-core/admin`)
+   — minted via Google OAuth at `/v1/admin/login`. Cross-project access
+   for admin panel operations. See spec 0012.
+
+See [ADR 0005](../adrs/0005-multi-tenant-coder-core.md).
 
 ## Data model
 
