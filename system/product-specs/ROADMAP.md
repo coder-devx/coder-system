@@ -10,8 +10,8 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**Shipped specs** (0001–0013) all trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).
-**Planned specs** (0014–0018) extend the system toward full self-hosting.
+**Shipped specs** (0001–0014) all trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).
+**Planned specs** (0015–0018) extend the system toward full self-hosting.
 
 Last updated: 2026-04-12 (6–12 month roadmap: self-hosting vision)
 
@@ -21,10 +21,10 @@ Last updated: 2026-04-12 (6–12 month roadmap: self-hosting vision)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 13 | 85 | 85 | `██████████` 100% |
-| Next — autonomous planning | 2 | 0 | 12 | `░░░░░░░░░░` 0% |
+| Shipped | 14 | 91 | 91 | `██████████` 100% |
+| Next — autonomous planning | 1 | 0 | 6 | `░░░░░░░░░░` 0% |
 | Later — full self-hosting | 3 | 0 | 21 | `░░░░░░░░░░` 0% |
-| **Total** | **18** | **85** | **118** | `███████░░░` **72%** |
+| **Total** | **18** | **91** | **118** | `████████░░` **77%** |
 
 ---
 
@@ -33,17 +33,6 @@ Last updated: 2026-04-12 (6–12 month roadmap: self-hosting vision)
 > The dev loop is closed. Coder needs to plan its own work. These specs
 > give the Team Manager a worker, give workers the ability to update
 > knowledge, and wire structured communication between roles.
-
-### [0014 — Knowledge write API](./wip/0014-knowledge-write-api.md)
-
-Workers can create and update knowledge artifacts (specs, designs, ADRs)
-via the API. Changes committed to the Git-backed repo with frontmatter
-validation and audit trail.
-
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 6 AC
-- **Depends on:** [`0002`](./active/0002-knowledge-repo-read-api.md)
-- **Unlocks:** [`0016`](./wip/0016-pm-worker-v1.md), [`0017`](./wip/0017-architect-worker-v1.md) (both need to write knowledge)
 
 ### [0015 — Worker-to-worker communication](./wip/0015-worker-communication.md)
 
@@ -73,7 +62,7 @@ the pipeline. Acceptance produces per-AC verdicts with evidence.
 
 - **Status:** wip
 - **Progress:** `░░░░░░░░░░` 0 / 7 AC
-- **Depends on:** [`0013`](./active/0013-team-manager-worker-v1.md), [`0014`](./wip/0014-knowledge-write-api.md), [`0015`](./wip/0015-worker-communication.md)
+- **Depends on:** [`0013`](./active/0013-team-manager-worker-v1.md), [`0014`](./active/0014-knowledge-write-api.md), [`0015`](./wip/0015-worker-communication.md)
 - **Unlocks:** self-hosting milestone (PM + TM + Dev + Reviewer = full lifecycle)
 
 ### [0017 — Architect worker v1](./wip/0017-architect-worker-v1.md)
@@ -85,7 +74,7 @@ existing decisions.
 
 - **Status:** wip
 - **Progress:** `░░░░░░░░░░` 0 / 7 AC
-- **Depends on:** [`0014`](./wip/0014-knowledge-write-api.md)
+- **Depends on:** [`0014`](./active/0014-knowledge-write-api.md)
 - **Unlocks:** higher-quality TM planning (designs give better task context)
 
 ### [0018 — Observability and cost tracking](./wip/0018-observability-and-cost-tracking.md)
@@ -295,6 +284,23 @@ Plans are reviewable before execution.
   approve/reject buttons. `StatusChip` extended for plan statuses.
   245 backend tests, 18 new.
 
+### [0014 — Knowledge write API](./active/0014-knowledge-write-api.md)
+
+Workers can create and update knowledge artifacts (specs, designs, ADRs)
+via the API. Changes committed to the Git-backed repo with frontmatter
+validation and audit trail.
+
+- **Status:** active
+- **Progress:** `██████████` 6 / 6 AC ✅
+- **What shipped:** `POST` and `PUT` endpoints on
+  `/v1/projects/{id}/knowledge/{type}` wrapping the GitHub Contents API.
+  Frontmatter validation against per-type required fields, cross-link
+  validation with self-reference exemption, structured commit messages
+  with actor attribution. Status changes trigger file moves (create at
+  new path + delete old + registry update). `GitHubClient` extended
+  with `create_file` and `delete_file` methods. 259 backend tests,
+  14 new.
+
 ---
 
 ## Dependency graph
@@ -315,10 +321,10 @@ flowchart TB
     s11["0011 Continuous deployment"]
     s12["0012 Admin auth + mutations"]
     s13["0013 Team Manager worker"]
+    s14["0014 Knowledge write API"]
   end
 
   subgraph next ["Next — autonomous planning"]
-    s14["0014 Knowledge write API"]
     s15["0015 Worker communication"]
   end
 
@@ -369,8 +375,8 @@ flowchart TB
   classDef next fill:#bbdefb,stroke:#1565c0,stroke-width:2px
   classDef later fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
 
-  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13 shipped
-  class s14,s15 next
+  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14 shipped
+  class s15 next
   class s16,s17,s18 later
 ```
 

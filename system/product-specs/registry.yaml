@@ -112,11 +112,11 @@ specs:
 
   - id: "0014"
     title: Knowledge write API
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0014-knowledge-write-api.md
-    served_by_designs: []
+    folder: active
+    file: active/0014-knowledge-write-api.md
+    served_by_designs: ["0007"]
 
   - id: "0015"
     title: Worker-to-worker communication

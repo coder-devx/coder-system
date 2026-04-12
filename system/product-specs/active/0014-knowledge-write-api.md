@@ -2,20 +2,20 @@
 id: "0014"
 title: Knowledge write API
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-11
+updated: 2026-04-12
 deprecated_at:
 reason:
-served_by_designs: []
+served_by_designs: ["0007"]
 related_specs: ["0002", "0016", "0017"]
 ---
 
 # Knowledge write API
 
 **Phase:** Next — autonomous planning
-**Progress:** 0 / 6 acceptance criteria
+**Progress:** 6 / 6 acceptance criteria ✅
 
 ## Problem
 
@@ -65,27 +65,30 @@ Both endpoints:
 
 ## Acceptance criteria
 
-- [ ] AC1: `POST /v1/projects/{id}/knowledge/{type}` creates a new
+- [x] AC1: `POST /v1/projects/{id}/knowledge/{type}` creates a new
   artifact file in the Git-backed knowledge repo.
-- [ ] AC2: `PUT /v1/projects/{id}/knowledge/{type}/{artifact_id}` updates
+- [x] AC2: `PUT /v1/projects/{id}/knowledge/{type}/{artifact_id}` updates
   an existing artifact without losing frontmatter fields.
-- [ ] AC3: Both endpoints validate frontmatter against the type's
+- [x] AC3: Both endpoints validate frontmatter against the type's
   `_TEMPLATE.md` schema and reject invalid writes with a 422.
-- [ ] AC4: Writes that would break a cross-link (referencing a
+- [x] AC4: Writes that would break a cross-link (referencing a
   non-existent ID) are rejected.
-- [ ] AC5: Every write commits to `main` with a structured commit
+- [x] AC5: Every write commits to `main` with a structured commit
   message attributing the worker actor.
-- [ ] AC6: The response includes the committed SHA and the artifact's
+- [x] AC6: The response includes the committed SHA and the artifact's
   canonical registry ID.
 
-## Open questions
+## Decisions
 
-- Should writes go to `main` directly or open a PR for human review?
-  Leaning toward direct commit for automated writes, PR for large
-  structural changes.
-- How does cross-link validation work for new artifacts whose IDs don't
-  exist in the registry yet?
+- **Direct commit to main** for all writes (no PR). Same pattern as the
+  existing checkbox PATCH endpoint. Human approval happens upstream (task
+  plans, spec review) — by the time a worker writes, the content is
+  already approved.
+- **Cross-link validation:** outbound cross-links must reference existing
+  IDs in the target registry. Self-references are allowed (a new spec
+  can list itself in `related_specs`). The create endpoint adds the
+  artifact to the registry atomically in the same commit.
 
 ## Links
 
-- Related specs: [`0002`](../active/0002-knowledge-repo-read-api.md), [`0016`](./0016-pm-worker-v1.md), [`0017`](./0017-architect-worker-v1.md)
+- Related specs: [`0002`](./0002-knowledge-repo-read-api.md), [`0016`](../wip/0016-pm-worker-v1.md), [`0017`](../wip/0017-architect-worker-v1.md)
