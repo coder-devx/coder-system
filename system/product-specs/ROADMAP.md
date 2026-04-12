@@ -10,10 +10,10 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**Shipped specs** (0001–0012) all trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).
-**Planned specs** (0013–0018) extend the system toward full self-hosting.
+**Shipped specs** (0001–0013) all trace to design [`0004 — Clean rebuild: coder-core + coder-admin`](../designs/active/0001-generalize-coder-from-vibetrade.md).
+**Planned specs** (0014–0018) extend the system toward full self-hosting.
 
-Last updated: 2026-04-11 (6–12 month roadmap: self-hosting vision)
+Last updated: 2026-04-12 (6–12 month roadmap: self-hosting vision)
 
 ---
 
@@ -21,10 +21,10 @@ Last updated: 2026-04-11 (6–12 month roadmap: self-hosting vision)
 
 | Phase | Specs | AC done | AC total | Progress |
 |---|---|---|---|---|
-| Shipped | 12 | 78 | 78 | `██████████` 100% |
-| Next — autonomous planning | 3 | 0 | 19 | `░░░░░░░░░░` 0% |
+| Shipped | 13 | 85 | 85 | `██████████` 100% |
+| Next — autonomous planning | 2 | 0 | 12 | `░░░░░░░░░░` 0% |
 | Later — full self-hosting | 3 | 0 | 21 | `░░░░░░░░░░` 0% |
-| **Total** | **18** | **78** | **118** | `██████░░░░` **66%** |
+| **Total** | **18** | **85** | **118** | `███████░░░` **72%** |
 
 ---
 
@@ -33,17 +33,6 @@ Last updated: 2026-04-11 (6–12 month roadmap: self-hosting vision)
 > The dev loop is closed. Coder needs to plan its own work. These specs
 > give the Team Manager a worker, give workers the ability to update
 > knowledge, and wire structured communication between roles.
-
-### [0013 — Team Manager worker v1](./wip/0013-team-manager-worker-v1.md)
-
-Given a spec and its designs, break it into sequenced developer tasks
-with clear prompts, dependency ordering, and complexity estimates.
-Plans are reviewable before execution.
-
-- **Status:** wip
-- **Progress:** `░░░░░░░░░░` 0 / 7 AC
-- **Depends on:** [`0010`](./active/0010-task-orchestration-v1.md) ✅, [`0012`](./active/0012-admin-auth-and-mutations.md) ✅
-- **Unlocks:** [`0016`](./wip/0016-pm-worker-v1.md) (PM needs TM to execute specs it drafts)
 
 ### [0014 — Knowledge write API](./wip/0014-knowledge-write-api.md)
 
@@ -84,7 +73,7 @@ the pipeline. Acceptance produces per-AC verdicts with evidence.
 
 - **Status:** wip
 - **Progress:** `░░░░░░░░░░` 0 / 7 AC
-- **Depends on:** [`0013`](./wip/0013-team-manager-worker-v1.md), [`0014`](./wip/0014-knowledge-write-api.md), [`0015`](./wip/0015-worker-communication.md)
+- **Depends on:** [`0013`](./active/0013-team-manager-worker-v1.md), [`0014`](./wip/0014-knowledge-write-api.md), [`0015`](./wip/0015-worker-communication.md)
 - **Unlocks:** self-hosting milestone (PM + TM + Dev + Reviewer = full lifecycle)
 
 ### [0017 — Architect worker v1](./wip/0017-architect-worker-v1.md)
@@ -286,6 +275,26 @@ Real-time pipeline updates via SSE.
 - **Progress:** `██████████` 7 / 7 AC ✅
 - **What shipped:** Google OAuth login with email allowlist, admin JWT (HS256, `coder-core/admin` audience) with cross-project access, `admin_sessions` audit table, SSE event bus for real-time pipeline updates, task merge endpoint (squash merge via GitHub API), knowledge checkbox editing via GitHub Contents API. Frontend: login page, auth guard, Bearer auth on all API calls, create task form, override buttons, approve-merge action, SSE hook, interactive checkboxes. 227 backend tests, 19 frontend tests.
 
+### [0013 — Team Manager worker v1](./active/0013-team-manager-worker-v1.md)
+
+Given a spec and its designs, break it into sequenced developer tasks
+with clear prompts, dependency ordering, and complexity estimates.
+Plans are reviewable before execution.
+
+- **Status:** active
+- **Progress:** `██████████` 7 / 7 AC ✅
+- **What shipped:** `team-manager` role in dispatcher with built-in
+  system prompt. Worker shells out to `claude` CLI, parses plan JSON
+  from output, creates draft `task_plan` row in Postgres. New
+  `task_plans` table (migration 0012) with `plan_json` JSONB, status
+  lifecycle (draft/approved/rejected), feedback field. 6 REST endpoints
+  for plan CRUD + approve/reject. Approve creates tasks with `blocked`
+  stage for dependency ordering; orchestrator `_unblock_dependents`
+  promotes blocked→queued when deps reach accepted. Admin panel: plan
+  list with status filter, plan detail with inline task editing,
+  approve/reject buttons. `StatusChip` extended for plan statuses.
+  245 backend tests, 18 new.
+
 ---
 
 ## Dependency graph
@@ -305,10 +314,10 @@ flowchart TB
     s10["0010 Task orchestration"]
     s11["0011 Continuous deployment"]
     s12["0012 Admin auth + mutations"]
+    s13["0013 Team Manager worker"]
   end
 
   subgraph next ["Next — autonomous planning"]
-    s13["0013 Team Manager worker"]
     s14["0014 Knowledge write API"]
     s15["0015 Worker communication"]
   end
@@ -360,8 +369,8 @@ flowchart TB
   classDef next fill:#bbdefb,stroke:#1565c0,stroke-width:2px
   classDef later fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
 
-  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12 shipped
-  class s13,s14,s15 next
+  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13 shipped
+  class s14,s15 next
   class s16,s17,s18 later
 ```
 

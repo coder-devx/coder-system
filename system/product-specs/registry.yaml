@@ -66,7 +66,7 @@ specs:
     file: active/0008-onboard-first-two-projects.md
     served_by_designs: ["0004"]
 
-  # ── Now — close the dev loop ──────────────────────────────────────
+  # ── Shipped — close the dev loop ──────────────────────────────────
 
   - id: "0009"
     title: Reviewer worker v1
@@ -104,11 +104,11 @@ specs:
 
   - id: "0013"
     title: Team Manager worker v1
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0013-team-manager-worker-v1.md
-    served_by_designs: []
+    folder: active
+    file: active/0013-team-manager-worker-v1.md
+    served_by_designs: ["0006"]
 
   - id: "0014"
     title: Knowledge write API

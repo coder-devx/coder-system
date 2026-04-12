@@ -2,20 +2,20 @@
 id: "0013"
 title: Team Manager worker v1
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-11
+updated: 2026-04-12
 deprecated_at:
 reason:
-served_by_designs: []
+served_by_designs: ["0006"]
 related_specs: ["0010", "0012", "0016"]
 ---
 
 # Team Manager worker v1
 
 **Phase:** Next — autonomous planning
-**Progress:** 0 / 7 acceptance criteria
+**Progress:** 7 / 7 acceptance criteria ✅
 
 ## Problem
 
@@ -59,27 +59,36 @@ A `team-manager` worker that:
 
 ## Acceptance criteria
 
-- [ ] AC1: `role=team-manager` tasks run the Team Manager worker.
-- [ ] AC2: The worker loads the target spec and its linked designs from
+- [x] AC1: `role=team-manager` tasks run the Team Manager worker.
+- [x] AC2: The worker loads the target spec and its linked designs from
   the knowledge API before planning.
-- [ ] AC3: The output plan includes ordered tasks with role, repo,
+- [x] AC3: The output plan includes ordered tasks with role, repo,
   prompt, depends_on, and complexity fields.
-- [ ] AC4: The plan is stored as a reviewable artifact before any tasks
+- [x] AC4: The plan is stored as a reviewable artifact before any tasks
   are submitted.
-- [ ] AC5: Human approval is required before tasks are submitted to the
+- [x] AC5: Human approval is required before tasks are submitted to the
   orchestrator.
-- [ ] AC6: Tasks are submitted in dependency order (blocking tasks before
+- [x] AC6: Tasks are submitted in dependency order (blocking tasks before
   dependent tasks).
-- [ ] AC7: The submitted tasks link back to the originating spec and plan.
+- [x] AC7: The submitted tasks link back to the originating spec and plan.
 
-## Open questions
+## Decisions
 
-- Where is the plan stored? In the knowledge repo as a task-plan
-  artifact, or as a new task-plan table in Postgres?
-- What's the approval UI? A new admin panel action, or a CLI command?
-- How does the worker handle specs with no linked designs — fall back
-  to spec body only?
+- **Plan storage:** Postgres `task_plans` table (operational state, not
+  a knowledge artifact). Columns: `spec_id`, `plan_json` (ordered task
+  list), `status` (draft/approved/rejected), `created_by_task_id`.
+  Avoids dependency on spec 0014 (knowledge write API).
+- **Approval UI:** Admin panel — new Plan Review view. Human can view,
+  edit individual task prompts, reorder, remove tasks, then approve or
+  reject. Follows the existing mutation pattern from spec 0012.
+- **No-designs fallback:** Worker plans from spec body only, logs a
+  warning. Less context → coarser tasks, acceptable for simple specs.
+- **Task submission:** The Team Manager worker itself submits approved
+  tasks in dependency order (not the orchestrator). TM creates tasks
+  sequentially — each blocking task before its dependents.
+- **Edit granularity:** Human can edit individual tasks (prompt, order,
+  complexity, role) before approving the plan.
 
 ## Links
 
-- Related specs: [`0010`](../active/0010-task-orchestration-v1.md), [`0012`](../active/0012-admin-auth-and-mutations.md), [`0016`](./0016-pm-worker-v1.md)
+- Related specs: [`0010`](./0010-task-orchestration-v1.md), [`0012`](./0012-admin-auth-and-mutations.md), [`0016`](../wip/0016-pm-worker-v1.md)

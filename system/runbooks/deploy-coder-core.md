@@ -5,7 +5,7 @@ type: runbook
 status: active
 owner: ro
 created: 2026-04-08
-updated: 2026-04-09
+updated: 2026-04-11
 applies_to_services: [coder-core]
 applies_to_integrations: [gcp, github]
 ---
@@ -41,6 +41,12 @@ Cloud SQL connection, scaling, runtime SA) is preserved by using
 you need to change one of those, do it manually with `gcloud run services
 update` and document the change.
 
+| Thing | Value |
+|---|---|
+| Migration job | `coder-core-migrate` (Cloud Run Job, same region/project) |
+| Migration command | `alembic upgrade head` |
+| Migration SA | `coder-core-sa` (reuses runtime SA with Cloud SQL IAM auth) |
+
 ## Automatic deploy
 
 The pipeline lives in [`coder-core/.github/workflows/ci.yml`](https://github.com/coder-devx/coder-core/blob/main/.github/workflows/ci.yml).
@@ -60,8 +66,20 @@ Pipeline stages:
    is loaded but not pushed (smoke-checks the Dockerfile). On main pushes
    the image is pushed to Artifact Registry tagged with the 12-char git
    SHA and `:latest`.
-3. **deploy** (main only) — `gcloud run services update coder-core
-   --image=…:{sha}`, then `curl /v1/health`.
+3. **deploy** (main only) — canary pattern:
+   1. Deploy the new image as a Cloud Run revision with **0% traffic**
+      (`--no-traffic --tag=canary`).
+   2. Health-check the canary revision via its tagged URL
+      (`https://canary---coder-core-…/v1/health`), retrying up to 5 times.
+   3. Run Alembic migrations via the `coder-core-migrate` Cloud Run Job
+      (same image, runtime SA, Cloud SQL IAM auth).
+   4. Shift 100% traffic to the canary revision, then normalise to
+      "route to latest" and remove the canary tag.
+   5. Send a Slack notification (success or failure) if the
+      `SLACK_DEPLOY_WEBHOOK_URL` variable is set.
+
+   If the health check or migration fails, the traffic-shift step never
+   runs — the previous revision keeps serving with zero downtime.
 
 GitHub auths to GCP via Workload Identity Federation:
 
@@ -88,11 +106,14 @@ Or in the browser: <https://github.com/coder-devx/coder-core/actions>.
 
 ### Success condition
 
-The `Smoke test /v1/health` step prints:
+The `Health check canary` step hits the tagged canary URL and prints:
 
 ```
 {"ok":true,"service":"coder-core","version":"X.Y.Z","environment":"prod"}
 ```
+
+The `Run database migrations` step completes without error. The
+`Shift traffic to new revision` step moves 100% to the new revision.
 
 Confirm in the Cloud Run console:
 <https://console.cloud.google.com/run/detail/europe-west1/coder-core/metrics?project=vibedevx>
@@ -167,8 +188,9 @@ The exact flags are in the `deploy` target of [`Makefile`](https://github.com/co
 
 ## Notes
 
-- **First automated deploy:** TBD on the next merge to `main` after
-  commit #5 lands. Update this line with the revision name once it ships.
+- **Canary deploy pattern:** added in spec 0011. Deploys with 0%
+  traffic, health-checks, migrates, then shifts. See the workflow for
+  details.
 - **First deployment** (2026-04-08): `coder-core-00001-9lp` — v0.0.1
   walking skeleton, `GET /v1/health` only.
 - **Runtime SA roles** (`coder-core-sa`): `roles/logging.logWriter`,

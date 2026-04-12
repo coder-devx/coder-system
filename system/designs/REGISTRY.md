@@ -10,6 +10,7 @@
 | 0002 | Worker Roles & Impersonation | ro | — | [active/0002-worker-roles-and-impersonation.md](./active/0002-worker-roles-and-impersonation.md) |
 | 0003 | Knowledge Repo Model | ro | — | [active/0003-knowledge-repo-model.md](./active/0003-knowledge-repo-model.md) |
 | 0004 | Clean rebuild — coder-core + coder-admin | ro | coder-core, coder-admin | [active/0001-generalize-coder-from-vibetrade.md](./active/0001-generalize-coder-from-vibetrade.md) |
+| 0006 | Team Manager Worker | ro | coder-core, coder-admin | [active/0006-team-manager-worker.md](./active/0006-team-manager-worker.md) |
 
 ## WIP
 

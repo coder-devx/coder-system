@@ -5,7 +5,7 @@ type: runbook
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-09
+updated: 2026-04-11
 applies_to_services: [coder-admin]
 applies_to_integrations: [gcp, github]
 ---
@@ -67,8 +67,18 @@ Pipeline stages:
    image is pushed to Artifact Registry tagged with the 12-char git
    SHA and `:latest`. `VITE_API_BASE_URL` is passed in as a build arg
    from `.env.production`.
-3. **deploy** (main only) — `gcloud run deploy coder-admin --image=…:{sha}`,
-   then `curl /healthz` and `curl / | grep "Coder Admin"`.
+3. **deploy** (main only) — canary pattern:
+   1. Deploy the new image as a Cloud Run revision with **0% traffic**
+      (`--no-traffic --tag=canary`).
+   2. Health-check the canary revision via its tagged URL
+      (`https://canary---coder-admin-…/`), retrying up to 5 times.
+   3. Shift 100% traffic to the canary revision, then normalise to
+      "route to latest" and remove the canary tag.
+   4. Send a Slack notification (success or failure) if the
+      `SLACK_DEPLOY_WEBHOOK_URL` variable is set.
+
+   If the health check fails, the traffic-shift step never runs — the
+   previous revision keeps serving with zero downtime.
 
 GitHub auths to GCP via Workload Identity Federation:
 
@@ -93,15 +103,9 @@ Or in the browser: <https://github.com/coder-devx/coder-admin/actions>.
 
 ### Success condition
 
-The smoke-test step prints:
-
-```
-HTTP/2 200
-ok
-```
-
-…and the `index.html` fetch contains `Coder Admin`. Confirm in the
-Cloud Run console:
+The `Health check canary` step fetches the canary URL and verifies the
+response contains `Coder Admin`. The `Shift traffic to new revision`
+step moves 100% to the new revision. Confirm in the Cloud Run console:
 <https://console.cloud.google.com/run/detail/europe-west1/coder-admin/metrics?project=vibedevx>
 
 Then open the service URL in a browser and verify the `coder-core

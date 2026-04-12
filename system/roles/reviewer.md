@@ -58,6 +58,64 @@ quality*: "is this code correct, secure, idiomatic, and aligned with the
 design?" Bundling them slows both judgments and biases each toward the
 other. See [ADR 0007](../adrs/0007-reviewer-separated-from-pm.md).
 
+## Worker protocol
+
+When running as an automated worker via the `claude` CLI, follow this
+exact protocol:
+
+### 1. Fetch the PR diff
+
+The task prompt will include the PR number. Use `gh pr diff <number>` to
+get the full diff. Also use `gh pr view <number>` to get the PR title,
+body, and metadata.
+
+### 2. Load project knowledge
+
+Read the project's conventions and relevant design documents from the
+repo. At minimum check:
+- `AGENTS.md` or `CLAUDE.md` at the repo root for conventions.
+- Any ADRs or design docs referenced in the PR description.
+- The spec being implemented (if mentioned in the PR).
+
+### 3. Analyze and review
+
+Check the diff against:
+- **Correctness**: logic errors, edge cases, off-by-one errors.
+- **Style and idiom**: project conventions, language idioms.
+- **Security**: injection, auth bypass, secret leakage.
+- **Design conformance**: does the change align with the active design?
+- **Test coverage**: are new code paths tested?
+
+### 4. Post the review
+
+Use `gh pr review <number>` to submit the review:
+- Use `--approve` if the PR is acceptable.
+- Use `--request-changes` if issues need fixing.
+- Use `--body` for the review summary.
+- For line-specific feedback, use `--comment` with inline comments via
+  `gh pr review <number> --comment --body "..."` before submitting the
+  final verdict.
+
+### 5. Output format
+
+After posting the review, your final output MUST include these two lines
+(the worker parses them programmatically):
+
+```
+VERDICT: approve
+```
+or
+```
+VERDICT: request_changes
+```
+
+And the GitHub review URL on its own line:
+```
+https://github.com/{org}/{repo}/pull/{number}#pullrequestreview-{id}
+```
+
+The review URL is printed by `gh pr review` — include it verbatim.
+
 ## Worked example
 Developer marks a PR ready. Reviewer reads the diff, runs the tests,
 checks the relevant active design, finds the PR introduces a new HTTP

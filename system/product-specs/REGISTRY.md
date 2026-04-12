@@ -18,12 +18,12 @@
 | [0010](./active/0010-task-orchestration-v1.md) | Task orchestration v1 | ro | — |
 | [0011](./active/0011-continuous-deployment.md) | Continuous deployment | ro | — |
 | [0012](./active/0012-admin-auth-and-mutations.md) | Admin panel auth and mutations | ro | — |
+| [0013](./active/0013-team-manager-worker-v1.md) | Team Manager worker v1 | ro | [0006](../designs/active/0006-team-manager-worker.md) |
 
 ## WIP
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0013](./wip/0013-team-manager-worker-v1.md) | Team Manager worker v1 | ro | — |
 | [0014](./wip/0014-knowledge-write-api.md) | Knowledge write API | ro | — |
 | [0015](./wip/0015-worker-communication.md) | Worker-to-worker communication | ro | — |
 | [0016](./wip/0016-pm-worker-v1.md) | PM worker v1 (spec and acceptance) | ro | — |
