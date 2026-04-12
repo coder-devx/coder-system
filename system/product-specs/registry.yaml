@@ -130,11 +130,11 @@ specs:
 
   - id: "0016"
     title: PM worker v1 (spec and acceptance)
-    status: wip
+    status: active
     owner: ro
-    folder: wip
-    file: wip/0016-pm-worker-v1.md
-    served_by_designs: []
+    folder: active
+    file: active/0016-pm-worker-v1.md
+    served_by_designs: ["0009"]
 
   - id: "0017"
     title: Architect worker v1

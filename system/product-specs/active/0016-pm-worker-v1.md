@@ -2,20 +2,20 @@
 id: "0016"
 title: PM worker v1 (spec and acceptance)
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-11
+updated: 2026-04-12
 deprecated_at:
 reason:
-served_by_designs: []
+served_by_designs: ["0009"]
 related_specs: ["0013", "0014", "0015"]
 ---
 
 # PM worker v1 (spec and acceptance)
 
 **Phase:** Later — full self-hosting
-**Progress:** 0 / 7 acceptance criteria
+**Progress:** 7 / 7 acceptance criteria
 
 ## Problem
 
@@ -61,29 +61,30 @@ Two modes for the PM worker:
 
 ## Acceptance criteria
 
-- [ ] AC1: `role=pm` tasks run the PM worker in draft or acceptance mode
+- [x] AC1: `role=pm` tasks run the PM worker in draft or acceptance mode
   (distinguished by task prompt).
-- [ ] AC2: In draft mode, the PM produces a valid spec document with all
+- [x] AC2: In draft mode, the PM produces a valid spec document with all
   required frontmatter fields, stored in `wip/` via the knowledge write
   API.
-- [ ] AC3: The drafted spec is surfaced to the human for review before
+- [x] AC3: The drafted spec is surfaced to the human for review before
   any pipeline execution.
-- [ ] AC4: Human approval is required before the spec enters the pipeline
+- [x] AC4: Human approval is required before the spec enters the pipeline
   (Team Manager picks it up only after approval).
-- [ ] AC5: In acceptance mode, the PM evaluates each AC against the
+- [x] AC5: In acceptance mode, the PM evaluates each AC against the
   delivery and produces a verdict (pass | fail | partial) with evidence.
-- [ ] AC6: The acceptance report is stored as a knowledge artifact linked
+- [x] AC6: The acceptance report is stored as a knowledge artifact linked
   to the spec.
-- [ ] AC7: A spec where all ACs pass is promoted to `active/` by the PM
+- [x] AC7: A spec where all ACs pass is promoted to `active/` by the PM
   (moving file, updating frontmatter and registry).
 
 ## Open questions
 
-- How does the PM communicate with the Team Manager to signal that a
-  spec is approved? Via the task message system (spec 0015) or by
-  creating a new TM task directly?
-- How does acceptance mode know which delivery to test against — the
-  latest merged PR, or a specific commit reference?
+_Resolved._
+
+- PM→TM signaling: via human approval gate. The PM drafts specs to
+  `wip/`; the human reviews and creates a TM task when ready.
+- Acceptance evidence: provided via the task prompt context. The PM
+  worker queries task results by spec_id in the prompt.
 
 ## Links
 

@@ -73,3 +73,12 @@ designs:
     file: active/0008-worker-communication.md
     affects_services: [coder-core, coder-admin]
     decided_by: []
+
+  - id: "0009"
+    title: PM Worker
+    status: active
+    owner: ro
+    folder: active
+    file: active/0009-pm-worker.md
+    affects_services: [coder-core]
+    decided_by: []
