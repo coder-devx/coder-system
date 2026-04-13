@@ -172,8 +172,8 @@ specs:
   served_by_designs: []
 - id: '0023'
   title: Branch cleanup GC job
-  status: active
+  status: wip
   owner: ro
-  folder: active
-  file: active/0023-draft-specification-complete.md
+  folder: wip
+  file: wip/0023-draft-specification-complete.md
   served_by_designs: []

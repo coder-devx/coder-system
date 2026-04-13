@@ -2,7 +2,7 @@
 id: '0023'
 title: Draft Specification Complete
 type: spec
-status: active
+status: wip
 owner: ro
 created: '2026-04-13'
 updated: '2026-04-13'
