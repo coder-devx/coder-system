@@ -13,7 +13,13 @@ is in an approval/override role, not a task-authoring role.
 **22 specs shipped.** "Close the Loop" phase complete — the pipeline now
 produces real PRs, has approval gates, and chains steps automatically.
 
-Last updated: 2026-04-12
+**Pipeline proven end-to-end (2026-04-13):** PM draft → spec file in repo →
+pipeline run advances to `spec_approval` → ready for human approval →
+chain auto-creates architect task. Bugs found and fixed during smoke testing:
+session commit race, JSON shape validation, heading extraction, max-turns
+tuning, error_max_turns handling.
+
+Last updated: 2026-04-13
 
 ---
 
@@ -463,6 +469,47 @@ flowchart TB
 
   class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22 shipped
 ```
+
+---
+
+## Scale — next specs
+
+> Make the pipeline robust, self-healing, and observable at scale.
+
+### 0023 — Branch cleanup GC job (planned)
+
+Hourly job deletes stale `task/*` branches older than 24h with no open PR.
+Prevents branch proliferation from failed developer tasks.
+
+- **Status:** planned
+- **Depends on:** 0010, 0020
+
+### 0024 — Worker output compliance (planned)
+
+Workers (PM, Architect, TM) must produce structured JSON output reliably.
+Add output schema validation, retry on malformed output, and fallback
+synthesis for all worker types (not just PM).
+
+- **Status:** planned
+- **Depends on:** 0016, 0017, 0013
+
+### 0025 — Pipeline run dashboard (planned)
+
+Admin panel view showing pipeline runs end-to-end: current step,
+time per step, blocking gates, auto-refresh. One-click approve/reject
+at each gate.
+
+- **Status:** planned
+- **Depends on:** 0021, 0022, 0003
+
+### 0026 — Automatic retry on transient failures (planned)
+
+When a worker fails due to API overload (529), rate limiting (429),
+or timeout, automatically retry with exponential backoff instead of
+leaving the task in `failed` state.
+
+- **Status:** planned
+- **Depends on:** 0010, 0019
 
 ---
 
