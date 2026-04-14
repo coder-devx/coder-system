@@ -126,10 +126,10 @@ designs:
   decided_by: []
 - id: '0024'
   title: Task Stage Runs API Endpoint
-  status: wip
+  status: active
   owner: ro
-  folder: wip
-  file: wip/0024-task-stage-runs-api-endpoint.md
+  folder: active
+  file: active/0024-task-stage-runs-api-endpoint.md
   affects_services:
   - coder-core
   decided_by: []
