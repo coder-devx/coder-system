@@ -1,6 +1,6 @@
 ---
-id: '0000'
-title: 'Product Specification: Task Stage Runs API Endpoint'
+id: '0024'
+title: Task Stage Runs API
 type: spec
 status: wip
 owner: ro
@@ -11,8 +11,6 @@ reason: null
 served_by_designs: []
 related_specs: []
 ---
-
-Since I don't have write permissions to create a proper spec directory, let me present the comprehensive product specification directly:
 
 # Product Specification: Task Stage Runs API Endpoint
 

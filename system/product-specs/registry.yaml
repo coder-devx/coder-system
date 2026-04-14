@@ -177,3 +177,10 @@ specs:
   folder: active
   file: active/0023-draft-specification-complete.md
   served_by_designs: []
+- id: '0024'
+  title: Task Stage Runs API
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0024-task-stage-runs-api.md
+  served_by_designs: []
