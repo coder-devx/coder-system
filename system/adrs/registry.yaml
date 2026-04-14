@@ -71,3 +71,10 @@ adrs:
     date: 2026-04-08
     file: 0010-agents-md-in-every-repo.md
     relates_to_designs: ["0001"]
+
+  - id: "0011"
+    title: In-process orphan reaper for Cloud Run dispatches
+    status: accepted
+    date: 2026-04-14
+    file: 0011-orphan-dispatch-reaper.md
+    relates_to_designs: ["0001", "0004"]

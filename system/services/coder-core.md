@@ -25,7 +25,7 @@ exposes:
     port: 8080
     path: /v1/projects/{id}/knowledge/{path}
 implements_designs: ["0001", "0002", "0004"]
-decided_by: ["0005", "0006", "0010"]
+decided_by: ["0005", "0006", "0010", "0011"]
 ---
 
 # Coder Core
@@ -166,5 +166,12 @@ flowchart LR
 - **Worker launch:** in-process modules inside coder-core. The dispatcher
   leases tasks with `SELECT ... FOR UPDATE SKIP LOCKED` and shells out
   to `claude`. Splitting into separate repos deferred until scale demands.
+- **Orphan recovery:** a background reaper runs inside every instance
+  and re-queues tasks stuck at `status='running'` past the worker
+  timeout (default: 1500 s threshold, 60 s scan interval, 3-reap cap).
+  Needed because Cloud Run replaces/drains instances mid-dispatch and
+  kills their in-flight `asyncio.create_task` background work. See
+  [ADR 0011](../adrs/0011-orphan-dispatch-reaper.md). The planned
+  structural fix is Cloud Tasks; the reaper is the near-term safety net.
 - **Knowledge cache:** pull-on-read with a 60-second in-memory TTL cache.
   `_metrics` endpoint exposes hit/miss counters.
