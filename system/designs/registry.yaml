@@ -124,3 +124,12 @@ designs:
   file: active/0023-design-complete-for-spec-0023.md
   affects_services: []
   decided_by: []
+- id: '0024'
+  title: Task Stage Runs API Endpoint
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0024-task-stage-runs-api-endpoint.md
+  affects_services:
+  - coder-core
+  decided_by: []
