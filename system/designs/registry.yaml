@@ -100,3 +100,12 @@ designs:
     file: active/0011-observability-and-cost-tracking.md
     affects_services: [coder-core, coder-admin]
     decided_by: []
+
+  - id: "0023"
+    title: Design Complete for Spec 0023
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0023-design-complete-for-spec-0023.md
+    affects_services: []
+    decided_by: []
