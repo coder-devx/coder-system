@@ -2,110 +2,125 @@
 # REGISTRY.md is generated from this file.
 
 designs:
-  - id: "0001"
-    title: System Overview
-    status: active
-    owner: ro
-    folder: active
-    file: active/0001-system-overview.md
-    affects_services: [coder-core, coder-admin]
-    decided_by: ["0001"]
-
-  - id: "0002"
-    title: Worker Roles & Impersonation
-    status: active
-    owner: ro
-    folder: active
-    file: active/0002-worker-roles-and-impersonation.md
-    affects_services: []
-    decided_by: ["0006", "0007"]
-
-  - id: "0003"
-    title: Knowledge Repo Model
-    status: active
-    owner: ro
-    folder: active
-    file: active/0003-knowledge-repo-model.md
-    affects_services: []
-    decided_by: ["0001", "0002", "0003", "0004", "0008"]
-
-  - id: "0004"
-    title: Clean rebuild — coder-core + coder-admin
-    status: active
-    owner: ro
-    folder: active
-    file: active/0001-generalize-coder-from-vibetrade.md
-    affects_services: [coder-core, coder-admin]
-    decided_by: ["0005", "0006", "0007", "0008"]
-
-  - id: "0005"
-    title: Competitive Intelligence Pipeline
-    status: wip
-    owner: ro
-    folder: wip
-    file: wip/0002-competitive-intelligence-pipeline.md
-    affects_services: [coder-core]
-    decided_by: []
-
-  - id: "0006"
-    title: Team Manager Worker
-    status: active
-    owner: ro
-    folder: active
-    file: active/0006-team-manager-worker.md
-    affects_services: [coder-core, coder-admin]
-    decided_by: []
-
-  - id: "0007"
-    title: Knowledge Write API
-    status: active
-    owner: ro
-    folder: active
-    file: active/0007-knowledge-write-api.md
-    affects_services: [coder-core]
-    decided_by: []
-
-  - id: "0008"
-    title: Worker-to-Worker Communication
-    status: active
-    owner: ro
-    folder: active
-    file: active/0008-worker-communication.md
-    affects_services: [coder-core, coder-admin]
-    decided_by: []
-
-  - id: "0009"
-    title: PM Worker
-    status: active
-    owner: ro
-    folder: active
-    file: active/0009-pm-worker.md
-    affects_services: [coder-core]
-    decided_by: []
-
-  - id: "0010"
-    title: Architect Worker
-    status: active
-    owner: ro
-    folder: active
-    file: active/0010-architect-worker.md
-    affects_services: [coder-core]
-    decided_by: []
-
-  - id: "0011"
-    title: Observability and Cost Tracking
-    status: active
-    owner: ro
-    folder: active
-    file: active/0011-observability-and-cost-tracking.md
-    affects_services: [coder-core, coder-admin]
-    decided_by: []
-
-  - id: "0023"
-    title: Design Complete for Spec 0023
-    status: wip
-    owner: ro
-    folder: wip
-    file: wip/0023-design-complete-for-spec-0023.md
-    affects_services: []
-    decided_by: []
+- id: '0001'
+  title: System Overview
+  status: active
+  owner: ro
+  folder: active
+  file: active/0001-system-overview.md
+  affects_services:
+  - coder-core
+  - coder-admin
+  decided_by:
+  - '0001'
+- id: '0002'
+  title: Worker Roles & Impersonation
+  status: active
+  owner: ro
+  folder: active
+  file: active/0002-worker-roles-and-impersonation.md
+  affects_services: []
+  decided_by:
+  - '0006'
+  - '0007'
+- id: '0003'
+  title: Knowledge Repo Model
+  status: active
+  owner: ro
+  folder: active
+  file: active/0003-knowledge-repo-model.md
+  affects_services: []
+  decided_by:
+  - '0001'
+  - '0002'
+  - '0003'
+  - '0004'
+  - 0008
+- id: '0004'
+  title: "Clean rebuild \u2014 coder-core + coder-admin"
+  status: active
+  owner: ro
+  folder: active
+  file: active/0001-generalize-coder-from-vibetrade.md
+  affects_services:
+  - coder-core
+  - coder-admin
+  decided_by:
+  - '0005'
+  - '0006'
+  - '0007'
+  - 0008
+- id: '0005'
+  title: Competitive Intelligence Pipeline
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0002-competitive-intelligence-pipeline.md
+  affects_services:
+  - coder-core
+  decided_by: []
+- id: '0006'
+  title: Team Manager Worker
+  status: active
+  owner: ro
+  folder: active
+  file: active/0006-team-manager-worker.md
+  affects_services:
+  - coder-core
+  - coder-admin
+  decided_by: []
+- id: '0007'
+  title: Knowledge Write API
+  status: active
+  owner: ro
+  folder: active
+  file: active/0007-knowledge-write-api.md
+  affects_services:
+  - coder-core
+  decided_by: []
+- id: 0008
+  title: Worker-to-Worker Communication
+  status: active
+  owner: ro
+  folder: active
+  file: active/0008-worker-communication.md
+  affects_services:
+  - coder-core
+  - coder-admin
+  decided_by: []
+- id: 0009
+  title: PM Worker
+  status: active
+  owner: ro
+  folder: active
+  file: active/0009-pm-worker.md
+  affects_services:
+  - coder-core
+  decided_by: []
+- id: '0010'
+  title: Architect Worker
+  status: active
+  owner: ro
+  folder: active
+  file: active/0010-architect-worker.md
+  affects_services:
+  - coder-core
+  decided_by: []
+- id: '0011'
+  title: Observability and Cost Tracking
+  status: active
+  owner: ro
+  folder: active
+  file: active/0011-observability-and-cost-tracking.md
+  affects_services:
+  - coder-core
+  - coder-admin
+  decided_by: []
+- id: '0023'
+  title: Design Complete for Spec 0023
+  status: active
+  owner: ro
+  folder: active
+  file: active/0023-design-complete-for-spec-0023.md
+  affects_services: []
+  decided_by: []
