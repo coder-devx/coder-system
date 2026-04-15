@@ -51,6 +51,12 @@ and `/pipeline-runs` endpoints in `coder-core`.
   (frontmatter, file move, registry update) and publishes
   `knowledge_approved`. Reject records feedback and can spawn a PM or
   Architect revision task.
+- **Stage-run archive.** Every dispatch snapshot lands in
+  `task_stage_runs` before the next handler resets the live `TaskRow`
+  (migration 0018). The archive is queryable per task via
+  `GET /v1/projects/{id}/tasks/{task_id}/stage-runs`, chronologically
+  ordered, with `stage` / `status` filters — the replay trail for
+  debugging a task without reading Cloud Run logs.
 - **Pipeline chaining.** A `pipeline_run` row tracks an end-to-end flow
   for one spec. Approving a spec auto-creates an Architect task;
   approving a design auto-creates a TM task; all developer tasks for a
@@ -68,6 +74,8 @@ and `/pipeline-runs` endpoints in `coder-core`.
   task into a fresh queued one.
 - `POST|GET /v1/projects/{id}/tasks/{task_id}/messages` — structured
   worker conversation; SSE `message_created` events.
+- `GET /v1/projects/{id}/tasks/{task_id}/stage-runs?stage=&status=&limit=`
+  — archived per-dispatch snapshots, oldest-first.
 - `POST /v1/projects/{id}/knowledge/{specs|designs}/{id}/approve|reject`
   — gate endpoints; SSE `knowledge_approved` / `knowledge_rejected`.
 - `GET /v1/projects/{id}/pipeline-runs` and
@@ -98,6 +106,10 @@ and `/pipeline-runs` endpoints in `coder-core`.
 - `0021-pipeline-chaining` — `pipeline_runs`, chain hooks on approvals
   and on all-dev-accepted, PM-draft auto-run, pause/resume/cancel.
   Migration 0017. Proved end-to-end on 2026-04-13.
+- `0024` — `GET /tasks/{task_id}/stage-runs` read endpoint over the
+  `task_stage_runs` archive (migration 0018). Ordered by `recorded_at`
+  ascending; filters on `stage` and `status`; 1–500 limit. No new
+  schema.
 
 ## Links
 

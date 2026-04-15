@@ -105,6 +105,11 @@ Endpoints:
 - `0008-worker-communication` (spec 0015) — introduced the
   `task_messages` table, the endpoints, orchestrator integration,
   and the admin thread UI.
+- `0024` — added the
+  `GET /v1/projects/{id}/tasks/{task_id}/stage-runs` read endpoint
+  (`api/task_stage_runs.py`) over the existing `task_stage_runs`
+  archive (migration 0018). Ordered by `recorded_at` ascending;
+  `stage` / `status` / `limit` filters; no schema change.
 
 ## Links
 

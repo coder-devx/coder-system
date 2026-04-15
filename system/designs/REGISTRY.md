@@ -25,7 +25,6 @@ Logical components of the Coder system as it exists today.
 | ID | Title | Owner | Implements specs |
 |---|---|---|---|
 | [0002](./wip/0002-competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | ro | — |
-| [0024](./wip/0024-task-stage-runs-api-endpoint.md) | Task Stage Runs API Endpoint | ro | [0024](../product-specs/wip/0024-task-stage-runs-api.md) |
 
 ## Deprecated
 

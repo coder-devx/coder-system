@@ -56,7 +56,7 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
-| [0024](./wip/0024-task-stage-runs-api.md) | Task Stage Runs API | in flight |
+| _No WIP in flight._ | | |
 
 ---
 
@@ -195,13 +195,15 @@ Prevents branch proliferation from failed developer tasks.
   [`designs/active/branch-cleanup`](../designs/active/branch-cleanup.md)
 - **Extends:** `task-orchestration`, `developer-worker`, `observability`
 
-### 0024 — Task Stage Runs API (in flight)
+### 0024 — Task Stage Runs API (shipped 2026-04-15)
 
 `GET /v1/projects/{project_id}/tasks/{task_id}/stage-runs` endpoint
 returning the archived `TaskStageRunRow` rows for a task, ordered by
 `recorded_at` ascending. Debugging-oriented, no admin UI.
 
-- **Status:** wip
+- **Status:** shipped → merged into
+  [`task-orchestration`](./active/task-orchestration.md) /
+  [`worker-communication`](../designs/active/worker-communication.md)
 - **Extends:** `task-orchestration`, `observability`
 
 ### 0025 — Worker output compliance (planned)

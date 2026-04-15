@@ -130,11 +130,3 @@ specs:
   file: active/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
-- id: '0024'
-  title: Task Stage Runs API
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0024-task-stage-runs-api.md
-  served_by_designs:
-  - '0024'

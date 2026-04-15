@@ -136,13 +136,3 @@ designs:
   file: wip/0002-competitive-intelligence-pipeline.md
   affects_services:
   - coder-core
-- id: '0024'
-  title: Task Stage Runs API Endpoint
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0024-task-stage-runs-api-endpoint.md
-  implements_specs:
-  - '0024'
-  affects_services:
-  - coder-core

@@ -29,7 +29,7 @@ in each component's `## Evolution` section and in git.
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0024](./wip/0024-task-stage-runs-api.md) | Task Stage Runs API | ro | [0024](../designs/wip/0024-task-stage-runs-api-endpoint.md) |
+| _None_ | | | |
 
 ## Deprecated
 
