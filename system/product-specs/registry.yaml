@@ -130,3 +130,16 @@ specs:
   file: active/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
+- id: '0025'
+  title: Worker output compliance
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0025-worker-output-compliance.md
+  served_by_designs:
+  - '0025'
+  related_specs:
+  - pm-worker
+  - architect-worker
+  - team-manager-worker
+  - task-orchestration

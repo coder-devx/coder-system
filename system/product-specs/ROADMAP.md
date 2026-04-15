@@ -56,7 +56,7 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
-| _No WIP in flight._ | | |
+| 0025 | [Worker output compliance](./wip/0025-worker-output-compliance.md) | wip |
 
 ---
 
@@ -206,14 +206,14 @@ returning the archived `TaskStageRunRow` rows for a task, ordered by
   [`worker-communication`](../designs/active/worker-communication.md)
 - **Extends:** `task-orchestration`, `observability`
 
-### 0025 — Worker output compliance (planned)
+### 0025 — Worker output compliance (wip)
 
 Workers (PM, Architect, TM) must produce structured JSON output reliably.
-Add output schema validation, retry on malformed output, and fallback
-synthesis for all worker types.
+Add per-worker output schemas, pre-side-effect validation, re-prompt on
+malformed output, and structured `failure_kind="schema"` on give-up.
 
-- **Status:** planned
-- **Extends:** `pm-worker`, `architect-worker`, `team-manager-worker`
+- **Status:** wip → [`wip/0025-worker-output-compliance`](./wip/0025-worker-output-compliance.md)
+- **Extends:** `pm-worker`, `architect-worker`, `team-manager-worker`, `task-orchestration`
 
 ### 0026 — Pipeline run dashboard (planned)
 

@@ -78,3 +78,10 @@ adrs:
     date: 2026-04-14
     file: 0011-orphan-dispatch-reaper.md
     relates_to_designs: ["0001", "0004"]
+
+  - id: "0012"
+    title: Re-prompt only, no programmatic repair, for malformed worker JSON
+    status: accepted
+    date: 2026-04-15
+    file: 0012-re-prompt-only-worker-output-remediation.md
+    relates_to_designs: ["0025"]

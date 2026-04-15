@@ -29,7 +29,7 @@ in each component's `## Evolution` section and in git.
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| _None_ | | | |
+| [0025](./wip/0025-worker-output-compliance.md) | Worker output compliance | ro | _none_ |
 
 ## Deprecated
 

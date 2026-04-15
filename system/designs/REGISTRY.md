@@ -25,6 +25,7 @@ Logical components of the Coder system as it exists today.
 | ID | Title | Owner | Implements specs |
 |---|---|---|---|
 | [0002](./wip/0002-competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | ro | — |
+| [0025](./wip/0025-worker-output-compliance.md) | Worker output compliance | ro | [0025](../product-specs/wip/0025-worker-output-compliance.md) |
 
 ## Deprecated
 
