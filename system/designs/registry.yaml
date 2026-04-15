@@ -149,3 +149,16 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+- id: '0027'
+  title: Automatic retry on transient failures
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0027-transient-failure-retry.md
+  implements_specs:
+  - '0027'
+  decided_by:
+  - '0013'
+  affects_services:
+  - coder-core
+  - coder-admin

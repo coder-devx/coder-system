@@ -30,6 +30,7 @@ in each component's `## Evolution` section and in git.
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
 | [0025](./wip/0025-worker-output-compliance.md) | Worker output compliance | ro | _none_ |
+| [0027](./wip/0027-transient-failure-retry.md) | Automatic retry on transient failures | ro | _none_ |
 
 ## Deprecated
 

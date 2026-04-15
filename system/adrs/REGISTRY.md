@@ -16,3 +16,4 @@
 | 0010 | Every repo (code and knowledge) contains an AGENTS.md | accepted | 2026-04-08 | [0010-agents-md-in-every-repo.md](./0010-agents-md-in-every-repo.md) |
 | 0011 | In-process orphan reaper for Cloud Run dispatches | accepted | 2026-04-14 | [0011-orphan-dispatch-reaper.md](./0011-orphan-dispatch-reaper.md) |
 | 0012 | Re-prompt only, no programmatic repair, for malformed worker JSON | accepted | 2026-04-15 | [0012-re-prompt-only-worker-output-remediation.md](./0012-re-prompt-only-worker-output-remediation.md) |
+| 0013 | Transient retry lives inside the worker, not at the dispatcher | accepted | 2026-04-15 | [0013-worker-level-transient-retry.md](./0013-worker-level-transient-retry.md) |

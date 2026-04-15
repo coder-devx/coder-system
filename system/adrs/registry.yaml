@@ -85,3 +85,10 @@ adrs:
     date: 2026-04-15
     file: 0012-re-prompt-only-worker-output-remediation.md
     relates_to_designs: ["0025"]
+
+  - id: "0013"
+    title: Transient retry lives inside the worker, not at the dispatcher
+    status: accepted
+    date: 2026-04-15
+    file: 0013-worker-level-transient-retry.md
+    relates_to_designs: ["0027"]

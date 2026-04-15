@@ -57,6 +57,7 @@ The system today, by logical component. Each links to its active spec
 | ID | Title | Status |
 |---|---|---|
 | 0025 | [Worker output compliance](./wip/0025-worker-output-compliance.md) | wip |
+| 0027 | [Automatic retry on transient failures](./wip/0027-transient-failure-retry.md) | wip |
 
 ---
 
@@ -224,14 +225,16 @@ at each gate. (Foundation for Phase 5.)
 - **Status:** planned
 - **Extends:** `task-orchestration`, `admin-panel`
 
-### 0027 — Automatic retry on transient failures (planned)
+### 0027 — Automatic retry on transient failures (wip)
 
 When a worker fails due to API overload (529), rate limiting (429),
 or timeout, automatically retry with exponential backoff instead of
-leaving the task in `failed` state.
+leaving the task in `failed` state. Retry lives inside the worker
+(ADR 0013) so it composes with 0025's schema-retry loop without
+duplicating classification at the dispatcher.
 
-- **Status:** planned
-- **Extends:** `task-orchestration`
+- **Status:** wip → [`wip/0027-transient-failure-retry`](./wip/0027-transient-failure-retry.md)
+- **Extends:** `task-orchestration`, all five role workers
 
 ### 0028 — Concurrent pipeline execution & queue fairness (planned)
 
