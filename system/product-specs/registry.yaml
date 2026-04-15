@@ -21,6 +21,18 @@ specs:
   file: active/architect-worker.md
   served_by_designs:
   - architect-worker
+- id: branch-cleanup
+  title: Branch cleanup
+  status: active
+  owner: ro
+  folder: active
+  file: active/branch-cleanup.md
+  served_by_designs:
+  - branch-cleanup
+  related_specs:
+  - developer-worker
+  - task-orchestration
+  - observability
 - id: continuous-deployment
   title: Continuous Deployment
   status: active
@@ -118,17 +130,6 @@ specs:
   file: active/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
-- id: '0023'
-  title: Branch cleanup GC job
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0023-branch-cleanup-gc.md
-  served_by_designs:
-  - '0023'
-  related_specs:
-  - developer-worker
-  - task-orchestration
 - id: '0024'
   title: Task Stage Runs API
   status: wip

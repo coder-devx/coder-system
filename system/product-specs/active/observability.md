@@ -41,6 +41,11 @@ without SSH.
 - **Admin dashboard.** `/metrics` route with a period selector, summary
   cards, CSS bar charts for daily cost and success rate, and a per-spec
   cost table.
+- **Branch GC counters.** `GET /v1/_admin/gc/metrics?period=` exposes
+  `deleted_total`, `errors_total`, `skipped_total`,
+  `dry_run_deleted_total`, `false_delete_total` — the counter surface
+  used by the [branch-cleanup](./branch-cleanup.md) runbook for
+  dashboards and the `false_delete_total > 0` SEV-2 alert.
 
 ## Interfaces
 
@@ -67,6 +72,8 @@ without SSH.
   (migration 0014), `/metrics` endpoint, Slack alerts with per-type
   rate limiting, admin dashboard with period selector and per-spec
   cost table. Design `0011`.
+- `0023` — `gc_events` audit table (migration 0019) and
+  `/v1/_admin/gc/metrics` counter surface for the branch-cleanup GC.
 
 ## Links
 

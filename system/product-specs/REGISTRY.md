@@ -11,6 +11,7 @@ in each component's `## Evolution` section and in git.
 |---|---|---|---|
 | [admin-panel](./active/admin-panel.md) | Admin Panel | ro | [system-overview](../designs/active/system-overview.md) |
 | [architect-worker](./active/architect-worker.md) | Architect Worker | ro | [architect-worker](../designs/active/architect-worker.md) |
+| [branch-cleanup](./active/branch-cleanup.md) | Branch cleanup | ro | [branch-cleanup](../designs/active/branch-cleanup.md) |
 | [continuous-deployment](./active/continuous-deployment.md) | Continuous Deployment | ro | [system-overview](../designs/active/system-overview.md) |
 | [developer-worker](./active/developer-worker.md) | Developer Worker | ro | [worker-roles](../designs/active/worker-roles.md) |
 | [impersonation](./active/impersonation.md) | Impersonation | ro | [impersonation](../designs/active/impersonation.md) |
@@ -28,7 +29,6 @@ in each component's `## Evolution` section and in git.
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0023](./wip/0023-branch-cleanup-gc.md) | Branch cleanup GC job | ro | [0023](../designs/wip/0023-branch-cleanup-gc.md) |
 | [0024](./wip/0024-task-stage-runs-api.md) | Task Stage Runs API | ro | [0024](../designs/wip/0024-task-stage-runs-api-endpoint.md) |
 
 ## Deprecated

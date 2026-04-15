@@ -15,6 +15,16 @@ designs:
   - architect-worker
   affects_services:
   - coder-core
+- id: branch-cleanup
+  title: Branch cleanup
+  status: active
+  owner: ro
+  folder: active
+  file: active/branch-cleanup.md
+  implements_specs:
+  - branch-cleanup
+  affects_services:
+  - coder-core
 - id: impersonation
   title: Impersonation
   status: active
@@ -124,16 +134,6 @@ designs:
   owner: ro
   folder: wip
   file: wip/0002-competitive-intelligence-pipeline.md
-  affects_services:
-  - coder-core
-- id: '0023'
-  title: Branch cleanup GC job
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0023-branch-cleanup-gc.md
-  implements_specs:
-  - '0023'
   affects_services:
   - coder-core
 - id: '0024'

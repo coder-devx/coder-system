@@ -11,7 +11,7 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**14 active components** describe the shipped system.
+**15 active components** describe the shipped system.
 
 **Pipeline proven end-to-end (2026-04-13):** PM draft → spec file in repo →
 pipeline run advances to `spec_approval` → ready for human approval →
@@ -48,6 +48,7 @@ The system today, by logical component. Each links to its active spec
 | Task Orchestration | [task-orchestration](./active/task-orchestration.md) | [worker-communication](../designs/active/worker-communication.md) |
 | Continuous Deployment | [continuous-deployment](./active/continuous-deployment.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
 | Observability | [observability](./active/observability.md) | [observability-and-cost-tracking](../designs/active/observability-and-cost-tracking.md) |
+| Branch cleanup | [branch-cleanup](./active/branch-cleanup.md) | [branch-cleanup](../designs/active/branch-cleanup.md) |
 
 ---
 
@@ -55,7 +56,6 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
-| [0023](./wip/0023-branch-cleanup-gc.md) | Branch cleanup GC job | in flight |
 | [0024](./wip/0024-task-stage-runs-api.md) | Task Stage Runs API | in flight |
 
 ---
@@ -82,7 +82,7 @@ flowchart TB
   end
 
   subgraph scale ["Phase 3 — Scale & Reliability"]
-    s23["Branch GC"]
+    s23["Branch GC (shipped)"]
     s24["Worker output compliance"]
     s25["Pipeline run dashboard"]
     s26["Transient retry"]
@@ -170,8 +170,8 @@ flowchart TB
   classDef secStyle fill:#f8bbd0,stroke:#ad1457,stroke-width:2px
   classDef autoStyle fill:#d1c4e9,stroke:#4527a0,stroke-width:2px
 
-  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs activeStyle
-  class s23,s24,s25,s26,s27 scaleStyle
+  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23 activeStyle
+  class s24,s25,s26,s27 scaleStyle
   class s28,s29,s30,s31 costStyle
   class s32,s33,s34,s35 adminStyle
   class s36,s37,s38 secStyle
@@ -186,13 +186,14 @@ flowchart TB
 > Success criteria: zero manual cleanup, <1% task loss from transient
 > failures, 3+ pipelines running concurrently without queue starvation.
 
-### 0023 — Branch cleanup GC job (in flight)
+### 0023 — Branch cleanup GC job (shipped 2026-04-15)
 
 Hourly job deletes stale `task/*` branches older than 24h with no open PR.
 Prevents branch proliferation from failed developer tasks.
 
-- **Status:** wip → [`wip/0023-branch-cleanup-gc.md`](./wip/0023-branch-cleanup-gc.md)
-- **Extends:** `task-orchestration`, `developer-worker`
+- **Status:** shipped → [`active/branch-cleanup`](./active/branch-cleanup.md) /
+  [`designs/active/branch-cleanup`](../designs/active/branch-cleanup.md)
+- **Extends:** `task-orchestration`, `developer-worker`, `observability`
 
 ### 0024 — Task Stage Runs API (in flight)
 

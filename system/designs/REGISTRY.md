@@ -9,6 +9,7 @@ Logical components of the Coder system as it exists today.
 | Slug | Title | Owner | Implements specs | Decided by |
 |---|---|---|---|---|
 | [architect-worker](./active/architect-worker.md) | Architect Worker | ro | [architect-worker](../product-specs/active/architect-worker.md) | — |
+| [branch-cleanup](./active/branch-cleanup.md) | Branch cleanup | ro | [branch-cleanup](../product-specs/active/branch-cleanup.md) | — |
 | [impersonation](./active/impersonation.md) | Impersonation | ro | — | [0006](../adrs/0006-per-role-service-accounts.md) |
 | [knowledge-repo-model](./active/knowledge-repo-model.md) | Knowledge Repo Model | ro | — | 0001, 0002, 0003, 0004, 0008 |
 | [knowledge-write-api](./active/knowledge-write-api.md) | Knowledge Write API | ro | [knowledge-api](../product-specs/active/knowledge-api.md) | — |
@@ -24,7 +25,6 @@ Logical components of the Coder system as it exists today.
 | ID | Title | Owner | Implements specs |
 |---|---|---|---|
 | [0002](./wip/0002-competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | ro | — |
-| [0023](./wip/0023-branch-cleanup-gc.md) | Branch cleanup GC job | ro | [0023](../product-specs/wip/0023-branch-cleanup-gc.md) |
 | [0024](./wip/0024-task-stage-runs-api-endpoint.md) | Task Stage Runs API Endpoint | ro | [0024](../product-specs/wip/0024-task-stage-runs-api.md) |
 
 ## Deprecated

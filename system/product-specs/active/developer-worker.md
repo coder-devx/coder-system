@@ -43,6 +43,10 @@ produces.
   stderr/traceback), `timed_out` (workspace cleaned).
 - Accepts a `fix_context` prefix on retry prompts so prior reviewer
   feedback flows into the next attempt.
+- Captures the `task/<slug>` branch name on push via
+  `git rev-parse --abbrev-ref HEAD` and persists it to
+  `tasks.branch_name` — the key the branch-cleanup GC uses to map a
+  remote branch back to its task row.
 
 ## Interfaces
 
@@ -72,6 +76,9 @@ produces.
   JSONL transcript capture, `task_logs` table, `timed_out` state.
 - 0020 — branch/commit/push/PR flow, `pr_url` column (migration 0016),
   reviewer prompt receives the PR URL, hard failure on missing PR.
+- 0023 — capture `tasks.branch_name` (migration 0019) on push so the
+  [branch-cleanup](./branch-cleanup.md) GC can resolve remote
+  `task/*` branches back to their task rows.
 
 ## Links
 
