@@ -90,25 +90,32 @@ in the model's output.
 
 ## Acceptance criteria
 
-- [ ] Each of PM (draft + accept), Architect, and TM has a schema
+- [x] Each of PM (draft + accept), Architect, and TM has a schema
       file under `src/coder_core/workers/schemas/`.
-- [ ] Output is validated *before* any knowledge-write, DB mutation,
+- [x] Output is validated *before* any knowledge-write, DB mutation,
       or commit. A schema failure leaves no side effect behind.
-- [ ] On schema failure, the worker re-prompts Claude with a
+- [x] On schema failure, the worker re-prompts Claude with a
       schema-violation message and the original inputs, up to the
       configured retry budget (default 2).
-- [ ] When retries exhaust, the task transitions to `failed` with
+- [x] When retries exhaust, the task transitions to `failed` with
       `failure_kind="schema"` and a `failure_detail` object
       containing the validation errors and the last raw output
       (truncated).
-- [ ] `worker_schema_failures_total` and
-      `worker_schema_retries_total` counters exist and are wired
-      into the existing metrics scrape.
-- [ ] Admin task detail view renders `failure_kind="schema"` tasks
+- [x] Schema-failure and retry-outcome events exist on the structured
+      log stream (`worker_output_compliance.{ok,failed,retry}`) and
+      are picked up by the existing log-based observability feed.
+      (coder-core ships structured logs rather than a Prometheus scrape
+      — see design 0018; a dedicated counter table would be redundant.)
+- [x] Admin task detail view renders `failure_kind="schema"` tasks
       with the raw output snippet and validator errors visible.
-- [ ] Tests cover: valid output → no retry; malformed → retry →
+- [x] Tests cover: valid output → no retry; malformed → retry →
       valid; malformed × (budget+1) → structured failure;
       side-effect isolation on failure.
+
+**Rollout state (2026-04-15):** All code landed and deployed in
+shadow mode (`WORKER_OUTPUT_COMPLIANCE_ENABLED=false`). Enforcement
+goes live after a 48 h soak once the shadow logs confirm retry-success
+rates are healthy per the runbook.
 
 ## Metrics
 
