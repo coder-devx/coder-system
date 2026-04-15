@@ -5,7 +5,7 @@ type: adr
 status: accepted
 date: 2026-04-08
 deciders: [ro]
-relates_to_designs: ["0003"]
+relates_to_designs: [knowledge-repo-model]
 ---
 
 # ADR 0001 — Knowledge repo layout: system + template

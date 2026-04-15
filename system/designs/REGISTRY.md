@@ -2,25 +2,30 @@
 
 > Generated view of [`registry.yaml`](./registry.yaml). Do not hand-edit.
 
-## Active
+## Active — subject-named logical components
 
-| ID | Title | Owner | Affects | File |
+Logical components of the Coder system as it exists today.
+
+| Slug | Title | Owner | Implements specs | Decided by |
 |---|---|---|---|---|
-| 0001 | System Overview | ro | coder-core, coder-admin | [active/0001-system-overview.md](./active/0001-system-overview.md) |
-| 0002 | Worker Roles & Impersonation | ro | — | [active/0002-worker-roles-and-impersonation.md](./active/0002-worker-roles-and-impersonation.md) |
-| 0003 | Knowledge Repo Model | ro | — | [active/0003-knowledge-repo-model.md](./active/0003-knowledge-repo-model.md) |
-| 0004 | Clean rebuild — coder-core + coder-admin | ro | coder-core, coder-admin | [active/0001-generalize-coder-from-vibetrade.md](./active/0001-generalize-coder-from-vibetrade.md) |
-| 0006 | Team Manager Worker | ro | coder-core, coder-admin | [active/0006-team-manager-worker.md](./active/0006-team-manager-worker.md) |
-| 0007 | Knowledge Write API | ro | coder-core | [active/0007-knowledge-write-api.md](./active/0007-knowledge-write-api.md) |
-| 0008 | Worker-to-Worker Communication | ro | coder-core, coder-admin | [active/0008-worker-communication.md](./active/0008-worker-communication.md) |
-| 0009 | PM Worker | ro | coder-core | [active/0009-pm-worker.md](./active/0009-pm-worker.md) |
-| 0010 | Architect Worker | ro | coder-core | [active/0010-architect-worker.md](./active/0010-architect-worker.md) |
+| [architect-worker](./active/architect-worker.md) | Architect Worker | ro | [architect-worker](../product-specs/active/architect-worker.md) | — |
+| [impersonation](./active/impersonation.md) | Impersonation | ro | — | [0006](../adrs/0006-per-role-service-accounts.md) |
+| [knowledge-repo-model](./active/knowledge-repo-model.md) | Knowledge Repo Model | ro | — | 0001, 0002, 0003, 0004, 0008 |
+| [knowledge-write-api](./active/knowledge-write-api.md) | Knowledge Write API | ro | [knowledge-api](../product-specs/active/knowledge-api.md) | — |
+| [observability-and-cost-tracking](./active/observability-and-cost-tracking.md) | Observability and Cost Tracking | ro | [observability](../product-specs/active/observability.md) | — |
+| [pm-worker](./active/pm-worker.md) | PM Worker | ro | [pm-worker](../product-specs/active/pm-worker.md) | — |
+| [system-overview](./active/system-overview.md) | System Overview | ro | — | 0001, 0005, 0006, 0007, 0008 |
+| [team-manager-worker](./active/team-manager-worker.md) | Team Manager Worker | ro | [team-manager-worker](../product-specs/active/team-manager-worker.md) | — |
+| [worker-communication](./active/worker-communication.md) | Worker Communication | ro | [task-orchestration](../product-specs/active/task-orchestration.md) | — |
+| [worker-roles](./active/worker-roles.md) | Worker Roles | ro | — | 0006, 0007 |
 
-## WIP
+## WIP — numbered, roadmap-aligned
 
-| ID | Title | Owner | Affects | File |
-|---|---|---|---|---|
-| 0005 | Competitive Intelligence Pipeline | ro | coder-core | [wip/0002-competitive-intelligence-pipeline.md](./wip/0002-competitive-intelligence-pipeline.md) |
+| ID | Title | Owner | Implements specs |
+|---|---|---|---|
+| [0002](./wip/0002-competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | ro | — |
+| [0023](./wip/0023-branch-cleanup-gc.md) | Branch cleanup GC job | ro | [0023](../product-specs/wip/0023-branch-cleanup-gc.md) |
+| [0024](./wip/0024-task-stage-runs-api-endpoint.md) | Task Stage Runs API Endpoint | ro | [0024](../product-specs/wip/0024-task-stage-runs-api.md) |
 
 ## Deprecated
 

@@ -5,7 +5,7 @@ type: adr
 status: accepted
 date: 2026-04-08
 deciders: [ro]
-relates_to_designs: ["0001"]
+relates_to_designs: [system-overview]
 supersedes:
 superseded_by:
 ---

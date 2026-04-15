@@ -25,8 +25,12 @@ when instantiating, do **not** rely on the upstream link at runtime.
 2. YAML registry is the source of truth.
 3. Cross-links must resolve.
 4. ADRs are append-only.
-5. Designs move, they don't get deleted.
-6. Numbering: zero-padded 4-digit, never reused.
+5. Specs and designs have **two lifecycles**:
+   - `wip/` is temporal and numbered (`00NN-kebab-title.md`) — planned work.
+   - `active/` is atemporal and subject-named (`component-slug.md`) — current system components.
+   - On ship, WIP content merges into `active/` (update existing and/or add new component files); the WIP file is deleted.
+   - `deprecated/` keeps removed components with `deprecated_at` and `reason`.
+6. Numbering: ADRs and WIP specs/designs use zero-padded 4-digit IDs, never reused. Active specs/designs use subject-kebab slugs as stable IDs.
 7. Diagrams are Mermaid, inline.
 8. Don't duplicate code-derivable knowledge.
 9. This repo is project-specific. Don't put Coder-system rules here.
@@ -38,5 +42,5 @@ See the upstream `AGENTS.md` for the full text of each rule.
 1. `README.md`
 2. `AGENTS.md` (this file)
 3. `glossary.md`
-4. `designs/active/0001-system-overview.md` (write this first when starting a project)
+4. `designs/active/system-overview.md` (write this first when starting a project)
 5. `services/REGISTRY.md` and `roles/REGISTRY.md`

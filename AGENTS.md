@@ -33,14 +33,37 @@ See [`README.md`](./README.md) for the layout.
    the old one's `status` to `superseded` with `superseded_by:` pointing at
    the new ID.
 
-5. **Designs move, they don't get deleted.** A WIP design that ships moves
-   into `active/` (or its content is merged into existing active design
-   files). An active design that's removed moves to `deprecated/` with a
-   `deprecated_at` date and `reason`. Files don't disappear — history matters.
+5. **Two lifecycles for specs and designs.** `wip/` and `active/` are
+   different kinds of knowledge, not two stages of the same file.
+   - `wip/` is **temporal and numbered**. Files align with the roadmap
+     and describe *planned* work (`00NN-kebab-title.md`).
+   - `active/` is **atemporal and subject-named**. Files describe the
+     system's real logical components as they exist today
+     (`multi-tenancy.md`, `developer-worker.md`, …). Active is the
+     current truth of how the system works, not a ledger of past specs.
+   - When a WIP spec/design ships, its content is **merged into
+     `active/`** by updating one or more existing component files,
+     creating a new component file for a genuinely new logical unit,
+     or both. The numbered WIP file is then **deleted**. History lives
+     in git, not in filenames.
+   - An active component that's removed from the system moves to
+     `deprecated/` with `status: deprecated`, `deprecated_at:`, and
+     `reason:`. Do not delete.
 
-6. **Numbering.** ADRs and designs use zero-padded 4-digit IDs
-   (`0001-short-kebab-title.md`). Look at the highest existing ID in the
-   registry before assigning a new one. IDs are never reused.
+6. **Numbering vs. subject-naming.**
+   - **ADRs** use zero-padded 4-digit IDs (`00NN-kebab-title.md`) and
+     are append-only (rule 4).
+   - **WIP** specs and designs use zero-padded 4-digit IDs aligned with
+     the roadmap. Look at the highest existing WIP + deprecated ID
+     before assigning a new one. Numeric IDs are never reused.
+   - **Active** specs and designs are **not** numbered. Filename is a
+     subject-kebab slug naming the logical component
+     (`task-orchestration.md`, not `0010-task-orchestration-v1.md`).
+     Slugs are stable identifiers — renaming one is a rename + registry
+     update + cross-link sweep.
+   - **Deprecated** specs/designs keep whatever name they had when
+     deprecated (numeric if deprecated from `wip/`, slug if deprecated
+     from `active/`).
 
 7. **Diagrams are Mermaid, inline.** No `.drawio`, no `.excalidraw`, no
    image attachments unless absolutely necessary (and then commit the source
@@ -70,18 +93,21 @@ See [`README.md`](./README.md) for the layout.
 ## How to update an existing artifact
 
 - Most fields can be edited in place.
-- Changing a file's **ID** is a rename + registry update + cross-link sweep.
-  Avoid it unless necessary.
+- Changing a file's **ID or slug** is a rename + registry update +
+  cross-link sweep. Avoid it unless necessary.
 - For ADRs, see rule 4 above (append-only).
-- For designs, prefer editing in place over creating new files — until the
-  edit is large enough to warrant a new ADR or a new design ID.
+- For **active** designs and specs, prefer editing the relevant
+  subject-named component file in place. Create a new component file
+  only when the change introduces a genuinely new logical unit.
+- For **WIP** designs and specs, edit in place while in flight. On ship,
+  fold the content into `active/` per rule 5 and delete the WIP file.
 
 ## Discovery order for an agent loading context
 
 1. `README.md` — what the repo is.
 2. `AGENTS.md` — this file, the rules.
 3. `system/glossary.md` — vocabulary.
-4. `system/designs/active/0001-system-overview.md` — the big picture.
+4. `system/designs/active/system-overview.md` — the big picture.
 5. `system/services/REGISTRY.md` and `system/roles/REGISTRY.md` — the moving parts.
 6. Specific files relevant to the task at hand.
 

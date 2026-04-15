@@ -5,7 +5,7 @@ type: adr
 status: accepted
 date: 2026-04-08
 deciders: [ro]
-relates_to_designs: ["0003"]
+relates_to_designs: [knowledge-repo-model]
 ---
 
 # ADR 0008 — CI validation of the knowledge repo

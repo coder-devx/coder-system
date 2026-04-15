@@ -5,7 +5,7 @@ type: adr
 status: accepted
 date: 2026-04-08
 deciders: [ro]
-relates_to_designs: ["0002", "0004"]
+relates_to_designs: [worker-roles, system-overview]
 ---
 
 # ADR 0006 — Each role-worker gets its own GCP service account

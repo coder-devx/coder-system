@@ -1,378 +1,62 @@
 # Roadmap
 
-> Human-readable progress view over [`registry.yaml`](./registry.yaml) and
-> the acceptance-criteria checkboxes in each spec file. Grouped by phase
-> and traced to the design that justifies each item.
+> Human-readable progress view. `active/` holds subject-named logical
+> components (the system as it is today). `wip/` holds numbered,
+> roadmap-aligned work in flight. When a WIP ships, its content merges
+> into `active/` and the numbered WIP file disappears.
 >
-> **Phase** reflects sequencing, not a calendar. A spec moves forward
-> only when its prerequisites are `active`.
+> **Phase** reflects sequencing, not a calendar. A WIP starts only when
+> its prerequisites are represented in `active/`.
 
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**22 specs shipped.** "Close the Loop" phase complete — the pipeline now
-produces real PRs, has approval gates, and chains steps automatically.
+**14 active components** describe the shipped system.
 
 **Pipeline proven end-to-end (2026-04-13):** PM draft → spec file in repo →
 pipeline run advances to `spec_approval` → ready for human approval →
-chain auto-creates architect task. Bugs found and fixed during smoke testing:
-session commit race, JSON shape validation, heading extraction, max-turns
-tuning, error_max_turns handling.
+chain auto-creates architect task.
 
-Last updated: 2026-04-13
+**Next 6 months (May–Nov 2026).** Five sequenced phases, 19 planned
+items: Scale & Reliability → Cost & Token Efficiency → Admin Panel v2
+→ Security & Compliance → Trusted Autonomy. The through-line is:
+*make the pipeline fast, cheap, visible, safe to trust with less human
+intervention.*
 
----
-
-## Progress summary
-
-| Phase | Specs | AC done | AC total | Progress |
-|---|---|---|---|---|
-| Shipped | 22 | 145 | 145 | `██████████` 100% |
-| **Total** | **22** | **145** | **145** | |
+Last updated: 2026-04-15
 
 ---
 
-## Shipped
+## Active components
 
-> Specs that have hit 100% AC and been promoted from `wip/` to `active/`.
+The system today, by logical component. Each links to its active spec
+(product view) and active design (technical view) where both exist.
 
-### [0001 — Multi-tenant project CRUD](./active/0001-multi-tenant-project-crud.md)
-
-`project_id` is a first-class dimension on every call. Create, list,
-fetch, archive, structured per-request logging carrying `project_id`,
-per-project API keys with rotate.
-
-- **Status:** active
-- **Progress:** `██████████` 6 / 6 AC ✅
-
-### [0002 — Knowledge repo read API](./active/0002-knowledge-repo-read-api.md)
-
-Single authoritative `GET` surface for a project's knowledge artifacts
-with parsed frontmatter and resolvable cross-links.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** typed routes `GET /v1/projects/{id}/knowledge/{type}`
-  and `GET /v1/projects/{id}/knowledge/{type}/{id}` returning parsed
-  pydantic models, cross-link resolution with broken-link surfacing,
-  in-memory TTL cache with `knowledge_cache_hit_total` metric exposed
-  at `/v1/projects/{id}/knowledge/_metrics`. Bytes-passthrough relocated
-  to `/knowledge/_files/{path}` as the escape hatch.
-
-### [0003 — Admin Panel v0 (read-only)](./active/0003-admin-panel-read-only.md)
-
-React/Vite SPA. Project switcher, project list, knowledge browser.
-Zero mutations.
-
-- **Status:** active
-- **Progress:** `██████████` 6 / 6 AC ✅
-- **What shipped:** `coder-admin` now has a typed API client over the
-  full project + knowledge surface, per-project API-key prompt with
-  `localStorage` persistence, project list (`/`) and project detail
-  (`/projects/:id`) views, registry list (`/projects/:id/:type`), and
-  artifact detail (`/projects/:id/:type/:artifactId`) with parsed
-  frontmatter table, react-markdown body, lazy-loaded mermaid diagram
-  rendering, and knowledge cross-links rewritten to in-app router
-  navigation. Project switcher in the header. Vitest covers the
-  cross-link rewriter, projects list + click-through, and the artifact
-  page (frontmatter, mermaid placeholder, intra-app navigation, and
-  the missing-API-key path).
-
-### [0004 — Developer worker v1](./active/0004-developer-worker-v1.md)
-
-In-process `developer` worker running `claude` against a project's
-real repo clone, opening PRs and writing back outcome + logs.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** the dispatcher leases queued tasks with
-  `SELECT ... FOR UPDATE SKIP LOCKED` (race-free even with concurrent
-  workers), shells out to `claude` against a per-task workspace clone
-  authed by a fresh GitHub-App installation token, captures the JSONL
-  session transcript, and records success/failure/`timed_out`
-  back onto the row. Logs emitted while the worker runs are buffered
-  via a contextvar-aware logging handler and drained into a new
-  `task_logs` table on completion (one transaction with the outcome
-  write). New `GET /v1/projects/{id}/tasks/{task_id}/logs` endpoint
-  surfaces them with `project_id`, `task_id`, and `role` on every line
-  per AC5. Timeouts are a distinct `timed_out` lifecycle state with
-  the per-task tempdir cleaned up via `try/finally`.
-
-### [0005 — Per-role service accounts](./active/0005-per-role-service-accounts.md)
-
-Every role has a dedicated GCP service account. Dispatcher fetches
-per-project Anthropic keys through a broker-downscoped token instead
-of a single process-wide env var.
-
-- **Status:** active
-- **Progress:** `██████████` 6 / 6 AC ✅
-- **What shipped:** seven `coder-{role}@vibedevx.iam.gserviceaccount.com`
-  service accounts provisioned by `coder-core/infra/terraform` with
-  state in `gs://vibedevx-coder-core-tfstate`. `roles.yaml` is the
-  single source of truth; both `roles.tf` (`yamldecode(file(...))`)
-  and `capability_matrix.py` read it so the IAM surface and the
-  human-readable `CAPABILITY_MATRIX.md` cannot drift. CI runs
-  `capability_matrix.py --check` + `tofu fmt -check` + `tofu validate`
-  on every PR (AC6).
-
-### [0006 — Pipeline UI in admin](./active/0006-pipeline-ui-in-admin.md)
-
-Pipeline tab in `coder-admin`. Live task list, captured logs, status
-filters. Still read-only.
-
-- **Status:** active
-- **Progress:** `██████████` 6 / 6 AC ✅
-- **What shipped:** `coder-core` `GET /v1/projects/{id}/tasks` now
-  accepts `?role=` and `?status=` filters. `coder-admin`
-  ships a typed `listTasks` / `getTask` / `getTaskLogs` client and a
-  shared `StatusChip` component, plus pipeline list and detail routes.
-
-### [0007 — Local agent impersonation](./active/0007-local-agent-impersonation.md)
-
-Short-lived role-scoped tokens so Claude Code / Cursor can act as a
-role for a project. Audit trail tied to the authorising human.
-
-- **Status:** active
-- **Progress:** `██████████` 6 / 6 AC ✅
-- **What shipped:** dual auth (`X-Api-Key` + `Authorization: Bearer`)
-  in `require_project_auth`, actor tracking on tasks, `coder` CLI with
-  `impersonate` / `token` / `status` commands, violet impersonation
-  badges in `coder-admin`. 181 tests.
-
-### [0008 — Onboard first two projects](./active/0008-onboard-first-two-projects.md)
-
-VibeTrade + Coder (dog-fooding) onboarded end-to-end, running in
-parallel with demonstrable isolation.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** VibeTrade (`vibetrade`) and Coder (`coder`) both
-  running developer tasks with per-secret IAM isolation.
-- **Promotes:** design [`0004`](../designs/active/0001-generalize-coder-from-vibetrade.md) from `wip` to `active`
-
-### [0009 — Reviewer worker v1](./active/0009-reviewer-worker-v1.md)
-
-Automated code review on PRs. Fetches the diff, loads project knowledge
-(conventions, ADRs, designs), posts structured review comments on
-GitHub, submits approve/request-changes.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** `workers/reviewer.py` following the developer
-  subprocess pattern. System prompt instructs claude to `gh pr diff`,
-  load conventions, analyze, and `gh pr review`. New `review_verdict`
-  and `review_url` columns on tasks (migration 0009). Live review on
-  [coder-devx/coder-core#2](https://github.com/coder-devx/coder-core/pull/2)
-  caught a real convention violation. 12 new tests.
-
-### [0010 — Task orchestration v1](./active/0010-task-orchestration-v1.md)
-
-End-to-end pipeline: enrich → execute → test → review → accept, with
-fix loops on failure. State machine in Postgres. Human override at
-any stage.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** Migration 0010 adds `stage`, `fix_attempts`, and
-  `fix_context` columns plus `ix_tasks_stage` index. `TaskStage` enum
-  covers the full lifecycle. `workers/orchestrator.py` implements the
-  `orchestrate_task` loop with stage transitions, fix loops (max 3),
-  and structured logging. Dispatcher prepends `fix_context` to prompt
-  for fix attempts. API: `stage=queued` on create, `?stage=` filter on
-  list, `POST /{task_id}/override` (pause/resume/retry/skip_to_stage/
-  reject). 19 new tests, 214 total passing.
-
-### [0011 — Continuous deployment](./active/0011-continuous-deployment.md)
-
-Push-to-main deploys for `coder-core` and `coder-admin` with canary
-pattern, automated migrations, and Slack notifications.
-
-- **Status:** active
-- **Progress:** `██████████` 6 / 6 AC ✅
-- **What shipped:** Canary deploy pattern for both repos: deploy with
-  `--no-traffic --tag=canary`, health-check the canary URL, shift
-  traffic only on success. `coder-core-migrate` Cloud Run Job runs
-  Alembic migrations before traffic shift. Slack webhook notifications
-  on success/failure (graceful degradation if not configured). Runbooks
-  updated for both services.
-
-### [0012 — Admin panel auth and mutations](./active/0012-admin-auth-and-mutations.md)
-
-Google OAuth for the admin panel. Write operations: create tasks,
-override pipeline decisions, approve merges, edit knowledge artifacts.
-Real-time pipeline updates via SSE.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** Google OAuth login with email allowlist, admin JWT (HS256, `coder-core/admin` audience) with cross-project access, `admin_sessions` audit table, SSE event bus for real-time pipeline updates, task merge endpoint (squash merge via GitHub API), knowledge checkbox editing via GitHub Contents API. Frontend: login page, auth guard, Bearer auth on all API calls, create task form, override buttons, approve-merge action, SSE hook, interactive checkboxes. 227 backend tests, 19 frontend tests.
-
-### [0013 — Team Manager worker v1](./active/0013-team-manager-worker-v1.md)
-
-Given a spec and its designs, break it into sequenced developer tasks
-with clear prompts, dependency ordering, and complexity estimates.
-Plans are reviewable before execution.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** `team-manager` role in dispatcher with built-in
-  system prompt. Worker shells out to `claude` CLI, parses plan JSON
-  from output, creates draft `task_plan` row in Postgres. New
-  `task_plans` table (migration 0012) with `plan_json` JSONB, status
-  lifecycle (draft/approved/rejected), feedback field. 6 REST endpoints
-  for plan CRUD + approve/reject. Approve creates tasks with `blocked`
-  stage for dependency ordering; orchestrator `_unblock_dependents`
-  promotes blocked→queued when deps reach accepted. Admin panel: plan
-  list with status filter, plan detail with inline task editing,
-  approve/reject buttons. `StatusChip` extended for plan statuses.
-  245 backend tests, 18 new.
-
-### [0014 — Knowledge write API](./active/0014-knowledge-write-api.md)
-
-Workers can create and update knowledge artifacts (specs, designs, ADRs)
-via the API. Changes committed to the Git-backed repo with frontmatter
-validation and audit trail.
-
-- **Status:** active
-- **Progress:** `██████████` 6 / 6 AC ✅
-- **What shipped:** `POST` and `PUT` endpoints on
-  `/v1/projects/{id}/knowledge/{type}` wrapping the GitHub Contents API.
-  Frontmatter validation against per-type required fields, cross-link
-  validation with self-reference exemption, structured commit messages
-  with actor attribution. Status changes trigger file moves (create at
-  new path + delete old + registry update). `GitHubClient` extended
-  with `create_file` and `delete_file` methods. 259 backend tests,
-  14 new.
-
-### [0015 — Worker-to-worker communication](./active/0015-worker-communication.md)
-
-Structured message passing between workers on a task: review feedback,
-clarification requests, acceptance decisions, human overrides. Full
-conversation visible in admin panel with real-time SSE updates.
-
-- **Status:** active
-- **Progress:** `██████████` 6 / 6 AC ✅
-- **What shipped:** `task_messages` table (migration 0013) with
-  `from_role`, `to_role`, `msg_type` (feedback/question/decision/
-  override), optional `verdict` (approve/request_changes/reject), and
-  `body`. POST + GET endpoints with tenant isolation and validation.
-  Orchestrator reads verdict messages as fallback for stage transitions;
-  `_build_fix_context` includes recent messages so the developer sees
-  reviewer feedback. SSE `message_created` events. Admin panel message
-  thread with color-coded type and verdict chips. 271 backend tests,
-  12 new.
-
-### [0016 — PM worker v1 (spec and acceptance)](./active/0016-pm-worker-v1.md)
-
-PM drafts product specs from problem statements and runs acceptance
-testing on delivered work. Specs require human approval before entering
-the pipeline. Acceptance produces per-AC verdicts with evidence.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** `workers/pm.py` with two modes: `draft:` creates
-  product specs from problem statements via claude CLI, `accept:`
-  evaluates acceptance criteria and produces verdict reports. Dispatcher
-  Phase 4 writes draft specs to `wip/` via GitHub Contents API and posts
-  verdict messages for acceptance reports. Built-in system prompts for
-  both modes. Design [`0009`](../designs/active/0009-pm-worker.md).
-  285 backend tests, 14 new.
-
-### [0017 — Architect worker v1](./active/0017-architect-worker-v1.md)
-
-Given an approved spec, produce a design document with components,
-data flow, Mermaid diagrams, and rollout plan. Draft ADRs for
-non-obvious decisions. Maintain architectural consistency with
-existing decisions.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** `workers/architect.py` with built-in system prompt
-  instructing Claude to output design JSON with frontmatter, body
-  (including Mermaid diagrams), and optional ADR list. Dispatcher
-  Phase 4 writes designs to `wip/` and ADRs via GitHub Contents API.
-  Design [`0010`](../designs/active/0010-architect-worker.md).
-  295 backend tests, 10 new.
-
-### [0018 — Observability and cost tracking](./active/0018-observability-and-cost-tracking.md)
-
-Per-project cost attribution (Anthropic tokens, compute, API calls).
-Pipeline health metrics (success rate, stage durations). Threshold
-alerts via Slack. Dashboard in admin panel.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** `task_stage_durations` table (migration 0014)
-  records per-stage timing via orchestrator hooks. `GET /v1/projects/
-  {id}/metrics?period=` returns daily cost, success rate, per-spec cost
-  breakdown, and avg stage durations. Slack webhook alerts with per-type
-  rate limiting (1/hour) fire after every task completion when cost or
-  success-rate thresholds are breached. Admin panel metrics dashboard
-  with period selector, summary cards, CSS bar charts, and per-spec
-  cost table. Design [`0011`](../designs/active/0011-observability-and-cost-tracking.md).
-  304 backend tests, 9 new.
-
-### [0019 — Task retry endpoint](./active/0019-task-retry-endpoint.md)
-
-One-click retry for failed/stuck tasks. Creates a fresh queued task
-cloned from the original with audit trail linking via `original_task_id`.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** `POST /v1/projects/{id}/tasks/{task_id}/retry`
-  endpoint cloning role/prompt/repo/spec_id from failed/timed_out/stuck
-  tasks. Migration 0015 adds `original_task_id` column with index.
-  Retryable-state gate (422 for non-terminal). Cross-tenant isolation
-  (404). Audit log entry with `triggered_by=retry`. Fire-and-forget
-  dispatch. First spec drafted by the PM worker and built through the
-  full pipeline (PM → Architect → TM → Developer → Reviewer).
-  329 backend tests, 11 new.
+| Component | Spec | Design |
+|---|---|---|
+| Multi-tenancy | [multi-tenancy](./active/multi-tenancy.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
+| Knowledge API (read + write) | [knowledge-api](./active/knowledge-api.md) | [knowledge-write-api](../designs/active/knowledge-write-api.md), [knowledge-repo-model](../designs/active/knowledge-repo-model.md) |
+| Admin Panel | [admin-panel](./active/admin-panel.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
+| Developer Worker | [developer-worker](./active/developer-worker.md) | [worker-roles](../designs/active/worker-roles.md) |
+| Reviewer Worker | [reviewer-worker](./active/reviewer-worker.md) | [worker-roles](../designs/active/worker-roles.md) |
+| PM Worker | [pm-worker](./active/pm-worker.md) | [pm-worker](../designs/active/pm-worker.md) |
+| Architect Worker | [architect-worker](./active/architect-worker.md) | [architect-worker](../designs/active/architect-worker.md) |
+| Team Manager Worker | [team-manager-worker](./active/team-manager-worker.md) | [team-manager-worker](../designs/active/team-manager-worker.md) |
+| Service Accounts | [service-accounts](./active/service-accounts.md) | [worker-roles](../designs/active/worker-roles.md) |
+| Impersonation | [impersonation](./active/impersonation.md) | [impersonation](../designs/active/impersonation.md) |
+| Onboarding | [onboarding](./active/onboarding.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
+| Task Orchestration | [task-orchestration](./active/task-orchestration.md) | [worker-communication](../designs/active/worker-communication.md) |
+| Continuous Deployment | [continuous-deployment](./active/continuous-deployment.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
+| Observability | [observability](./active/observability.md) | [observability-and-cost-tracking](../designs/active/observability-and-cost-tracking.md) |
 
 ---
 
-## Close the Loop
+## In flight (`wip/`)
 
-> Make the pipeline produce real artifacts and chain steps automatically.
-> After this phase, typing a problem statement results in shipped code
-> with human approval at 3 gates (spec, design, plan).
-
-### [0020 — Developer PR flow](./active/0020-developer-pr-flow.md)
-
-Developer worker creates a feature branch, commits, pushes, opens a PR.
-Reviewer reviews the real PR. Merge endpoint closes the loop.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** Worker protocol in developer.md instructs Claude to
-  branch/commit/push/PR. Migration 0016 adds `pr_url` column. Dispatcher
-  extracts PR URL from developer output. Orchestrator prepends PR URL to
-  reviewer prompt. 7 new tests, 336 total.
-
-### [0022 — Spec and design approval gates](./active/0022-spec-design-approval-gates.md)
-
-Formal approve/reject for PM-drafted specs and Architect-drafted designs.
-Extends the task plan approval pattern (spec 0013) to knowledge artifacts.
-
-- **Status:** active
-- **Progress:** `██████████` 7 / 7 AC ✅
-- **What shipped:** `POST /knowledge/{type}/{id}/approve` promotes wip→active
-  (file move, frontmatter update, registry update). `POST /knowledge/{type}/{id}/reject`
-  records feedback and optionally creates a revision task (PM for specs, Architect
-  for designs). 422 guards for non-wip artifacts. SSE events for both actions.
-  13 new tests, 346 total.
-
-### [0021 — Pipeline chaining](./active/0021-pipeline-chaining.md)
-
-Automatic task creation between pipeline steps. PM→Architect→TM→Dev→PM
-flows hands-free with human approval gates between steps.
-
-- **Status:** active
-- **Progress:** `██████████` 6 / 6 AC ✅
-- **What shipped:** `pipeline_runs` table (migration 0017) tracks end-to-end
-  pipeline state. Chain hooks in approve endpoints (spec→architect,
-  design→TM) and orchestrator (all dev accepted→PM acceptance). Auto-create
-  pipeline run for `draft:` PM tasks. REST endpoints: list, get, override
-  (pause/resume/cancel). Paused runs don't chain. SSE events for overrides.
-  17 new tests, 363 total.
+| ID | Title | Status |
+|---|---|---|
+| [0023](./wip/0023-branch-cleanup-gc.md) | Branch cleanup GC job | in flight |
+| [0024](./wip/0024-task-stage-runs-api.md) | Task Stage Runs API | in flight |
 
 ---
 
@@ -380,169 +64,354 @@ flows hands-free with human approval gates between steps.
 
 ```mermaid
 flowchart TB
-  subgraph shipped [Shipped]
-    s1["0001 Project CRUD"]
-    s2["0002 Knowledge API"]
-    s3["0003 Admin v0"]
-    s4["0004 Developer worker"]
-    s5["0005 Role SAs"]
-    s6["0006 Pipeline UI"]
-    s7["0007 Impersonation"]
-    s8["0008 Onboard 2 projects"]
-    s9["0009 Reviewer worker"]
-    s10["0010 Task orchestration"]
-    s11["0011 Continuous deployment"]
-    s12["0012 Admin auth + mutations"]
-    s13["0013 Team Manager worker"]
-    s14["0014 Knowledge write API"]
-    s15["0015 Worker communication"]
-    s16["0016 PM worker"]
-    s17["0017 Architect worker"]
+  subgraph active [Active components]
+    mt[multi-tenancy]
+    ka[knowledge-api]
+    ap[admin-panel]
+    dev[developer-worker]
+    rev[reviewer-worker]
+    pm[pm-worker]
+    arch[architect-worker]
+    tm[team-manager-worker]
+    sa[service-accounts]
+    imp[impersonation]
+    onb[onboarding]
+    to[task-orchestration]
+    cd[continuous-deployment]
+    obs[observability]
   end
 
-    s18["0018 Observability"]
-    s19["0019 Task retry"]
+  subgraph scale ["Phase 3 — Scale & Reliability"]
+    s23["Branch GC"]
+    s24["Worker output compliance"]
+    s25["Pipeline run dashboard"]
+    s26["Transient retry"]
+    s27["Concurrent pipelines"]
   end
 
-  subgraph closeloop ["Close the Loop"]
-    s20["0020 Developer PR flow"]
-    s22["0022 Approval gates"]
-    s21["0021 Pipeline chaining"]
+  subgraph cost ["Phase 4 — Cost & Efficiency"]
+    s28["Prompt caching"]
+    s29["Model tier routing"]
+    s30["Budget gates"]
+    s31["Cost regression alerts"]
   end
 
-  %% Shipped internal deps
-  s1 --> s2
-  s1 --> s3
-  s1 --> s4
-  s2 --> s3
-  s2 --> s4
-  s3 --> s6
-  s4 --> s5
-  s4 --> s6
-  s5 --> s7
-  s6 --> s7
-  s5 --> s8
-  s6 --> s8
-  s7 --> s8
+  subgraph adminv2 ["Phase 5 — Admin v2"]
+    s32["Live timeline"]
+    s33["Diff & PR viewer"]
+    s34["Knowledge editor"]
+    s35["Command palette"]
+  end
 
-  %% Now deps
-  s4 --> s9
-  s4 --> s10
-  s9 --> s10
-  s8 --> s11
-  s3 --> s12
-  s10 --> s12
+  subgraph sec ["Phase 6 — Security"]
+    s36["Audit log"]
+    s37["Secret rotation"]
+    s38["Tenant isolation tests"]
+  end
 
-  %% Next deps
-  s10 --> s13
-  s12 --> s13
-  s2 --> s14
-  s10 --> s15
+  subgraph auto ["Phase 7 — Trusted Autonomy"]
+    s39["Confidence auto-approve"]
+    s40["Escalation & on-call"]
+    s41["Self-healing"]
+  end
 
-  %% Later deps
-  s13 --> s16
-  s14 --> s16
-  s15 --> s16
-  s14 --> s17
-  s10 --> s18
-  s11 --> s18
-  s10 --> s19
-  s13 --> s19
+  to --> s23
+  dev --> s23
+  pm --> s24
+  arch --> s24
+  tm --> s24
+  to --> s25
+  ap --> s25
+  to --> s26
+  dev --> s27
+  to --> s27
+  obs --> s27
 
-  %% Close the Loop deps
-  s4 --> s20
-  s9 --> s20
-  s10 --> s20
-  s12 --> s20
-  s12 --> s22
-  s13 --> s22
-  s14 --> s22
-  s20 --> s21
-  s22 --> s21
-  s10 --> s21
-  s13 --> s21
-  s16 --> s21
-  s17 --> s21
+  ka --> s28
+  obs --> s28
+  to --> s28
+  to --> s29
+  obs --> s29
+  obs --> s30
+  s29 --> s30
+  obs --> s31
+  s28 --> s31
 
-  classDef shipped fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
-  classDef closeloopStyle fill:#bbdefb,stroke:#1565c0,stroke-width:2px
+  to --> s32
+  s25 --> s32
+  ap --> s32
+  dev --> s33
+  ap --> s33
+  ka --> s34
+  ap --> s34
+  ap --> s35
 
-  class s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22 shipped
+  imp --> s36
+  ap --> s36
+  sa --> s37
+  cd --> s37
+  mt --> s38
+  sa --> s38
+  s36 --> s38
+
+  to --> s39
+  obs --> s39
+  to --> s40
+  obs --> s40
+  s26 --> s40
+  to --> s41
+  s26 --> s41
+  s40 --> s41
+
+  classDef activeStyle fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
+  classDef scaleStyle fill:#ffe0b2,stroke:#e65100,stroke-width:2px
+  classDef costStyle fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+  classDef adminStyle fill:#bbdefb,stroke:#1565c0,stroke-width:2px
+  classDef secStyle fill:#f8bbd0,stroke:#ad1457,stroke-width:2px
+  classDef autoStyle fill:#d1c4e9,stroke:#4527a0,stroke-width:2px
+
+  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs activeStyle
+  class s23,s24,s25,s26,s27 scaleStyle
+  class s28,s29,s30,s31 costStyle
+  class s32,s33,s34,s35 adminStyle
+  class s36,s37,s38 secStyle
+  class s39,s40,s41 autoStyle
 ```
 
 ---
 
-## Scale — next specs
+## Phase 3 — Scale & Reliability (May–Jun 2026)
 
 > Make the pipeline robust, self-healing, and observable at scale.
+> Success criteria: zero manual cleanup, <1% task loss from transient
+> failures, 3+ pipelines running concurrently without queue starvation.
 
-### 0023 — Branch cleanup GC job (planned)
+### 0023 — Branch cleanup GC job (in flight)
 
 Hourly job deletes stale `task/*` branches older than 24h with no open PR.
 Prevents branch proliferation from failed developer tasks.
 
-- **Status:** planned
-- **Depends on:** 0010, 0020
+- **Status:** wip → [`wip/0023-branch-cleanup-gc.md`](./wip/0023-branch-cleanup-gc.md)
+- **Extends:** `task-orchestration`, `developer-worker`
 
-### 0024 — Worker output compliance (planned)
+### 0024 — Task Stage Runs API (in flight)
+
+`GET /v1/projects/{project_id}/tasks/{task_id}/stage-runs` endpoint
+returning the archived `TaskStageRunRow` rows for a task, ordered by
+`recorded_at` ascending. Debugging-oriented, no admin UI.
+
+- **Status:** wip
+- **Extends:** `task-orchestration`, `observability`
+
+### 0025 — Worker output compliance (planned)
 
 Workers (PM, Architect, TM) must produce structured JSON output reliably.
 Add output schema validation, retry on malformed output, and fallback
-synthesis for all worker types (not just PM).
+synthesis for all worker types.
 
 - **Status:** planned
-- **Depends on:** 0016, 0017, 0013
+- **Extends:** `pm-worker`, `architect-worker`, `team-manager-worker`
 
-### 0025 — Pipeline run dashboard (planned)
+### 0026 — Pipeline run dashboard (planned)
 
 Admin panel view showing pipeline runs end-to-end: current step,
 time per step, blocking gates, auto-refresh. One-click approve/reject
-at each gate.
+at each gate. (Foundation for Phase 5.)
 
 - **Status:** planned
-- **Depends on:** 0021, 0022, 0003
+- **Extends:** `task-orchestration`, `admin-panel`
 
-### 0026 — Automatic retry on transient failures (planned)
+### 0027 — Automatic retry on transient failures (planned)
 
 When a worker fails due to API overload (529), rate limiting (429),
 or timeout, automatically retry with exponential backoff instead of
 leaving the task in `failed` state.
 
 - **Status:** planned
-- **Depends on:** 0010, 0019
+- **Extends:** `task-orchestration`
+
+### 0028 — Concurrent pipeline execution & queue fairness (planned)
+
+Dispatcher supports N concurrent workers per role with fair per-project
+scheduling (no single project can starve others). Adds `worker_concurrency`
+config, per-project lease quotas, and a queue-depth gauge.
+
+- **Status:** planned
+- **Extends:** `developer-worker`, `task-orchestration`, `observability`
 
 ---
 
-## Self-hosting milestone
+## Phase 4 — Cost & Token Efficiency (Jun–Jul 2026)
 
-When specs 0009–0018 are all `active`, the following loop runs without
-human authoring:
+> Cut per-pipeline token spend by ~50% without hurting quality. Today
+> every worker re-sends the same context; every task runs on the most
+> expensive model regardless of complexity. Fix both.
 
-1. **PM** drafts a spec from a problem statement → human approves.
-2. **Architect** produces a design → human approves.
-3. **Team Manager** breaks the design into tasks → human reviews plan.
-4. **Developer** executes each task (code + tests + PR).
-5. **Reviewer** reviews each PR (approve or request changes).
-6. **Orchestrator** manages the pipeline (fix loops, retries, escalation).
-7. **CD** ships merged code to production.
-8. **PM** runs acceptance against the ACs → spec moves to `active`.
-9. **Observability** tracks cost, health, and trends throughout.
+### 0029 — Prompt caching & shared context reuse (planned)
 
-The human's role becomes: approve specs, approve designs, review task
-plans, and intervene when the system gets stuck. Everything else is
-autonomous.
+Use Anthropic prompt caching for stable sections (role system prompt,
+project conventions, relevant knowledge slice). Share a common
+"project context block" across sibling tasks in the same pipeline run.
+Target: 40% reduction in input tokens for orchestrated runs.
+
+- **Status:** planned
+- **Extends:** `knowledge-api`, `observability`, `task-orchestration`
+
+### 0030 — Model tier routing (planned)
+
+Route simple tasks (GC jobs, trivial fixes, acceptance checks on tight
+ACs) to Haiku; reserve Sonnet for design/architect/complex developer
+work. Per-role default + per-task override. Measure quality regression
+via reviewer approval rate.
+
+- **Status:** planned
+- **Extends:** `task-orchestration`, `observability`
+
+### 0031 — Per-project token budgets & cost gates (planned)
+
+Each project gets a soft/hard monthly token budget. At soft, Slack
+warning and auto-downshift to cheaper models. At hard, new tasks
+queue and require override. Exposes `GET /v1/projects/{id}/budget`.
+
+- **Status:** planned
+- **Extends:** `observability`
+
+### 0032 — Prompt & cost regression alerts (planned)
+
+Nightly job compares per-stage cost and token-per-AC against a
+7-day baseline; alerts on >25% regressions with the commit range
+likely responsible.
+
+- **Status:** planned
+- **Extends:** `observability`
+
+---
+
+## Phase 5 — Admin Panel v2: Interactive & Live (Jul–Sep 2026)
+
+> Make the admin panel the thing you keep open all day. Today it's a
+> list of rows; it should be a live view of what the system is doing,
+> with every common action one keystroke away.
+
+### 0033 — Live pipeline timeline (planned)
+
+Replace the flat task list with a timeline view per pipeline run:
+horizontal swim-lanes per role, stage durations as bars, SSE-driven
+progress tick, hover for logs, click for detail.
+
+- **Status:** planned
+- **Extends:** `admin-panel`, `task-orchestration`
+
+### 0034 — In-panel diff & PR viewer (planned)
+
+View PR diffs, reviewer comments, and commit history directly in the
+admin panel. Approve/request-changes buttons call through to `coder-core`.
+
+- **Status:** planned
+- **Extends:** `admin-panel`, `developer-worker`
+
+### 0035 — Inline knowledge editor with approvals (planned)
+
+Edit spec/design markdown in-browser with frontmatter form + body
+editor + live preview. Approve/reject buttons adjacent.
+
+- **Status:** planned
+- **Extends:** `admin-panel`, `knowledge-api`
+
+### 0036 — Command palette & keyboard-first navigation (planned)
+
+`⌘K` palette: jump to project, task, spec, run; trigger common actions
+(approve, retry, override); fuzzy-search knowledge. Full keyboard
+navigation of tables and forms.
+
+- **Status:** planned
+- **Extends:** `admin-panel`
+
+---
+
+## Phase 6 — Security & Compliance (Sep–Oct 2026)
+
+> Close the gap between "it works" and "it's safe to let a customer
+> near it." Preparation for external pilots.
+
+### 0037 — Centralized audit log service (planned)
+
+Every mutation (approve, reject, override, retry, merge, knowledge
+write, impersonation) lands in an append-only audit log with actor,
+project, target, before/after, and correlation ID. Queryable by admin,
+retained 1 year.
+
+- **Status:** planned
+- **Extends:** `impersonation`, `admin-panel`, `task-orchestration`
+
+### 0038 — Automated secret rotation (planned)
+
+Scheduled rotation of Anthropic keys, GitHub App tokens, per-project
+API keys, and admin JWT secrets. Zero-downtime rollover via dual-key
+windows. Runbook becomes a cron job.
+
+- **Status:** planned
+- **Extends:** `service-accounts`, `continuous-deployment`
+
+### 0039 — Tenant isolation test harness (planned)
+
+CI suite that provisions two projects and asserts no cross-tenant
+reads/writes are possible across every endpoint, token type, and
+worker path.
+
+- **Status:** planned
+- **Extends:** `multi-tenancy`, `service-accounts`
+
+---
+
+## Phase 7 — Trusted Autonomy (Oct–Nov 2026)
+
+> Today three gates (spec / design / plan) require human approval
+> every run. Many are low-risk rubber-stamps. Let the system earn
+> auto-approval on the easy cases so humans focus on the hard ones.
+
+### 0040 — Confidence-scored auto-approval (planned)
+
+PM, Architect, and TM outputs include a self-reported confidence
+score with justification. If score > threshold AND project opted-in
+AND historical approval rate > 95% on similar artifacts, auto-approve
+with a 10-minute "undo" window.
+
+- **Status:** planned
+- **Extends:** `task-orchestration`, `observability`, `pm-worker`, `architect-worker`, `team-manager-worker`
+
+### 0041 — Escalation policies & human on-call routing (planned)
+
+When a pipeline stalls, fails repeatedly, or exceeds SLA, route to a
+human via Slack/PagerDuty with full context. Per-project on-call
+rotation.
+
+- **Status:** planned
+- **Extends:** `task-orchestration`, `observability`
+
+### 0042 — Self-healing stuck pipelines (planned)
+
+Watchdog detects pipelines stuck in a stage beyond 3× p95 duration,
+diagnoses, and auto-remediates (retry, re-dispatch, unblock). Only
+pages a human when auto-remediation fails.
+
+- **Status:** planned
+- **Extends:** `task-orchestration`
 
 ---
 
 ## How to update this file
 
-1. Edit the acceptance-criteria checkboxes in the relevant
-   `wip/00XX-*.md` spec.
-2. Update that spec's **Progress** line at the top (`N / M`).
-3. Update this file's spec section AND the summary table at the top.
-4. If a spec ships: move the file from `wip/` to `active/`, update
-   `status:` in its frontmatter, update `folder:` and `status:` in
-   `registry.yaml`, regenerate `REGISTRY.md`, and move its section
-   here under "Shipped".
-5. If a spec is dropped: move to `deprecated/` with `deprecated_at`
-   and `reason` per `AGENTS.md` rule 5.
+1. **Adding a WIP:** create `wip/00NN-kebab-title.md` + design counterpart
+   if needed, register in both `registry.yaml`s, add an entry under the
+   relevant phase here.
+2. **Shipping a WIP:** merge its content into one or more subject-named
+   files under `active/` (update existing and/or add new component files),
+   delete the numbered WIP file, update both registries, remove its entry
+   from the phase section here and add/update a row in "Active components"
+   if a new component was introduced.
+3. **Deprecating an active component:** move its file to `deprecated/`
+   with `status: deprecated`, `deprecated_at:`, `reason:`; remove the
+   "Active components" row here.
+
+See [`../../AGENTS.md`](../../AGENTS.md) rule 5 for the canonical rule.

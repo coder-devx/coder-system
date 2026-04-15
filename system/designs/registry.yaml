@@ -1,56 +1,124 @@
-# Source of truth for the designs registry across active/wip/deprecated.
+# Source of truth for the designs registry.
 # REGISTRY.md is generated from this file.
+#
+# Active designs are subject-named logical components of the system as it
+# exists today. WIP designs are numbered and roadmap-aligned.
 
 designs:
-- id: '0001'
-  title: System Overview
+- id: architect-worker
+  title: Architect Worker
   status: active
   owner: ro
   folder: active
-  file: active/0001-system-overview.md
+  file: active/architect-worker.md
+  implements_specs:
+  - architect-worker
   affects_services:
   - coder-core
-  - coder-admin
-  decided_by:
-  - '0001'
-- id: '0002'
-  title: Worker Roles & Impersonation
+- id: impersonation
+  title: Impersonation
   status: active
   owner: ro
   folder: active
-  file: active/0002-worker-roles-and-impersonation.md
-  affects_services: []
+  file: active/impersonation.md
   decided_by:
   - '0006'
-  - '0007'
-- id: '0003'
+  affects_services:
+  - coder-core
+- id: knowledge-repo-model
   title: Knowledge Repo Model
   status: active
   owner: ro
   folder: active
-  file: active/0003-knowledge-repo-model.md
-  affects_services: []
+  file: active/knowledge-repo-model.md
   decided_by:
   - '0001'
   - '0002'
   - '0003'
   - '0004'
-  - 0008
-- id: '0004'
-  title: "Clean rebuild \u2014 coder-core + coder-admin"
+  - '0008'
+  affects_services:
+  - coder-core
+- id: knowledge-write-api
+  title: Knowledge Write API
   status: active
   owner: ro
   folder: active
-  file: active/0001-generalize-coder-from-vibetrade.md
+  file: active/knowledge-write-api.md
+  implements_specs:
+  - knowledge-api
+  affects_services:
+  - coder-core
+- id: observability-and-cost-tracking
+  title: Observability and Cost Tracking
+  status: active
+  owner: ro
+  folder: active
+  file: active/observability-and-cost-tracking.md
+  implements_specs:
+  - observability
   affects_services:
   - coder-core
   - coder-admin
+- id: pm-worker
+  title: PM Worker
+  status: active
+  owner: ro
+  folder: active
+  file: active/pm-worker.md
+  implements_specs:
+  - pm-worker
+  affects_services:
+  - coder-core
+- id: system-overview
+  title: System Overview
+  status: active
+  owner: ro
+  folder: active
+  file: active/system-overview.md
   decided_by:
+  - '0001'
   - '0005'
   - '0006'
   - '0007'
-  - 0008
-- id: '0005'
+  - '0008'
+  affects_services:
+  - coder-core
+  - coder-admin
+- id: team-manager-worker
+  title: Team Manager Worker
+  status: active
+  owner: ro
+  folder: active
+  file: active/team-manager-worker.md
+  implements_specs:
+  - team-manager-worker
+  affects_services:
+  - coder-core
+  - coder-admin
+- id: worker-communication
+  title: Worker Communication
+  status: active
+  owner: ro
+  folder: active
+  file: active/worker-communication.md
+  implements_specs:
+  - task-orchestration
+  affects_services:
+  - coder-core
+  - coder-admin
+- id: worker-roles
+  title: Worker Roles
+  status: active
+  owner: ro
+  folder: active
+  file: active/worker-roles.md
+  decided_by:
+  - '0006'
+  - '0007'
+  affects_services:
+  - coder-core
+- id: '0002'
   title: Competitive Intelligence Pipeline
   status: wip
   owner: ro
@@ -58,78 +126,23 @@ designs:
   file: wip/0002-competitive-intelligence-pipeline.md
   affects_services:
   - coder-core
-  decided_by: []
-- id: '0006'
-  title: Team Manager Worker
-  status: active
-  owner: ro
-  folder: active
-  file: active/0006-team-manager-worker.md
-  affects_services:
-  - coder-core
-  - coder-admin
-  decided_by: []
-- id: '0007'
-  title: Knowledge Write API
-  status: active
-  owner: ro
-  folder: active
-  file: active/0007-knowledge-write-api.md
-  affects_services:
-  - coder-core
-  decided_by: []
-- id: 0008
-  title: Worker-to-Worker Communication
-  status: active
-  owner: ro
-  folder: active
-  file: active/0008-worker-communication.md
-  affects_services:
-  - coder-core
-  - coder-admin
-  decided_by: []
-- id: 0009
-  title: PM Worker
-  status: active
-  owner: ro
-  folder: active
-  file: active/0009-pm-worker.md
-  affects_services:
-  - coder-core
-  decided_by: []
-- id: '0010'
-  title: Architect Worker
-  status: active
-  owner: ro
-  folder: active
-  file: active/0010-architect-worker.md
-  affects_services:
-  - coder-core
-  decided_by: []
-- id: '0011'
-  title: Observability and Cost Tracking
-  status: active
-  owner: ro
-  folder: active
-  file: active/0011-observability-and-cost-tracking.md
-  affects_services:
-  - coder-core
-  - coder-admin
-  decided_by: []
 - id: '0023'
-  title: Design Complete for Spec 0023
-  status: active
+  title: Branch cleanup GC job
+  status: wip
   owner: ro
-  folder: active
-  file: active/0023-design-complete-for-spec-0023.md
-  affects_services: []
-  decided_by: []
+  folder: wip
+  file: wip/0023-branch-cleanup-gc.md
+  implements_specs:
+  - '0023'
+  affects_services:
+  - coder-core
 - id: '0024'
   title: Task Stage Runs API Endpoint
-  status: active
+  status: wip
   owner: ro
-  folder: active
-  file: active/0024-task-stage-runs-api-endpoint.md
+  folder: wip
+  file: wip/0024-task-stage-runs-api-endpoint.md
+  implements_specs:
+  - '0024'
   affects_services:
   - coder-core
-  decided_by: []

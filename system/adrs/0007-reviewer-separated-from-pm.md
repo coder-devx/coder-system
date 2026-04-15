@@ -5,7 +5,7 @@ type: adr
 status: accepted
 date: 2026-04-08
 deciders: [ro]
-relates_to_designs: ["0002"]
+relates_to_designs: [worker-roles]
 ---
 
 # ADR 0007 — Reviewer is a separate role from Product Manager

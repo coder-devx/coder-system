@@ -2,33 +2,34 @@
 
 > Generated view of [`registry.yaml`](./registry.yaml). Do not hand-edit.
 
-## Active
+## Active — subject-named logical components
+
+Components of the Coder system as it exists today. Ship history lives
+in each component's `## Evolution` section and in git.
+
+| Slug | Title | Owner | Served by designs |
+|---|---|---|---|
+| [admin-panel](./active/admin-panel.md) | Admin Panel | ro | [system-overview](../designs/active/system-overview.md) |
+| [architect-worker](./active/architect-worker.md) | Architect Worker | ro | [architect-worker](../designs/active/architect-worker.md) |
+| [continuous-deployment](./active/continuous-deployment.md) | Continuous Deployment | ro | [system-overview](../designs/active/system-overview.md) |
+| [developer-worker](./active/developer-worker.md) | Developer Worker | ro | [worker-roles](../designs/active/worker-roles.md) |
+| [impersonation](./active/impersonation.md) | Impersonation | ro | [impersonation](../designs/active/impersonation.md) |
+| [knowledge-api](./active/knowledge-api.md) | Knowledge API | ro | [knowledge-write-api](../designs/active/knowledge-write-api.md), [knowledge-repo-model](../designs/active/knowledge-repo-model.md) |
+| [multi-tenancy](./active/multi-tenancy.md) | Multi-tenancy | ro | [system-overview](../designs/active/system-overview.md) |
+| [observability](./active/observability.md) | Observability | ro | [observability-and-cost-tracking](../designs/active/observability-and-cost-tracking.md) |
+| [onboarding](./active/onboarding.md) | Onboarding | ro | [system-overview](../designs/active/system-overview.md) |
+| [pm-worker](./active/pm-worker.md) | PM Worker | ro | [pm-worker](../designs/active/pm-worker.md) |
+| [reviewer-worker](./active/reviewer-worker.md) | Reviewer Worker | ro | [worker-roles](../designs/active/worker-roles.md) |
+| [service-accounts](./active/service-accounts.md) | Service Accounts | ro | [worker-roles](../designs/active/worker-roles.md) |
+| [task-orchestration](./active/task-orchestration.md) | Task Orchestration | ro | [worker-communication](../designs/active/worker-communication.md) |
+| [team-manager-worker](./active/team-manager-worker.md) | Team Manager Worker | ro | [team-manager-worker](../designs/active/team-manager-worker.md) |
+
+## WIP — numbered, roadmap-aligned
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0001](./active/0001-multi-tenant-project-crud.md) | Multi-tenant project CRUD | ro | [0004](../designs/active/0001-generalize-coder-from-vibetrade.md) |
-| [0002](./active/0002-knowledge-repo-read-api.md) | Knowledge repo read API | ro | [0004](../designs/active/0001-generalize-coder-from-vibetrade.md) |
-| [0003](./active/0003-admin-panel-read-only.md) | Admin Panel v0 (read-only) | ro | [0004](../designs/active/0001-generalize-coder-from-vibetrade.md) |
-| [0004](./active/0004-developer-worker-v1.md) | Developer worker v1 | ro | [0004](../designs/active/0001-generalize-coder-from-vibetrade.md) |
-| [0005](./active/0005-per-role-service-accounts.md) | Per-role service accounts | ro | [0004](../designs/active/0001-generalize-coder-from-vibetrade.md) |
-| [0006](./active/0006-pipeline-ui-in-admin.md) | Pipeline UI in admin | ro | [0004](../designs/active/0001-generalize-coder-from-vibetrade.md) |
-| [0007](./active/0007-local-agent-impersonation.md) | Local agent impersonation | ro | [0004](../designs/active/0001-generalize-coder-from-vibetrade.md) |
-| [0008](./active/0008-onboard-first-two-projects.md) | Onboard first two projects | ro | [0004](../designs/active/0001-generalize-coder-from-vibetrade.md) |
-| [0009](./active/0009-reviewer-worker-v1.md) | Reviewer worker v1 | ro | — |
-| [0010](./active/0010-task-orchestration-v1.md) | Task orchestration v1 | ro | — |
-| [0011](./active/0011-continuous-deployment.md) | Continuous deployment | ro | — |
-| [0012](./active/0012-admin-auth-and-mutations.md) | Admin panel auth and mutations | ro | — |
-| [0013](./active/0013-team-manager-worker-v1.md) | Team Manager worker v1 | ro | [0006](../designs/active/0006-team-manager-worker.md) |
-| [0014](./active/0014-knowledge-write-api.md) | Knowledge write API | ro | [0007](../designs/active/0007-knowledge-write-api.md) |
-| [0015](./active/0015-worker-communication.md) | Worker-to-worker communication | ro | [0008](../designs/active/0008-worker-communication.md) |
-| [0016](./active/0016-pm-worker-v1.md) | PM worker v1 (spec and acceptance) | ro | [0009](../designs/active/0009-pm-worker.md) |
-| [0017](./active/0017-architect-worker-v1.md) | Architect worker v1 | ro | [0010](../designs/active/0010-architect-worker.md) |
-
-## WIP
-
-| ID | Title | Owner | Served by designs |
-|---|---|---|---|
-| [0018](./wip/0018-observability-and-cost-tracking.md) | Observability and cost tracking | ro | — |
+| [0023](./wip/0023-branch-cleanup-gc.md) | Branch cleanup GC job | ro | [0023](../designs/wip/0023-branch-cleanup-gc.md) |
+| [0024](./wip/0024-task-stage-runs-api.md) | Task Stage Runs API | ro | [0024](../designs/wip/0024-task-stage-runs-api-endpoint.md) |
 
 ## Deprecated
 

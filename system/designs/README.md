@@ -1,33 +1,43 @@
 # designs/
 
-Design docs for the Coder system. Each design is a logical unit (a feature, a
-subsystem, an interaction model) with diagrams and the rationale that links
-back to ADRs and product specs.
+Design docs for the Coder system — the technical **how**. Each active
+design describes a logical component as it currently works, with
+diagrams and the rationale linking back to ADRs and product specs.
 
-## Lifecycle
+## Two lifecycles
 
-```
-wip/  ──ship──▶  active/  ──remove──▶  deprecated/
-```
+`wip/` and `active/` are different kinds of knowledge, not two stages
+of the same file. See [`../../AGENTS.md`](../../AGENTS.md) rule 5 for
+the canonical statement.
 
-| Folder | Meaning |
-|---|---|
-| [`active/`](./active/) | Describes how the system **currently** works. The big picture. |
-| [`wip/`](./wip/)       | In flight. Implementation in progress. Will land in `active/` (as a new file or by editing an existing one) when done. |
-| [`deprecated/`](./deprecated/) | Removed from the system, kept with a `deprecated_at` date and `reason` so the history is recoverable. |
+| Folder | Kind | Naming | Purpose |
+|---|---|---|---|
+| [`wip/`](./wip/) | Temporal, roadmap-aligned | `00NN-kebab-title.md` | Design work in flight for a planned spec. |
+| [`active/`](./active/) | Atemporal, subject-named | `component-slug.md` | Logical components of the system as it exists today. |
+| [`deprecated/`](./deprecated/) | Historical | Whatever name it had when deprecated | Removed components; kept with `deprecated_at` and `reason`. |
 
-## Promotion rules
+## Ship = merge, not move
 
-- A WIP design that ships is **either** moved into `active/` as-is **or** its
-  content is merged into existing active design files. Both are valid; pick
-  whichever keeps `active/` coherent.
-- An active design that is removed is moved to `deprecated/`. Set
-  `status: deprecated`, `deprecated_at:`, and a `reason:` field. Do not delete.
+When a WIP design ships, its content is **merged into `active/`**:
 
-See [`../../AGENTS.md`](../../AGENTS.md) rule 5 for the canonical rule.
+- **Update** one or more existing subject-named files when the WIP
+  extends or refines components that already exist.
+- **Add** a new subject-named file when the WIP introduces a genuinely
+  new logical component.
+- Both are valid; many WIPs do both.
 
-## Numbering
+The numbered WIP file is **deleted** once its content lands in
+`active/`. History lives in git, not in filenames.
 
-Zero-padded 4-digit IDs. Look at the highest existing ID across **all three**
-subfolders and `registry.yaml` before assigning a new one. IDs are never
-reused.
+## Naming
+
+- `wip/` — zero-padded 4-digit numeric ID aligned with the spec it
+  serves: `0023-branch-cleanup-gc.md`. Numeric IDs are never reused.
+- `active/` — short subject-kebab slug naming the component:
+  `system-overview.md`, `worker-roles.md`, `task-orchestration.md`.
+  Slugs are stable identifiers; renaming requires a cross-link sweep.
+
+## Entry points
+
+- `active/system-overview.md` — start here for the big picture.
+- `active/<component>.md` — drill into a specific component.

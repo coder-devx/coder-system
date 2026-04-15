@@ -1,5 +1,5 @@
 ---
-id: "0005"
+id: "0002"
 title: Competitive Intelligence Pipeline
 type: design
 status: wip
@@ -8,7 +8,7 @@ created: 2026-04-08
 updated: 2026-04-08
 implements_specs: []
 decided_by: []
-related_designs: ["0001", "0002", "0004"]
+related_designs: [system-overview, worker-roles]
 affects_services: [coder-core]
 affects_repos: [coder-core]
 ---

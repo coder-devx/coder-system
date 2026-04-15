@@ -18,9 +18,9 @@ Each knowledge type lives in its own folder under `system/` (and mirrored under 
 |---|---|---|
 | `services/` | One file per running service. Ownership, tech, deps, API surface. | Live |
 | `repos/` | One file per code repo. CI/CD, branches, linked services. | Live |
-| `designs/` | Logical design docs with diagrams. | `active/` · `wip/` · `deprecated/` |
+| `designs/` | Logical design docs with diagrams. | `active/` (subject-named) · `wip/` (numbered) · `deprecated/` |
 | `adrs/` | Numbered architectural decisions with context + rationale. | Append-only |
-| `product-specs/` | Product features and roadmap items. | `active/` · `wip/` · `deprecated/` |
+| `product-specs/` | Product features. | `active/` (subject-named) · `wip/` (numbered) · `deprecated/` |
 | `roles/` | Worker roles (Architect, PM, Developer…) — capabilities and permissions. | Live |
 | `integrations/` | External systems (GitHub, GCP, Slack, …) and their auth model. | Live |
 | `runbooks/` | Operational procedures (incident, secret rotation, onboarding). | Live |
@@ -35,15 +35,18 @@ Each knowledge type lives in its own folder under `system/` (and mirrored under 
 - **Cross-links** — every doc has YAML frontmatter with typed link fields
   (`implements`, `depends_on`, `serves_spec`, `decided_by`, etc.) so the graph
   can be traversed by tools.
-- **Numbering** — ADRs and designs use zero-padded 4-digit IDs (`0001-…`).
-  IDs are never reused, even after deprecation.
+- **Numbering vs. subject-naming** — ADRs and WIP specs/designs use
+  zero-padded 4-digit IDs (`0001-…`). IDs are never reused, even after
+  deprecation. Active specs/designs are subject-named (`component-slug.md`)
+  — they describe logical components of the system as it exists today,
+  not a history of shipped items.
 - **Agents** — see [`AGENTS.md`](./AGENTS.md) for how any AI agent (Claude Code,
   Cursor, etc.) should read and update this repo. `CLAUDE.md` and
   `.cursor/rules/coder-system.mdc` both reference it.
 
 ## Where to start
 
-- New to Coder? → [`system/designs/active/0001-system-overview.md`](./system/designs/active/0001-system-overview.md)
+- New to Coder? → [`system/designs/active/system-overview.md`](./system/designs/active/system-overview.md)
 - Looking for a service? → [`system/services/REGISTRY.md`](./system/services/REGISTRY.md)
 - Want to know why we did X? → [`system/adrs/REGISTRY.md`](./system/adrs/REGISTRY.md)
 - Setting up a new project under Coder? → copy [`template/`](./template/) into the project's own `coder-system` repo.

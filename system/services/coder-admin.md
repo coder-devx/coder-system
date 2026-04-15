@@ -17,7 +17,7 @@ exposes:
   - protocol: http
     port: 8080
     path: /
-implements_designs: ["0001"]
+implements_designs: [system-overview]
 decided_by: []
 ---
 

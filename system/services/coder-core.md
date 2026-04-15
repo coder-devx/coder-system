@@ -24,7 +24,7 @@ exposes:
   - protocol: http
     port: 8080
     path: /v1/projects/{id}/knowledge/{path}
-implements_designs: ["0001", "0002", "0004"]
+implements_designs: [system-overview, worker-roles]
 decided_by: ["0005", "0006", "0010", "0011"]
 ---
 

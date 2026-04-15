@@ -1,186 +1,139 @@
 # Source of truth for the product specs registry.
 # REGISTRY.md is generated from this file.
+#
+# Active specs are subject-named logical components of the system as it
+# exists today. WIP specs are numbered and roadmap-aligned (see ROADMAP.md).
 
 specs:
-- id: '0001'
-  title: Multi-tenant project CRUD
+- id: admin-panel
+  title: Admin Panel
   status: active
   owner: ro
   folder: active
-  file: active/0001-multi-tenant-project-crud.md
+  file: active/admin-panel.md
   served_by_designs:
-  - '0004'
-- id: '0002'
-  title: Knowledge repo read API
+  - system-overview
+- id: architect-worker
+  title: Architect Worker
   status: active
   owner: ro
   folder: active
-  file: active/0002-knowledge-repo-read-api.md
+  file: active/architect-worker.md
   served_by_designs:
-  - '0004'
-- id: '0003'
-  title: Admin Panel v0 (read-only)
+  - architect-worker
+- id: continuous-deployment
+  title: Continuous Deployment
   status: active
   owner: ro
   folder: active
-  file: active/0003-admin-panel-read-only.md
+  file: active/continuous-deployment.md
   served_by_designs:
-  - '0004'
-- id: '0004'
-  title: Developer worker v1
+  - system-overview
+- id: developer-worker
+  title: Developer Worker
   status: active
   owner: ro
   folder: active
-  file: active/0004-developer-worker-v1.md
+  file: active/developer-worker.md
   served_by_designs:
-  - '0004'
-- id: '0005'
-  title: Per-role service accounts
+  - worker-roles
+- id: impersonation
+  title: Impersonation
   status: active
   owner: ro
   folder: active
-  file: active/0005-per-role-service-accounts.md
+  file: active/impersonation.md
   served_by_designs:
-  - '0004'
-- id: '0006'
-  title: Pipeline UI in admin
+  - impersonation
+- id: knowledge-api
+  title: Knowledge API
   status: active
   owner: ro
   folder: active
-  file: active/0006-pipeline-ui-in-admin.md
+  file: active/knowledge-api.md
   served_by_designs:
-  - '0004'
-- id: '0007'
-  title: Local agent impersonation
+  - knowledge-write-api
+  - knowledge-repo-model
+- id: multi-tenancy
+  title: Multi-tenancy
   status: active
   owner: ro
   folder: active
-  file: active/0007-local-agent-impersonation.md
+  file: active/multi-tenancy.md
   served_by_designs:
-  - '0004'
-- id: 0008
-  title: Onboard first two projects
+  - system-overview
+- id: observability
+  title: Observability
   status: active
   owner: ro
   folder: active
-  file: active/0008-onboard-first-two-projects.md
+  file: active/observability.md
   served_by_designs:
-  - '0004'
-- id: 0009
-  title: Reviewer worker v1
+  - observability-and-cost-tracking
+- id: onboarding
+  title: Onboarding
   status: active
   owner: ro
   folder: active
-  file: active/0009-reviewer-worker-v1.md
-  served_by_designs: []
-- id: '0010'
-  title: Task orchestration v1
-  status: active
-  owner: ro
-  folder: active
-  file: active/0010-task-orchestration-v1.md
-  served_by_designs: []
-- id: '0011'
-  title: Continuous deployment
-  status: active
-  owner: ro
-  folder: active
-  file: active/0011-continuous-deployment.md
-  served_by_designs: []
-- id: '0012'
-  title: Admin panel auth and mutations
-  status: active
-  owner: ro
-  folder: active
-  file: active/0012-admin-auth-and-mutations.md
-  served_by_designs: []
-- id: '0013'
-  title: Team Manager worker v1
-  status: active
-  owner: ro
-  folder: active
-  file: active/0013-team-manager-worker-v1.md
+  file: active/onboarding.md
   served_by_designs:
-  - '0006'
-- id: '0014'
-  title: Knowledge write API
+  - system-overview
+- id: pm-worker
+  title: PM Worker
   status: active
   owner: ro
   folder: active
-  file: active/0014-knowledge-write-api.md
+  file: active/pm-worker.md
   served_by_designs:
-  - '0007'
-- id: '0015'
-  title: Worker-to-worker communication
+  - pm-worker
+- id: reviewer-worker
+  title: Reviewer Worker
   status: active
   owner: ro
   folder: active
-  file: active/0015-worker-communication.md
+  file: active/reviewer-worker.md
   served_by_designs:
-  - 0008
-- id: '0016'
-  title: PM worker v1 (spec and acceptance)
+  - worker-roles
+- id: service-accounts
+  title: Service Accounts
   status: active
   owner: ro
   folder: active
-  file: active/0016-pm-worker-v1.md
+  file: active/service-accounts.md
   served_by_designs:
-  - 0009
-- id: '0017'
-  title: Architect worker v1
+  - worker-roles
+- id: task-orchestration
+  title: Task Orchestration
   status: active
   owner: ro
   folder: active
-  file: active/0017-architect-worker-v1.md
+  file: active/task-orchestration.md
   served_by_designs:
-  - '0010'
-- id: 0018
-  title: Observability and cost tracking
+  - worker-communication
+- id: team-manager-worker
+  title: Team Manager Worker
   status: active
   owner: ro
   folder: active
-  file: active/0018-observability-and-cost-tracking.md
+  file: active/team-manager-worker.md
   served_by_designs:
-  - '0011'
-- id: 0019
-  title: Task retry endpoint
-  status: active
-  owner: ro
-  folder: active
-  file: active/0019-task-retry-endpoint.md
-  served_by_designs: []
-- id: '0020'
-  title: Developer PR flow
-  status: active
-  owner: ro
-  folder: active
-  file: active/0020-developer-pr-flow.md
-  served_by_designs: []
-- id: '0021'
-  title: Pipeline chaining
-  status: active
-  owner: ro
-  folder: active
-  file: active/0021-pipeline-chaining.md
-  served_by_designs: []
-- id: '0022'
-  title: Spec and design approval gates
-  status: active
-  owner: ro
-  folder: active
-  file: active/0022-spec-design-approval-gates.md
-  served_by_designs: []
+  - team-manager-worker
 - id: '0023'
   title: Branch cleanup GC job
-  status: active
+  status: wip
   owner: ro
-  folder: active
-  file: active/0023-draft-specification-complete.md
-  served_by_designs: []
+  folder: wip
+  file: wip/0023-branch-cleanup-gc.md
+  served_by_designs:
+  - '0023'
+  related_specs:
+  - developer-worker
+  - task-orchestration
 - id: '0024'
   title: Task Stage Runs API
-  status: active
+  status: wip
   owner: ro
-  folder: active
-  file: active/0024-task-stage-runs-api.md
-  served_by_designs: []
+  folder: wip
+  file: wip/0024-task-stage-runs-api.md
+  served_by_designs:
+  - '0024'

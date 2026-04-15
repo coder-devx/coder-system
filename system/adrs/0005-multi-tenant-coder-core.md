@@ -5,7 +5,7 @@ type: adr
 status: accepted
 date: 2026-04-08
 deciders: [ro]
-relates_to_designs: ["0001", "0004"]
+relates_to_designs: [system-overview]
 ---
 
 # ADR 0005 — Multi-tenant Coder Core, project-aware in every call
