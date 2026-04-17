@@ -8,6 +8,7 @@ auth: iam-service-account
 secret_storage: none
 used_by_services: [coder-core]
 used_by_roles: [system-admin, developer]
+last_verified_at: 2026-04-08
 ---
 
 # Cloud SQL

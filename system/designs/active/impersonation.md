@@ -6,6 +6,7 @@ status: active
 owner: ro
 created: 2026-04-08
 updated: 2026-04-15
+last_verified_at: 2026-04-15
 implements_specs: []
 decided_by: ["0006"]
 related_designs: [worker-roles, system-overview]

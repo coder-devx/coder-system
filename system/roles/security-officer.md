@@ -5,6 +5,7 @@ type: role
 status: proposed
 owner: ro
 seniority: senior
+last_verified_at: 2026-04-08
 ---
 
 # Security Officer *(proposed)*

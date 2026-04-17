@@ -8,6 +8,7 @@ auth: bot-token + socket-mode
 secret_storage: gcp-secret-manager
 used_by_services: [coder-agent]
 used_by_roles: [team-manager, sre, release-manager]
+last_verified_at: 2026-04-08
 ---
 
 # Slack

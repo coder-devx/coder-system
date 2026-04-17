@@ -8,6 +8,7 @@ auth: integration-token
 secret_storage: gcp-secret-manager
 used_by_services: [coder-agent]
 used_by_roles: [product-manager, software-architect]
+last_verified_at: 2026-04-08
 ---
 
 # Notion

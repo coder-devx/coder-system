@@ -6,6 +6,7 @@ status: active
 owner: ro
 created: 2026-04-08
 updated: 2026-04-11
+last_verified_at: 2026-04-12
 applies_to_services: [coder-core]
 applies_to_integrations: [gcp, github]
 ---

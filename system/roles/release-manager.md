@@ -5,6 +5,7 @@ type: role
 status: proposed
 owner: ro
 seniority: mid
+last_verified_at: 2026-04-08
 ---
 
 # Release Manager *(proposed)*

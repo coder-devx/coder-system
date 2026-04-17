@@ -15,6 +15,7 @@ cd:
   target: cloud-run
   trigger: manual
 decided_by: ["0005", "0006", "0010"]
+last_verified_at: 2026-04-08
 ---
 
 # coder-core

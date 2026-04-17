@@ -6,6 +6,7 @@ status: active
 owner: ro
 created: 2026-04-12
 updated: 2026-04-15
+last_verified_at: 2026-04-17
 implements_specs: [architect-worker]
 decided_by: []
 related_designs: [team-manager-worker, pm-worker, knowledge-write-api, worker-roles]

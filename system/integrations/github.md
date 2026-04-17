@@ -8,6 +8,7 @@ auth: github-app
 secret_storage: gcp-secret-manager
 used_by_services: [coder-core]
 used_by_roles: [software-architect, developer, reviewer, release-manager]
+last_verified_at: 2026-04-09
 ---
 
 # GitHub

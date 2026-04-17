@@ -6,6 +6,7 @@ status: active
 owner: ro
 created: 2026-04-12
 updated: 2026-04-15
+last_verified_at: 2026-04-15
 implements_specs: [observability]
 decided_by: []
 related_designs: [system-overview]

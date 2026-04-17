@@ -6,6 +6,7 @@ status: wip
 owner: ro
 created: 2026-04-17
 updated: 2026-04-17
+last_verified_at: 2026-04-17
 implements_specs: ["0044"]
 decided_by: ["0015"]
 related_designs: [knowledge-repo-model, knowledge-write-api, architect-worker, team-manager-worker, worker-communication]

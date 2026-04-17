@@ -19,6 +19,7 @@ exposes:
     path: /
 implements_designs: [system-overview]
 decided_by: []
+last_verified_at: 2026-04-15
 ---
 
 # Coder Admin Panel

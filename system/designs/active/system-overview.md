@@ -6,6 +6,7 @@ status: active
 owner: ro
 created: 2026-04-08
 updated: 2026-04-15
+last_verified_at: 2026-04-15
 implements_specs: []
 decided_by: ["0001", "0005", "0006", "0007", "0008"]
 related_designs: [worker-roles, impersonation, knowledge-repo-model]

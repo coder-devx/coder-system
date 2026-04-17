@@ -5,6 +5,7 @@ type: role
 status: defined
 owner: ro
 seniority: senior
+last_verified_at: 2026-04-12
 ---
 
 # Reviewer

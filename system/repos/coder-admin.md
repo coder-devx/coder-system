@@ -15,6 +15,7 @@ cd:
   target: cloud-run
   trigger: push-to-main
 decided_by: []
+last_verified_at: 2026-04-09
 ---
 
 # coder-admin

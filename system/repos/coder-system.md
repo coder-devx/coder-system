@@ -15,6 +15,7 @@ cd:
   target: none
   trigger: none
 decided_by: ["0001", "0002", "0003", "0004", "0008"]
+last_verified_at: 2026-04-08
 ---
 
 # coder-system

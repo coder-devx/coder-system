@@ -6,6 +6,7 @@ status: wip
 owner: ro
 created: 2026-04-17
 updated: 2026-04-17
+last_verified_at: 2026-04-17
 served_by_designs: ["0044"]
 related_specs: [knowledge-api, reviewer-worker, team-manager-worker, architect-worker, admin-panel, task-orchestration]
 ---

@@ -8,6 +8,7 @@ auth: service-account
 secret_storage: workload-identity
 used_by_services: [coder-core, coder-admin]
 used_by_roles: [system-admin, sre, release-manager]
+last_verified_at: 2026-04-09
 ---
 
 # Google Cloud Platform

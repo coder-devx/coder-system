@@ -26,6 +26,7 @@ exposes:
     path: /v1/projects/{id}/knowledge/{path}
 implements_designs: [system-overview, worker-roles]
 decided_by: ["0005", "0006", "0010", "0011"]
+last_verified_at: 2026-04-15
 ---
 
 # Coder Core

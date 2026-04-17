@@ -32,16 +32,18 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # Files that are NOT knowledge artifacts even though they're MD.
 SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md"}
 
-# Required frontmatter fields per artifact type.
+# Required frontmatter fields per artifact type. Spec 0043 adds
+# ``last_verified_at`` to every non-ADR type — ADRs are append-only
+# and their freshness is binary (superseded or not).
 REQUIRED_FIELDS: dict[str, set[str]] = {
-    "service":     {"id", "name", "type", "status", "owner"},
-    "repo":        {"id", "name", "type", "status", "owner", "github"},
-    "design":      {"id", "title", "type", "status", "owner", "created"},
+    "service":     {"id", "name", "type", "status", "owner", "last_verified_at"},
+    "repo":        {"id", "name", "type", "status", "owner", "github", "last_verified_at"},
+    "design":      {"id", "title", "type", "status", "owner", "created", "last_verified_at"},
     "adr":         {"id", "title", "type", "status", "date", "deciders"},
-    "spec":        {"id", "title", "type", "status", "owner", "created"},
-    "role":        {"id", "name", "type", "status", "owner"},
-    "integration": {"id", "name", "type", "status", "owner", "auth"},
-    "runbook":     {"id", "title", "type", "status", "owner", "created"},
+    "spec":        {"id", "title", "type", "status", "owner", "created", "last_verified_at"},
+    "role":        {"id", "name", "type", "status", "owner", "last_verified_at"},
+    "integration": {"id", "name", "type", "status", "owner", "auth", "last_verified_at"},
+    "runbook":     {"id", "title", "type", "status", "owner", "created", "last_verified_at"},
 }
 
 # Folder → registry key mapping (the YAML top-level list under registry.yaml).
@@ -188,6 +190,26 @@ def validate_section(section_root: Path, section_label: str) -> None:
         missing = REQUIRED_FIELDS[artifact_type] - set(data.keys())
         if missing:
             err(f"{md}: missing required frontmatter fields: {sorted(missing)}")
+
+        # Spec 0043: ``last_verified_at`` must be a parseable date
+        # (YYYY-MM-DD) and cannot be in the future. ADRs are exempt —
+        # their freshness is binary (superseded or not).
+        if artifact_type != "adr" and "last_verified_at" in data:
+            import datetime as _dt
+
+            raw = data["last_verified_at"]
+            parsed: _dt.date | None = None
+            if isinstance(raw, _dt.date):
+                parsed = raw
+            elif isinstance(raw, str):
+                try:
+                    parsed = _dt.date.fromisoformat(raw)
+                except ValueError:
+                    err(f"{md}: last_verified_at is not a YYYY-MM-DD date: {raw!r}")
+            else:
+                err(f"{md}: last_verified_at must be a date string, got {type(raw).__name__}")
+            if parsed is not None and parsed > _dt.date.today():
+                err(f"{md}: last_verified_at is in the future: {parsed.isoformat()}")
 
         # Cross-link checks.
         for field, target_registry in CROSS_LINKS.items():
