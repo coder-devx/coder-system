@@ -136,6 +136,17 @@ designs:
   file: wip/0002-competitive-intelligence-pipeline.md
   affects_services:
   - coder-core
+- id: '0026'
+  title: Pipeline run dashboard — live timeline + inline gates
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0026-pipeline-run-dashboard.md
+  implements_specs:
+  - '0026'
+  affects_services:
+  - coder-core
+  - coder-admin
 - id: '0043'
   title: Knowledge freshness signals
   status: wip

@@ -26,9 +26,10 @@ compound in value.*
 
 Last updated: 2026-04-17 — 0025 (worker output compliance), 0027
 (transient-failure retry), and 0028 (concurrent pipelines with
-per-project fairness) shipped; 0043 / 0044 designs added under
-Architect review. Phase 3 down to a single remaining planned item
-(0026 pipeline dashboard).
+per-project fairness) shipped; 0026 (pipeline-run dashboard) spec
++ design drafted; 0043 / 0044 designs added under Architect review.
+Phase 3 artifacts all covered — every item is either shipped or has
+a WIP spec + design awaiting implementation.
 
 ---
 
@@ -61,6 +62,7 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
+| 0026 | [Pipeline run dashboard — live timeline + inline gates](./wip/0026-pipeline-run-dashboard.md) | wip |
 | 0043 | [Knowledge freshness signals](./wip/0043-knowledge-freshness-signals.md) | wip |
 | 0044 | [Write-through enforcement on ship](./wip/0044-write-through-enforcement.md) | wip |
 
@@ -257,13 +259,19 @@ after a 48 h shadow soak from the 2026-04-15 deploy.
   [`worker-communication`](../designs/active/worker-communication.md).
 - **ADR:** [0012 — re-prompt only, no programmatic repair](../adrs/0012-re-prompt-only-worker-output-remediation.md).
 
-### 0026 — Pipeline run dashboard (planned)
+### 0026 — Pipeline run dashboard (wip)
 
 Admin panel view showing pipeline runs end-to-end: current step,
 time per step, blocking gates, auto-refresh. One-click approve/reject
 at each gate. (Foundation for Phase 5.)
 
-- **Status:** planned
+Scope in flight: two timestamp columns on `pipeline_runs`
+(`step_started_at`, `blocked_since`), a nightly 7-day per-step
+median rollup, SSE events (`pipeline_run.changed` + `.gate_blocked`)
+replacing the 3-s poll, a live Timeline strip + inline Gate card on
+`RunDetail`, and sort-by-blocked-longest-first on the Runs list.
+
+- **Status:** wip → [`wip/0026-pipeline-run-dashboard`](./wip/0026-pipeline-run-dashboard.md)
 - **Extends:** `task-orchestration`, `admin-panel`
 
 ### 0027 — Automatic retry on transient failures (shipped 2026-04-17)
