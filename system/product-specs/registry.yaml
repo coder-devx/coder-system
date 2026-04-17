@@ -130,6 +130,18 @@ specs:
   file: active/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
+- id: '0028'
+  title: Concurrent pipeline execution with per-project fairness
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0028-concurrent-pipelines.md
+  served_by_designs:
+  - '0028'
+  related_specs:
+  - developer-worker
+  - task-orchestration
+  - observability
 - id: '0043'
   title: Knowledge freshness signals
   status: wip

@@ -25,8 +25,8 @@ trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
 Last updated: 2026-04-17 — 0025 (worker output compliance) and 0027
-(transient-failure retry) shipped; 0043 / 0044 designs added under
-Architect review.
+(transient-failure retry) shipped; 0028 spec + design drafted;
+0043 / 0044 designs added under Architect review.
 
 ---
 
@@ -59,6 +59,7 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
+| 0028 | [Concurrent pipeline execution with per-project fairness](./wip/0028-concurrent-pipelines.md) | wip |
 | 0043 | [Knowledge freshness signals](./wip/0043-knowledge-freshness-signals.md) | wip |
 | 0044 | [Write-through enforcement on ship](./wip/0044-write-through-enforcement.md) | wip |
 
@@ -292,13 +293,18 @@ found during the 2026-04-17 trial flip).
   [`worker-communication`](../designs/active/worker-communication.md).
 - **ADR:** [0013 — worker-level transient retry](../adrs/0013-worker-level-transient-retry.md).
 
-### 0028 — Concurrent pipeline execution & queue fairness (planned)
+### 0028 — Concurrent pipeline execution & queue fairness (wip)
 
 Dispatcher supports N concurrent workers per role with fair per-project
 scheduling (no single project can starve others). Adds `worker_concurrency`
 config, per-project lease quotas, and a queue-depth gauge.
 
-- **Status:** planned
+Global cap already live via `worker_concurrency` + admin
+`/v1/projects/{id}/ops/concurrency`. Residual scope: per-project
+fair scheduling (round-robin over contending projects), queue-depth
+gauge, and a soft per-project cap.
+
+- **Status:** wip → [`wip/0028-concurrent-pipelines`](./wip/0028-concurrent-pipelines.md)
 - **Extends:** `developer-worker`, `task-orchestration`, `observability`
 
 ---
