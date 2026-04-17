@@ -92,6 +92,21 @@ and `/pipeline-runs` endpoints in `coder-core`.
   worker per ADR 0013 — the pre-0027 dispatcher-level wrapper was
   removed on ship. Runbook:
   [`worker-transient-failure`](../../runbooks/worker-transient-failure.md).
+- **Concurrent pipelines with per-project fairness.** A process-wide
+  `DispatcherQueue` sits in front of `orchestrate_task`: waiters are
+  queued per-project and admission rotates round-robin across
+  projects with queued work so one tenant can't monopolise the
+  global `worker_concurrency` cap. Each project optionally carries a
+  soft cap (`projects.worker_concurrency_soft`, migration 0027) that
+  yields the project's turn to another waiter once hit — soft
+  semantics, no ceiling on idle-fleet workloads. Queue depth is
+  exposed per-project (`GET /v1/projects/{id}/ops/queue-depth`) and
+  fleet-wide (`GET /v1/_admin/ops/queue-depth`); the admin panel
+  renders the per-project Queue strip on the project dashboard and
+  the Fleet queue widget on the admin home. Lifecycle events
+  (`dispatcher_queue.{enqueued,dequeued,starved_yield}`) flow through
+  the structured-log feed with wait-time timing. Runbook:
+  [`concurrency-overflow`](../../runbooks/concurrency-overflow.md).
 
 ## Interfaces
 
@@ -156,6 +171,14 @@ and `/pipeline-runs` endpoints in `coder-core`.
   `exit_code=-9 + "coder task deadline exceeded"` so the classifier
   doesn't retry our own deadline hits. Pre-0027 dispatcher-level
   retry removed per ADR 0013.
+- `0028` — concurrent pipelines with per-project fairness: a global
+  cap (`worker_concurrency`, already live in a pre-0028 sliver) plus
+  a `DispatcherQueue` that round-robins admission across projects
+  with queued work. Migration 0027 adds the optional soft per-project
+  cap. Two new queue-depth endpoints and two admin surfaces
+  (per-project Queue strip + Fleet queue widget). The pre-0028
+  semaphore-only path is retained for `worker_concurrency <= 0`
+  disable-the-cap operation.
 
 ## Links
 

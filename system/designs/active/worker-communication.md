@@ -140,6 +140,14 @@ Endpoints:
   (budget-exhausted). `worker_transient_retry.*` events ride the
   same structured log feed. The pre-0027 dispatcher-level retry was
   removed on ship per ADR 0013.
+- `0028` — concurrent pipelines with per-project fairness:
+  `workers/_dispatcher_queue.py` sits in front of the existing
+  `orchestrate_task` concurrency gate. Migration 0027 adds
+  `projects.worker_concurrency_soft` for the optional soft cap;
+  `dispatcher_queue.{enqueued,dequeued,starved_yield}` events
+  ride the structured-log feed. Two new queue-depth endpoints
+  (`api/ops.py`) power the admin panel's per-project Queue strip
+  and Fleet queue widget.
 
 ## Links
 

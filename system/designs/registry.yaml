@@ -136,17 +136,6 @@ designs:
   file: wip/0002-competitive-intelligence-pipeline.md
   affects_services:
   - coder-core
-- id: '0028'
-  title: Concurrent pipeline execution with per-project fairness
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0028-concurrent-pipelines.md
-  implements_specs:
-  - '0028'
-  affects_services:
-  - coder-core
-  - coder-admin
 - id: '0043'
   title: Knowledge freshness signals
   status: wip

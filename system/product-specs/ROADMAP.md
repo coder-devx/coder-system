@@ -24,9 +24,11 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-17 — 0025 (worker output compliance) and 0027
-(transient-failure retry) shipped; 0028 spec + design drafted;
-0043 / 0044 designs added under Architect review.
+Last updated: 2026-04-17 — 0025 (worker output compliance), 0027
+(transient-failure retry), and 0028 (concurrent pipelines with
+per-project fairness) shipped; 0043 / 0044 designs added under
+Architect review. Phase 3 down to a single remaining planned item
+(0026 pipeline dashboard).
 
 ---
 
@@ -59,7 +61,6 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
-| 0028 | [Concurrent pipeline execution with per-project fairness](./wip/0028-concurrent-pipelines.md) | wip |
 | 0043 | [Knowledge freshness signals](./wip/0043-knowledge-freshness-signals.md) | wip |
 | 0044 | [Write-through enforcement on ship](./wip/0044-write-through-enforcement.md) | wip |
 
@@ -91,7 +92,7 @@ flowchart TB
     s24["Worker output compliance (shipped)"]
     s25["Pipeline run dashboard"]
     s26["Transient retry (shipped)"]
-    s27["Concurrent pipelines"]
+    s27["Concurrent pipelines (shipped)"]
   end
 
   subgraph cost ["Phase 4 — Cost & Efficiency"]
@@ -200,8 +201,8 @@ flowchart TB
   classDef autoStyle fill:#d1c4e9,stroke:#4527a0,stroke-width:2px
   classDef knowStyle fill:#b2dfdb,stroke:#004d40,stroke-width:2px
 
-  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24,s26 activeStyle
-  class s25,s27 scaleStyle
+  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24,s26,s27 activeStyle
+  class s25 scaleStyle
   class s28,s29,s30,s31 costStyle
   class s32,s33,s34,s35 adminStyle
   class s36,s37,s38 secStyle
@@ -293,19 +294,21 @@ found during the 2026-04-17 trial flip).
   [`worker-communication`](../designs/active/worker-communication.md).
 - **ADR:** [0013 — worker-level transient retry](../adrs/0013-worker-level-transient-retry.md).
 
-### 0028 — Concurrent pipeline execution & queue fairness (wip)
+### 0028 — Concurrent pipeline execution & queue fairness (shipped 2026-04-17)
 
-Dispatcher supports N concurrent workers per role with fair per-project
-scheduling (no single project can starve others). Adds `worker_concurrency`
-config, per-project lease quotas, and a queue-depth gauge.
+`DispatcherQueue` sits in front of the global `worker_concurrency`
+cap: waiters are queued per-project and admission round-robins across
+contending projects so one tenant can't monopolise every slot.
+Migration 0027 added the optional `projects.worker_concurrency_soft`
+soft cap (yield on contention). Two new queue-depth endpoints
+(`/v1/projects/{id}/ops/queue-depth`, `/v1/_admin/ops/queue-depth`)
+and two admin surfaces (per-project Queue strip + Fleet queue
+widget) surface the dispatcher state.
 
-Global cap already live via `worker_concurrency` + admin
-`/v1/projects/{id}/ops/concurrency`. Residual scope: per-project
-fair scheduling (round-robin over contending projects), queue-depth
-gauge, and a soft per-project cap.
-
-- **Status:** wip → [`wip/0028-concurrent-pipelines`](./wip/0028-concurrent-pipelines.md)
-- **Extends:** `developer-worker`, `task-orchestration`, `observability`
+- **Status:** shipped → merged into
+  [`task-orchestration`](./active/task-orchestration.md) /
+  [`worker-communication`](../designs/active/worker-communication.md).
+- **Runbook:** [concurrency-overflow](../runbooks/concurrency-overflow.md).
 
 ---
 

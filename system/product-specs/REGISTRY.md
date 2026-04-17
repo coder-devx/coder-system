@@ -29,7 +29,6 @@ in each component's `## Evolution` section and in git.
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0028](./wip/0028-concurrent-pipelines.md) | Concurrent pipeline execution with per-project fairness | ro | _none_ |
 | [0043](./wip/0043-knowledge-freshness-signals.md) | Knowledge freshness signals | ro | _none_ |
 | [0044](./wip/0044-write-through-enforcement.md) | Write-through enforcement on ship | ro | _none_ |
 
