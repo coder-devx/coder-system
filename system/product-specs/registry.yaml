@@ -130,19 +130,6 @@ specs:
   file: active/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
-- id: '0025'
-  title: Worker output compliance
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0025-worker-output-compliance.md
-  served_by_designs:
-  - '0025'
-  related_specs:
-  - pm-worker
-  - architect-worker
-  - team-manager-worker
-  - task-orchestration
 - id: '0027'
   title: Automatic retry on transient failures
   status: wip
@@ -158,3 +145,32 @@ specs:
   - architect-worker
   - team-manager-worker
   - reviewer-worker
+- id: '0043'
+  title: Knowledge freshness signals
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0043-knowledge-freshness-signals.md
+  served_by_designs:
+  - '0043'
+  related_specs:
+  - knowledge-api
+  - architect-worker
+  - reviewer-worker
+  - admin-panel
+  - observability
+- id: '0044'
+  title: Write-through enforcement on ship
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0044-write-through-enforcement.md
+  served_by_designs:
+  - '0044'
+  related_specs:
+  - knowledge-api
+  - reviewer-worker
+  - team-manager-worker
+  - architect-worker
+  - admin-panel
+  - task-orchestration

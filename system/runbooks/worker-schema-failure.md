@@ -13,9 +13,13 @@ applies_to_integrations: []
 # Worker schema failure
 
 Operational guide for tasks that fail with
-``failure_kind = "schema"`` (spec
-[0025](../product-specs/wip/0025-worker-output-compliance.md), ADR
-[0012](../adrs/0012-re-prompt-only-worker-output-remediation.md)).
+``failure_kind = "schema"``. The schema gate lives in
+[task-orchestration](../product-specs/active/task-orchestration.md)
+and the per-worker schemas in [pm-worker](../designs/active/pm-worker.md),
+[architect-worker](../designs/active/architect-worker.md), and
+[team-manager-worker](../designs/active/team-manager-worker.md).
+Rationale in ADR
+[0012](../adrs/0012-re-prompt-only-worker-output-remediation.md).
 
 ## When to run this
 
@@ -147,7 +151,13 @@ missing, etc.).
 
 ## Related
 
-- Spec: [worker-output-compliance (0025)](../product-specs/wip/0025-worker-output-compliance.md)
-- Design: [worker-output-compliance (0025)](../designs/wip/0025-worker-output-compliance.md)
+- Spec: [task-orchestration](../product-specs/active/task-orchestration.md)
+  (schema gate lives in the orchestrator's Phase 4).
+- Designs: [pm-worker](../designs/active/pm-worker.md),
+  [architect-worker](../designs/active/architect-worker.md),
+  [team-manager-worker](../designs/active/team-manager-worker.md),
+  [worker-communication](../designs/active/worker-communication.md)
+  (`tasks.failure_kind` / `failure_detail` columns).
 - ADR: [0012 — re-prompt-only remediation](../adrs/0012-re-prompt-only-worker-output-remediation.md)
-- Adjacent: [branch-gc](./branch-gc.md)
+- Adjacent: [worker-transient-failure](./worker-transient-failure.md),
+  [branch-gc](./branch-gc.md)

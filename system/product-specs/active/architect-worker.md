@@ -36,6 +36,13 @@ planner gets a concrete architecture to decompose.
   knowledge write API with proper registry entries.
 - Output gates on human approval before the Team Manager picks the
   spec up for planning.
+- **Output compliance gate.** Architect output is validated against
+  the `architect` JSON schema (frontmatter shape + at least one
+  Mermaid fence in the body) before any Phase 4 write. Schema
+  failures re-prompt Claude with the validator errors up to the
+  configured budget; on exhaustion the task lands in `failed` with
+  `failure_kind="schema"` — no partial design files, no half-written
+  ADRs.
 
 ## Interfaces
 
@@ -58,6 +65,11 @@ planner gets a concrete architecture to decompose.
 - 0017 — `workers/architect.py` with built-in system prompt, Mermaid
   requirement, ADR drafting, dispatcher Phase 4 write-through to the
   knowledge API.
+- 0025 — worker output compliance: `architect` JSON schema gates
+  Phase 4 via `validate_and_retry`. Schema exhaustion writes
+  `failure_kind="schema"` with the validator errors and truncated
+  raw snippet in `failure_detail`; ADR 0012 for the re-prompt-only
+  rationale.
 
 ## Links
 

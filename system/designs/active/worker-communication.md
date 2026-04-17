@@ -57,6 +57,18 @@ flowchart TB
 
 Index: `ix_task_messages_task_id` on `(task_id, created_at)`.
 
+**`tasks` table additions for schema failures (migration 0020):**
+
+| Column | Type | Notes |
+|---|---|---|
+| `failure_kind` | `VARCHAR(20)` NULL | `schema` \| `transient` \| other — NULL on success |
+| `failure_detail` | `JSONB` NULL | Validator errors, truncated raw output, attempt count, classifier kind |
+| `output_schema_version` | `VARCHAR(20)` NULL | Schema version the worker validated against; pinned per task |
+
+Index: `ix_tasks_failure_kind_created_at` on `(failure_kind, created_at)` for admin queries. Columns populated by the
+structured-output workers (PM, Architect, TM) via
+`workers/_compliance.py::validate_and_retry`.
+
 Endpoints:
 
 | Method | Path | Description |
@@ -110,6 +122,13 @@ Endpoints:
   (`api/task_stage_runs.py`) over the existing `task_stage_runs`
   archive (migration 0018). Ordered by `recorded_at` ascending;
   `stage` / `status` / `limit` filters; no schema change.
+- `0025` — worker output compliance: migration 0020 adds
+  `tasks.failure_kind`, `failure_detail`, `output_schema_version`;
+  the task-detail admin panel renders schema-failed tasks inline
+  (validator errors + raw snippet up to 4 KB) via the
+  `failure_kind="schema"` branch. `worker_output_compliance.*`
+  structured log events flow through the existing observability
+  feed; no new counter table per design 0018.
 
 ## Links
 

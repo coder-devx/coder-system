@@ -73,10 +73,15 @@ queue but aren't dispatched. The orchestrator's completion handler
 re-evaluates siblings when a blocker hits `accepted`.
 
 **`workers/team_manager.py`** — subprocess pattern. Loads the spec
-and its `served_by_designs`, calls Claude to decompose, validates
-`plan_json` schema (including cycle check), POSTs the draft plan,
-writes `plan_id` to the task result. Does **not** block on human
-approval.
+and its `served_by_designs`, calls Claude to decompose. Output flows
+through `workers/_compliance.py::validate_and_retry` against
+`workers/schemas/team_manager.json` (ordered tasks, valid role,
+S/M/L complexity, acyclic `depends_on`) before the draft plan is
+POSTed. Schema failures re-prompt Claude up to
+`worker_output_compliance_budget`; on exhaustion the task lands
+`failure_kind="schema"` with validator errors in `failure_detail` —
+no `task_plans` row written. Does **not** block on human approval
+in the happy path.
 
 **API endpoints:**
 
@@ -134,6 +139,9 @@ depends_on multi-select), drag-to-reorder, approve/reject buttons.
   plan CRUD endpoints, dependency resolution in the orchestrator,
   and the Plan Review admin view. First worker that creates other
   workers' work.
+- `0025` — worker output compliance: `team_manager.json` schema owns
+  the cycle check and role validation. Schema gate sits in front of
+  the `task_plans` write so failures don't produce orphan plan rows.
 
 ## Links
 

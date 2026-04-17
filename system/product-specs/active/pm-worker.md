@@ -40,6 +40,14 @@ spec is promoted.
 - Auto-creates a pipeline run for `draft:` tasks so downstream
   chaining (architect → TM → developer → PM-accept) is wired from
   the start.
+- **Output compliance gate.** Draft and accept outputs are validated
+  against the per-mode JSON schemas (`pm_draft`, `pm_accept`) before
+  any Phase 4 side effect. On schema failure the worker re-prompts
+  Claude with the validator errors and last raw output, up to the
+  configured retry budget; on exhaustion the task exits with
+  `failure_kind="schema"` and `failure_detail` holding the errors and
+  a truncated raw snippet — zero partial knowledge writes, zero
+  orphan DB rows.
 
 ## Interfaces
 
@@ -65,6 +73,10 @@ spec is promoted.
   Phase 4 wires both modes to the knowledge write API and messaging.
   First self-hosted spec drafted by the PM and shipped end-to-end
   (0019).
+- 0025 — worker output compliance: `pm_draft` and `pm_accept` JSON
+  schemas, shared `validate_and_retry` gate in front of Phase 4.
+  Schema exhaustion lands `failure_kind="schema"` on the task row and
+  leaves no side effect; ADR 0012 explains the re-prompt-only choice.
 
 ## Links
 

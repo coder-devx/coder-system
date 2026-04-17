@@ -17,3 +17,5 @@
 | 0011 | In-process orphan reaper for Cloud Run dispatches | accepted | 2026-04-14 | [0011-orphan-dispatch-reaper.md](./0011-orphan-dispatch-reaper.md) |
 | 0012 | Re-prompt only, no programmatic repair, for malformed worker JSON | accepted | 2026-04-15 | [0012-re-prompt-only-worker-output-remediation.md](./0012-re-prompt-only-worker-output-remediation.md) |
 | 0013 | Transient retry lives inside the worker, not at the dispatcher | accepted | 2026-04-15 | [0013-worker-level-transient-retry.md](./0013-worker-level-transient-retry.md) |
+| 0014 | Knowledge freshness derives from declared affects, not semantic similarity | accepted | 2026-04-17 | [0014-freshness-from-declared-affects.md](./0014-freshness-from-declared-affects.md) |
+| 0015 | Ship gate lives in the Coder pipeline, not in GitHub branch protection | accepted | 2026-04-17 | [0015-ship-gate-in-coder-pipeline.md](./0015-ship-gate-in-coder-pipeline.md) |

@@ -62,6 +62,19 @@ and `/pipeline-runs` endpoints in `coder-core`.
   approving a design auto-creates a TM task; all developer tasks for a
   spec reaching `accepted` auto-creates a PM acceptance task. Paused
   runs stop chaining until resumed.
+- **Worker output compliance.** PM, Architect, and Team Manager worker
+  outputs are validated against per-worker JSON schemas (`pm_draft`,
+  `pm_accept`, `architect`, `team_manager`) before any Phase 4 side
+  effect runs. Schema failures re-prompt Claude with the validator
+  errors and the last raw output up to the configured retry budget;
+  on exhaustion the task lands in `failed` with `failure_kind="schema"`
+  and `failure_detail` carrying the errors, attempt count, and a
+  truncated raw snippet. The admin task detail view renders these
+  inline — no log dive required. Retry lifecycle events
+  (`worker_output_compliance.{ok,retry,failed}`) flow through the
+  structured log stream ([observability-and-cost-tracking](../../designs/active/observability-and-cost-tracking.md))
+  so operators can see which prompts are drifting. Runbook:
+  [`worker-schema-failure`](../../runbooks/worker-schema-failure.md).
 
 ## Interfaces
 
@@ -110,6 +123,14 @@ and `/pipeline-runs` endpoints in `coder-core`.
   `task_stage_runs` archive (migration 0018). Ordered by `recorded_at`
   ascending; filters on `stage` and `status`; 1–500 limit. No new
   schema.
+- `0025` — worker output compliance: per-worker JSON schemas,
+  `validate_and_retry` gate in front of dispatcher Phase 4, new
+  `tasks.failure_kind` / `failure_detail` / `output_schema_version`
+  columns (migration 0020), admin task-detail renders schema failures
+  inline. Enforcement behind `worker_output_compliance_enabled`; flag
+  default flips to `true` after the 48 h shadow soak confirms healthy
+  retry-success rates. ADR 0012 documents the re-prompt-only
+  remediation rule.
 
 ## Links
 

@@ -136,19 +136,6 @@ designs:
   file: wip/0002-competitive-intelligence-pipeline.md
   affects_services:
   - coder-core
-- id: '0025'
-  title: Worker output compliance
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0025-worker-output-compliance.md
-  implements_specs:
-  - '0025'
-  decided_by:
-  - '0012'
-  affects_services:
-  - coder-core
-  - coder-admin
 - id: '0027'
   title: Automatic retry on transient failures
   status: wip
@@ -159,6 +146,32 @@ designs:
   - '0027'
   decided_by:
   - '0013'
+  affects_services:
+  - coder-core
+  - coder-admin
+- id: '0043'
+  title: Knowledge freshness signals
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0043-knowledge-freshness-signals.md
+  implements_specs:
+  - '0043'
+  decided_by:
+  - '0014'
+  affects_services:
+  - coder-core
+  - coder-admin
+- id: '0044'
+  title: Write-through enforcement on ship
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0044-write-through-enforcement.md
+  implements_specs:
+  - '0044'
+  decided_by:
+  - '0015'
   affects_services:
   - coder-core
   - coder-admin

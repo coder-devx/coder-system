@@ -5,7 +5,7 @@ type: adr
 status: accepted
 date: 2026-04-15
 deciders: [ro]
-relates_to_designs: ["0025"]
+relates_to_designs: [pm-worker, architect-worker, team-manager-worker, worker-communication]
 ---
 
 # ADR 0012 — Re-prompt only, no programmatic repair, for malformed worker JSON

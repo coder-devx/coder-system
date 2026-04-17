@@ -84,7 +84,7 @@ adrs:
     status: accepted
     date: 2026-04-15
     file: 0012-re-prompt-only-worker-output-remediation.md
-    relates_to_designs: ["0025"]
+    relates_to_designs: [pm-worker, architect-worker, team-manager-worker, worker-communication]
 
   - id: "0013"
     title: Transient retry lives inside the worker, not at the dispatcher
@@ -92,3 +92,17 @@ adrs:
     date: 2026-04-15
     file: 0013-worker-level-transient-retry.md
     relates_to_designs: ["0027"]
+
+  - id: "0014"
+    title: Knowledge freshness derives from declared affects, not semantic similarity
+    status: accepted
+    date: 2026-04-17
+    file: 0014-freshness-from-declared-affects.md
+    relates_to_designs: ["0043"]
+
+  - id: "0015"
+    title: Ship gate lives in the Coder pipeline, not in GitHub branch protection
+    status: accepted
+    date: 2026-04-17
+    file: 0015-ship-gate-in-coder-pipeline.md
+    relates_to_designs: ["0044"]

@@ -57,10 +57,18 @@ flowchart TB
 - **Dispatcher registration** — `"architect": run_architect_task`
   added to `_RUNNERS`; `architect_system_prompt_path` in config;
   `_system_prompt_path_for("architect")` wired.
+- **Schema gate** — `workers/_compliance.py::validate_and_retry`
+  validates the architect output against
+  `workers/schemas/architect.json` (frontmatter shape, at least one
+  inline Mermaid fence, ADR list well-formed) before Phase 4 runs.
+  Schema failures re-prompt Claude with the validator errors and
+  last raw output, up to `worker_output_compliance_budget`. On
+  exhaustion returns `SchemaFailure` and Phase 4 is skipped.
 - **Phase 4 handler `_handle_architect_result`** — writes the design
   to `system/designs/wip/{id}-{slug}.md` and each ADR to
   `system/adrs/wip/{id}-{slug}.md` via the knowledge write API.
-  Publishes `design_drafted` SSE event.
+  Publishes `design_drafted` SSE event. Only runs on the
+  `ValidatedOutput` branch.
 
 ### Data flow
 
@@ -85,11 +93,14 @@ flowchart TB
   designs are consistent with the existing landscape.
 - ADRs are drafted when a decision affects multiple components,
   introduces new dependencies, or deviates from existing patterns.
-- Invalid JSON from Claude does not crash the task: Phase 4 logs a
-  warning and skips file creation; the raw output remains in the
-  task transcript.
-- GitHub write failures are logged; the task is still marked
-  succeeded — the result is recoverable from the transcript.
+- Malformed architect output triggers the `validate_and_retry`
+  re-prompt loop. On budget exhaustion the task lands in `failed`
+  with `failure_kind="schema"` and `failure_detail` carrying the
+  validator errors and a truncated raw snippet — zero design files
+  or ADR files written, zero registry mutations.
+- GitHub write failures after schema validation passes are logged;
+  the task is still marked succeeded — the result is recoverable
+  from the transcript.
 
 ## Interfaces
 
@@ -105,6 +116,9 @@ flowchart TB
   subprocess worker, its JSON output format, and Phase 4 design/ADR
   write integration. Shipped as a single commit: worker + dispatcher
   registration + config + tests. No migration, no new admin UI.
+- `0025` — worker output compliance: `architect.json` schema,
+  `validate_and_retry` gate before Phase 4. The Mermaid-required
+  invariant moves into the schema itself. ADR 0012 for re-prompt-only.
 
 ## Links
 

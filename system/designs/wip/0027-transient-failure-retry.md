@@ -289,7 +289,12 @@ Single PR, shadow-first mirroring the 0025 pattern.
 
 - Spec: [wip/0027-transient-failure-retry](../../product-specs/wip/0027-transient-failure-retry.md)
 - ADR: [0013 — worker-level transient retry](../../adrs/0013-worker-level-transient-retry.md)
-- Peer spec/design: [0025 — worker output compliance](./0025-worker-output-compliance.md)
+- Prior shipped work: worker output compliance (0025, shipped
+  2026-04-17) — folded into
+  [pm-worker](../active/pm-worker.md),
+  [architect-worker](../active/architect-worker.md),
+  [team-manager-worker](../active/team-manager-worker.md),
+  [worker-communication](../active/worker-communication.md).
 - Related designs: [worker-roles](../active/worker-roles.md),
   [worker-communication](../active/worker-communication.md),
   [pm-worker](../active/pm-worker.md),

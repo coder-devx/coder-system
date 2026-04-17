@@ -39,6 +39,12 @@ dependency order.
 - Submitted tasks link back to the spec and the originating plan.
 - Admin plan-review UI supports inline per-task edits (prompt,
   complexity, role, order) before approve/reject.
+- **Output compliance gate.** The `plan_json` envelope is validated
+  against the `team_manager` JSON schema (ordered tasks, valid
+  `role`, no dependency cycles, S/M/L complexity) before the draft
+  row lands in `task_plans`. Schema failures re-prompt Claude; on
+  exhaustion the task lands `failed` with `failure_kind="schema"` —
+  no orphan plan rows.
 
 ## Interfaces
 
@@ -63,6 +69,10 @@ dependency order.
 - 0013 — `team-manager` role, `task_plans` table (migration 0012),
   plan CRUD + approve/reject endpoints, `blocked` stage with
   `_unblock_dependents`, admin plan-review UI with inline editing.
+- 0025 — worker output compliance: `team_manager` JSON schema gates
+  the draft-row write. Cycle checks and role validation move from
+  the Phase 4 handler into the schema itself; ADR 0012 explains why
+  auto-repair is out.
 
 ## Links
 

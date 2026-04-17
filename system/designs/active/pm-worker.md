@@ -61,10 +61,18 @@ sequenceDiagram
 - **System prompt** — `system/roles/pm.md` with role definition,
   embedded spec template, output-format instructions for both modes,
   and AC quality criteria.
+- **Schema gate** — `workers/_compliance.py::validate_and_retry`
+  wraps the Claude output with `workers/schemas/pm_draft.json` or
+  `workers/schemas/pm_accept.json` before Phase 4 runs. On validation
+  failure, re-prompts Claude with the schema, validator errors, and
+  last raw output verbatim, up to `worker_output_compliance_budget`
+  (default 2). On exhaustion returns `SchemaFailure`; Phase 4
+  short-circuits and the dispatcher writes `failure_kind="schema"`.
 - **Dispatcher Phase 4 for PM** — on succeeded PM tasks, parses the
   result and calls `_create_spec_from_draft` (via knowledge write
   API) or `_process_acceptance` (status transition + verdict
-  message on thread).
+  message on thread). Only runs on the `ValidatedOutput` branch —
+  schema-failed tasks produce zero Phase 4 side effects.
 - **Configuration** — `pm_system_prompt_path` in `Settings`;
   `_system_prompt_path_for("pm")` wired.
 - **Pipeline routing** — PM tasks are **not** orchestrated:
@@ -91,10 +99,13 @@ write API.
 - Humans approve every drafted spec (drafts land in `wip/`).
 - Each AC gets an explicit verdict with cited evidence.
 - PM tasks don't enter the orchestrated developer/reviewer pipeline.
-- PM uses only existing tables — no new migration; it writes through
-  `tasks`, `task_messages`, and the knowledge write API.
-- Invalid Claude output does not crash the task: Phase 4 logs a
-  warning and skips the downstream side effect.
+- PM writes through `tasks`, `task_messages`, and the knowledge
+  write API; `failure_kind` / `failure_detail` / `output_schema_version`
+  columns on `tasks` (migration 0020) carry schema-failure state.
+- Malformed Claude output triggers the `validate_and_retry` re-prompt
+  loop; on budget exhaustion the task row alone is mutated
+  (`failure_kind="schema"`) — zero partial spec files, zero
+  acceptance reports written.
 
 ## Interfaces
 
@@ -110,6 +121,10 @@ write API.
 - `0009-pm-worker` (spec 0016) — introduced the two-mode PM worker,
   its system prompt, and Phase 4 integration. Dog-fooded by having
   PM draft a real spec and run acceptance on a delivered one.
+- `0025` — worker output compliance: `pm_draft.json` and
+  `pm_accept.json` schemas, `validate_and_retry` gate before Phase 4,
+  schema-failure lifecycle via migration 0020's task columns. See
+  ADR 0012 for the re-prompt-only remediation choice.
 
 ## Links
 

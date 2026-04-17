@@ -17,13 +17,15 @@ is in an approval/override role, not a task-authoring role.
 pipeline run advances to `spec_approval` → ready for human approval →
 chain auto-creates architect task.
 
-**Next 6 months (May–Nov 2026).** Five sequenced phases, 19 planned
-items: Scale & Reliability → Cost & Token Efficiency → Admin Panel v2
-→ Security & Compliance → Trusted Autonomy. The through-line is:
-*make the pipeline fast, cheap, visible, safe to trust with less human
-intervention.*
+**Next 9 months (May 2026–Feb 2027).** Six sequenced phases, 25
+planned items: Scale & Reliability → Cost & Token Efficiency → Admin
+Panel v2 → Security & Compliance → Trusted Autonomy → Knowledge Depth.
+The through-line is: *make the pipeline fast, cheap, visible, safe to
+trust with less human intervention, and make the knowledge it runs on
+compound in value.*
 
-Last updated: 2026-04-15
+Last updated: 2026-04-17 — 0025 (worker output compliance) shipped;
+0043 / 0044 designs added under Architect review.
 
 ---
 
@@ -56,8 +58,9 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
-| 0025 | [Worker output compliance](./wip/0025-worker-output-compliance.md) | wip |
 | 0027 | [Automatic retry on transient failures](./wip/0027-transient-failure-retry.md) | wip |
+| 0043 | [Knowledge freshness signals](./wip/0043-knowledge-freshness-signals.md) | wip |
+| 0044 | [Write-through enforcement on ship](./wip/0044-write-through-enforcement.md) | wip |
 
 ---
 
@@ -84,7 +87,7 @@ flowchart TB
 
   subgraph scale ["Phase 3 — Scale & Reliability"]
     s23["Branch GC (shipped)"]
-    s24["Worker output compliance"]
+    s24["Worker output compliance (shipped)"]
     s25["Pipeline run dashboard"]
     s26["Transient retry"]
     s27["Concurrent pipelines"]
@@ -114,6 +117,15 @@ flowchart TB
     s39["Confidence auto-approve"]
     s40["Escalation & on-call"]
     s41["Self-healing"]
+  end
+
+  subgraph know ["Phase 8 — Knowledge Depth"]
+    s43["Freshness signals"]
+    s44["Write-through enforcement"]
+    s45["Cold-start ingestion"]
+    s46["Graph-aware retrieval"]
+    s47["Template schema migration"]
+    s48["Cross-project patterns"]
   end
 
   to --> s23
@@ -164,19 +176,36 @@ flowchart TB
   s26 --> s41
   s40 --> s41
 
+  ka --> s43
+  obs --> s43
+  arch --> s43
+  ka --> s44
+  rev --> s44
+  tm --> s44
+  arch --> s44
+  onb --> s45
+  ka --> s45
+  ka --> s46
+  s43 --> s46
+  ka --> s47
+  s44 --> s48
+  s43 --> s48
+
   classDef activeStyle fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
   classDef scaleStyle fill:#ffe0b2,stroke:#e65100,stroke-width:2px
   classDef costStyle fill:#fff9c4,stroke:#f57f17,stroke-width:2px
   classDef adminStyle fill:#bbdefb,stroke:#1565c0,stroke-width:2px
   classDef secStyle fill:#f8bbd0,stroke:#ad1457,stroke-width:2px
   classDef autoStyle fill:#d1c4e9,stroke:#4527a0,stroke-width:2px
+  classDef knowStyle fill:#b2dfdb,stroke:#004d40,stroke-width:2px
 
-  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23 activeStyle
-  class s24,s25,s26,s27 scaleStyle
+  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24 activeStyle
+  class s25,s26,s27 scaleStyle
   class s28,s29,s30,s31 costStyle
   class s32,s33,s34,s35 adminStyle
   class s36,s37,s38 secStyle
   class s39,s40,s41 autoStyle
+  class s43,s44,s45,s46,s47,s48 knowStyle
 ```
 
 ---
@@ -207,14 +236,24 @@ returning the archived `TaskStageRunRow` rows for a task, ordered by
   [`worker-communication`](../designs/active/worker-communication.md)
 - **Extends:** `task-orchestration`, `observability`
 
-### 0025 — Worker output compliance (wip)
+### 0025 — Worker output compliance (shipped 2026-04-17)
 
-Workers (PM, Architect, TM) must produce structured JSON output reliably.
-Add per-worker output schemas, pre-side-effect validation, re-prompt on
-malformed output, and structured `failure_kind="schema"` on give-up.
+Per-worker JSON schemas gate Phase 4 for PM (draft + accept),
+Architect, and Team Manager. `validate_and_retry` re-prompts Claude on
+schema failure up to a budget; exhaustion lands
+`failure_kind="schema"` with zero side effects. Enforcement enabled
+after a 48 h shadow soak from the 2026-04-15 deploy.
 
-- **Status:** wip → [`wip/0025-worker-output-compliance`](./wip/0025-worker-output-compliance.md)
-- **Extends:** `pm-worker`, `architect-worker`, `team-manager-worker`, `task-orchestration`
+- **Status:** shipped → merged into
+  [`pm-worker`](./active/pm-worker.md),
+  [`architect-worker`](./active/architect-worker.md),
+  [`team-manager-worker`](./active/team-manager-worker.md),
+  [`task-orchestration`](./active/task-orchestration.md) /
+  [`pm-worker`](../designs/active/pm-worker.md),
+  [`architect-worker`](../designs/active/architect-worker.md),
+  [`team-manager-worker`](../designs/active/team-manager-worker.md),
+  [`worker-communication`](../designs/active/worker-communication.md).
+- **ADR:** [0012 — re-prompt only, no programmatic repair](../adrs/0012-re-prompt-only-worker-output-remediation.md).
 
 ### 0026 — Pipeline run dashboard (planned)
 
@@ -403,6 +442,108 @@ pages a human when auto-remediation fails.
 
 - **Status:** planned
 - **Extends:** `task-orchestration`
+
+---
+
+## Phase 8 — Knowledge Depth (Nov 2026–Feb 2027)
+
+> Make the knowledge repo compound in value. Today it's structured,
+> validated (ADR 0008), and atomically written via the Knowledge API.
+> It is not yet *fresh*, *auto-captured on ship*, *auto-populated at
+> onboarding*, *graph-served*, *migratable across template revisions*,
+> or *cross-project-aware*. Each of those is a specific, observable
+> gap — not a vague "make it smarter" — and each unlocks a real
+> behaviour we want from the system.
+>
+> Success criteria: `active/` is never more than 48 h behind shipped
+> reality; median fleet freshness score trends non-decreasing;
+> onboarding a new project produces a populated knowledge repo in a
+> single afternoon; Knowledge API can return a traversed subgraph in
+> one call; template schema bumps apply across every project without
+> hand-editing. Items 0043 and 0044 are small enough to pull forward
+> into Phase 3 capacity if a developer is idle; everything else waits
+> for this phase.
+
+### 0043 — Knowledge freshness signals (wip)
+
+Add `last_verified_at` + computed `freshness_score` to every
+artifact. Knowledge API responses carry freshness; callers can request
+`min_freshness=N` to refuse stale content. Nightly Architect-worker
+audit pass re-verifies or flags the N most stale artifacts per
+project. Admin panel shows a freshness badge and a "needs attention"
+queue. Distinct from 0044 — freshness is ambient decay signalling;
+0044 is preventing one specific *cause* of decay.
+
+- **Status:** wip → [`wip/0043-knowledge-freshness-signals`](./wip/0043-knowledge-freshness-signals.md)
+- **Extends:** `knowledge-api`, `architect-worker`, `reviewer-worker`,
+  `admin-panel`, `observability`
+
+### 0044 — Write-through enforcement on ship (wip)
+
+Operationalises AGENTS.md rule 5. The Reviewer worker's output schema
+gains a required `ship_attestation`: every AC of the shipping WIP
+either names an `active/` artifact + section that now covers it, or
+is explicitly dropped with a reason. The Team Manager's close-cycle
+step refuses to close while shipped-but-unmerged WIPs exist.
+`POST /v1/knowledge/ship` performs the full fold (active updates +
+WIP delete + both registries) in one atomic commit. Back-fill script
+cleans up existing orphan WIPs.
+
+- **Status:** wip → [`wip/0044-write-through-enforcement`](./wip/0044-write-through-enforcement.md)
+- **Extends:** `knowledge-api`, `reviewer-worker`,
+  `team-manager-worker`, `architect-worker`, `admin-panel`,
+  `task-orchestration`
+
+### 0045 — Cold-start knowledge ingestion (planned)
+
+A tool + runbook that populates a new project's knowledge repo from
+an existing codebase and history: inferred services from repo
+structure, inferred designs from top-level modules + docstrings, a
+first pass at ADRs extracted from commit messages referencing
+decisions, and a seeded glossary. Output is a PR a human reviews, not
+a silent commit. Target: a new project goes from `onboard` to
+populated repo in an afternoon, not a week.
+
+- **Status:** planned
+- **Extends:** `onboarding`, `knowledge-api`, `architect-worker`
+
+### 0046 — Graph-aware knowledge retrieval (planned)
+
+Knowledge API v2 endpoint `GET /v1/projects/{id}/knowledge/graph`
+that accepts a starting artifact and a traversal spec (depth, edge
+types, freshness floor) and returns the whole subgraph in one
+response, pre-joined. Replaces the N+1 pattern of workers fetching
+an artifact and then each cross-link separately. Respects 0043's
+freshness so a graph fetch at `min_freshness=70` excludes stale
+branches.
+
+- **Status:** planned
+- **Extends:** `knowledge-api`
+
+### 0047 — Template schema migration (planned)
+
+When `template/` gains a new required field or renames one, every
+managed project's knowledge repo needs to adopt the change. Today
+this is manual and error-prone. Adds template versioning
+(`template_version` in each project repo), a migration script
+registry in `coder-system/migrations/`, and a Coder Core job that
+runs pending migrations per project as a reviewed PR. Makes schema
+evolution a regular event, not a crisis.
+
+- **Status:** planned
+- **Extends:** `knowledge-api`, `onboarding`
+
+### 0048 — Cross-project pattern surfacing (planned)
+
+The second moat: once 0043 + 0044 keep each project's knowledge
+clean, surface patterns across projects. Similar ADRs, recurring
+failure taxonomies, role-prompt improvements that worked in one
+project and could transfer. First cut is read-only: an admin panel
+"fleet patterns" view and an API that lets a worker ask "has any
+other project decided this already?" — learning, not auto-apply.
+
+- **Status:** planned
+- **Extends:** `knowledge-api`, `admin-panel`, all five role workers
 
 ---
 

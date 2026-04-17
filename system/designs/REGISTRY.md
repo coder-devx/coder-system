@@ -25,8 +25,9 @@ Logical components of the Coder system as it exists today.
 | ID | Title | Owner | Implements specs |
 |---|---|---|---|
 | [0002](./wip/0002-competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | ro | — |
-| [0025](./wip/0025-worker-output-compliance.md) | Worker output compliance | ro | [0025](../product-specs/wip/0025-worker-output-compliance.md) |
 | [0027](./wip/0027-transient-failure-retry.md) | Automatic retry on transient failures | ro | [0027](../product-specs/wip/0027-transient-failure-retry.md) |
+| [0043](./wip/0043-knowledge-freshness-signals.md) | Knowledge freshness signals | ro | [0043](../product-specs/wip/0043-knowledge-freshness-signals.md) |
+| [0044](./wip/0044-write-through-enforcement.md) | Write-through enforcement on ship | ro | [0044](../product-specs/wip/0044-write-through-enforcement.md) |
 
 ## Deprecated
 
