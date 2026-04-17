@@ -107,6 +107,21 @@ and `/pipeline-runs` endpoints in `coder-core`.
   (`dispatcher_queue.{enqueued,dequeued,starved_yield}`) flow through
   the structured-log feed with wait-time timing. Runbook:
   [`concurrency-overflow`](../../runbooks/concurrency-overflow.md).
+- **Pipeline-run dashboard signals.** Every `pipeline_runs` row
+  carries two timing columns (migration 0028): `step_started_at`
+  resets on every step transition, and `blocked_since` is set while
+  the run sits in a `*_approval` step and cleared on resolution. The
+  pair powers the admin Runs list's blocked-longest-first sort and
+  the per-run Timeline strip. Per-step duration statistics roll up
+  nightly into `pipeline_step_stats` (migration 0029); the median is
+  exposed via `GET /v1/projects/{id}/ops/step-stats` and an admin-only
+  `POST /v1/_admin/ops/step-stats/recompute`. Two new SSE event types
+  (`pipeline_run.changed`, `pipeline_run.gate_blocked`) fire on every
+  row mutation so the dashboard can stay live without polling. The
+  `RunDetail` page renders an inline Gate card when `blocked_since`
+  is set — operators approve, request-changes, or reject a pending
+  spec/design without leaving the run view. Runbook:
+  [`pipeline-run-blocked`](../../runbooks/pipeline-run-blocked.md).
 
 ## Interfaces
 
@@ -179,6 +194,14 @@ and `/pipeline-runs` endpoints in `coder-core`.
   (per-project Queue strip + Fleet queue widget). The pre-0028
   semaphore-only path is retained for `worker_concurrency <= 0`
   disable-the-cap operation.
+- `0026` — pipeline-run dashboard: migrations 0028 + 0029 add
+  `pipeline_runs.step_started_at` / `blocked_since` and the
+  `pipeline_step_stats` rollup table. New `advance_step(row, step)`
+  helper on `PipelineRunRow` centralises the timing-column writes
+  across the six existing transition sites. Two new SSE event types
+  (`pipeline_run.changed`, `pipeline_run.gate_blocked`) fire through
+  the existing subscriber feed. Admin surfaces: inline Gate card on
+  RunDetail + blocked-longest-first sort on the Runs list.
 
 ## Links
 

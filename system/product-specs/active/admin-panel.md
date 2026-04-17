@@ -73,6 +73,15 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   email allowlist, admin JWT, task creation form, override and
   approve-merge actions, SSE-driven real-time pipeline, checkbox editing
   of knowledge.
+- 0026 Pipeline run dashboard (shipped 2026-04-17) — Runs list sorts
+  blocked-longest-first with a red "blocked Nm" badge per row;
+  RunDetail renders an inline Gate card for spec/design approvals
+  (approve / request-changes / reject, all from the run view) with a
+  drill-through for plan approval; the step chip + blocked badge is
+  the primary what-needs-me-now signal. Reads
+  `pipeline_runs.step_started_at` / `blocked_since` (spec 0026
+  migrations 0028/0029) and the new
+  `GET /v1/projects/{id}/ops/step-stats` rollup.
 
 ## Links
 

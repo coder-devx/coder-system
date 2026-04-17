@@ -148,6 +148,17 @@ Endpoints:
   ride the structured-log feed. Two new queue-depth endpoints
   (`api/ops.py`) power the admin panel's per-project Queue strip
   and Fleet queue widget.
+- `0026` — pipeline-run dashboard: migration 0028 adds
+  `pipeline_runs.step_started_at` and `blocked_since` (the second
+  indexed for the blocked-longest-first sort); migration 0029 adds
+  the `pipeline_step_stats` rollup table. The
+  `advance_step(row, step)` helper on
+  `domain/pipeline_run.py` centralises the timing-column writes
+  across the six existing transition sites. Two new SSE event types
+  (`pipeline_run.changed`, `pipeline_run.gate_blocked`) fire through
+  the existing `events.py` publisher so the admin dashboard can stay
+  live without polling. `api/ops.py` gains two endpoints for the
+  step-stats rollup and its admin-triggered recompute.
 
 ## Links
 

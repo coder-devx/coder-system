@@ -130,17 +130,6 @@ specs:
   file: active/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
-- id: '0026'
-  title: Pipeline run dashboard — live timeline + inline gates
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0026-pipeline-run-dashboard.md
-  served_by_designs:
-  - '0026'
-  related_specs:
-  - admin-panel
-  - task-orchestration
 - id: '0043'
   title: Knowledge freshness signals
   status: wip

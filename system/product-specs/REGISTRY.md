@@ -29,7 +29,6 @@ in each component's `## Evolution` section and in git.
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0026](./wip/0026-pipeline-run-dashboard.md) | Pipeline run dashboard — live timeline + inline gates | ro | _none_ |
 | [0043](./wip/0043-knowledge-freshness-signals.md) | Knowledge freshness signals | ro | _none_ |
 | [0044](./wip/0044-write-through-enforcement.md) | Write-through enforcement on ship | ro | _none_ |
 

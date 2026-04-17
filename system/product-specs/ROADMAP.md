@@ -24,12 +24,9 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-17 — 0025 (worker output compliance), 0027
-(transient-failure retry), and 0028 (concurrent pipelines with
-per-project fairness) shipped; 0026 (pipeline-run dashboard) spec
-+ design drafted; 0043 / 0044 designs added under Architect review.
-Phase 3 artifacts all covered — every item is either shipped or has
-a WIP spec + design awaiting implementation.
+Last updated: 2026-04-17 — Phase 3 (Scale & Reliability) complete:
+0023, 0025, 0026, 0027, and 0028 all shipped into `active/`.
+0043 / 0044 designs remain WIP awaiting implementation in Phase 8.
 
 ---
 
@@ -62,7 +59,6 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
-| 0026 | [Pipeline run dashboard — live timeline + inline gates](./wip/0026-pipeline-run-dashboard.md) | wip |
 | 0043 | [Knowledge freshness signals](./wip/0043-knowledge-freshness-signals.md) | wip |
 | 0044 | [Write-through enforcement on ship](./wip/0044-write-through-enforcement.md) | wip |
 
@@ -92,7 +88,7 @@ flowchart TB
   subgraph scale ["Phase 3 — Scale & Reliability"]
     s23["Branch GC (shipped)"]
     s24["Worker output compliance (shipped)"]
-    s25["Pipeline run dashboard"]
+    s25["Pipeline run dashboard (shipped)"]
     s26["Transient retry (shipped)"]
     s27["Concurrent pipelines (shipped)"]
   end
@@ -203,8 +199,7 @@ flowchart TB
   classDef autoStyle fill:#d1c4e9,stroke:#4527a0,stroke-width:2px
   classDef knowStyle fill:#b2dfdb,stroke:#004d40,stroke-width:2px
 
-  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24,s26,s27 activeStyle
-  class s25 scaleStyle
+  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24,s25,s26,s27 activeStyle
   class s28,s29,s30,s31 costStyle
   class s32,s33,s34,s35 adminStyle
   class s36,s37,s38 secStyle
@@ -259,20 +254,21 @@ after a 48 h shadow soak from the 2026-04-15 deploy.
   [`worker-communication`](../designs/active/worker-communication.md).
 - **ADR:** [0012 — re-prompt only, no programmatic repair](../adrs/0012-re-prompt-only-worker-output-remediation.md).
 
-### 0026 — Pipeline run dashboard (wip)
+### 0026 — Pipeline run dashboard (shipped 2026-04-17)
 
-Admin panel view showing pipeline runs end-to-end: current step,
-time per step, blocking gates, auto-refresh. One-click approve/reject
-at each gate. (Foundation for Phase 5.)
+Admin panel view showing pipeline runs end-to-end: inline Gate card
+on `RunDetail` for spec / design / plan approvals without leaving
+the run view, sort-by-blocked-longest-first on the Runs list with a
+red `blocked Nm` badge per row. Two new timestamp columns on
+`pipeline_runs` (`step_started_at` + `blocked_since`), a
+`pipeline_step_stats` rollup table, and two new SSE event types
+(`pipeline_run.changed` + `.gate_blocked`) back the UX.
 
-Scope in flight: two timestamp columns on `pipeline_runs`
-(`step_started_at`, `blocked_since`), a nightly 7-day per-step
-median rollup, SSE events (`pipeline_run.changed` + `.gate_blocked`)
-replacing the 3-s poll, a live Timeline strip + inline Gate card on
-`RunDetail`, and sort-by-blocked-longest-first on the Runs list.
-
-- **Status:** wip → [`wip/0026-pipeline-run-dashboard`](./wip/0026-pipeline-run-dashboard.md)
-- **Extends:** `task-orchestration`, `admin-panel`
+- **Status:** shipped → merged into
+  [`task-orchestration`](./active/task-orchestration.md),
+  [`admin-panel`](./active/admin-panel.md) /
+  [`worker-communication`](../designs/active/worker-communication.md).
+- **Runbook:** [pipeline-run-blocked](../runbooks/pipeline-run-blocked.md).
 
 ### 0027 — Automatic retry on transient failures (shipped 2026-04-17)
 
