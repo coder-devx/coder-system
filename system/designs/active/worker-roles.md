@@ -97,6 +97,11 @@ Reviewer is a distinct role from Product Manager per
   split, the fleet, and per-role service accounts.
 - Build plan step 5 (spec 0005) — provisioned the seven role SAs and
   the System Admin broker pattern.
+- `0027` — worker transient-failure retry: every role worker (PM,
+  Architect, TM, Developer, Reviewer) wraps its `claude` spawn in
+  the shared `run_with_transient_retry` helper. Classification
+  taxonomy + retry budget are shared across roles; ADR 0013 pins the
+  retry loop inside the worker, not the dispatcher.
 
 ## Links
 

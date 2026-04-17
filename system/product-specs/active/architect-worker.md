@@ -43,6 +43,11 @@ planner gets a concrete architecture to decompose.
   configured budget; on exhaustion the task lands in `failed` with
   `failure_kind="schema"` — no partial design files, no half-written
   ADRs.
+- **Transient-failure retry.** The claude spawn is wrapped in
+  `run_with_transient_retry` (spec 0027). Composes with 0025 —
+  transient wraps the spawn, schema wraps a successful spawn's
+  output. Architect's 900 s task deadline is distinct from transient:
+  a deadline hit surfaces as `TaskStatus.TIMED_OUT`, not retried.
 
 ## Interfaces
 
@@ -70,6 +75,7 @@ planner gets a concrete architecture to decompose.
   `failure_kind="schema"` with the validator errors and truncated
   raw snippet in `failure_detail`; ADR 0012 for the re-prompt-only
   rationale.
+- 0027 — transient-failure retry around the claude spawn. ADR 0013.
 
 ## Links
 

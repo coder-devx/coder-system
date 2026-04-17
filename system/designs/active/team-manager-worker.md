@@ -80,8 +80,11 @@ S/M/L complexity, acyclic `depends_on`) before the draft plan is
 POSTed. Schema failures re-prompt Claude up to
 `worker_output_compliance_budget`; on exhaustion the task lands
 `failure_kind="schema"` with validator errors in `failure_detail` —
-no `task_plans` row written. Does **not** block on human approval
-in the happy path.
+no `task_plans` row written. The claude spawn is also wrapped in
+`workers/_transient_retry.py::run_with_transient_retry` (spec 0027)
+so transport blips retry inside the worker before reaching the
+schema gate. Does **not** block on human approval in the happy
+path.
 
 **API endpoints:**
 
@@ -142,6 +145,8 @@ depends_on multi-select), drag-to-reorder, approve/reject buttons.
 - `0025` — worker output compliance: `team_manager.json` schema owns
   the cycle check and role validation. Schema gate sits in front of
   the `task_plans` write so failures don't produce orphan plan rows.
+- `0027` — transient-failure retry wrapping the claude spawn.
+  ADR 0013.
 
 ## Links
 

@@ -91,7 +91,7 @@ adrs:
     status: accepted
     date: 2026-04-15
     file: 0013-worker-level-transient-retry.md
-    relates_to_designs: ["0027"]
+    relates_to_designs: [pm-worker, architect-worker, team-manager-worker, worker-roles, worker-communication]
 
   - id: "0014"
     title: Knowledge freshness derives from declared affects, not semantic similarity

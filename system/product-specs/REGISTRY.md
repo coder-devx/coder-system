@@ -29,7 +29,6 @@ in each component's `## Evolution` section and in git.
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0027](./wip/0027-transient-failure-retry.md) | Automatic retry on transient failures | ro | _none_ |
 | [0043](./wip/0043-knowledge-freshness-signals.md) | Knowledge freshness signals | ro | _none_ |
 | [0044](./wip/0044-write-through-enforcement.md) | Write-through enforcement on ship | ro | _none_ |
 

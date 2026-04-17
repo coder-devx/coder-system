@@ -68,6 +68,15 @@ sequenceDiagram
   last raw output verbatim, up to `worker_output_compliance_budget`
   (default 2). On exhaustion returns `SchemaFailure`; Phase 4
   short-circuits and the dispatcher writes `failure_kind="schema"`.
+- **Transient retry** — `workers/_transient_retry.py::run_with_transient_retry`
+  wraps the `claude` subprocess spawn. `workers/_transient.py::classify`
+  tags the spawn result as `transient` / `permanent` / `unknown`
+  based on envelope subtype + stderr substring + exit code. Transient
+  failures re-spawn with full-jitter exponential backoff up to
+  `worker_transient_retry_budget` (default 3). Budget exhaustion
+  returns `TransientFailure`; the dispatcher writes
+  `failure_kind="transient"`. Recovered runs carry a
+  `RetryHistory` the dispatcher persists on `tasks.transient_retry_history`.
 - **Dispatcher Phase 4 for PM** — on succeeded PM tasks, parses the
   result and calls `_create_spec_from_draft` (via knowledge write
   API) or `_process_acceptance` (status transition + verdict
@@ -125,6 +134,9 @@ write API.
   `pm_accept.json` schemas, `validate_and_retry` gate before Phase 4,
   schema-failure lifecycle via migration 0020's task columns. See
   ADR 0012 for the re-prompt-only remediation choice.
+- `0027` — transient-failure retry: the claude spawn is wrapped in
+  `run_with_transient_retry` with worker-level budget and backoff.
+  ADR 0013.
 
 ## Links
 

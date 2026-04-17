@@ -130,21 +130,6 @@ specs:
   file: active/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
-- id: '0027'
-  title: Automatic retry on transient failures
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0027-transient-failure-retry.md
-  served_by_designs:
-  - '0027'
-  related_specs:
-  - task-orchestration
-  - developer-worker
-  - pm-worker
-  - architect-worker
-  - team-manager-worker
-  - reviewer-worker
 - id: '0043'
   title: Knowledge freshness signals
   status: wip

@@ -24,8 +24,9 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-17 — 0025 (worker output compliance) shipped;
-0043 / 0044 designs added under Architect review.
+Last updated: 2026-04-17 — 0025 (worker output compliance) and 0027
+(transient-failure retry) shipped; 0043 / 0044 designs added under
+Architect review.
 
 ---
 
@@ -58,7 +59,6 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
-| 0027 | [Automatic retry on transient failures](./wip/0027-transient-failure-retry.md) | wip |
 | 0043 | [Knowledge freshness signals](./wip/0043-knowledge-freshness-signals.md) | wip |
 | 0044 | [Write-through enforcement on ship](./wip/0044-write-through-enforcement.md) | wip |
 
@@ -89,7 +89,7 @@ flowchart TB
     s23["Branch GC (shipped)"]
     s24["Worker output compliance (shipped)"]
     s25["Pipeline run dashboard"]
-    s26["Transient retry"]
+    s26["Transient retry (shipped)"]
     s27["Concurrent pipelines"]
   end
 
@@ -199,8 +199,8 @@ flowchart TB
   classDef autoStyle fill:#d1c4e9,stroke:#4527a0,stroke-width:2px
   classDef knowStyle fill:#b2dfdb,stroke:#004d40,stroke-width:2px
 
-  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24 activeStyle
-  class s25,s26,s27 scaleStyle
+  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24,s26 activeStyle
+  class s25,s27 scaleStyle
   class s28,s29,s30,s31 costStyle
   class s32,s33,s34,s35 adminStyle
   class s36,s37,s38 secStyle
@@ -264,16 +264,33 @@ at each gate. (Foundation for Phase 5.)
 - **Status:** planned
 - **Extends:** `task-orchestration`, `admin-panel`
 
-### 0027 — Automatic retry on transient failures (wip)
+### 0027 — Automatic retry on transient failures (shipped 2026-04-17)
 
-When a worker fails due to API overload (529), rate limiting (429),
-or timeout, automatically retry with exponential backoff instead of
-leaving the task in `failed` state. Retry lives inside the worker
-(ADR 0013) so it composes with 0025's schema-retry loop without
-duplicating classification at the dispatcher.
+Per-worker classify-and-retry loop wraps every role worker's `claude`
+spawn. Transient-class failures (429/529/timeout/DNS) retry with
+full-jitter exponential backoff inside the worker; budget exhaustion
+lands `failure_kind="transient"` with a structured detail, recovered
+runs populate `tasks.transient_retry_history` for the admin chip. The
+pre-0027 dispatcher-level retry was removed on ship per ADR 0013.
 
-- **Status:** wip → [`wip/0027-transient-failure-retry`](./wip/0027-transient-failure-retry.md)
-- **Extends:** `task-orchestration`, all five role workers
+Ship note: the worker internal-timeout signature was changed to
+`exit_code=-9 + "coder task deadline exceeded"` so the classifier
+doesn't retry our own task-deadline hits as transient (collision
+found during the 2026-04-17 trial flip).
+
+- **Status:** shipped → merged into
+  [`pm-worker`](./active/pm-worker.md),
+  [`architect-worker`](./active/architect-worker.md),
+  [`team-manager-worker`](./active/team-manager-worker.md),
+  [`developer-worker`](./active/developer-worker.md),
+  [`reviewer-worker`](./active/reviewer-worker.md),
+  [`task-orchestration`](./active/task-orchestration.md) /
+  [`pm-worker`](../designs/active/pm-worker.md),
+  [`architect-worker`](../designs/active/architect-worker.md),
+  [`team-manager-worker`](../designs/active/team-manager-worker.md),
+  [`worker-roles`](../designs/active/worker-roles.md),
+  [`worker-communication`](../designs/active/worker-communication.md).
+- **ADR:** [0013 — worker-level transient retry](../adrs/0013-worker-level-transient-retry.md).
 
 ### 0028 — Concurrent pipeline execution & queue fairness (planned)
 

@@ -64,6 +64,11 @@ flowchart TB
   Schema failures re-prompt Claude with the validator errors and
   last raw output, up to `worker_output_compliance_budget`. On
   exhaustion returns `SchemaFailure` and Phase 4 is skipped.
+- **Transient retry** — `workers/_transient_retry.py::run_with_transient_retry`
+  wraps the claude spawn. Architect's longer per-task deadline
+  (900 s) is signalled via `exit_code=-9 + "coder task deadline
+  exceeded after Xs"`, which the classifier returns as `unknown`
+  (not retried) so the worker's `TaskStatus.TIMED_OUT` path runs.
 - **Phase 4 handler `_handle_architect_result`** — writes the design
   to `system/designs/wip/{id}-{slug}.md` and each ADR to
   `system/adrs/wip/{id}-{slug}.md` via the knowledge write API.
@@ -119,6 +124,8 @@ flowchart TB
 - `0025` — worker output compliance: `architect.json` schema,
   `validate_and_retry` gate before Phase 4. The Mermaid-required
   invariant moves into the schema itself. ADR 0012 for re-prompt-only.
+- `0027` — transient-failure retry wrapping the claude spawn.
+  ADR 0013.
 
 ## Links
 

@@ -5,7 +5,7 @@ type: adr
 status: accepted
 date: 2026-04-15
 deciders: [ro]
-relates_to_designs: ["0027"]
+relates_to_designs: [pm-worker, architect-worker, team-manager-worker, worker-roles, worker-communication]
 ---
 
 # ADR 0013 — Transient retry lives inside the worker, not at the dispatcher

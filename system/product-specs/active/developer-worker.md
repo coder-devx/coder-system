@@ -47,6 +47,15 @@ produces.
   `git rev-parse --abbrev-ref HEAD` and persists it to
   `tasks.branch_name` — the key the branch-cleanup GC uses to map a
   remote branch back to its task row.
+- **Transient-failure retry.** The `claude` spawn is wrapped in the
+  shared `run_with_transient_retry` helper; Anthropic 429/529,
+  socket resets, and DNS blips re-spawn with full-jitter exponential
+  backoff up to a bounded budget before surfacing. Budget
+  exhaustion lands `failure_kind="transient"` on the task row;
+  success-after-retry populates `transient_retry_history` so the
+  admin panel renders a "recovered after N transient retries" chip.
+  The per-task deadline is distinct: a deadline hit surfaces as
+  `TaskStatus.TIMED_OUT`, not retried.
 
 ## Interfaces
 
@@ -79,6 +88,11 @@ produces.
 - 0023 — capture `tasks.branch_name` (migration 0019) on push so the
   [branch-cleanup](./branch-cleanup.md) GC can resolve remote
   `task/*` branches back to their task rows.
+- 0027 — worker transient-failure retry: `_transient.classify` +
+  `run_with_transient_retry` wrap the claude spawn. Migration 0021
+  adds `tasks.transient_retry_history`. ADR 0013 documents why the
+  retry loop lives inside the worker and not at the dispatcher; the
+  pre-0027 dispatcher-level wrapper was removed on ship.
 
 ## Links
 

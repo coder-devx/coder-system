@@ -75,6 +75,23 @@ and `/pipeline-runs` endpoints in `coder-core`.
   structured log stream ([observability-and-cost-tracking](../../designs/active/observability-and-cost-tracking.md))
   so operators can see which prompts are drifting. Runbook:
   [`worker-schema-failure`](../../runbooks/worker-schema-failure.md).
+- **Worker transient-failure retry.** Every role worker (all five —
+  PM, Architect, Team Manager, Developer, Reviewer) wraps its
+  `claude` subprocess spawn in a classify-and-retry loop. A failure
+  classified as transient (Anthropic 429/529, socket reset, read
+  timeout, DNS) re-spawns with full-jitter exponential backoff up to
+  the configured budget before surfacing. Budget exhaustion writes
+  `failure_kind="transient"` with a `failure_detail` carrying the
+  canonical `error_kind`, attempt count, per-attempt delays, and a
+  truncated `last_stderr`. Success-after-retry populates a separate
+  `tasks.transient_retry_history` column (migration 0021) so the
+  admin panel can render a yellow "recovered after N transient
+  retries" chip without a log dive. Lifecycle events
+  (`worker_transient_retry.{attempt,succeeded,exhausted,unknown}`)
+  flow through the observability feed. The retry lives inside the
+  worker per ADR 0013 — the pre-0027 dispatcher-level wrapper was
+  removed on ship. Runbook:
+  [`worker-transient-failure`](../../runbooks/worker-transient-failure.md).
 
 ## Interfaces
 
@@ -131,6 +148,14 @@ and `/pipeline-runs` endpoints in `coder-core`.
   default flips to `true` after the 48 h shadow soak confirms healthy
   retry-success rates. ADR 0012 documents the re-prompt-only
   remediation rule.
+- `0027` — worker transient-failure retry: `_transient.classify` +
+  `run_with_transient_retry` wrap every role worker's claude spawn.
+  Migration 0021 adds `tasks.transient_retry_history` (recovered
+  runs). Each worker's internal task-deadline signature was updated
+  from `exit_code=124 + "claude CLI timed out"` to
+  `exit_code=-9 + "coder task deadline exceeded"` so the classifier
+  doesn't retry our own deadline hits. Pre-0027 dispatcher-level
+  retry removed per ADR 0013.
 
 ## Links
 

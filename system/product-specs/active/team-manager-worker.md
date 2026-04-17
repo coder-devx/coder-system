@@ -45,6 +45,9 @@ dependency order.
   row lands in `task_plans`. Schema failures re-prompt Claude; on
   exhaustion the task lands `failed` with `failure_kind="schema"` —
   no orphan plan rows.
+- **Transient-failure retry.** The claude spawn is wrapped in
+  `run_with_transient_retry` (spec 0027); composes with the schema
+  gate above.
 
 ## Interfaces
 
@@ -73,6 +76,7 @@ dependency order.
   the draft-row write. Cycle checks and role validation move from
   the Phase 4 handler into the schema itself; ADR 0012 explains why
   auto-repair is out.
+- 0027 — transient-failure retry around the claude spawn. ADR 0013.
 
 ## Links
 

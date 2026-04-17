@@ -57,17 +57,21 @@ flowchart TB
 
 Index: `ix_task_messages_task_id` on `(task_id, created_at)`.
 
-**`tasks` table additions for schema failures (migration 0020):**
+**`tasks` table additions for structured failures and recovered-retry history:**
 
-| Column | Type | Notes |
-|---|---|---|
-| `failure_kind` | `VARCHAR(20)` NULL | `schema` \| `transient` \| other — NULL on success |
-| `failure_detail` | `JSONB` NULL | Validator errors, truncated raw output, attempt count, classifier kind |
-| `output_schema_version` | `VARCHAR(20)` NULL | Schema version the worker validated against; pinned per task |
+| Column | Migration | Type | Notes |
+|---|---|---|---|
+| `failure_kind` | 0020 | `VARCHAR(20)` NULL | `schema` \| `transient` \| other — NULL on success |
+| `failure_detail` | 0020 | `JSONB` NULL | Validator errors + raw snippet (schema), or `{error_kind, attempts, delays_ms, last_stderr}` (transient) |
+| `output_schema_version` | 0020 | `VARCHAR(20)` NULL | Schema version the worker validated against; pinned per task |
+| `transient_retry_history` | 0021 | `TEXT` NULL | JSON `{attempts, delays_ms, error_kind}` — populated only when the task **recovered** from one or more transient retries. NULL on first-attempt success and on budget-exhausted transients (those use `failure_detail`). |
 
-Index: `ix_tasks_failure_kind_created_at` on `(failure_kind, created_at)` for admin queries. Columns populated by the
-structured-output workers (PM, Architect, TM) via
-`workers/_compliance.py::validate_and_retry`.
+Index: `ix_tasks_failure_kind_created_at` on `(failure_kind, created_at)`
+for admin queries. Schema columns populated by the structured-output
+workers (PM, Architect, TM) via
+`workers/_compliance.py::validate_and_retry`. Transient columns
+populated by all five role workers via
+`workers/_transient_retry.py::run_with_transient_retry`.
 
 Endpoints:
 
@@ -129,6 +133,13 @@ Endpoints:
   `failure_kind="schema"` branch. `worker_output_compliance.*`
   structured log events flow through the existing observability
   feed; no new counter table per design 0018.
+- `0027` — worker transient-failure retry: migration 0021 adds
+  `tasks.transient_retry_history` for recovered runs. The admin
+  task-detail grows a yellow "recovered after N transient retries"
+  chip (recovered) and a yellow panel sibling to 0025's schema panel
+  (budget-exhausted). `worker_transient_retry.*` events ride the
+  same structured log feed. The pre-0027 dispatcher-level retry was
+  removed on ship per ADR 0013.
 
 ## Links
 

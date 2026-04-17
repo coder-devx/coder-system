@@ -48,6 +48,12 @@ spec is promoted.
   `failure_kind="schema"` and `failure_detail` holding the errors and
   a truncated raw snippet — zero partial knowledge writes, zero
   orphan DB rows.
+- **Transient-failure retry.** The claude spawn is wrapped in
+  `run_with_transient_retry` (spec 0027); 429/529/timeout/DNS blips
+  re-spawn with exponential backoff. Budget exhaustion lands
+  `failure_kind="transient"`; composes with the schema gate above
+  (transient wraps the spawn; schema wraps the output of a
+  successful spawn).
 
 ## Interfaces
 
@@ -77,6 +83,8 @@ spec is promoted.
   schemas, shared `validate_and_retry` gate in front of Phase 4.
   Schema exhaustion lands `failure_kind="schema"` on the task row and
   leaves no side effect; ADR 0012 explains the re-prompt-only choice.
+- 0027 — transient-failure retry around the claude spawn; composes
+  with 0025's schema loop. ADR 0013.
 
 ## Links
 

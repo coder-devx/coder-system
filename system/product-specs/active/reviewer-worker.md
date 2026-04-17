@@ -36,6 +36,10 @@ developer-produced PR and a human-facing merge decision.
 - Verdict messages feed the orchestrator's stage transitions and
   surface as `feedback` in the developer's fix-loop prompt when
   changes are requested.
+- **Transient-failure retry.** The claude spawn is wrapped in the
+  shared `run_with_transient_retry` helper (spec 0027); Anthropic
+  transport blips retry inside the worker up to the configured
+  budget before surfacing as `failure_kind="transient"`.
 
 ## Interfaces
 
@@ -61,6 +65,8 @@ developer-produced PR and a human-facing merge decision.
   columns (migration 0009), knowledge-grounded reviews, first live
   review caught a real convention violation on
   `coder-devx/coder-core#2`.
+- 0027 — transient-failure retry around the claude spawn via the
+  shared classifier + retry wrapper.
 
 ## Links
 
