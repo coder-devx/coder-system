@@ -5,7 +5,7 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-15
-updated: 2026-04-15
+updated: 2026-04-17
 served_by_designs: ["0027"]
 related_specs: [task-orchestration, developer-worker, pm-worker, architect-worker, team-manager-worker, reviewer-worker]
 ---
@@ -107,34 +107,63 @@ worker classifies the failure as transient.
 
 ## Acceptance criteria
 
-- [ ] `coder_core.workers._transient.classify(exit_code, stderr, envelope)`
+- [x] `coder_core.workers._transient.classify(exit_code, stderr, envelope)`
       returns one of `transient`, `permanent`, `unknown` with fixtures
       covering 429, 529, `error_overloaded`, `read timed out`,
       `connection reset`, and a handful of non-transient stderr
       samples from past runs.
-- [ ] Each of developer / reviewer / pm / architect / team-manager
+- [x] Each of developer / reviewer / pm / architect / team-manager
       workers loops `classify` + backoff around the existing `claude`
       invocation. On `transient` with retries remaining, sleep and
       retry; on `permanent` or budget exhaustion, return the existing
       failed `WorkerResult` shape.
-- [ ] Retry budget, base delay, and cap are env-configurable
+- [x] Retry budget, base delay, and cap are env-configurable
       (`WORKER_TRANSIENT_RETRY_BUDGET` default 3,
       `WORKER_TRANSIENT_RETRY_BASE_MS` default 2000,
       `WORKER_TRANSIENT_RETRY_CAP_MS` default 30000).
-- [ ] When all retries fail, `tasks.failure_kind="transient"`,
+- [x] When all retries fail, `tasks.failure_kind="transient"`,
       `tasks.failure_detail` is a JSON blob
       `{error_kind, attempts, delays_ms[], last_stderr}`; no
       side-effectful writeback runs.
-- [ ] `worker_transient_retry.*` log events fire at each attempt with
+- [x] `worker_transient_retry.*` log events fire at each attempt with
       the role, attempt number, chosen delay, and classification.
-- [ ] Admin task detail: recovered runs show a small yellow chip
+- [x] Admin task detail: recovered runs show a small yellow chip
       "recovered after N transient retries"; exhausted runs render a
       yellow panel equivalent in shape to the 0025 schema panel.
-- [ ] Tests: unit tests for `classify`; a worker-level test that uses
+- [x] Tests: unit tests for `classify`; a worker-level test that uses
       a stubbed subprocess to cover transient-then-success and
       transient × (budget+1) paths; a dispatcher-level test that
       verifies `failure_kind="transient"` is written on exhaustion
       without other side effects.
+
+**Rollout state (2026-04-17):** All code landed and deployed in shadow
+mode (`WORKER_TRANSIENT_RETRY_ENABLED=false`). In shadow the classifier
+runs and emits `worker_transient_retry.shadow_*` events but never
+retries — the legacy dispatcher-level retry (pre-0027) still drives
+behaviour. Enforcement flips by (a) confirming shadow classifier
+accuracy and a sub-target `unknown` rate per the
+[runbook](../../runbooks/worker-transient-failure.md), (b) flipping
+`WORKER_TRANSIENT_RETRY_ENABLED=true`, and (c) removing the legacy
+dispatcher wrapper (`dispatcher._run_with_transient_retry`) per
+ADR 0013. The three happen in one PR; shadow-first mirrors the 0025
+pattern.
+
+**Ship blocker discovered 2026-04-17:** A trial flip exposed a
+collision between each worker's internal-timeout marker
+(`exit_code=124` + stderr `"claude CLI timed out after Xs"`, used in
+all five workers' spawn closures) and the classifier's transient
+patterns (`124` in `_TRANSIENT_EXIT_CODES`, `"timed out"` in the
+stderr substring table). With the flag on, an internal task-deadline
+timeout is classified as `transient`, retried up to budget, and
+surfaces as `failure_kind="transient"` instead of the intended
+`TaskStatus.TIMED_OUT`. Fix before next flip: change each worker's
+internal-timeout signature to a non-colliding one (e.g. exit_code
+outside `_TRANSIENT_EXIT_CODES` + stderr that doesn't match the
+substring table) so the classifier returns `permanent` on
+internal deadline hits while still catching genuine Anthropic
+transport timeouts. Also plan alongside: delete obsolete pre-0025
+fallback tests (architect flat-shape, PM markdown-fallback), the
+legacy dispatcher-retry test, and the "flag defaults off" test.
 
 ## Metrics
 
