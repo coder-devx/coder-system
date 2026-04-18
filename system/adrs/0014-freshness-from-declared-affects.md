@@ -5,7 +5,7 @@ type: adr
 status: accepted
 date: 2026-04-17
 deciders: [ro]
-relates_to_designs: ["0043"]
+relates_to_designs: [knowledge-freshness]
 ---
 
 # ADR 0014 — Knowledge freshness derives from declared affects, not semantic similarity

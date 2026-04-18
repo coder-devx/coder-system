@@ -98,7 +98,7 @@ adrs:
     status: accepted
     date: 2026-04-17
     file: 0014-freshness-from-declared-affects.md
-    relates_to_designs: ["0043"]
+    relates_to_designs: [knowledge-freshness]
 
   - id: "0015"
     title: Ship gate lives in the Coder pipeline, not in GitHub branch protection

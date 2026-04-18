@@ -1,23 +1,72 @@
 ---
 id: knowledge-freshness-audit
-title: Knowledge freshness audit — weekly triage
+title: Knowledge freshness audit — setup + weekly triage
 type: runbook
 status: active
 owner: ro
 created: 2026-04-17
-updated: 2026-04-17
-last_verified_at: 2026-04-17
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 applies_to_services: [coder-core, coder-admin]
 applies_to_integrations: []
 ---
 
 # Knowledge freshness audit
 
-Weekly operational pass over the audit queue produced by the
-nightly Architect re-verification job (spec
-[0043](../product-specs/wip/0043-knowledge-freshness-signals.md),
-design [0043](../designs/wip/0043-knowledge-freshness-signals.md),
-ADR [0014](../adrs/0014-freshness-from-declared-affects.md)).
+Two things in one runbook:
+
+1. **Setup** — how to wire Cloud Scheduler to the nightly audit
+   endpoint once per GCP project.
+2. **Weekly triage** — the operational pass over the queue the
+   nightly pass produces.
+
+See
+[knowledge-freshness](../product-specs/active/knowledge-freshness.md)
+for the product view and the
+[design](../designs/active/knowledge-freshness.md) for the technical
+one; ADR
+[0014](../adrs/0014-freshness-from-declared-affects.md) pins the
+"declared affects, not semantic similarity" constraint.
+
+## Setup — Cloud Scheduler wiring
+
+The nightly audit is a POST to
+`/v1/_admin/knowledge-audit/run`. Admin JWT required. One scheduler
+job per GCP project, fleet-wide payload (`{}` → every non-archived
+project). Stagger projects by creating one job per project instead of
+one fleet-wide job when concurrent GitHub reads are a concern.
+
+```sh
+# Prereqs: the ``coder-core-invoker`` service account already exists
+# (IAM is managed via infra/terraform). Its email is in the terraform
+# outputs. The scheduler calls coder-core with an OIDC token so the
+# admin JWT verifier accepts it (same pattern as /v1/_admin/gc/branches).
+
+gcloud scheduler jobs create http knowledge-audit-nightly \
+  --project=vibedevx \
+  --location=europe-west1 \
+  --schedule="0 3 * * *" \
+  --time-zone="UTC" \
+  --http-method=POST \
+  --uri="https://coder-core-<hash>.a.run.app/v1/_admin/knowledge-audit/run" \
+  --headers="Content-Type=application/json" \
+  --message-body='{"project_id": "_all", "floor": 40, "limit": 5}' \
+  --oidc-service-account-email="coder-core-invoker@vibedevx.iam.gserviceaccount.com" \
+  --oidc-token-audience="https://coder-core-<hash>.a.run.app"
+```
+
+- **Schedule:** 03:00 UTC. Picked to avoid overlap with the branch-GC
+  job at 02:00 UTC and the regression-check job at 04:00 UTC.
+- **`floor=40`, `limit=5`** are the shipped defaults; override per
+  project by creating a dedicated job with a different payload.
+- **Manual verification:** `gcloud scheduler jobs run
+  knowledge-audit-nightly --location=europe-west1` triggers the
+  endpoint immediately; the admin Freshness tab should show the
+  new run within a minute.
+
+The same payload works from `curl` for operators who want to fire a
+one-off pass without waiting for the schedule — pass an admin JWT in
+`Authorization: Bearer` instead of the OIDC token.
 
 ## When to run this
 
@@ -49,8 +98,13 @@ outcomes:
 | `needs_rewrite` | Architect identified specific gaps between the artifact and the code. | A report with `gaps: [...]`. |
 | `uncertain` | Architect flagged questions a human must answer. | A report with `questions: [...]`. |
 
-Reports are surfaced at **Admin → Needs attention** and via
-`GET /v1/projects/{id}/knowledge/audit-reports?status=open`.
+Reports are surfaced at **Admin → Freshness** (Needs attention
+table) and via
+`GET /v1/_admin/knowledge-audit/runs/{run_id}` which returns every
+`knowledge_audit_items` row for a pass (including the architect's
+`decision` + canonical-JSON `report` once the task completes).
+`GET /v1/_admin/ops/freshness` gives the score histogram + oldest-N
+across the latest run per project without listing individual runs.
 
 ## Triage
 
@@ -127,12 +181,12 @@ and should be escalated rather than left to rot the queue.
 
 ## Success condition
 
-- `knowledge_audit_reports` open count returns to zero for the
-  project by end-of-week.
-- Median `freshness_score` across the fleet (from the
-  `knowledge_freshness_summary` event) is flat-or-rising
+- `knowledge_audit_items.decision IN ('needs_rewrite', 'uncertain')`
+  open count returns to zero for the project by end-of-week.
+- Median `knowledge_freshness_score` gauge (fleet view on
+  `GET /v1/_admin/ops/freshness/metrics`) is flat-or-rising
   week-over-week.
-- `knowledge_stale_reads_total` / total reads is under 20% for
+- `knowledge_stale_reads_total` / total typed reads is under 20% for
   every project (if over, the threshold is too tight or the audit
   cadence is too slow).
 
@@ -140,10 +194,11 @@ and should be escalated rather than left to rot the queue.
 
 - **The queue keeps growing.** Five artifacts per night per project
   is the per-project audit cap; if churn is higher, the audit can't
-  keep up. First, raise the per-project cap temporarily (`settings.knowledge_audit_max_per_night`)
-  to clear the backlog. If the cap has to stay high, that's a
-  signal to rebuild the artifact or raise `min_freshness` on the
-  callers reading it — the underlying repo area is in flux.
+  keep up. First, raise the per-project cap temporarily via the
+  trigger payload (`{"project_id": "acme", "limit": 20}`) to clear
+  the backlog. If the cap has to stay high, that's a signal to
+  rebuild the artifact or raise `min_freshness` on the callers
+  reading it — the underlying repo area is in flux.
 - **Architect keeps returning `uncertain` on the same artifact.**
   Either the artifact needs a *decision* (escalate once, don't keep
   looping), or the Architect prompt doesn't have enough context;
@@ -159,8 +214,8 @@ and should be escalated rather than left to rot the queue.
 
 ## Related
 
-- Spec: [0043 — knowledge freshness signals](../product-specs/wip/0043-knowledge-freshness-signals.md)
-- Design: [0043 — knowledge freshness signals](../designs/wip/0043-knowledge-freshness-signals.md)
+- Spec: [knowledge-freshness](../product-specs/active/knowledge-freshness.md)
+- Design: [knowledge-freshness](../designs/active/knowledge-freshness.md)
 - ADRs: [0014 — freshness from declared affects](../adrs/0014-freshness-from-declared-affects.md),
   [0008 — CI validation of the knowledge repo](../adrs/0008-ci-validation-of-knowledge-repo.md)
   (validator enforces `last_verified_at`).

@@ -372,8 +372,9 @@ Phased so we land the mechanism before enforcing it.
   [architect-worker](../active/architect-worker.md),
   [team-manager-worker](../active/team-manager-worker.md),
   [worker-communication](../active/worker-communication.md).
-- Peer WIPs: [0043 — knowledge freshness signals](./0043-knowledge-freshness-signals.md)
-  (the "last_verified_at is set at ship" integration lives there).
+- Peer active: [knowledge-freshness](../active/knowledge-freshness.md)
+  (shipped 2026-04-18; the `last_verified_at` surface 0044 integrates
+  with at ship time lives there).
 - Prior shipped work: worker output compliance (0025, shipped
   2026-04-17) — folded into
   [pm-worker](../active/pm-worker.md),

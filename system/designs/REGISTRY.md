@@ -11,6 +11,7 @@ Logical components of the Coder system as it exists today.
 | [architect-worker](./active/architect-worker.md) | Architect Worker | ro | [architect-worker](../product-specs/active/architect-worker.md) | — |
 | [branch-cleanup](./active/branch-cleanup.md) | Branch cleanup | ro | [branch-cleanup](../product-specs/active/branch-cleanup.md) | — |
 | [impersonation](./active/impersonation.md) | Impersonation | ro | — | [0006](../adrs/0006-per-role-service-accounts.md) |
+| [knowledge-freshness](./active/knowledge-freshness.md) | Knowledge Freshness | ro | [knowledge-freshness](../product-specs/active/knowledge-freshness.md) | [0014](../adrs/0014-freshness-from-declared-affects.md) |
 | [knowledge-repo-model](./active/knowledge-repo-model.md) | Knowledge Repo Model | ro | — | 0001, 0002, 0003, 0004, 0008 |
 | [knowledge-write-api](./active/knowledge-write-api.md) | Knowledge Write API | ro | [knowledge-api](../product-specs/active/knowledge-api.md) | — |
 | [observability-and-cost-tracking](./active/observability-and-cost-tracking.md) | Observability and Cost Tracking | ro | [observability](../product-specs/active/observability.md) | — |
@@ -25,7 +26,6 @@ Logical components of the Coder system as it exists today.
 | ID | Title | Owner | Implements specs |
 |---|---|---|---|
 | [0002](./wip/0002-competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | ro | — |
-| [0043](./wip/0043-knowledge-freshness-signals.md) | Knowledge freshness signals | ro | [0043](../product-specs/wip/0043-knowledge-freshness-signals.md) |
 | [0044](./wip/0044-write-through-enforcement.md) | Write-through enforcement on ship | ro | [0044](../product-specs/wip/0044-write-through-enforcement.md) |
 
 ## Deprecated

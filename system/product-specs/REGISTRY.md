@@ -16,6 +16,7 @@ in each component's `## Evolution` section and in git.
 | [developer-worker](./active/developer-worker.md) | Developer Worker | ro | [worker-roles](../designs/active/worker-roles.md) |
 | [impersonation](./active/impersonation.md) | Impersonation | ro | [impersonation](../designs/active/impersonation.md) |
 | [knowledge-api](./active/knowledge-api.md) | Knowledge API | ro | [knowledge-write-api](../designs/active/knowledge-write-api.md), [knowledge-repo-model](../designs/active/knowledge-repo-model.md) |
+| [knowledge-freshness](./active/knowledge-freshness.md) | Knowledge Freshness | ro | [knowledge-freshness](../designs/active/knowledge-freshness.md) |
 | [multi-tenancy](./active/multi-tenancy.md) | Multi-tenancy | ro | [system-overview](../designs/active/system-overview.md) |
 | [observability](./active/observability.md) | Observability | ro | [observability-and-cost-tracking](../designs/active/observability-and-cost-tracking.md) |
 | [onboarding](./active/onboarding.md) | Onboarding | ro | [system-overview](../designs/active/system-overview.md) |
@@ -29,7 +30,6 @@ in each component's `## Evolution` section and in git.
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0043](./wip/0043-knowledge-freshness-signals.md) | Knowledge freshness signals | ro | _none_ |
 | [0044](./wip/0044-write-through-enforcement.md) | Write-through enforcement on ship | ro | _none_ |
 
 ## Deprecated

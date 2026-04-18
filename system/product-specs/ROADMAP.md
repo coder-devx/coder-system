@@ -11,7 +11,7 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**15 active components** describe the shipped system.
+**16 active components** describe the shipped system.
 
 **Pipeline proven end-to-end (2026-04-13):** PM draft → spec file in repo →
 pipeline run advances to `spec_approval` → ready for human approval →
@@ -24,9 +24,10 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-17 — Phase 3 (Scale & Reliability) complete:
+Last updated: 2026-04-18 — 0043 (Knowledge freshness signals) shipped
+into `active/` as [knowledge-freshness](./active/knowledge-freshness.md),
+pulled forward from Phase 8. 0044 remains WIP. Phase 3 complete:
 0023, 0025, 0026, 0027, and 0028 all shipped into `active/`.
-0043 / 0044 designs remain WIP awaiting implementation in Phase 8.
 
 ---
 
@@ -59,7 +60,6 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
-| 0043 | [Knowledge freshness signals](./wip/0043-knowledge-freshness-signals.md) | wip |
 | 0044 | [Write-through enforcement on ship](./wip/0044-write-through-enforcement.md) | wip |
 
 ---
@@ -120,7 +120,7 @@ flowchart TB
   end
 
   subgraph know ["Phase 8 — Knowledge Depth"]
-    s43["Freshness signals"]
+    s43["Freshness signals (shipped)"]
     s44["Write-through enforcement"]
     s45["Cold-start ingestion"]
     s46["Graph-aware retrieval"]
@@ -494,19 +494,21 @@ pages a human when auto-remediation fails.
 > into Phase 3 capacity if a developer is idle; everything else waits
 > for this phase.
 
-### 0043 — Knowledge freshness signals (wip)
+### 0043 — Knowledge freshness signals (shipped 2026-04-18)
 
-Add `last_verified_at` + computed `freshness_score` to every
-artifact. Knowledge API responses carry freshness; callers can request
-`min_freshness=N` to refuse stale content. Nightly Architect-worker
-audit pass re-verifies or flags the N most stale artifacts per
-project. Admin panel shows a freshness badge and a "needs attention"
-queue. Distinct from 0044 — freshness is ambient decay signalling;
-0044 is preventing one specific *cause* of decay.
+Shipped into `active/` as
+[knowledge-freshness](./active/knowledge-freshness.md). Every non-ADR
+artifact now carries `last_verified_at`; the Knowledge API envelope
+includes `freshness: {score, reasons, …}` on every read;
+`min_freshness=N` returns 409 STALE with the body; `POST .../verify`
+bumps the date atomically; a nightly audit dispatches the lowest-scored
+artifacts to the Architect worker, which emits verified / needs_rewrite
+/ uncertain and the consumer calls `.../verify` or files a structured
+report. The admin Freshness tab renders the score histogram and
+Needs-attention table with one-click Verify.
 
-- **Status:** wip → [`wip/0043-knowledge-freshness-signals`](./wip/0043-knowledge-freshness-signals.md)
-- **Extends:** `knowledge-api`, `architect-worker`, `reviewer-worker`,
-  `admin-panel`, `observability`
+- **Status:** shipped → [`active/knowledge-freshness`](./active/knowledge-freshness.md)
+- **Design:** [`designs/active/knowledge-freshness`](../designs/active/knowledge-freshness.md)
 
 ### 0044 — Write-through enforcement on ship (wip)
 

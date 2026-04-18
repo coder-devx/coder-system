@@ -66,6 +66,22 @@ specs:
   served_by_designs:
   - knowledge-write-api
   - knowledge-repo-model
+  related_specs:
+  - knowledge-freshness
+- id: knowledge-freshness
+  title: Knowledge Freshness
+  status: active
+  owner: ro
+  folder: active
+  file: active/knowledge-freshness.md
+  served_by_designs:
+  - knowledge-freshness
+  related_specs:
+  - knowledge-api
+  - architect-worker
+  - reviewer-worker
+  - admin-panel
+  - observability
 - id: multi-tenancy
   title: Multi-tenancy
   status: active
@@ -82,6 +98,8 @@ specs:
   file: active/observability.md
   served_by_designs:
   - observability-and-cost-tracking
+  related_specs:
+  - knowledge-freshness
 - id: onboarding
   title: Onboarding
   status: active
@@ -130,20 +148,6 @@ specs:
   file: active/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
-- id: '0043'
-  title: Knowledge freshness signals
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0043-knowledge-freshness-signals.md
-  served_by_designs:
-  - '0043'
-  related_specs:
-  - knowledge-api
-  - architect-worker
-  - reviewer-worker
-  - admin-panel
-  - observability
 - id: '0044'
   title: Write-through enforcement on ship
   status: wip

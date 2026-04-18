@@ -8,7 +8,7 @@ created: 2026-04-11
 updated: 2026-04-15
 last_verified_at: 2026-04-15
 served_by_designs: [observability-and-cost-tracking]
-related_specs: []
+related_specs: [knowledge-freshness]
 ---
 
 # Observability
