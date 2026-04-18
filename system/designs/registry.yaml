@@ -168,3 +168,49 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+- id: '0030'
+  title: Model tier routing
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0030-model-tier-routing.md
+  implements_specs:
+  - '0030'
+  related_designs:
+  - worker-roles
+  - worker-communication
+  - observability-and-cost-tracking
+  - pm-worker
+  - architect-worker
+  - team-manager-worker
+  affects_services:
+  - coder-core
+  - coder-admin
+- id: '0031'
+  title: Per-project token budgets & cost gates
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0031-token-budgets.md
+  implements_specs:
+  - '0031'
+  related_designs:
+  - observability-and-cost-tracking
+  - worker-communication
+  affects_services:
+  - coder-core
+  - coder-admin
+- id: '0032'
+  title: Prompt & cost regression alerts
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0032-cost-regression-alerts.md
+  implements_specs:
+  - '0032'
+  related_designs:
+  - observability-and-cost-tracking
+  - worker-communication
+  affects_services:
+  - coder-core
+  - coder-admin

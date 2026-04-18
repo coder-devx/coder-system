@@ -64,6 +64,9 @@ The system today, by logical component. Each links to its active spec
 | ID | Title | Status |
 |---|---|---|
 | [0029](./wip/0029-prompt-caching.md) | Prompt caching & shared context reuse | drafting |
+| [0030](./wip/0030-model-tier-routing.md) | Model tier routing | drafting |
+| [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | drafting |
+| [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | drafting |
 
 ---
 

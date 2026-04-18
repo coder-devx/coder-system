@@ -27,6 +27,9 @@ Logical components of the Coder system as it exists today.
 |---|---|---|---|
 | [0002](./wip/0002-competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | ro | — |
 | [0029](./wip/0029-prompt-caching.md) | Prompt caching & shared context reuse | ro | [0029](../product-specs/wip/0029-prompt-caching.md) |
+| [0030](./wip/0030-model-tier-routing.md) | Model tier routing | ro | [0030](../product-specs/wip/0030-model-tier-routing.md) |
+| [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | ro | [0031](../product-specs/wip/0031-token-budgets.md) |
+| [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | ro | [0032](../product-specs/wip/0032-cost-regression-alerts.md) |
 
 ## Deprecated
 

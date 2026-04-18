@@ -31,6 +31,9 @@ in each component's `## Evolution` section and in git.
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
 | [0029](./wip/0029-prompt-caching.md) | Prompt caching & shared context reuse | ro | [0029](../designs/wip/0029-prompt-caching.md) |
+| [0030](./wip/0030-model-tier-routing.md) | Model tier routing | ro | [0030](../designs/wip/0030-model-tier-routing.md) |
+| [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | ro | [0031](../designs/wip/0031-token-budgets.md) |
+| [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | ro | [0032](../designs/wip/0032-cost-regression-alerts.md) |
 
 ## Deprecated
 
