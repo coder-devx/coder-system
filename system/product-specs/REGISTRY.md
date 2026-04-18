@@ -28,7 +28,9 @@ in each component's `## Evolution` section and in git.
 
 ## WIP — numbered, roadmap-aligned
 
-_None in flight._
+| ID | Title | Owner | Served by designs |
+|---|---|---|---|
+| [0029](./wip/0029-prompt-caching.md) | Prompt caching & shared context reuse | ro | [0029](../designs/wip/0029-prompt-caching.md) |
 
 ## Deprecated
 

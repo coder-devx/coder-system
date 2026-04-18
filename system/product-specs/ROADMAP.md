@@ -63,7 +63,7 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
-| — | (no spec currently in flight) | — |
+| [0029](./wip/0029-prompt-caching.md) | Prompt caching & shared context reuse | drafting |
 
 ---
 
@@ -525,9 +525,9 @@ on GitHub errors). `POST /v1/knowledge/ship` performs the full fold
 Trees commit. Admin panel renders a two-column Ship gate (merges ↔
 attestation) on RunDetail. Architect worker ships a
 `knowledge-ship-draft` mode that auto-populates the merges column
-when `settings.ship_draft_dispatch_enabled` is on. Report-mode
-`scripts/find_orphan_wips.py` lands; the `--open-audit` flag is a
-deferred follow-up.
+when `settings.ship_draft_dispatch_enabled` is on.
+`scripts/find_orphan_wips.py` supports both report and
+`--open-audit` dispatch modes for the one-time fleet sweep.
 
 - **Status:** shipped → folded into
   [`knowledge-api`](./active/knowledge-api.md),

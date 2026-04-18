@@ -149,3 +149,22 @@ designs:
   file: wip/0002-competitive-intelligence-pipeline.md
   affects_services:
   - coder-core
+- id: '0029'
+  title: Prompt caching & shared context reuse
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0029-prompt-caching.md
+  implements_specs:
+  - '0029'
+  related_designs:
+  - worker-roles
+  - worker-communication
+  - observability-and-cost-tracking
+  - pm-worker
+  - architect-worker
+  - team-manager-worker
+  - knowledge-repo-model
+  affects_services:
+  - coder-core
+  - coder-admin
