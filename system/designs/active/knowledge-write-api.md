@@ -5,8 +5,8 @@ type: design
 status: active
 owner: ro
 created: 2026-04-12
-updated: 2026-04-15
-last_verified_at: 2026-04-15
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 implements_specs: [knowledge-api]
 decided_by: []
 related_designs: [system-overview, knowledge-repo-model, pm-worker, architect-worker]
@@ -97,8 +97,76 @@ and `folder` fields — three commits total.
   via the structured trailer.
 - Partial failure (artifact committed, registry update fails) returns
   500 with the artifact commit SHA so the caller can retry the
-  registry update. Git Trees API for atomic multi-file commits is a
-  future optimisation.
+  registry update. The **/ship** endpoint sidesteps this entirely by
+  composing the whole write as a single Git Trees commit (see below).
+
+### Ship endpoint (atomic WIP→active merge)
+
+`POST /v1/projects/{id}/knowledge/ship` lands the full wip-to-active
+merge in one GitHub commit via the **Git Trees API** rather than the
+one-file-per-commit Contents path used by the rest of this design. The
+handler builds a tree containing: every `active/` edit or create in
+`merges[]`, the WIP file delete, and rewrites of both affected
+`{folder}/registry.yaml` files — then writes a single commit pointing
+the branch ref at the new tree. Either the whole set lands or the ref
+is untouched; no partial ship state is representable on disk.
+
+Body contract:
+
+```json
+{
+  "wip_id": "0044",
+  "wip_type": "spec" | "design",
+  "merges": [
+    {"artifact_type": "spec" | "design",
+     "artifact_id": "<slug>",
+     "action": "create" | "edit",
+     "body": "<full post-merge markdown with frontmatter>"}
+  ],
+  "attestation": {
+    "reviewer": "<actor-slug>",
+    "acs": [
+      {"ac": "<text>", "merged_into": "<artifact_id>", "section": "<heading>"},
+      {"ac": "<text>", "dropped": true, "reason": "<text>"}
+    ]
+  },
+  "commit_message": "<required>"
+}
+```
+
+Pre-commit validator (everything runs in-memory against a HEAD
+snapshot; any failure returns 4xx with no GitHub write):
+
+- Parse the WIP's `## Acceptance criteria` from the HEAD snapshot and
+  require every AC to appear in `attestation.acs` — by normalised
+  whitespace match — under either `merged_into` + `section` or
+  `dropped: true` + `reason`. Missing AC → 400 naming the offending
+  text. Exact text or drop, no fuzzy match.
+- Every `merged_into` must resolve to an existing `active/` artifact
+  or to a `create` entry in the same request. Dangling refs → 400.
+- Each merge body's frontmatter runs through the existing Write-API
+  validator (required fields, `type`/`id` immutability, cross-link
+  resolution **against the post-merge snapshot** so a `create` in the
+  same request is visible to an `edit` in the same request). Any
+  validation failure → 400.
+- Ship calls whose touched paths include `template/` are rejected with
+  a pointer to the template-migration path (spec 0047 territory).
+- Both affected registries are rewritten (not hand-patched) so entry
+  ordering and formatting stay stable.
+
+Concurrency serialises on the branch ref SHA: two concurrent `/ship`
+calls for the same WIP race on the ref update and the loser gets 409.
+The endpoint is gated on `settings.ship_gate_enabled`.
+
+### Orphan-WIP query
+
+`GET /v1/projects/{id}/knowledge/wips?shipped=true` returns
+`[{wip_id, wip_type, developer_task_id, pr_url, merged_at}, ...]` for
+WIPs whose correlated developer task is `closed` + PR `merged` but
+whose file still sits in `wip/`. Correlation path: `tasks.spec_id` /
+`tasks.design_id` plus task status + PR state. No new schema. This is
+the feed Team Manager's close-cycle backstop consults and the admin
+ship-gate "needs attention" list renders.
 
 ## Interfaces
 
@@ -106,9 +174,12 @@ and `folder` fields — three commits total.
 |---|---|---|
 | `POST` | `/v1/projects/{id}/knowledge/{type}` | 201 · `{id, commit_sha, path}` |
 | `PUT` | `/v1/projects/{id}/knowledge/{type}/{artifact_id}` | 200 · `{id, commit_sha, path}` |
+| `POST` | `/v1/projects/{id}/knowledge/ship` | 201 · `{commit_sha, paths[]}` |
+| `GET` | `/v1/projects/{id}/knowledge/wips?shipped=true` | 200 · `[{wip_id, pr_url, merged_at, ...}]` |
 
-Errors: `400` (immutable field change / bad YAML), `404` (missing
-artifact or project), `409` (SHA conflict or create-race),
+Errors: `400` (immutable field change / bad YAML / AC gap / dangling
+`merged_into` / template touch), `404` (missing artifact or project),
+`409` (SHA conflict, create-race, or concurrent `/ship`),
 `422` (validation / broken cross-link), `502` (registry unparseable).
 
 ## Evolution
@@ -118,9 +189,18 @@ artifact or project), `409` (SHA conflict or create-race),
 - `0007-knowledge-write-api` (spec 0014) — generalized the pattern to
   full create/update across all artifact types and added cross-link
   validation.
+- 0044 — write-through enforcement on ship: the Git Trees atomic
+  multi-file commit (previously a "future optimisation") is the
+  implementation of the new `POST /knowledge/ship` endpoint. Adds the
+  orphan-WIP query, an AC-coverage validator against the WIP HEAD
+  snapshot, post-merge cross-link resolution, template-path refusal,
+  and ref-SHA-based concurrency. Gated on
+  `settings.ship_gate_enabled`. ADR 0015 explains the pipeline-side
+  gate placement.
 
 ## Links
 
-- Specs: [`0014`](../../product-specs/wip/0014-knowledge-write-api.md)
+- Specs: knowledge-api (ship endpoint + orphan-WIP query)
+- ADRs: [0015 — ship gate lives in the Coder pipeline](../../adrs/0015-ship-gate-in-coder-pipeline.md)
 - Designs: knowledge-repo-model, pm-worker, architect-worker
 - Services: `coder-core`

@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-15
-last_verified_at: 2026-04-17
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 served_by_designs: [team-manager-worker]
 related_specs: []
 ---
@@ -49,6 +49,16 @@ dependency order.
 - **Transient-failure retry.** The claude spawn is wrapped in
   `run_with_transient_retry` (spec 0027); composes with the schema
   gate above.
+- **Close-cycle ship backstop.** The `on_all_dev_tasks_accepted`
+  close-cycle hook queries the Knowledge API's orphan-WIP endpoint
+  (`/knowledge/wips?shipped=true`) and refuses to close the cycle
+  when the result is non-empty. The block lands as a structured
+  `wips_pending_merge` stamp on the pipeline run with a
+  `blocked_since` timestamp, a SSE `pipeline_run.close_cycle_blocked`
+  event, and an optional auto-dispatched `knowledge-ship-draft`
+  architect task (behind `settings.ship_draft_dispatch_enabled`) so
+  the admin ship-gate panel opens pre-populated. The hook fails open
+  on GitHub errors so an API outage never traps a cycle.
 
 ## Interfaces
 
@@ -78,6 +88,14 @@ dependency order.
   the Phase 4 handler into the schema itself; ADR 0012 explains why
   auto-repair is out.
 - 0027 — transient-failure retry around the claude spawn. ADR 0013.
+- 0044 — close-cycle backstop: `on_all_dev_tasks_accepted` consults
+  the orphan-WIP query, stamps `wips_pending_merge` +
+  `blocked_since` on the pipeline run, publishes
+  `pipeline_run.close_cycle_blocked`, and optionally auto-dispatches
+  a `knowledge-ship-draft` architect task (behind
+  `ship_draft_dispatch_enabled`). Fails open on GitHub errors.
+  ADR 0015 explains why the gate lives in the Coder pipeline rather
+  than GitHub branch protection.
 
 ## Links
 

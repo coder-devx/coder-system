@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-15
-last_verified_at: 2026-04-17
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 served_by_designs: [worker-communication]
 related_specs: []
 ---
@@ -108,6 +108,20 @@ and `/pipeline-runs` endpoints in `coder-core`.
   (`dispatcher_queue.{enqueued,dequeued,starved_yield}`) flow through
   the structured-log feed with wait-time timing. Runbook:
   [`concurrency-overflow`](../../runbooks/concurrency-overflow.md).
+- **Ship-gate close-cycle backstop.** When every developer task for a
+  run's spec reaches `accepted`, `on_all_dev_tasks_accepted` consults
+  the Knowledge API's orphan-WIP query before promoting the run to
+  `pm_acceptance`. A non-empty result stamps `wips_pending_merge` +
+  `blocked_since` on the pipeline run, publishes a structured
+  `pipeline_run.close_cycle_blocked` event, and (behind
+  `settings.ship_draft_dispatch_enabled`) auto-dispatches a
+  `knowledge-ship-draft` architect task seeded with the orphaned WIP
+  body so the admin ship-gate panel opens pre-populated. Ship-draft
+  dispatch is idempotent on the architect-task side: a second call for
+  the same spec reuses the queued draft rather than creating a
+  duplicate. Fails open on GitHub errors — an API outage never traps
+  a cycle. ADR 0015 keeps the gate inside the Coder pipeline rather
+  than GitHub branch protection.
 - **Pipeline-run dashboard signals.** Every `pipeline_runs` row
   carries two timing columns (migration 0028): `step_started_at`
   resets on every step transition, and `blocked_since` is set while
@@ -195,6 +209,15 @@ and `/pipeline-runs` endpoints in `coder-core`.
   (per-project Queue strip + Fleet queue widget). The pre-0028
   semaphore-only path is retained for `worker_concurrency <= 0`
   disable-the-cap operation.
+- `0044` — write-through enforcement on ship: close-cycle backstop
+  in `on_all_dev_tasks_accepted` stamps `wips_pending_merge` +
+  `blocked_since` on the pipeline run when
+  `/knowledge/wips?shipped=true` returns non-empty; publishes
+  `pipeline_run.close_cycle_blocked` SSE; optional
+  `knowledge-ship-draft` architect auto-dispatch behind
+  `settings.ship_draft_dispatch_enabled` (idempotent on the task
+  side). ADR 0015 fixes the gate inside the Coder pipeline rather
+  than GitHub branch protection.
 - `0026` — pipeline-run dashboard: migrations 0028 + 0029 add
   `pipeline_runs.step_started_at` / `blocked_since` and the
   `pipeline_step_stats` rollup table. New `advance_step(row, step)`

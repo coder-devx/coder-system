@@ -149,16 +149,3 @@ designs:
   file: wip/0002-competitive-intelligence-pipeline.md
   affects_services:
   - coder-core
-- id: '0044'
-  title: Write-through enforcement on ship
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0044-write-through-enforcement.md
-  implements_specs:
-  - '0044'
-  decided_by:
-  - '0015'
-  affects_services:
-  - coder-core
-  - coder-admin

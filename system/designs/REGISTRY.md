@@ -26,7 +26,6 @@ Logical components of the Coder system as it exists today.
 | ID | Title | Owner | Implements specs |
 |---|---|---|---|
 | [0002](./wip/0002-competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | ro | — |
-| [0044](./wip/0044-write-through-enforcement.md) | Write-through enforcement on ship | ro | [0044](../product-specs/wip/0044-write-through-enforcement.md) |
 
 ## Deprecated
 

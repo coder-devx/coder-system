@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-15
-last_verified_at: 2026-04-17
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 served_by_designs: [architect-worker]
 related_specs: []
 ---
@@ -49,6 +49,16 @@ planner gets a concrete architecture to decompose.
   transient wraps the spawn, schema wraps a successful spawn's
   output. Architect's 900 s task deadline is distinct from transient:
   a deadline hit surfaces as `TaskStatus.TIMED_OUT`, not retried.
+- **Knowledge-ship-draft mode.** When a task's prompt begins with the
+  `# Knowledge ship draft` header, the architect worker swaps its
+  output schema for `architect_ship_draft.json` and emits a
+  `merges[]` array (one entry per touched `active/` file, with
+  `artifact_type`, `artifact_id`, `action`, and full post-merge
+  `body`) instead of a design envelope. The close-cycle backstop
+  auto-dispatches these tasks (behind
+  `settings.ship_draft_dispatch_enabled`), seeding the left column of
+  the admin ship-gate panel so operators don't hand-craft the
+  `merges[]` payload.
 
 ## Interfaces
 
@@ -77,6 +87,12 @@ planner gets a concrete architecture to decompose.
   raw snippet in `failure_detail`; ADR 0012 for the re-prompt-only
   rationale.
 - 0027 — transient-failure retry around the claude spawn. ADR 0013.
+- 0044 — knowledge-ship-draft mode: the worker detects the
+  `# Knowledge ship draft` prompt header, swaps in
+  `architect_ship_draft.json`, and emits `merges[]` instead of a
+  design envelope. Close-cycle backstop auto-dispatches ship-draft
+  tasks (idempotent via task-existence query) when
+  `ship_draft_dispatch_enabled` is on.
 
 ## Links
 

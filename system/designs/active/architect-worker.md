@@ -5,8 +5,8 @@ type: design
 status: active
 owner: ro
 created: 2026-04-12
-updated: 2026-04-15
-last_verified_at: 2026-04-17
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 implements_specs: [architect-worker]
 decided_by: []
 related_designs: [team-manager-worker, pm-worker, knowledge-write-api, worker-roles]
@@ -75,6 +75,19 @@ flowchart TB
   `system/adrs/wip/{id}-{slug}.md` via the knowledge write API.
   Publishes `design_drafted` SSE event. Only runs on the
   `ValidatedOutput` branch.
+- **Knowledge-ship-draft mode (spec 0044).** Before constructing the
+  default architect prompt, the worker inspects the incoming task's
+  prompt for the `SHIP_DRAFT_PROMPT_HEADER = "# Knowledge ship draft"`
+  prefix. When it matches, the worker swaps its output schema for
+  `workers/schemas/architect_ship_draft.json` — a `merges[]` shape
+  with `artifact_type`, `artifact_id`, `action` (`create` | `edit`),
+  and a full post-merge `body` per entry — and skips the design
+  envelope branch in Phase 4. Output flows into the admin ship-gate
+  panel's left column rather than `designs/wip/*`. Non-ship-draft
+  architect tasks keep the existing schema and Phase 4 unchanged. The
+  close-cycle backstop in `workers/pipeline_chain.py` is the
+  dispatcher for these tasks (see team-manager-worker design); dispatch
+  is gated on `settings.ship_draft_dispatch_enabled`.
 
 ### Data flow
 
@@ -127,9 +140,17 @@ flowchart TB
   invariant moves into the schema itself. ADR 0012 for re-prompt-only.
 - `0027` — transient-failure retry wrapping the claude spawn.
   ADR 0013.
+- 0044 — knowledge-ship-draft mode: prompt-prefix detection on
+  `# Knowledge ship draft` swaps the output schema to
+  `architect_ship_draft.json` and emits `merges[]` instead of a design
+  envelope. The close-cycle backstop auto-dispatches ship-draft tasks
+  (idempotent via architect-task existence query) when
+  `ship_draft_dispatch_enabled` is on. Non-ship-draft architect tasks
+  unchanged. ADR 0015.
 
 ## Links
 
-- Specs: [`0017`](../../product-specs/wip/0017-architect-worker-v1.md)
+- Specs: architect-worker, knowledge-api (ship endpoint)
 - Designs: team-manager-worker, pm-worker, knowledge-write-api
+- ADRs: [0015 — ship gate in the Coder pipeline](../../adrs/0015-ship-gate-in-coder-pipeline.md)
 - Services: `coder-core`

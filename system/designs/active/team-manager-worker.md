@@ -5,8 +5,8 @@ type: design
 status: active
 owner: ro
 created: 2026-04-12
-updated: 2026-04-15
-last_verified_at: 2026-04-17
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 implements_specs: [team-manager-worker]
 decided_by: []
 related_designs: [system-overview, worker-roles, architect-worker, pm-worker]
@@ -102,6 +102,26 @@ path.
 ordered task cards, inline edit (prompt, role, repo, complexity,
 depends_on multi-select), drag-to-reorder, approve/reject buttons.
 
+**Close-cycle ship backstop (spec 0044).** `on_all_dev_tasks_accepted`
+in `workers/pipeline_chain.py` runs the orphan-WIP query
+(`GET /knowledge/wips?shipped=true`) before promoting the run to
+`pm_acceptance`. A non-empty result stamps the pipeline run with
+`wips_pending_merge` and a `blocked_since` timestamp (same column the
+0026 dashboard reads), publishes a `pipeline_run.close_cycle_blocked`
+SSE event with the offending WIP ids and (if present) the
+auto-dispatched architect ship-draft task id. The stamp and the
+optional architect task row commit inside the same DB session so the
+admin panel never observes "blocked with no draft queued" mid-flight.
+When `settings.ship_draft_dispatch_enabled` is on, the hook dispatches
+a `role=architect` task whose prompt begins with the
+`# Knowledge ship draft` header — the architect worker detects the
+header and switches to ship-draft mode (see architect-worker design).
+Dispatch is idempotent: a second close-cycle call for the same WIP
+reuses the queued non-FAILED ship-draft task rather than creating a
+duplicate. Fetching the WIP body fails open on GitHub errors — the
+backstop still blocks, the admin UI still works; only the automatic
+pre-population is skipped.
+
 ### Data flow
 
 1. Human creates a TM task: "Plan spec 0013 for project coder".
@@ -148,6 +168,13 @@ depends_on multi-select), drag-to-reorder, approve/reject buttons.
   the `task_plans` write so failures don't produce orphan plan rows.
 - `0027` — transient-failure retry wrapping the claude spawn.
   ADR 0013.
+- 0044 — close-cycle ship backstop: `on_all_dev_tasks_accepted`
+  queries the Knowledge API's orphan-WIP endpoint, stamps
+  `wips_pending_merge` + `blocked_since` on the pipeline run,
+  publishes `pipeline_run.close_cycle_blocked`, and optionally
+  auto-dispatches a `knowledge-ship-draft` architect task (gated on
+  `ship_draft_dispatch_enabled`, idempotent on the task-existence
+  query). Fails open on GitHub errors. ADR 0015.
 
 ## Links
 

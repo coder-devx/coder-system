@@ -5,8 +5,8 @@ type: runbook
 status: active
 owner: ro
 created: 2026-04-17
-updated: 2026-04-17
-last_verified_at: 2026-04-17
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 applies_to_services: [coder-core, coder-admin]
 applies_to_integrations: []
 ---
@@ -112,7 +112,27 @@ edit the task list (reorder, re-prompt, drop) before approving.
 - Edit inline, then approve or reject from there.
 - Returning to the run view shows the pipeline advanced.
 
-### Outcome E — The run is stuck, not blocked
+### Outcome E — `wips_pending_merge` (close-cycle backstop)
+
+Gate card shows a **close-cycle blocked** banner instead of an
+inline approve form. This fires when all developer tasks for the
+spec have accepted but the spec's numbered WIP file still sits in
+`wip/` — the write-through ship gate hasn't run yet. The
+backstop stamps `blocked_since` on the run and emits a
+`pipeline_run.close_cycle_blocked` event via SSE, but does not
+create a PM acceptance task until the ship lands.
+
+- The banner shows the offending WIP id and a one-click "Open
+  ship gate" link → `/projects/{project_id}/ship/{wip_id}`.
+- Walk the ship through the
+  [ship-wip-into-active](./ship-wip-into-active.md) runbook. On
+  Approve, the ship endpoint re-runs the backstop and the run
+  advances to `pm_acceptance` on its own — no second click here.
+- If the spec legitimately shouldn't ship into `active/`
+  (non-goal, scope change), use the ship gate's **Reject** flow
+  with a reason; then cancel this pipeline run.
+
+### Outcome F — The run is stuck, not blocked
 
 `blocked_since` is null but the Runs list still shows the run
 in a non-terminal state with no recent updates. This isn't a
@@ -168,5 +188,7 @@ gate problem — it's an orphan or a hung worker.
   [admin-panel](../product-specs/active/admin-panel.md) (Runs list
   + RunDetail pages).
 - Adjacent runbooks:
+  [ship-wip-into-active](./ship-wip-into-active.md) — Outcome E's
+  `wips_pending_merge` state walks through here;
   [worker-transient-failure](./worker-transient-failure.md),
   [concurrency-overflow](./concurrency-overflow.md).

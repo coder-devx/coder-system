@@ -5,8 +5,8 @@ type: runbook
 status: active
 owner: ro
 created: 2026-04-17
-updated: 2026-04-17
-last_verified_at: 2026-04-17
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 applies_to_services: [coder-core, coder-admin]
 applies_to_integrations: [github]
 ---
@@ -14,10 +14,17 @@ applies_to_integrations: [github]
 # Ship a WIP into active
 
 Operational guide for the ship gate — the step that folds a shipping
-WIP into `active/` atomically, attested by the Reviewer worker
-(spec [0044](../product-specs/wip/0044-write-through-enforcement.md),
-design [0044](../designs/wip/0044-write-through-enforcement.md),
-ADR [0015](../adrs/0015-ship-gate-in-coder-pipeline.md)).
+WIP into `active/` atomically, attested by the Reviewer worker. The
+ship endpoint lives in
+[knowledge-api](../product-specs/active/knowledge-api.md) /
+[knowledge-write-api](../designs/active/knowledge-write-api.md); the
+close-cycle backstop lives in
+[team-manager-worker](../product-specs/active/team-manager-worker.md);
+the admin ship-gate panel is described in
+[admin-panel](../product-specs/active/admin-panel.md). ADR
+[0015](../adrs/0015-ship-gate-in-coder-pipeline.md) records the
+decision to keep the gate inside the Coder pipeline rather than
+GitHub branch protection.
 
 ## When to run this
 
@@ -58,10 +65,12 @@ Architect's draft before attestation).
    `create` and `edit` actions against `active/` files. Wait for
    the task to show `done` (typically ~60 s).
 2. **Review the draft at the ship gate.** Admin →
-   `/projects/{id}/pipelines/{run_id}/ship`. Left column: per-file
+   `/projects/{project_id}/ship/{wip_id}`. Left column: per-file
    diff preview, including registry YAML edits and the WIP file's
    deletion. Right column: the Reviewer's `ship_attestation` with
-   one entry per AC.
+   one entry per AC. Discovery: the project's detail page shows a
+   "Pending ships" banner listing every WIP that's closed + merged
+   but un-shipped; each row links straight to this gate.
 3. **Sanity-check the AC coverage.** Every AC from the WIP must be
    either:
    - `merged_into: <artifact>` + `section: <heading>` — confirm the
@@ -78,9 +87,15 @@ Architect's draft before attestation).
 5. **Confirm the commit landed.** Click through to GitHub via the
    returned SHA. You should see a single commit covering every
    touched file + both affected registries + the WIP delete.
-6. **Team Manager close-cycle unblocks.** The next `close_cycle`
-   run will see the WIP gone from the `wips?shipped=true` query
-   and close normally.
+6. **Team Manager close-cycle unblocks.** The pipeline's
+   close-cycle backstop (in
+   `coder_core.workers.pipeline_chain.on_all_dev_tasks_accepted`)
+   stamps the run's `blocked_since` and emits a
+   `pipeline_run.close_cycle_blocked` event when a shipped spec
+   still has its numbered WIP in `wip/`. On Approve the ship
+   endpoint fires `on_wip_shipped`, which re-runs the backstop;
+   with the WIP gone the run advances to `pm_acceptance`
+   automatically — no manual prod.
 
 ## Rejection paths
 
@@ -171,8 +186,22 @@ to apply directly (typo, clearer section title).
 
 ## Related
 
-- Spec: [0044 — write-through enforcement on ship](../product-specs/wip/0044-write-through-enforcement.md)
-- Design: [0044 — write-through enforcement on ship](../designs/wip/0044-write-through-enforcement.md)
+- Specs: [knowledge-api](../product-specs/active/knowledge-api.md)
+  (ship endpoint + orphan-WIP query),
+  [reviewer-worker](../product-specs/active/reviewer-worker.md)
+  (ship-mode schema + `ship_attestation`),
+  [team-manager-worker](../product-specs/active/team-manager-worker.md)
+  (close-cycle backstop),
+  [architect-worker](../product-specs/active/architect-worker.md)
+  (ship-draft mode),
+  [admin-panel](../product-specs/active/admin-panel.md)
+  (Ship gate panel).
+- Designs: [knowledge-write-api](../designs/active/knowledge-write-api.md)
+  (atomic Git Trees commit path),
+  [team-manager-worker](../designs/active/team-manager-worker.md)
+  (close-cycle mechanics),
+  [architect-worker](../designs/active/architect-worker.md)
+  (ship-draft prompt-prefix detection).
 - ADRs: [0015 — ship gate in the Coder pipeline](../adrs/0015-ship-gate-in-coder-pipeline.md),
   [0012 — re-prompt-only remediation](../adrs/0012-re-prompt-only-worker-output-remediation.md)
   (the Reviewer ship-mode schema plugs into this loop).

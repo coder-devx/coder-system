@@ -148,18 +148,3 @@ specs:
   file: active/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
-- id: '0044'
-  title: Write-through enforcement on ship
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0044-write-through-enforcement.md
-  served_by_designs:
-  - '0044'
-  related_specs:
-  - knowledge-api
-  - reviewer-worker
-  - team-manager-worker
-  - architect-worker
-  - admin-panel
-  - task-orchestration

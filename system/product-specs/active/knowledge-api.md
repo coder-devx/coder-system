@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-15
-last_verified_at: 2026-04-15
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 served_by_designs: [knowledge-write-api, knowledge-repo-model]
 related_specs: [knowledge-freshness]
 ---
@@ -45,6 +45,23 @@ checks, and actor attribution.
   registry update) in one commit.
 - In-memory TTL cache keyed on `(project, ref, path)` with
   `knowledge_cache_hit_total` metric.
+- **Ship endpoint.** `POST /v1/projects/{id}/knowledge/ship` atomically
+  lands a WIP-to-active merge in a single GitHub Git Trees commit:
+  `active/` edits or creates, the WIP file delete, and both
+  `{folder}/registry.yaml` rewrites. The body carries
+  `{wip_id, wip_type, merges[], attestation, commit_message}` — the
+  reviewer attestation pairs every WIP acceptance criterion with either
+  a target `active/` artifact + section or an explicit drop reason.
+  Validation (AC coverage, cross-link resolution against the post-merge
+  snapshot, frontmatter shape, `type`/`id` immutability) runs in-memory
+  against the HEAD snapshot; any failure returns 4xx with nothing
+  written. Concurrency serialises on the branch ref SHA; the loser of
+  a race gets 409. Template paths are refused with a pointer to the
+  template-migration path. Behind `settings.ship_gate_enabled`.
+- **Orphan-WIP query.** `GET /v1/projects/{id}/knowledge/wips?shipped=true`
+  returns the WIPs whose correlated developer task is `closed` + PR
+  `merged` but whose file still sits in `wip/`. Used by Team Manager's
+  close-cycle backstop and the admin ship-gate "needs attention" list.
 
 ## Interfaces
 
@@ -53,6 +70,8 @@ checks, and actor attribution.
 - `GET /v1/projects/{id}/knowledge/glossary` — glossary terms.
 - `POST /v1/projects/{id}/knowledge/{type}` — create.
 - `PUT /v1/projects/{id}/knowledge/{type}/{artifact_id}` — update.
+- `POST /v1/projects/{id}/knowledge/ship` — atomic WIP→active merge.
+- `GET /v1/projects/{id}/knowledge/wips?shipped=true` — orphan WIP list.
 - `GET /v1/projects/{id}/knowledge/_metrics` — cache metrics.
 - `GET /v1/projects/{id}/knowledge/_files/{path}` — bytes passthrough
   escape hatch.
@@ -73,8 +92,16 @@ checks, and actor attribution.
 - 0014 Knowledge write API (shipped 2026-04) — `POST`/`PUT` wrapping
   GitHub Contents API, frontmatter validation, cross-link integrity,
   actor-attributed commits, status-change file moves.
+- 0044 Write-through enforcement on ship (shipped 2026-04-18) —
+  `POST /v1/projects/{id}/knowledge/ship` atomic WIP→active merge via
+  Git Trees (single commit covering every touched file + both
+  registries + WIP delete) behind `settings.ship_gate_enabled`; new
+  `GET /v1/projects/{id}/knowledge/wips?shipped=true` orphan query
+  powering the close-cycle backstop and the admin ship-gate panel;
+  pre-commit validator enforces AC coverage, cross-link resolution
+  against the post-merge snapshot, and template-path refusal.
 
 ## Links
 
-- Designs: (none yet)
+- Designs: knowledge-write-api (Git Trees atomic ship path)
 - Related components: multi-tenancy, admin-panel

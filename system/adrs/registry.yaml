@@ -105,4 +105,4 @@ adrs:
     status: accepted
     date: 2026-04-17
     file: 0015-ship-gate-in-coder-pipeline.md
-    relates_to_designs: ["0044"]
+    relates_to_designs: [knowledge-write-api, team-manager-worker, architect-worker]

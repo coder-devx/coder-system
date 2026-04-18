@@ -5,7 +5,7 @@ type: adr
 status: accepted
 date: 2026-04-17
 deciders: [ro]
-relates_to_designs: ["0044"]
+relates_to_designs: [knowledge-write-api, team-manager-worker, architect-worker]
 ---
 
 # ADR 0015 — Ship gate lives in the Coder pipeline, not in GitHub branch protection

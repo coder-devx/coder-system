@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-15
-last_verified_at: 2026-04-17
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 served_by_designs: [worker-roles]
 related_specs: []
 ---
@@ -41,6 +41,15 @@ developer-produced PR and a human-facing merge decision.
   shared `run_with_transient_retry` helper (spec 0027); Anthropic
   transport blips retry inside the worker up to the configured
   budget before surfacing as `failure_kind="transient"`.
+- **Ship attestation (ship-mode).** On `role=reviewer` tasks run in
+  ship-mode, the worker swaps its JSON schema for `reviewer_ship.json`
+  and must emit a `ship_attestation` block that pairs every acceptance
+  criterion of the shipping WIP with either a target `active/` artifact
+  + section or an explicit drop reason. Shape errors re-prompt through
+  the spec 0025 `validate_and_retry` gate; an `approve` verdict without
+  a compliant attestation is rejected by the schema. The attestation
+  is the left-hand half of the admin ship-gate panel and the payload
+  the orchestrator POSTs to `/knowledge/ship`.
 
 ## Interfaces
 
@@ -68,6 +77,11 @@ developer-produced PR and a human-facing merge decision.
   `coder-devx/coder-core#2`.
 - 0027 — transient-failure retry around the claude spawn via the
   shared classifier + retry wrapper.
+- 0044 — ship-mode reviewer schema (`reviewer_ship.json`) with
+  required `ship_attestation`; the worker loads the ship schema when
+  the task carries the ship-mode flag and enforces AC coverage via
+  the 0025 `validate_and_retry` gate. Non-ship reviews keep the
+  existing schema unchanged.
 
 ## Links
 

@@ -158,8 +158,9 @@ the artifact.
 - Hand the report to the PM worker with the
   `open_wip_from_audit` task kind. Prompt includes the artifact, the
   gaps, and the existing roadmap phase — PM proposes a numbered WIP
-  that will later ship via 0044's ship gate and merge back into
-  `active/`.
+  that will later ship via the write-through ship gate
+  ([ship-wip-into-active](./ship-wip-into-active.md)) and merge back
+  into `active/`.
 - Until the WIP ships, the artifact keeps its low score. That's
   correct: the rot is real, and "a WIP exists" is not the same as
   "the repo is current".

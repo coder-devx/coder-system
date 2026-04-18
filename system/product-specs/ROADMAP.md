@@ -24,10 +24,13 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-18 — 0043 (Knowledge freshness signals) shipped
-into `active/` as [knowledge-freshness](./active/knowledge-freshness.md),
-pulled forward from Phase 8. 0044 remains WIP. Phase 3 complete:
-0023, 0025, 0026, 0027, and 0028 all shipped into `active/`.
+Last updated: 2026-04-18 — 0044 (Write-through enforcement on ship)
+shipped into `active/` across `knowledge-api`, `reviewer-worker`,
+`team-manager-worker`, `architect-worker`, `admin-panel`, and
+`task-orchestration` (plus the matching designs). 0043 (Knowledge
+freshness signals) shipped earlier today as
+[knowledge-freshness](./active/knowledge-freshness.md). Phase 3
+complete: 0023, 0025, 0026, 0027, and 0028 all shipped into `active/`.
 
 ---
 
@@ -60,7 +63,7 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
-| 0044 | [Write-through enforcement on ship](./wip/0044-write-through-enforcement.md) | wip |
+| — | (no spec currently in flight) | — |
 
 ---
 
@@ -490,8 +493,8 @@ pages a human when auto-remediation fails.
 > onboarding a new project produces a populated knowledge repo in a
 > single afternoon; Knowledge API can return a traversed subgraph in
 > one call; template schema bumps apply across every project without
-> hand-editing. Items 0043 and 0044 are small enough to pull forward
-> into Phase 3 capacity if a developer is idle; everything else waits
+> hand-editing. Items 0043 and 0044 were small enough to pull forward
+> into Phase 3 capacity; both shipped 2026-04-18. Everything else waits
 > for this phase.
 
 ### 0043 — Knowledge freshness signals (shipped 2026-04-18)
@@ -510,21 +513,36 @@ Needs-attention table with one-click Verify.
 - **Status:** shipped → [`active/knowledge-freshness`](./active/knowledge-freshness.md)
 - **Design:** [`designs/active/knowledge-freshness`](../designs/active/knowledge-freshness.md)
 
-### 0044 — Write-through enforcement on ship (wip)
+### 0044 — Write-through enforcement on ship (shipped 2026-04-18)
 
-Operationalises AGENTS.md rule 5. The Reviewer worker's output schema
-gains a required `ship_attestation`: every AC of the shipping WIP
+Operationalised AGENTS.md rule 5. The Reviewer worker's output schema
+gained a required `ship_attestation`: every AC of the shipping WIP
 either names an `active/` artifact + section that now covers it, or
-is explicitly dropped with a reason. The Team Manager's close-cycle
-step refuses to close while shipped-but-unmerged WIPs exist.
-`POST /v1/knowledge/ship` performs the full fold (active updates +
-WIP delete + both registries) in one atomic commit. Back-fill script
-cleans up existing orphan WIPs.
+is explicitly dropped with a reason. Team Manager's close-cycle step
+now refuses to close while shipped-but-unmerged WIPs exist (fails open
+on GitHub errors). `POST /v1/knowledge/ship` performs the full fold
+(active updates + WIP delete + both registries) in one atomic Git
+Trees commit. Admin panel renders a two-column Ship gate (merges ↔
+attestation) on RunDetail. Architect worker ships a
+`knowledge-ship-draft` mode that auto-populates the merges column
+when `settings.ship_draft_dispatch_enabled` is on. Report-mode
+`scripts/find_orphan_wips.py` lands; the `--open-audit` flag is a
+deferred follow-up.
 
-- **Status:** wip → [`wip/0044-write-through-enforcement`](./wip/0044-write-through-enforcement.md)
-- **Extends:** `knowledge-api`, `reviewer-worker`,
-  `team-manager-worker`, `architect-worker`, `admin-panel`,
-  `task-orchestration`
+- **Status:** shipped → folded into
+  [`knowledge-api`](./active/knowledge-api.md),
+  [`reviewer-worker`](./active/reviewer-worker.md),
+  [`team-manager-worker`](./active/team-manager-worker.md),
+  [`architect-worker`](./active/architect-worker.md),
+  [`admin-panel`](./active/admin-panel.md), and
+  [`task-orchestration`](./active/task-orchestration.md)
+- **Design:** [`knowledge-write-api`](../designs/active/knowledge-write-api.md)
+  (ship endpoint + orphan-WIP query),
+  [`team-manager-worker`](../designs/active/team-manager-worker.md)
+  (close-cycle backstop),
+  [`architect-worker`](../designs/active/architect-worker.md)
+  (ship-draft mode)
+- **ADR:** [`0015 — ship gate lives in the Coder pipeline`](../adrs/0015-ship-gate-in-coder-pipeline.md)
 
 ### 0045 — Cold-start knowledge ingestion (planned)
 

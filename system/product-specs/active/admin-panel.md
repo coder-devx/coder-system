@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-15
-last_verified_at: 2026-04-17
+updated: 2026-04-18
+last_verified_at: 2026-04-18
 served_by_designs: [system-overview]
 related_specs: []
 ---
@@ -43,6 +43,15 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   tasks (squash-merge via GitHub API).
 - Real-time updates via SSE — stage transitions and new messages appear
   within ~2s without polling.
+- **Ship gate panel.** RunDetail renders a two-column Ship gate when
+  the close-cycle backstop has stamped `wips_pending_merge` on a
+  pipeline run: left column shows the architect-drafted `merges[]`
+  (per-file diff + post-merge frontmatter); right column shows the
+  reviewer's `ship_attestation` (AC → `active/` section pairings and
+  drop reasons). Approve calls `POST /knowledge/ship` which lands the
+  atomic commit; Reject opens a structured audit record and leaves the
+  WIP in flight. The gate is distinct from the existing PR-merge gate
+  and never touches GitHub branch protection (ADR 0015).
 
 ## Interfaces
 
@@ -83,6 +92,13 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `pipeline_runs.step_started_at` / `blocked_since` (spec 0026
   migrations 0028/0029) and the new
   `GET /v1/projects/{id}/ops/step-stats` rollup.
+- 0044 Write-through enforcement on ship (shipped 2026-04-18) — new
+  Ship gate panel on RunDetail fires off `wips_pending_merge`;
+  two-column layout renders the architect-drafted `merges[]` beside
+  the reviewer's `ship_attestation`. Approve posts to
+  `/knowledge/ship` (atomic Git Trees commit); Reject records an
+  audit entry and leaves the WIP in flight. Gate lives entirely in
+  the admin panel — no branch-protection integration per ADR 0015.
 
 ## Links
 

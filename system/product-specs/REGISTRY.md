@@ -28,9 +28,7 @@ in each component's `## Evolution` section and in git.
 
 ## WIP — numbered, roadmap-aligned
 
-| ID | Title | Owner | Served by designs |
-|---|---|---|---|
-| [0044](./wip/0044-write-through-enforcement.md) | Write-through enforcement on ship | ro | _none_ |
+_None in flight._
 
 ## Deprecated
 
