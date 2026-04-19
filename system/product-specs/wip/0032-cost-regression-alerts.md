@@ -140,8 +140,13 @@ cost regressions with the commit range likely responsible.
   readable baseline and no false-positive regressions
   (false-positive = regression-event fires on a day where
   the operator confirms no real regression happened).
-  **Pending shadow soak** — `regression_alerts_enabled`
-  defaults False so persistence runs but Slack is silent.
+  **Decided to skip the 2-week soak** — flag flipped to
+  `REGRESSION_ALERTS_ENABLED=true` fleet-wide 2026-04-19
+  alongside the 0029 fleet flip. First false-positive
+  review happens after the first live alert; threshold
+  re-calibration lands as a config bump, not a code
+  change. Acceptance: false-positive rate <20% over a
+  rolling month (same as the Metrics section below).
 
 ## Metrics
 

@@ -27,16 +27,17 @@ without SSH.
 
 - **Per-task cost capture.** Anthropic `usage` (input + output tokens)
   is read from worker responses and written on task completion.
-- **Prompt-cache telemetry.** Every completed task also records
+- **Prompt-cache telemetry.** Every completed task records
   `cache_read_input_tokens` and `cache_creation_input_tokens` from the
   CLI envelope (migration 0022). `/metrics` returns per-role
   `cache_stats` with hit rate
   (`cache_read / (cache_read + regular_input)`), and the admin
   `/metrics` page renders the table + an aggregate `CacheCard` chip
-  on the project overview. Capture runs unconditionally — the
-  `prompt_caching_enabled` flag gates whether coder-core prepends the
-  shared per-run context block to the system prompt, not whether
-  metrics are recorded, so the shadow soak produces a clean baseline.
+  on the project overview. Capture always ran unconditionally; as of
+  2026-04-19 the `PROMPT_CACHING_ENABLED` flag is on fleet-wide so
+  coder-core prepends the shared per-run context block to every
+  worker's system prompt, driving the claude CLI's internal
+  `cache_control` markers and producing real hit rates.
 - **Per-stage timing.** Orchestrator hooks write a row to
   `task_stage_durations` on every stage transition, enabling average
   duration per stage across arbitrary windows.
@@ -47,13 +48,19 @@ without SSH.
   derived from task outcomes. Fix-loop frequency falls out of
   `fix_attempts` aggregation.
 - **Slack alerts.** Fire after every task completion when daily cost,
-  success-rate, or prompt-cache-hit thresholds are breached, with
-  per-alert-type rate limiting (1/hour) so a bad day doesn't page
-  twelve times. The cache-hit-floor alert
-  (`SLACK_CACHE_HIT_FLOOR`, default 0 = disabled) is additionally
-  gated on `PROMPT_CACHING_ENABLED` and a 3-task min sample so it
-  stays silent during the populate-only phase and only fires once
-  caching is expected to be live. Runbook:
+  success-rate, prompt-cache-hit, or per-project budget-soft
+  thresholds are breached, with per-alert-type rate limiting (1/hour)
+  so a bad day doesn't page twelve times. A separate nightly
+  regression alert (spec 0032, `REGRESSION_ALERTS_ENABLED=true` as of
+  2026-04-19) fires on per-role cost regressions > +25% versus the
+  7-day baseline, deduped per (role, metric, day) via the
+  `regression_events` table. The cache-hit-floor alert
+  (`SLACK_CACHE_HIT_FLOOR`, default 0 = disabled) resolves each
+  project's `prompt_caching_enabled` override before firing so a
+  canary carve-out and a fleet-enabled project don't silence each
+  other. The budget-soft alert
+  (`alert_type=f"budget_soft_{project}_{yyyymm}"`) dedups per
+  calendar month. Runbook:
   [`cache-hit-drop`](../../runbooks/cache-hit-drop.md).
 - **Admin dashboard.** `/metrics` route with a period selector, summary
   cards, CSS bar charts for daily cost and success rate, and a per-spec
@@ -97,9 +104,33 @@ without SSH.
   Metrics page renders a "Prompt Cache Efficiency" table and the
   ProjectDetail `CacheCard` aggregate chip. `SLACK_CACHE_HIT_FLOOR`
   alert fires when per-project rolling-24h hit ratio drops below the
-  floor (gated on `PROMPT_CACHING_ENABLED` + 3-task min sample).
-  Capture runs unconditionally — the flag only controls whether the
-  shared per-run context block is prepended to the system prompt.
+  floor (gated on effective `prompt_caching_enabled` per project +
+  3-task min sample). `PROMPT_CACHING_ENABLED=true` on revision
+  `coder-core-00115-vhp` (2026-04-19) so cache_stats are driven by
+  real cache_control markers, not a zero baseline.
+- `0031` — per-project token budgets: migration 0035 adds
+  `projects.budget_{soft,hard}_tokens` tri-state overrides.
+  `resolve_budget_limits` is the single resolution point (per-project
+  override → fleet default → 0 disables). Dispatcher hard-gate fails
+  budget-exhausted tasks with `failure_kind="budget"`; soft-breach
+  Slack alerts dedup per month via the yyyymm suffix on
+  `alert_type`. `PATCH /v1/projects/{id}` accepts the override
+  fields. Rollup table + admin override UI + monthly-reset cron
+  deferred to phase 2.
+- `0030` — model tier routing: migrations 0036/0037 add
+  `projects.pin_top_tier` tri-state + `tasks.model_override`.
+  `resolve_tier_model` in the dispatcher routes reviewer tasks to
+  Haiku when `tier_routing_enabled=True` OR the project has
+  `pin_top_tier=false`. `/metrics` `by_tier` rolls usage up by
+  Haiku/Sonnet/Opus classification. `coder` project runs as the
+  first canary with `pin_top_tier=false`.
+- `0032` — cost regression alerts: migration 0038 adds
+  `regression_events`. The nightly detector persists findings with
+  dedupe on `(role, metric, day_utc)`. Acknowledge flow
+  (`POST /v1/_admin/regression/events/{id}/acknowledge`) suppresses
+  repeat Slack fires. `REGRESSION_ALERTS_ENABLED=true` as of
+  2026-04-19 un-gates the Slack post. `stage_cost_baseline`
+  pre-aggregation + commit-range attribution deferred to phase 2.
 
 ## Links
 

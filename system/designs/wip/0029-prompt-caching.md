@@ -265,25 +265,25 @@ grep-able. `coder_core.workers.context.apply_cache_prefix` is
 wired into all 5 role workers but no-ops while the effective
 flag is False.
 
-**Phase 3 — canary enable. CODE LANDED, CANARY SOAK PENDING.**
-Migration 0034 added `projects.prompt_caching_enabled` (nullable
-tri-state) so one project can flip without touching the fleet.
-Each role worker reads `task.prompt_caching_enabled` (resolved
-by the dispatcher: per-project override → global setting). To
-canary: `UPDATE projects SET prompt_caching_enabled=true WHERE
-id='<canary>';`. Watch the `cache_stats` card, Reviewer approval
-rate, and schema-retry rate for 48 h. Expected ratio floor on a
-live run is ~0.4 (first sibling is a miss, the rest hit); p95
-should be >0.6 once the pipeline has 3+ roles running
-concurrently.
+**Phase 3 — canary enable. DONE (2026-04-19).** Migration 0034
+added `projects.prompt_caching_enabled` (nullable tri-state).
+Canary flipped on the `coder` project via one-shot Cloud Run Job
+(`UPDATE projects SET prompt_caching_enabled=true WHERE id='coder'`).
+`coder`'s `/metrics` cache_stats started registering cache_read
+tokens immediately — verdict deferred to the fleet measurement
+window below.
 
-**Phase 4 — fleet enable.** Flip `PROMPT_CACHING_ENABLED=true`
-on the Cloud Run revision. Slack alert `SLACK_CACHE_HIT_FLOOR=0.3`
-catches accidental invalidation from a future prompt rewrite
-(the alert resolves the per-project override before firing so a
-canary project and a fleet project don't silence each other).
-Runbook [cache-hit-drop](../../runbooks/cache-hit-drop.md)
-documents triage.
+**Phase 4 — fleet enable. DONE (2026-04-19).**
+`PROMPT_CACHING_ENABLED=true` landed on `coder-core-00115-vhp`
+along with `REGRESSION_ALERTS_ENABLED=true`. Every project now
+prepends the shared context block. `SLACK_CACHE_HIT_FLOOR` still
+0 — operators should set it to 0.3 once the first week of data
+defines the fleet-median hit rate and the natural invalidation
+cadence (AGENTS.md edits, role-prompt rewrites). The alert
+resolves per-project override before firing so a canary carve-out
+and a fleet project don't silence each other. Runbook
+[cache-hit-drop](../../runbooks/cache-hit-drop.md) documents
+triage.
 
 **Backout plan.** Set `prompt_caching_enabled = False` — the
 `cache_control` keys drop out, Anthropic returns the same

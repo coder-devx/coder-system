@@ -124,7 +124,10 @@ tokens are the primary lever we control.
 - [x] Slack alerts fire once per (project, threshold, month) via
   `alert_type=f"budget_soft_{project_id}_{yyyymm}"` — the 1h
   in-memory rate limiter dedupes within-hour, the yyyymm
-  suffix dedupes within-month.
+  suffix dedupes within-month. **Latent**: every project's
+  `budget_soft_tokens` is currently NULL → falls to fleet
+  `project_token_soft_limit=0` → alert disabled. Configure
+  via PATCH when caps are set.
 - [x] `GET /v1/projects/{id}/budget` returns the current-period
   rollup with resolved per-project limits; `PATCH
   /v1/projects/{id}` accepts `budget_soft_tokens` /

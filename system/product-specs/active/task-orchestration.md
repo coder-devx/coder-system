@@ -132,13 +132,38 @@ and `/pipeline-runs` endpoints in `coder-core`.
   The dispatcher loads the block at task start, stamps it on
   `WorkerInput.project_context_block` + `_block_hash`, and logs the
   hash so sibling tasks in one run can be audited for byte-identity
-  (the invariant the prompt cache rides on). When
-  `PROMPT_CACHING_ENABLED` is set, each role worker's system-prompt
-  assembler prepends the block so the claude CLI's internal
-  `cache_control` keys every sibling call on the same prefix bytes.
-  The flag is off by default — populate + link + audit run
-  regardless, so the admin `cache_stats` baseline is clean before the
-  canary flip. Design [0029](../../designs/wip/0029-prompt-caching.md).
+  (the invariant the prompt cache rides on). As of 2026-04-19
+  `PROMPT_CACHING_ENABLED=true` fleet-wide, so each role worker's
+  system-prompt assembler prepends the block, driving the claude
+  CLI's internal `cache_control` markers. Per-project
+  `projects.prompt_caching_enabled` (migration 0034) tri-state still
+  lets an operator opt a project out. Design
+  [0029](../../designs/wip/0029-prompt-caching.md).
+- **Model tier routing.** `resolve_tier_model` in the dispatcher
+  picks a per-role low-tier model (`worker_model_low_tier_{role}`
+  config) when the effective tier-routing flag is on. Resolution
+  order: explicit `tasks.model_override` wins; `projects.pin_top_tier`
+  True pins to role default; `pin_top_tier=False` forces policy
+  regardless of the fleet flag; NULL falls through to
+  `settings.tier_routing_enabled`. The dispatcher stamps the resolved
+  model on `WorkerInput.model_override`; runners use their existing
+  fallback. `tasks.model` records what actually ran. As of 2026-04-19
+  the fleet flag is still False; `coder` runs as the first canary
+  with `pin_top_tier=false`, routing reviewer tasks to
+  `claude-haiku-4-5-20251001`. Migrations 0036 + 0037. Design
+  [0030](../../designs/wip/0030-model-tier-routing.md).
+- **Per-project token budgets.** Dispatcher pre-dispatch gate fails
+  tasks with `failure_kind="budget"` when the project's calendar-month
+  spend exceeds the resolved hard cap.
+  `projects.budget_{soft,hard}_tokens` (migration 0035) override the
+  `settings.project_token_{soft,hard}_limit` fleet defaults via
+  `coder_core.api.projects.resolve_budget_limits`. `PATCH
+  /v1/projects/{id}` with the project's API key sets the overrides;
+  `GET /v1/projects/{id}/budget` returns the current-period rollup.
+  Soft-breach Slack alert deduplicates per calendar month via the
+  yyyymm suffix on `alert_type`. No project currently sets a cap;
+  machinery is latent until ops configures them. Design
+  [0031](../../designs/wip/0031-token-budgets.md).
 - **Pipeline-run dashboard signals.** Every `pipeline_runs` row
   carries two timing columns (migration 0028): `step_started_at`
   resets on every step transition, and `blocked_since` is set while
@@ -245,14 +270,31 @@ and `/pipeline-runs` endpoints in `coder-core`.
   RunDetail + blocked-longest-first sort on the Runs list.
 - `0029` — prompt caching & shared context reuse: migration 0032 adds
   `pipeline_run_contexts` (one row per run, carrying the materialised
-  block + sha256 hash), migration 0033 adds `tasks.pipeline_run_id`.
-  `coder_core.workers.context.build_project_context` composes the
-  block from AGENTS.md; `apply_cache_prefix` prepends it to every role
-  worker's system prompt when `PROMPT_CACHING_ENABLED` is on. The
-  dispatcher's block-load path emits an audit log with `block_hash`
-  so sibling byte-identity is grep-able. Flag stays off until the
-  canary soak validates ≥40% input-token reduction on a single
-  project without regressing Reviewer approval or schema-retry rate.
+  block + sha256 hash), migration 0033 adds `tasks.pipeline_run_id`,
+  migration 0034 adds `projects.prompt_caching_enabled` per-project
+  override. `coder_core.workers.context.build_project_context`
+  composes the block from AGENTS.md; `apply_cache_prefix` prepends it
+  to every role worker's system prompt when the effective flag is on.
+  The dispatcher's block-load path emits an audit log with
+  `block_hash` so sibling byte-identity is grep-able.
+  `PROMPT_CACHING_ENABLED=true` on revision `coder-core-00115-vhp`
+  (2026-04-19).
+- `0030` — model tier routing: migrations 0036/0037 add
+  `projects.pin_top_tier` + `tasks.model_override`.
+  `resolve_tier_model` in the dispatcher stamps
+  `WorkerInput.model_override` so runners hit the picked model
+  without changing their own code path. `/metrics` gains `by_tier`.
+  `coder` canary runs with `pin_top_tier=false`; fleet
+  `tier_routing_enabled` still off.
+- `0031` — per-project token budgets: migration 0035 adds
+  `projects.budget_{soft,hard}_tokens`. Dispatcher hard-gate +
+  soft-breach Slack alert + PATCH API all via
+  `resolve_budget_limits`. No project configured yet.
+- `0032` — cost regression alerts: migration 0038 adds
+  `regression_events`. Nightly cron detects, persists, dedups on
+  `(role, metric, day_utc)`. Acknowledge flow
+  (`POST /v1/_admin/regression/events/{id}/acknowledge`) suppresses
+  repeat fires. `REGRESSION_ALERTS_ENABLED=true` (2026-04-19).
 
 ## Links
 

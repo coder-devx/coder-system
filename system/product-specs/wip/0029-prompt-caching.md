@@ -121,7 +121,11 @@ Out of scope for this WIP: 0030 (tier routing), 0031 (budgets),
   project's `/metrics` shows ≥40% input-token reduction vs
   its own 7-day pre-enable baseline, with no regression in
   Reviewer approval rate or schema-retry rate (per
-  `observability`'s rollup). **Pending canary soak.**
+  `observability`'s rollup). **Fleet-enabled 2026-04-19** —
+  `PROMPT_CACHING_ENABLED=true` on `coder-core-00115-vhp`. Measurement
+  window opened; verdict expected in 48 h against the on-the-fly
+  `cache_stats` rollup. Pending per-project input-token-reduction
+  number.
 - [x] Documentation: `observability.md` and `task-orchestration.md`
   updated with the new fields and the per-run context behaviour;
   runbook `cache-hit-drop` covers triage for a ratio drop

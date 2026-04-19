@@ -132,9 +132,12 @@ the cost equation: the per-token rate.
 - [ ] 48 h shadow soak with flag off and `model_id` capture
   on produces a per-tier baseline; flag enabled on canary
   project shows ≥25% cost reduction on routable tasks with
-  approval-rate delta ≤1 pp. **Pending canary soak** — flip
-  `pin_top_tier=false` on one project to opt in without the
-  fleet flag.
+  approval-rate delta ≤1 pp. **Canary live 2026-04-19** —
+  `coder` project carries `pin_top_tier=false`; reviewer tasks
+  on `coder` route to `claude-haiku-4-5-20251001` from this
+  revision on. Fleet `tier_routing_enabled` still False.
+  Measurement opened via `/metrics` `by_tier` on the `coder`
+  project; pending 48 h data.
 - [x] Per-project opt-out exercised in a test: `pin_top_tier=True`
   returns None from the resolver (routes to role default)
   regardless of the fleet flag state.

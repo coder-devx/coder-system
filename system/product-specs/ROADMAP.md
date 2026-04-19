@@ -24,14 +24,18 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-19 — **Phase 4 phase-1 deployed to prod.**
-0029 (prompt caching) canary running on the `coder` project. 0030
-(tier routing), 0031 (token budgets), 0032 (regression alerts) all
-have phase-1 code landed + migrated (migrations 0032-0038) + tests
-(696 total) + docs updated, flags default off pending per-spec
-canary flips + soaks. 2026-04-18: 0044 (write-through enforcement)
-and 0043 (freshness signals) shipped into `active/`. Phase 3
-complete: 0023, 0025, 0026, 0027, 0028 all shipped.
+Last updated: 2026-04-19 — **Phase 4 LIVE in prod.** All four specs
+(0029/0030/0031/0032) phase-1 deployed + flags flipped on. Fleet:
+`PROMPT_CACHING_ENABLED=true`, `REGRESSION_ALERTS_ENABLED=true`.
+Per-project: `coder` runs with `pin_top_tier=false` (tier routing
+routes reviewer tasks to Haiku). Migrations 0022, 0032-0038 all
+applied. Prod image `072323d6d71f` on revision `coder-core-00115-vhp`.
+Remaining Phase 4 work is deferred increments (yaml policy table
+for 0030, rollup pre-aggregation for 0031/0032, admin UI surfaces)
+— each has an explicit phase-2 note on its WIP spec. 2026-04-18:
+0044 (write-through enforcement) and 0043 (freshness signals)
+shipped into `active/`. Phase 3 complete: 0023, 0025, 0026, 0027,
+0028 all shipped.
 
 ---
 
@@ -329,53 +333,75 @@ widget) surface the dispatcher state.
 > every worker re-sends the same context; every task runs on the most
 > expensive model regardless of complexity. Fix both.
 
-### 0029 — Prompt caching & shared context reuse (phase-1 deployed, canary running)
+### 0029 — Prompt caching & shared context reuse (phase-1 LIVE, fleet-enabled)
 
 Populate + link + read + gate + per-project override + Slack cache-hit
-floor + runbook all live in prod. Canary flipped on the `coder`
-project via `UPDATE projects SET prompt_caching_enabled=true` — 48h
-soak in progress to validate ≥40% input-token reduction before fleet
-flip. Migrations 0022, 0032-0034.
+floor + runbook all live in prod with `PROMPT_CACHING_ENABLED=true`
+fleet-wide. Every task now prepends the shared per-run context block
+to the system prompt. Validation moves from canary soak to live
+measurement: watch `/metrics` `cache_stats` on the admin panel for
+hit-rate climb across roles over the next pipeline cycle.
+Migrations 0022, 0032-0034.
 
-- **Status:** phase-1 deployed, canary soaking
+- **Status:** LIVE (flag on fleet-wide)
 - **WIP:** [0029](./wip/0029-prompt-caching.md) · **Design:** [0029](../designs/wip/0029-prompt-caching.md)
 - **Extends:** `knowledge-api`, `observability`, `task-orchestration`
+- **Next:** ship WIP → active once the input-token-reduction numbers
+  stabilise for 24-48 h at the measured rate. That also unblocks
+  0030/0031/0032 cross-references from WIP to active docs.
 
-### 0030 — Model tier routing (phase-1 deployed)
+### 0030 — Model tier routing (phase-1 LIVE on canary)
 
 `resolve_tier_model` in the dispatcher + per-role low-tier config
-(`worker_model_low_tier_{role}`) + per-project pin
-(`projects.pin_top_tier` tri-state) + `/metrics` `by_tier` rollup all
-live. Fleet flag off. Canary path: PATCH `pin_top_tier=false` on one
-project. Deferred: yaml policy table + per-task-kind routing +
-schema-retry escalation. Migrations 0036, 0037.
+(`worker_model_low_tier_reviewer=claude-haiku-4-5-20251001`) +
+per-project pin (`projects.pin_top_tier` tri-state) + `/metrics`
+`by_tier` rollup. `tier_routing_enabled=False` fleet-wide; `coder`
+project opted in with `pin_top_tier=false`. Reviewer tasks on `coder`
+route to Haiku; other projects stay on Sonnet. Migrations 0036, 0037.
 
-- **Status:** phase-1 deployed, flag off
+- **Status:** LIVE on `coder` canary; fleet flag off
 - **WIP:** [0030](./wip/0030-model-tier-routing.md) · **Design:** [0030](../designs/wip/0030-model-tier-routing.md)
 - **Extends:** `task-orchestration`, `observability`
+- **Next:** watch `coder` reviewer approval rate in the `by_tier`
+  rollup for 48-72 h. If approval rate holds within 1 pp of baseline,
+  flip the fleet flag and opt more roles' low-tier configs. Phase 2
+  adds the yaml policy table + per-task-kind routing + schema-retry
+  escalation.
 
-### 0031 — Per-project token budgets & cost gates (phase-1 deployed)
+### 0031 — Per-project token budgets & cost gates (phase-1 LIVE, per-project)
 
 Per-project `budget_{soft,hard}_tokens` tri-state overrides +
 `resolve_budget_limits` + dispatcher hard gate + soft-breach Slack
-alert with per-month dedupe + PATCH support live. Rollup table +
-`status=budget_blocked` + admin override UI + monthly reset cron
-deferred. Migration 0035.
+alert with per-month dedupe + `PATCH /v1/projects/{id}` support live.
+No project currently sets a limit (every `budget_*_tokens=None`;
+fleet defaults also 0 = disabled), so no task is gated yet — the
+machinery is ready when ops decides where to set caps. Migration 0035.
 
-- **Status:** phase-1 deployed, configurable per project
+- **Status:** LIVE (ready to configure per project)
 - **WIP:** [0031](./wip/0031-token-budgets.md) · **Design:** [0031](../designs/wip/0031-token-budgets.md)
 - **Extends:** `observability`
+- **Next:** set realistic soft caps on `coder` (`PATCH
+  /v1/projects/coder budget_soft_tokens=<X>`) once the first full
+  month of post-caching spend defines a baseline. Phase 2 adds
+  rollup table + `status=budget_blocked` + admin override UI +
+  monthly reset cron.
 
-### 0032 — Prompt & cost regression alerts (phase-1 deployed, shadow soaking)
+### 0032 — Prompt & cost regression alerts (phase-1 LIVE, alerts on)
 
-Detector + `regression_events` persistence + dedupe + acknowledge flow
-+ `settings.regression_alerts_enabled` shadow-soak flag live. GET +
-ack endpoints behind admin JWT. Commit-range attribution +
-`stage_cost_baseline` pre-aggregation deferred. Migration 0038.
+Detector + `regression_events` persistence + dedupe + acknowledge
+flow + `GET|ack` endpoints live with
+`REGRESSION_ALERTS_ENABLED=true`. Nightly Cloud Scheduler hook fires
+the detector at 04:00 UTC; findings persist to the table and post to
+the existing Slack webhook. Acknowledged events stop re-firing.
+Migration 0038.
 
-- **Status:** phase-1 deployed, 2-week shadow soak in progress
+- **Status:** LIVE (flag on fleet-wide)
 - **WIP:** [0032](./wip/0032-cost-regression-alerts.md) · **Design:** [0032](../designs/wip/0032-cost-regression-alerts.md)
 - **Extends:** `observability`
+- **Next:** calibrate the +25% threshold against the first week of
+  real alerts. Phase 2 adds `stage_cost_baseline` pre-aggregation +
+  commit-range attribution from the continuous-deployment log +
+  admin `/metrics/regressions` tab.
 
 ---
 
