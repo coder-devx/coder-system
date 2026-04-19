@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-18
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 served_by_designs: ["0032"]
 related_specs: [observability, task-orchestration, continuous-deployment]
 ---
@@ -100,26 +100,48 @@ cost regressions with the commit range likely responsible.
 ## Acceptance criteria
 
 - [ ] `stage_cost_baseline` migration lands; nightly rollup
-  job populates it.
-- [ ] `regression_event` table captures detected
-  regressions with `(role, task_kind, model_id, day_utc,
-  baseline_median, current_median, delta_pct,
-  suspect_commit_range)`.
-- [ ] Regression threshold is settings-configurable with
-  per-role overrides; default +25% cost / +30% input-tokens.
+  job populates it. **Deferred** — phase 1 computes the
+  7-day baseline on-the-fly via `rollup_role_metrics` over
+  the last 8 days of `tasks`. Pre-aggregation will matter
+  once we have enough traffic to make the on-the-fly query
+  slow; today it's fast enough.
+- [x] `regression_events` table (migration 0038) captures
+  detected regressions with
+  `(role, metric, day_utc, baseline_value, current_value,
+  delta_ratio, detected_at, acknowledged_at,
+  acknowledged_by, note)`. Dedupe index on
+  `(role, metric, day_utc)` makes re-runs idempotent. The
+  `task_kind`, `model_id`, and `suspect_commit_range`
+  columns are deferred until the per-task-kind discrimination
+  from 0030 phase 2 lands.
+- [x] Regression threshold is settings-configurable via the
+  `threshold` kwarg on `detect_regressions`; default +25%.
+  Per-role overrides deferred — fleet-wide threshold is
+  sufficient for phase 1 calibration.
 - [ ] Commit-range attribution pulls from
   `continuous-deployment` deploy log and populates
-  `suspect_commit_range`.
-- [ ] Slack webhook fires on new regression events when
-  `regression_alerts_enabled=True`; deduped per (role,
-  task_kind, day) via a dedupe key on the event row.
-- [ ] Admin panel `/metrics/regressions` tab lists open
-  and historical regressions; acknowledge button sets
-  `acknowledged_at` + `acknowledged_by` on the row.
+  `suspect_commit_range`. **Deferred** — the detector fires
+  an alert with role/metric/delta; operator reads
+  `git log` between the last clean day and the regression
+  day manually. Automated attribution lands after the
+  false-positive rate calibrates.
+- [x] Slack webhook fires on new regression events when
+  `settings.regression_alerts_enabled=True`; acknowledged
+  rows are filtered out before the Slack post so an
+  accepted regression doesn't re-fire on subsequent nights.
+  `alert_type="regression_check"` keeps the 1h rate-limiter
+  honest.
+- [x] Acknowledge API: `POST
+  /v1/_admin/regression/events/{id}/acknowledge` with an
+  actor + optional note. Listed via `GET
+  /v1/_admin/regression/events?open_only=&limit=`.
+  Admin panel UI pending.
 - [ ] 2-week shadow soak with the flag off produces a
   readable baseline and no false-positive regressions
   (false-positive = regression-event fires on a day where
   the operator confirms no real regression happened).
+  **Pending shadow soak** — `regression_alerts_enabled`
+  defaults False so persistence runs but Slack is silent.
 
 ## Metrics
 

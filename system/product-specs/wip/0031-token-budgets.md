@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-18
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 served_by_designs: ["0031"]
 related_specs: [observability, task-orchestration, multi-tenancy, admin-panel]
 ---
@@ -100,27 +100,42 @@ tokens are the primary lever we control.
 
 ## Acceptance criteria
 
-- [ ] `projects.budget_{soft,hard}_tokens` columns, settings
-  fleet defaults, and `project_budget_period` table all
-  land via migration.
+- [x] `projects.budget_{soft,hard}_tokens` columns land via
+  migration 0035 as nullable tri-state (NULL = fleet default,
+  positive = override, 0 = disabled for this project). Fleet
+  defaults continue to live as `project_token_{soft,hard}_limit`
+  in settings. The `project_budget_period` rollup table is
+  deferred — current monthly queries use a dynamic
+  month-start filter and are fast enough at current traffic.
 - [ ] Task-completion hook increments
   `project_budget_period.tokens_used` atomically per task.
-- [ ] Pre-dispatch gate refuses to dispatch when
-  `tokens_used > hard_cap`; the task row lands
-  `status=budget_blocked` with
-  `failure_kind="budget"` + the offending cap.
+  (Deferred with the rollup table — the on-the-fly month query
+  replaces the need until traffic justifies pre-aggregation.)
+- [x] Pre-dispatch gate refuses to dispatch when
+  `tokens_used >= hard_cap`; the task row fails with
+  `failure_kind="budget"`. Resolution runs through
+  `coder_core.api.projects.resolve_budget_limits` so a
+  per-project override takes effect immediately.
 - [ ] Soft breach sets
   `projects.budget_downshift_active_until_month_end = true`;
-  0030's resolver respects it when present.
-- [ ] Slack alerts fire once per (project, threshold, month).
-- [ ] `GET /v1/projects/{id}/budget` returns the current-period
-  rollup; `PATCH /v1/projects/{id}` accepts
-  `budget_soft_tokens` / `budget_hard_tokens` updates.
+  0030's resolver respects it when present. (Pending — chains
+  on 0030 shipping, which happened this session; the flag
+  column + resolver integration land in a follow-up.)
+- [x] Slack alerts fire once per (project, threshold, month) via
+  `alert_type=f"budget_soft_{project_id}_{yyyymm}"` — the 1h
+  in-memory rate limiter dedupes within-hour, the yyyymm
+  suffix dedupes within-month.
+- [x] `GET /v1/projects/{id}/budget` returns the current-period
+  rollup with resolved per-project limits; `PATCH
+  /v1/projects/{id}` accepts `budget_soft_tokens` /
+  `budget_hard_tokens` updates.
 - [ ] Admin panel renders the Budget column + project detail
   card + override affordance; operator override creates a
-  24 h exemption and records `override_granted_by`.
+  24 h exemption and records `override_granted_by`. (Pending
+  admin UI; API surface for overrides is in place via PATCH.)
 - [ ] Monthly reset cron resets `tokens_used` at 00:00 UTC on
   the 1st; the prior month's row is preserved for audit.
+  (Deferred with the rollup table.)
 
 ## Metrics
 

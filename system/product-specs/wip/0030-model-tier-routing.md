@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-18
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 served_by_designs: ["0030"]
 related_specs: [task-orchestration, observability, pm-worker, architect-worker, team-manager-worker, developer-worker, reviewer-worker]
 ---
@@ -103,26 +103,41 @@ the cost equation: the per-token rate.
 
 - [ ] `model_tier_policy.yaml` exists in the project template,
   validated by `scripts/validate.py` (every cell populated,
-  no typos on role or task_kind).
-- [ ] `_model_for_task` resolves the tier in one place; every
-  worker's dispatch path goes through it; `tasks.model_id`
-  records what actually ran.
-- [ ] `tasks.model_tier_override` lands as a migration and
-  the orchestrator's retry path writes it for re-dispatched
-  schema retries.
-- [ ] `tier_routing_enabled=False` → every task runs on the
-  top tier; `tier_routing_enabled=True` → policy applies;
-  `projects.pin_top_tier=True` → top tier regardless.
-- [ ] `/v1/projects/{id}/metrics` returns `by_tier` rollup
-  with approval rate, avg cost, avg duration; admin `/metrics`
-  renders a per-tier card.
+  no typos on role or task_kind). **Deferred** — phase 1
+  ships with a simpler per-role config
+  (`settings.worker_model_low_tier_{role}`) rather than a
+  per-(role × task_kind) table. The yaml table is the v2
+  evolution once per-task-kind discrimination proves
+  necessary.
+- [x] `resolve_tier_model(role, project, explicit_override)`
+  in `coder_core.workers.dispatcher` is the single resolution
+  point; the dispatcher stamps the result on
+  `WorkerInput.model_override` and every worker's existing
+  fallback (`task.model_override or settings.worker_model_{role}`)
+  picks it up transparently. `tasks.model` still records
+  what actually ran.
+- [x] `tasks.model_override` lands via migration 0037 as a
+  nullable string. Retry-time writes are deferred until the
+  orchestrator's schema-retry path opts in.
+- [x] `tier_routing_enabled=False` → every task runs on the
+  role default; `tier_routing_enabled=True` → low-tier model
+  picked for roles with a non-empty
+  `worker_model_low_tier_{role}`; `projects.pin_top_tier=True`
+  pins to top regardless; `False` forces policy regardless.
+  Migration 0036 adds the per-project column.
+- [x] `/v1/projects/{id}/metrics` returns `by_tier` rollup
+  with task_count, succeeded, success_rate, total_cost_tokens,
+  avg_cost_tokens — classified by model-name prefix
+  (haiku/sonnet/opus/unknown). Admin panel rendering pending.
 - [ ] 48 h shadow soak with flag off and `model_id` capture
   on produces a per-tier baseline; flag enabled on canary
   project shows ≥25% cost reduction on routable tasks with
-  approval-rate delta ≤1 pp.
-- [ ] Per-project opt-out exercised in a test: the audit
-  project runs every task on top tier even with the fleet
-  flag on.
+  approval-rate delta ≤1 pp. **Pending canary soak** — flip
+  `pin_top_tier=false` on one project to opt in without the
+  fleet flag.
+- [x] Per-project opt-out exercised in a test: `pin_top_tier=True`
+  returns None from the resolver (routes to role default)
+  regardless of the fleet flag state.
 
 ## Metrics
 
