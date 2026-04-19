@@ -5,8 +5,8 @@ type: design
 status: wip
 owner: ro
 created: 2026-04-18
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 implements_specs: ["0029"]
 decided_by: []
 related_designs: [worker-roles, worker-communication, observability-and-cost-tracking, pm-worker, architect-worker, team-manager-worker, knowledge-repo-model]
@@ -247,34 +247,43 @@ flowchart TB
 
 ## Rollout
 
-Four phases, each gated on the prior holding for 48 h:
+Four phases, each gated on the prior holding for 48 h.
 
 **Phase 1 — schema + metric capture (flag off, `cache_control`
-off).** Migration lands
-`tasks.{cache_read,cache_creation}_input_tokens` +
-`pipeline_run_contexts`. Worker writes them from the response
-envelope (Anthropic returns 0s when caching isn't requested —
-that's fine, it becomes the baseline). Metrics API exposes
-`cache_hit_ratio` (will read as ~0.0 during this phase).
+off). LANDED.** Migration 0022 added
+`tasks.{cache_read,cache_creation}_input_tokens`, migration
+0032 added `pipeline_run_contexts`. Worker already writes cache
+counters from the response envelope; `/metrics` exposes per-role
+`cache_stats` with `cache_hit_rate`.
 
-**Phase 2 — context builder on, `cache_control` off.**
-Orchestrator starts calling `build_project_context` at pipeline-
-run creation and persisting the block. Workers start reading
-the block, but still don't send `cache_control`. Validates that
-the block is stable across siblings (`block_hash` audit: a
-pipeline run's children must all read the same hash) and that
-the extra query per task dispatch isn't a latency regression.
+**Phase 2 — context builder on, `cache_control` off. LANDED.**
+Orchestrator calls `build_project_context` at pipeline-run
+creation and persists the block. Migration 0033 added
+`tasks.pipeline_run_id`; dispatcher stamps `WorkerInput.project_context_block`
++ `_block_hash` and logs the hash so sibling byte-identity is
+grep-able. `coder_core.workers.context.apply_cache_prefix` is
+wired into all 5 role workers but no-ops while the effective
+flag is False.
 
-**Phase 3 — canary enable.** Flip
-`settings.prompt_caching_enabled = True` on one project. Watch
-the `cache_hit_ratio` card, the Reviewer approval rate, and the
-schema-retry rate for 48 h. Expected ratio floor on a live run
-is ~0.4 (first sibling is a miss, the rest hit); p95 should be
->0.6 once the pipeline has 3+ roles running concurrently.
+**Phase 3 — canary enable. CODE LANDED, CANARY SOAK PENDING.**
+Migration 0034 added `projects.prompt_caching_enabled` (nullable
+tri-state) so one project can flip without touching the fleet.
+Each role worker reads `task.prompt_caching_enabled` (resolved
+by the dispatcher: per-project override → global setting). To
+canary: `UPDATE projects SET prompt_caching_enabled=true WHERE
+id='<canary>';`. Watch the `cache_stats` card, Reviewer approval
+rate, and schema-retry rate for 48 h. Expected ratio floor on a
+live run is ~0.4 (first sibling is a miss, the rest hit); p95
+should be >0.6 once the pipeline has 3+ roles running
+concurrently.
 
-**Phase 4 — fleet enable.** Flip to True fleet-wide. Slack
-alert `SLACK_CACHE_HIT_FLOOR=0.3` catches accidental
-invalidation from a future prompt rewrite.
+**Phase 4 — fleet enable.** Flip `PROMPT_CACHING_ENABLED=true`
+on the Cloud Run revision. Slack alert `SLACK_CACHE_HIT_FLOOR=0.3`
+catches accidental invalidation from a future prompt rewrite
+(the alert resolves the per-project override before firing so a
+canary project and a fleet project don't silence each other).
+Runbook [cache-hit-drop](../../runbooks/cache-hit-drop.md)
+documents triage.
 
 **Backout plan.** Set `prompt_caching_enabled = False` — the
 `cache_control` keys drop out, Anthropic returns the same

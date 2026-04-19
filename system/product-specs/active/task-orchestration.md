@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 served_by_designs: [worker-communication]
 related_specs: []
 ---
@@ -122,6 +122,23 @@ and `/pipeline-runs` endpoints in `coder-core`.
   duplicate. Fails open on GitHub errors — an API outage never traps
   a cycle. ADR 0015 keeps the gate inside the Coder pipeline rather
   than GitHub branch protection.
+- **Shared per-run context block.** At pipeline-run creation the
+  orchestrator materialises a project context block (system-prompt
+  header + project brief + AGENTS.md, capped at 64 KiB, fail-open on
+  GitHub outages) into `pipeline_run_contexts` (migration 0032) and
+  back-links every chain-dispatched task to its run via
+  `tasks.pipeline_run_id` (migration 0033) — PM draft, architect, team
+  manager, developer fan-out, reviewer retries, and PM acceptance.
+  The dispatcher loads the block at task start, stamps it on
+  `WorkerInput.project_context_block` + `_block_hash`, and logs the
+  hash so sibling tasks in one run can be audited for byte-identity
+  (the invariant the prompt cache rides on). When
+  `PROMPT_CACHING_ENABLED` is set, each role worker's system-prompt
+  assembler prepends the block so the claude CLI's internal
+  `cache_control` keys every sibling call on the same prefix bytes.
+  The flag is off by default — populate + link + audit run
+  regardless, so the admin `cache_stats` baseline is clean before the
+  canary flip. Design [0029](../../designs/wip/0029-prompt-caching.md).
 - **Pipeline-run dashboard signals.** Every `pipeline_runs` row
   carries two timing columns (migration 0028): `step_started_at`
   resets on every step transition, and `blocked_since` is set while
@@ -226,6 +243,16 @@ and `/pipeline-runs` endpoints in `coder-core`.
   (`pipeline_run.changed`, `pipeline_run.gate_blocked`) fire through
   the existing subscriber feed. Admin surfaces: inline Gate card on
   RunDetail + blocked-longest-first sort on the Runs list.
+- `0029` — prompt caching & shared context reuse: migration 0032 adds
+  `pipeline_run_contexts` (one row per run, carrying the materialised
+  block + sha256 hash), migration 0033 adds `tasks.pipeline_run_id`.
+  `coder_core.workers.context.build_project_context` composes the
+  block from AGENTS.md; `apply_cache_prefix` prepends it to every role
+  worker's system prompt when `PROMPT_CACHING_ENABLED` is on. The
+  dispatcher's block-load path emits an audit log with `block_hash`
+  so sibling byte-identity is grep-able. Flag stays off until the
+  canary soak validates ≥40% input-token reduction on a single
+  project without regressing Reviewer approval or schema-retry rate.
 
 ## Links
 

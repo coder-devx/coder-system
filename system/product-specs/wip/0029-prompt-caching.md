@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-18
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 served_by_designs: ["0029"]
 related_specs: [task-orchestration, observability, knowledge-api, pm-worker, architect-worker, team-manager-worker, developer-worker, reviewer-worker]
 ---
@@ -92,31 +92,40 @@ Out of scope for this WIP: 0030 (tier routing), 0031 (budgets),
 
 ## Acceptance criteria
 
-- [ ] Every role worker's system prompt is split into
-  cache-eligible prefix + task-specific suffix, and the prefix
-  carries the `cache_control: ephemeral` marker on every API
-  call.
-- [ ] A shared per-pipeline-run project context block is built
+- [x] Every role worker's system prompt is split into
+  cache-eligible prefix + task-specific suffix. The prefix
+  rides on the `claude` CLI's internal `cache_control` handling
+  (we don't construct the API payload directly) — each role
+  worker prepends the shared block via
+  `coder_core.workers.context.apply_cache_prefix` before writing
+  the system-prompt tempfile the CLI reads, gated on the
+  effective per-project/global flag.
+- [x] A shared per-pipeline-run project context block is built
   once (at pipeline-run creation) and passed to every task in
-  that run; identical bytes produce identical cache keys.
-- [ ] `TaskRow` records `cache_read_input_tokens` and
+  that run via the dispatcher (audit log carries `block_hash`
+  so sibling byte-identity is grep-able); identical bytes
+  produce identical cache keys. Migrations 0032 + 0033 land
+  `pipeline_run_contexts` and `tasks.pipeline_run_id`.
+- [x] `TaskRow` records `cache_read_input_tokens` and
   `cache_creation_input_tokens`; `/v1/projects/{id}/metrics`
-  returns a `cache_hit_ratio` (`cache_read / (cache_read +
-  regular_input)`) over the requested window.
-- [ ] Admin `/metrics` page shows a cache-hit-ratio card
-  alongside the existing daily-cost chart.
-- [ ] `settings.prompt_caching_enabled` flag gates the
-  `cache_control` markers (but not the metric capture — metrics
-  stay on so the shadow soak produces a baseline).
+  returns per-role `cache_stats` with `cache_hit_rate`
+  (`cache_read / (cache_read + regular_input)`) over the
+  requested window.
+- [x] Admin `/metrics` page shows a cache-hit-rate table + an
+  aggregate `CacheCard` chip on the project overview.
+- [x] `settings.prompt_caching_enabled` + per-project
+  `projects.prompt_caching_enabled` (migration 0034) gate the
+  `cache_control` marker prepend (but not the metric capture —
+  metrics stay on so the shadow soak produces a baseline).
 - [ ] After 48 h with the flag enabled on a canary project, the
   project's `/metrics` shows ≥40% input-token reduction vs
   its own 7-day pre-enable baseline, with no regression in
   Reviewer approval rate or schema-retry rate (per
-  `observability`'s rollup).
-- [ ] Documentation: `observability.md` and `task-orchestration.md`
+  `observability`'s rollup). **Pending canary soak.**
+- [x] Documentation: `observability.md` and `task-orchestration.md`
   updated with the new fields and the per-run context behaviour;
-  a runbook entry covers "cache-hit ratio dropped overnight"
-  triage (stale prefix, invalidation, prompt rewrite).
+  runbook `cache-hit-drop` covers triage for a ratio drop
+  (stale prefix, invalidation, prompt rewrite).
 
 ## Metrics
 
