@@ -24,13 +24,14 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-18 — 0044 (Write-through enforcement on ship)
-shipped into `active/` across `knowledge-api`, `reviewer-worker`,
-`team-manager-worker`, `architect-worker`, `admin-panel`, and
-`task-orchestration` (plus the matching designs). 0043 (Knowledge
-freshness signals) shipped earlier today as
-[knowledge-freshness](./active/knowledge-freshness.md). Phase 3
-complete: 0023, 0025, 0026, 0027, and 0028 all shipped into `active/`.
+Last updated: 2026-04-19 — **Phase 4 phase-1 deployed to prod.**
+0029 (prompt caching) canary running on the `coder` project. 0030
+(tier routing), 0031 (token budgets), 0032 (regression alerts) all
+have phase-1 code landed + migrated (migrations 0032-0038) + tests
+(696 total) + docs updated, flags default off pending per-spec
+canary flips + soaks. 2026-04-18: 0044 (write-through enforcement)
+and 0043 (freshness signals) shipped into `active/`. Phase 3
+complete: 0023, 0025, 0026, 0027, 0028 all shipped.
 
 ---
 
@@ -328,42 +329,52 @@ widget) surface the dispatcher state.
 > every worker re-sends the same context; every task runs on the most
 > expensive model regardless of complexity. Fix both.
 
-### 0029 — Prompt caching & shared context reuse (planned)
+### 0029 — Prompt caching & shared context reuse (phase-1 deployed, canary running)
 
-Use Anthropic prompt caching for stable sections (role system prompt,
-project conventions, relevant knowledge slice). Share a common
-"project context block" across sibling tasks in the same pipeline run.
-Target: 40% reduction in input tokens for orchestrated runs.
+Populate + link + read + gate + per-project override + Slack cache-hit
+floor + runbook all live in prod. Canary flipped on the `coder`
+project via `UPDATE projects SET prompt_caching_enabled=true` — 48h
+soak in progress to validate ≥40% input-token reduction before fleet
+flip. Migrations 0022, 0032-0034.
 
-- **Status:** planned
+- **Status:** phase-1 deployed, canary soaking
+- **WIP:** [0029](./wip/0029-prompt-caching.md) · **Design:** [0029](../designs/wip/0029-prompt-caching.md)
 - **Extends:** `knowledge-api`, `observability`, `task-orchestration`
 
-### 0030 — Model tier routing (planned)
+### 0030 — Model tier routing (phase-1 deployed)
 
-Route simple tasks (GC jobs, trivial fixes, acceptance checks on tight
-ACs) to Haiku; reserve Sonnet for design/architect/complex developer
-work. Per-role default + per-task override. Measure quality regression
-via reviewer approval rate.
+`resolve_tier_model` in the dispatcher + per-role low-tier config
+(`worker_model_low_tier_{role}`) + per-project pin
+(`projects.pin_top_tier` tri-state) + `/metrics` `by_tier` rollup all
+live. Fleet flag off. Canary path: PATCH `pin_top_tier=false` on one
+project. Deferred: yaml policy table + per-task-kind routing +
+schema-retry escalation. Migrations 0036, 0037.
 
-- **Status:** planned
+- **Status:** phase-1 deployed, flag off
+- **WIP:** [0030](./wip/0030-model-tier-routing.md) · **Design:** [0030](../designs/wip/0030-model-tier-routing.md)
 - **Extends:** `task-orchestration`, `observability`
 
-### 0031 — Per-project token budgets & cost gates (planned)
+### 0031 — Per-project token budgets & cost gates (phase-1 deployed)
 
-Each project gets a soft/hard monthly token budget. At soft, Slack
-warning and auto-downshift to cheaper models. At hard, new tasks
-queue and require override. Exposes `GET /v1/projects/{id}/budget`.
+Per-project `budget_{soft,hard}_tokens` tri-state overrides +
+`resolve_budget_limits` + dispatcher hard gate + soft-breach Slack
+alert with per-month dedupe + PATCH support live. Rollup table +
+`status=budget_blocked` + admin override UI + monthly reset cron
+deferred. Migration 0035.
 
-- **Status:** planned
+- **Status:** phase-1 deployed, configurable per project
+- **WIP:** [0031](./wip/0031-token-budgets.md) · **Design:** [0031](../designs/wip/0031-token-budgets.md)
 - **Extends:** `observability`
 
-### 0032 — Prompt & cost regression alerts (planned)
+### 0032 — Prompt & cost regression alerts (phase-1 deployed, shadow soaking)
 
-Nightly job compares per-stage cost and token-per-AC against a
-7-day baseline; alerts on >25% regressions with the commit range
-likely responsible.
+Detector + `regression_events` persistence + dedupe + acknowledge flow
++ `settings.regression_alerts_enabled` shadow-soak flag live. GET +
+ack endpoints behind admin JWT. Commit-range attribution +
+`stage_cost_baseline` pre-aggregation deferred. Migration 0038.
 
-- **Status:** planned
+- **Status:** phase-1 deployed, 2-week shadow soak in progress
+- **WIP:** [0032](./wip/0032-cost-regression-alerts.md) · **Design:** [0032](../designs/wip/0032-cost-regression-alerts.md)
 - **Extends:** `observability`
 
 ---
