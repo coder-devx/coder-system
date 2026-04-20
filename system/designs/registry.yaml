@@ -354,3 +354,26 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+- id: '0048'
+  title: Cross-project pattern surfacing
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0048-cross-project-patterns.md
+  implements_specs:
+  - '0048'
+  related_designs:
+  - knowledge-write-api
+  - knowledge-repo-model
+  - knowledge-freshness
+  - system-overview
+  - impersonation
+  - audit-log
+  - architect-worker
+  - pm-worker
+  - team-manager-worker
+  - worker-roles
+  - observability-and-cost-tracking
+  affects_services:
+  - coder-core
+  - coder-admin

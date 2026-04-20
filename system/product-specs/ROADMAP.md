@@ -80,6 +80,7 @@ The system today, by logical component. Each links to its active spec
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
 | [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | drafting |
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
+| [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | drafting |
 
 ---
 
@@ -851,17 +852,76 @@ first real schema change → admin UI on.
 - **WIP:** [0047](./wip/0047-template-schema-migration.md) · **Design:** [0047](../designs/wip/0047-template-schema-migration.md)
 - **Extends:** `knowledge-api`, `onboarding`, `admin-panel`, `audit-log`
 
-### 0048 — Cross-project pattern surfacing (planned)
+### 0048 — Cross-project pattern surfacing (drafting)
 
-The second moat: once 0043 + 0044 keep each project's knowledge
-clean, surface patterns across projects. Similar ADRs, recurring
-failure taxonomies, role-prompt improvements that worked in one
-project and could transfer. First cut is read-only: an admin panel
-"fleet patterns" view and an API that lets a worker ask "has any
-other project decided this already?" — learning, not auto-apply.
+A read-only fleet-scoped pattern index produced by a daily Cloud
+Run Job `coder-core-pattern-indexer` (03:00 UTC + manual
+`POST /v1/_admin/patterns/index/run`). Five v1 pattern kinds:
+**`adr`** (Jaccard ≥ 0.5 on tokenised ADR titles across ≥ 2
+projects), **`spec_problem`** (Jaccard ≥ 0.4 on `## Problem`
+first-paragraph tokens across projects), **`failure_taxonomy`**
+(SQL aggregate on `tasks.failure_kind` over 30 days where
+`count_distinct(project_id) ≥ 2`), **`role_prompt_delta`** (per
+project per role, pre/post approval-rate window 3d/7d around the
+latest commit touching the role file, keep where `|Δ| ≥ 3 pp`
+and `n ≥ 20`), **`template_drift`** (frontmatter keys present in
+a project's `system/<type>/_TEMPLATE.md` but absent centrally).
+**Stable `pattern_id` across runs** via a matcher that reuses the
+prior id when member-key Jaccard ≥ 0.6, falls back to a
+deterministic hash for first-appearance — keeps
+`informed_by_patterns` citations resolvable. **Pure structural
+similarity in v1**, no embeddings, no LLM (consistent with ADR
+0014's freshness rejection of semantic similarity).
 
-- **Status:** planned
-- **Extends:** `knowledge-api`, `admin-panel`, all five role workers
+**Admin endpoints** at `/v1/_admin/patterns/...` (admin token):
+list, detail, index runs, manual run trigger. **Worker consult
+endpoint** `GET /v1/projects/{id}/patterns/consult?topic=&kinds=
+&max_results=5` is project-token-callable through the
+impersonation broker, which attaches a special read-only
+`fleet:patterns:consult` scope (whitelisted to this one
+endpoint) on outbound. Per-project per-minute rate cap
+(`patterns_consult_per_project_per_minute`=30; over → 429
+`Retry-After`). Every consult writes a `consultations` row
+(migration 0058) plus an `audit_events` row
+(`action='pattern.consulted'`).
+
+**Isolation invariant:** the consult endpoint's response model
+forbids extra fields and exposes only `(project_id, artifact_id,
+decision_pill_or_summary, pattern_id)` per member — no body, no
+freshness, no raw frontmatter. To read another project's actual
+content, the operator must click through to the admin panel with
+their own admin scope. Schema test enforces the invariant on the
+Pydantic model. **`informed_by_patterns: [pattern_id]`**
+frontmatter (added to design / ADR / spec `_TEMPLATE.md` via a
+0047 migration) records what a worker cited; ADR 0008 validator
+soft-checks each id resolves against the latest indexer run.
+
+Architect worker's pre-claude assembly gains an opt-in
+consultation step (gated on
+`architect_pattern_consult_enabled`, default off) when the spec
+implies an ADR-warranting decision; cited patterns land as a
+`# Cross-project precedent` block in prompt context. PM and
+reviewer get the same shape in subsequent phases (ACs deferred).
+Admin `/admin/patterns` page (behind
+`VITE_FLEET_PATTERNS_ENABLED`) lists the latest run's groups,
+sortable by member count, with a `template_drift`-row
+"Propose template promotion" button that opens a pre-filled
+0047 migration scaffold (the 0048 ↔ 0047 handoff). Tri-state
+`projects.fleet_patterns_enabled` (migration 0058) +
+`projects.fleet_patterns_index_opt_in` (default true; per-tenant
+opt-out) + `CODER_FLEET_PATTERNS_ENABLED` fleet flag. Migrations
+0057 (`pattern_groups` + `pattern_index_runs`) + 0058
+(`consultations` + projects flags). Headline KPIs: ≥ 30% of
+architect tasks producing an ADR call consult; citation rate
+(non-empty `informed_by_patterns` among consulted tasks); indexer
+wall-clock < 10 min. Rollout: schemas + endpoints behind 404
+flag → manual `coder`-only indexer run → second project added →
+architect consult flip on `coder` → fleet flip → PM/reviewer
+consult → first `template_drift`-driven 0047 promotion.
+
+- **Status:** drafting
+- **WIP:** [0048](./wip/0048-cross-project-patterns.md) · **Design:** [0048](../designs/wip/0048-cross-project-patterns.md)
+- **Extends:** `knowledge-api`, `admin-panel`, `architect-worker`, `pm-worker`, `team-manager-worker`, `reviewer-worker`, `developer-worker`, `multi-tenancy`, `knowledge-freshness`
 
 ---
 
