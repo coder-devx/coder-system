@@ -77,6 +77,7 @@ The system today, by logical component. Each links to its active spec
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | drafting |
 | [0039](./wip/0039-tenant-isolation-tests.md) | Tenant isolation test harness | drafting |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | drafting |
+| [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
 
 ---
 
@@ -691,18 +692,54 @@ when `settings.ship_draft_dispatch_enabled` is on.
   (ship-draft mode)
 - **ADR:** [`0015 — ship gate lives in the Coder pipeline`](../adrs/0015-ship-gate-in-coder-pipeline.md)
 
-### 0045 — Cold-start knowledge ingestion (planned)
+### 0045 — Cold-start knowledge ingestion (drafting)
 
-A tool + runbook that populates a new project's knowledge repo from
-an existing codebase and history: inferred services from repo
-structure, inferred designs from top-level modules + docstrings, a
-first pass at ADRs extracted from commit messages referencing
-decisions, and a seeded glossary. Output is a PR a human reviews, not
-a silent commit. Target: a new project goes from `onboard` to
-populated repo in an afternoon, not a week.
+A oneshot Cloud Run Job `coder-core-cold-start-ingest` takes
+`(project_id, code_repo_url, code_repo_ref)` and produces a single
+PR titled `cold-start: <project>` against the new project's
+knowledge repo. The job clones, scans (directory tree, READMEs,
+language manifests, top-N module docstrings, last 500 commit
+messages), buckets into per-scope batches each ≤ 80k input tokens,
+dispatches one architect task per batch in a new **`cold-start`
+mode** (header `# Knowledge cold start` + new
+`architect_cold_start.json` schema emitting `artifacts[]` of
+`{artifact_type, artifact_id, body, ingestion_provenance,
+confidence}`), then aggregates returns, drops `confidence < 60`,
+skips artifacts whose `ingestion_provenance.human_edited == true`
+(or absent = human-authored), commits everything via Git Trees on
+a `cold-start/<date>-<sha>` branch, and opens the PR. Cross-batch
+context-passing (sequential batches; later batches see earlier
+artifacts' frontmatter + ids only) keeps an inferred design
+referencing an inferred service coherent. **Re-run safety** rests
+on a per-knowledge-repo GitHub Action
+`flip-cold-start-provenance.yml` (distributed via `template/` for
+new projects + a one-time `seed_cold_start_action.py` sweep for
+existing) that flips `human_edited: true` on any cold-started
+artifact a human commit edits — re-runs then skip those artifacts.
+Hard cost ceiling `cold_start_max_tokens` (default 2M+200k); ≥ 40
+sub-batches fails fast. Tri-state per-project flags
+`cold_start_enabled` + `cold_start_min_confidence` (migration
+0053); run-tracking table `cold_start_runs` (migration 0052).
+CLI `coder project ingest <slug> --from <url> [--ref <git_ref>]
+[--wait]` enqueues + optionally polls; `--status` prints the
+latest run. Onboarding runbook gains Step 11 + a new
+`cold-start-review.md` runbook walks the operator through PR
+review (categories to check, how to read provenance, when to drop
+vs edit ADRs). **Specs and runbooks are out of scope** — both
+encode intent or operator procedure that can't be inferred from
+code; the PM worker authors specs the normal way after onboarding.
+Cold-start PRs are never auto-approved (0040 disabled regardless
+of project policy). Target: < 50 kLoC repo from
+`coder project ingest` to PR open in ≤ 90 min. Rollout:
+schemas+templates land first (no behaviour) → driver+endpoint
+behind `CODER_COLD_START_ENABLED`=false fleet, `coder` opt-in
+true → dry run on `coder` for calibration → Action sweep across
+existing repos → fleet flip → admin `/admin/cold-start` UI
+behind `VITE_COLD_START_ENABLED`.
 
-- **Status:** planned
-- **Extends:** `onboarding`, `knowledge-api`, `architect-worker`
+- **Status:** drafting
+- **WIP:** [0045](./wip/0045-cold-start-ingestion.md) · **Design:** [0045](../designs/wip/0045-cold-start-ingestion.md)
+- **Extends:** `onboarding`, `knowledge-api`, `architect-worker`, `knowledge-freshness`
 
 ### 0046 — Graph-aware knowledge retrieval (planned)
 

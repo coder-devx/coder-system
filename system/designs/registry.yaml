@@ -301,3 +301,20 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+- id: '0045'
+  title: Cold-start knowledge ingestion
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0045-cold-start-ingestion.md
+  implements_specs:
+  - '0045'
+  related_designs:
+  - architect-worker
+  - knowledge-write-api
+  - knowledge-repo-model
+  - worker-communication
+  - system-overview
+  affects_services:
+  - coder-core
+  - coder-admin

@@ -280,3 +280,16 @@ specs:
   - audit-log
   - observability
   - admin-panel
+- id: '0045'
+  title: Cold-start knowledge ingestion
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0045-cold-start-ingestion.md
+  served_by_designs:
+  - '0045'
+  related_specs:
+  - onboarding
+  - knowledge-api
+  - architect-worker
+  - knowledge-freshness
