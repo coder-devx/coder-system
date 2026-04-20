@@ -74,6 +74,7 @@ The system today, by logical component. Each links to its active spec
 | [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | drafting |
 | [0041](./wip/0041-escalation-policies.md) | Escalation policies & on-call routing | drafting |
 | [0042](./wip/0042-self-healing.md) | Self-healing stuck pipelines | drafting |
+| [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | drafting |
 
 ---
 
@@ -464,14 +465,30 @@ retained 1 year.
 - **Status:** planned
 - **Extends:** `impersonation`, `admin-panel`, `task-orchestration`
 
-### 0038 — Automated secret rotation (planned)
+### 0038 — Automated secret rotation (drafting)
 
-Scheduled rotation of Anthropic keys, GitHub App tokens, per-project
-API keys, and admin JWT secrets. Zero-downtime rollover via dual-key
-windows. Runbook becomes a cron job.
+Scheduled rotation of per-project API keys, per-project Anthropic
+keys, the admin JWT signing secret, and the shared GitHub App private
+key. Zero-downtime rollover via a dual-value window per secret: new
+value accepted immediately; old value accepted until a per-kind TTL
+elapses, then closed. New `secret_rotations` registry table
+(migration 0042) stores canonical name + kind + cadence + dual-value
+window + last/next times + last error. New
+`projects.api_key_hash_previous` column (migration 0043) backs the
+two-key accept window for project API keys. A Cloud Run Job
+`coder-core-rotate-secrets` ticks every 15 min via Cloud Scheduler,
+rotates anything due, and closes any expired dual-value windows.
+Every rotation emits an `audit_events` row (`action=secret.rotate`,
+`target_type=secret`). Break-glass endpoint
+`POST /v1/_admin/secrets/{canonical_name}/rotate-now` for incident
+response. Admin `/admin/secrets` page behind
+`VITE_SECRET_ROTATION_ENABLED`. Flag-gated fleet-wide on
+`CODER_SECRET_ROTATION_ENABLED` (default off on first deploy; flip
+per-kind after a shadow soak).
 
-- **Status:** planned
-- **Extends:** `service-accounts`, `continuous-deployment`
+- **Status:** drafting
+- **WIP:** [0038](./wip/0038-secret-rotation.md) · **Design:** [0038](../designs/wip/0038-secret-rotation.md)
+- **Extends:** `service-accounts`, `continuous-deployment`, `admin-panel`, `impersonation`, `audit-log`
 
 ### 0039 — Tenant isolation test harness (planned)
 

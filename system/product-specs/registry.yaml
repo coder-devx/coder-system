@@ -234,3 +234,18 @@ specs:
   - audit-log
   - admin-panel
   - '0041'
+- id: '0038'
+  title: Automated secret rotation
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0038-secret-rotation.md
+  served_by_designs:
+  - '0038'
+  related_specs:
+  - service-accounts
+  - continuous-deployment
+  - multi-tenancy
+  - admin-panel
+  - impersonation
+  - audit-log
