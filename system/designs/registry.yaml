@@ -282,3 +282,22 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+- id: '0040'
+  title: Confidence-scored auto-approval
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0040-confidence-auto-approve.md
+  implements_specs:
+  - '0040'
+  related_designs:
+  - worker-communication
+  - worker-roles
+  - pm-worker
+  - architect-worker
+  - team-manager-worker
+  - audit-log
+  - observability-and-cost-tracking
+  affects_services:
+  - coder-core
+  - coder-admin

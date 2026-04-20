@@ -76,6 +76,7 @@ The system today, by logical component. Each links to its active spec
 | [0042](./wip/0042-self-healing.md) | Self-healing stuck pipelines | drafting |
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | drafting |
 | [0039](./wip/0039-tenant-isolation-tests.md) | Tenant isolation test harness | drafting |
+| [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | drafting |
 
 ---
 
@@ -523,15 +524,33 @@ tests → wire GCP nightly + admin surface → flip
 > every run. Many are low-risk rubber-stamps. Let the system earn
 > auto-approval on the easy cases so humans focus on the hard ones.
 
-### 0040 — Confidence-scored auto-approval (planned)
+### 0040 — Confidence-scored auto-approval (drafting)
 
-PM, Architect, and TM outputs include a self-reported confidence
-score with justification. If score > threshold AND project opted-in
-AND historical approval rate > 95% on similar artifacts, auto-approve
-with a 10-minute "undo" window.
+PM, Architect, and TM outputs gain a required `self_confidence`
+envelope (score, justification, risk_flags from a fixed vocabulary).
+An evaluator at each approval gate returns `EligibleForAuto` only
+when four predicates hold: project opted in, score ≥ per-gate
+threshold (spec 85, design 90, plan 80), last-20 audit-based
+historical approval rate ≥ 95% (< 5 prior approvals = insufficient),
+and zero risk flags (worker-reported ∪ handler-computed static
+flags). On eligibility the handler writes an `auto_approvals` row
+(migration 0044) with `status='pending'` and a 10-minute
+`window_expires_at`; `knowledge_approved` and chain dispatch are
+withheld until a 1-minute Cloud Scheduler tick finalises
+(`SELECT FOR UPDATE SKIP LOCKED`) or an operator clicks
+`accept-now`. Undo within the window reverts + spawns a revision
+task. Per-project tri-state opt-in on three new
+`projects.auto_approve_{spec,design,plan}_enabled` columns
+(migration 0045). Every transition writes an `audit_events` row
+(four new actions). Admin surfaces a pending-auto-approval card
+adjacent to the existing Gate card on RunDetail + on knowledge
+artifact views behind `VITE_AUTO_APPROVE_ENABLED`. Fleet flag
+`CODER_AUTO_APPROVE_ENABLED` starts off; 4-stage ramp (shadow →
+enable pending writes → `coder` spec only → expand).
 
-- **Status:** planned
-- **Extends:** `task-orchestration`, `observability`, `pm-worker`, `architect-worker`, `team-manager-worker`
+- **Status:** drafting
+- **WIP:** [0040](./wip/0040-confidence-auto-approve.md) · **Design:** [0040](../designs/wip/0040-confidence-auto-approve.md)
+- **Extends:** `task-orchestration`, `observability`, `pm-worker`, `architect-worker`, `team-manager-worker`, `audit-log`, `admin-panel`
 
 ### 0041 — Escalation policies & on-call routing (drafting)
 
