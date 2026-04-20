@@ -116,11 +116,12 @@ tokens are the primary lever we control.
   `failure_kind="budget"`. Resolution runs through
   `coder_core.api.projects.resolve_budget_limits` so a
   per-project override takes effect immediately.
-- [ ] Soft breach sets
-  `projects.budget_downshift_active_until_month_end = true`;
-  0030's resolver respects it when present. (Pending — chains
-  on 0030 shipping, which happened this session; the flag
-  column + resolver integration land in a follow-up.)
+- [x] Soft breach sets `projects.budget_downshift_at = now()`
+  (migration 0039); `resolve_tier_model` in
+  `coder_core.workers.dispatcher` checks the stamp ahead of the
+  policy resolution, forcing the low-tier route while the stamp
+  is non-NULL. `pin_top_tier=True` still wins so audit projects
+  never silently downshift.
 - [x] Slack alerts fire once per (project, threshold, month) via
   `alert_type=f"budget_soft_{project_id}_{yyyymm}"` — the 1h
   in-memory rate limiter dedupes within-hour, the yyyymm
@@ -132,13 +133,19 @@ tokens are the primary lever we control.
   rollup with resolved per-project limits; `PATCH
   /v1/projects/{id}` accepts `budget_soft_tokens` /
   `budget_hard_tokens` updates.
-- [ ] Admin panel renders the Budget column + project detail
-  card + override affordance; operator override creates a
-  24 h exemption and records `override_granted_by`. (Pending
-  admin UI; API surface for overrides is in place via PATCH.)
-- [ ] Monthly reset cron resets `tokens_used` at 00:00 UTC on
-  the 1st; the prior month's row is preserved for audit.
-  (Deferred with the rollup table.)
+- [x] Admin panel renders the Budget column + project detail
+  card + override affordance. The card surfaces active override
+  window + `granted_by`, soft-breach downshift state, and
+  grant/revoke buttons calling the new
+  `POST/DELETE /v1/_admin/projects/{id}/budget/override`
+  endpoints. Override bounded to 1..168 h (7 days max — longer
+  is a signal to raise the cap).
+- [x] Monthly reset cron clears every project's
+  `budget_downshift_at` via
+  `POST /v1/_admin/budget/monthly-reset` (Cloud Scheduler at
+  00:05 UTC on the 1st). Rollup-table reset is still deferred;
+  the on-the-fly month query re-reads from `tasks`, so clearing
+  the downshift stamp is all the cron needs to do.
 
 ## Metrics
 
