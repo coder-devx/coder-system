@@ -78,6 +78,7 @@ The system today, by logical component. Each links to its active spec
 | [0039](./wip/0039-tenant-isolation-tests.md) | Tenant isolation test harness | drafting |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | drafting |
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
+| [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | drafting |
 
 ---
 
@@ -741,18 +742,51 @@ behind `VITE_COLD_START_ENABLED`.
 - **WIP:** [0045](./wip/0045-cold-start-ingestion.md) · **Design:** [0045](../designs/wip/0045-cold-start-ingestion.md)
 - **Extends:** `onboarding`, `knowledge-api`, `architect-worker`, `knowledge-freshness`
 
-### 0046 — Graph-aware knowledge retrieval (planned)
+### 0046 — Graph-aware knowledge retrieval (drafting)
 
-Knowledge API v2 endpoint `GET /v1/projects/{id}/knowledge/graph`
-that accepts a starting artifact and a traversal spec (depth, edge
-types, freshness floor) and returns the whole subgraph in one
-response, pre-joined. Replaces the N+1 pattern of workers fetching
-an artifact and then each cross-link separately. Respects 0043's
-freshness so a graph fetch at `min_freshness=70` excludes stale
-branches.
+New endpoint `GET /v1/projects/{id}/knowledge/graph` returns the
+subgraph reachable from a starting artifact (`?start=<type/id>`)
+in a single round-trip, replacing the N+1 walk every authoring
+worker does today (architect's pre-claude assembly currently
+~30–50 sequential GETs). Bounded BFS with three caps: `depth`
+(default 2, hard cap 3), `max_nodes` (default 200, hard cap
+500), per-node fan-out cap (50, server-enforced); over-cap
+edges land in `truncated_at[]` annotated with reason rather than
+5xx-erroring. **Cache-coherence invariant:** the handler resolves
+the project's `main` to a commit SHA at request entry and uses
+that SHA for every subsequent fetch in the response — two
+artifacts in one response can never disagree about each other's
+content. **Freshness gating** via `min_freshness=N` (semantics
+inherited from 0043): below-floor nodes return as `stub_nodes`
+with no body and no out-edge traversal, so workers see "this
+branch is stale, I'm seeing it blind" rather than silent
+exclusion. Same typed envelope as the existing single-`GET`
+shape — workers convert by replacing one helper call, no new
+model code. Per-worker conversions: architect (depth=2,
+`served_by_designs+related_designs+decided_by`), TM (depth=2,
+`decided_by+related_designs+affects_services`), reviewer
+(depth=1, `served_by_designs`), PM accept (depth=1,
+`related_specs`); each keeps a runtime-flag-gated fallback to
+the legacy serial walk for one-week soak before removal.
+**Pure logic** in `coder_core/knowledge/graph.py` — `GraphExpander`
+takes a fetch callback so it's unit-testable; no I/O. Reuses the
+existing TTL cache + parsers + freshness machinery — no new
+storage, no precomputed graph, no background indexer.
+Tri-state per-project flag `projects.knowledge_graph_enabled`
+(migration 0054) + fleet kill switch
+`CODER_KNOWLEDGE_GRAPH_ENABLED`. Admin per-artifact "Graph" tab
+renders Mermaid via the 0034 PR-viewer's shared renderer behind
+`VITE_KNOWLEDGE_GRAPH_ENABLED`. Headline KPI: pre-claude
+assembly p50 latency drop from ~6 s to ≤ 1.5 s on `coder` seed
+(architect task), ≥ 4× across all four converted workers; secondary:
+GitHub Contents calls per task drop from 30+ to ≤ 5. Rollout: ship
+endpoint + expander dark → `coder` opt-in → architect conversion
+trial-flip → TM/reviewer/PM trial-flips one per day → fleet
+flip → admin tab → fallback removal after 1-week soak.
 
-- **Status:** planned
-- **Extends:** `knowledge-api`
+- **Status:** drafting
+- **WIP:** [0046](./wip/0046-graph-aware-retrieval.md) · **Design:** [0046](../designs/wip/0046-graph-aware-retrieval.md)
+- **Extends:** `knowledge-api`, `knowledge-freshness`, `architect-worker`, `reviewer-worker`, `team-manager-worker`, `pm-worker`
 
 ### 0047 — Template schema migration (planned)
 
