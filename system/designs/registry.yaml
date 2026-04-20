@@ -230,3 +230,21 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+- id: '0042'
+  title: Self-healing stuck pipelines
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0042-self-healing.md
+  implements_specs:
+  - '0042'
+  related_designs:
+  - system-overview
+  - worker-communication
+  - worker-roles
+  - observability-and-cost-tracking
+  - audit-log
+  - '0041'
+  affects_services:
+  - coder-core
+  - coder-admin

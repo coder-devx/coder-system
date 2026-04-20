@@ -220,3 +220,17 @@ specs:
   - audit-log
   - admin-panel
   - multi-tenancy
+- id: '0042'
+  title: Self-healing stuck pipelines
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0042-self-healing.md
+  served_by_designs:
+  - '0042'
+  related_specs:
+  - task-orchestration
+  - observability
+  - audit-log
+  - admin-panel
+  - '0041'

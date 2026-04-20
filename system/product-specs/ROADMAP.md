@@ -73,6 +73,7 @@ The system today, by logical component. Each links to its active spec
 | [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | drafting |
 | [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | drafting |
 | [0041](./wip/0041-escalation-policies.md) | Escalation policies & on-call routing | drafting |
+| [0042](./wip/0042-self-healing.md) | Self-healing stuck pipelines | drafting |
 
 ---
 
@@ -530,14 +531,45 @@ Fleet flag `CODER_ESCALATIONS_ENABLED` default off; 3-stage rollout
 - **WIP:** [0041](./wip/0041-escalation-policies.md) · **Design:** [0041](../designs/wip/0041-escalation-policies.md)
 - **Extends:** `task-orchestration`, `observability`, `audit-log`, `admin-panel`, `multi-tenancy`
 
-### 0042 — Self-healing stuck pipelines (planned)
+### 0042 — Self-healing stuck pipelines (drafting)
 
-Watchdog detects pipelines stuck in a stage beyond 3× p95 duration,
-diagnoses, and auto-remediates (retry, re-dispatch, unblock). Only
-pages a human when auto-remediation fails.
+A 5-minute Cloud Run Job `coder-core-self-heal-watch` ticks per
+project, runs a small registry of `Remediator`s with a uniform
+`detect + remediate` interface, and each remediation is _provably
+safe_ (worst case = no change, never wrong change). v1 ships three
+patterns: **`stuck_queued`** (`tasks.status='queued'` >
+`stuck_queued_min_minutes`=15 with project DispatcherQueue depth 0
+and `worker_concurrency` not pinned → re-enqueue via existing
+override path; safe because re-enqueue is idempotent on task id),
+**`zombie_executing`** (`tasks.heartbeat_at` (new column, migration
+0049) older than `zombie_heartbeat_staleness_seconds`=180 + deadline
+elapsed + Cloud Run revision still alive → fail with
+`failure_kind='zombie'` then call existing `/tasks/{id}/retry` clone;
+safe because it's the manual-recovery flow), **`orphan_chain_hook`**
+(pipeline_runs step-advanced but next-role task absent + close-cycle
+backstop logged failure within 1h → idempotent
+`POST /v1/_admin/pipeline-runs/{id}/replay-chain`; safe because hook
+early-returns when next task exists). Each pattern gates on a
+per-target-per-pattern-per-day cap (lookup into `self_heal_attempts`,
+migration 0050) — second hit logs `outcome='skipped_cap'` and lets
+0041 escalate normally. Per-pattern mode `off`/`dry_run`/`apply` plus
+fleet kill switch `CODER_SELF_HEALING_ENABLED`. Workers update
+`tasks.heartbeat_at` every 30 s via a supervisor wrapper
+`with_heartbeat` in `coder_core/workers/_runtime.py` + new
+`PATCH /tasks/{id}/heartbeat` endpoint. Every remediation writes an
+`audit_events` row (`self_heal.remediated` / `.failed`); on success
+the watchdog enumerates open `escalations` matching the target and
+calls `/escalations/{id}/resolve` with
+`resolved_by_id='self-healing-watchdog'` (peer-consumer integration
+with 0041). Admin `/admin/self-heal` page lists fleet attempts behind
+`VITE_SELF_HEAL_ENABLED`. Headline KPI: count of escalations
+prevented per week, target ≥ 30% drop in 0041 L1+L2 fires after
+30 days. Rollout: 1-week shadow (every pattern in `dry_run`) →
+flip `stuck_queued` to `apply` → soak → expand.
 
-- **Status:** planned
-- **Extends:** `task-orchestration`
+- **Status:** drafting
+- **WIP:** [0042](./wip/0042-self-healing.md) · **Design:** [0042](../designs/wip/0042-self-healing.md)
+- **Extends:** `task-orchestration`, `observability`, `audit-log`, `admin-panel`, `0041`
 
 ---
 
