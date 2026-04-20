@@ -249,3 +249,18 @@ specs:
   - admin-panel
   - impersonation
   - audit-log
+- id: '0039'
+  title: Tenant isolation test harness
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0039-tenant-isolation-tests.md
+  served_by_designs:
+  - '0039'
+  related_specs:
+  - multi-tenancy
+  - service-accounts
+  - impersonation
+  - audit-log
+  - knowledge-api
+  - task-orchestration

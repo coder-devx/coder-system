@@ -75,6 +75,7 @@ The system today, by logical component. Each links to its active spec
 | [0041](./wip/0041-escalation-policies.md) | Escalation policies & on-call routing | drafting |
 | [0042](./wip/0042-self-healing.md) | Self-healing stuck pipelines | drafting |
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | drafting |
+| [0039](./wip/0039-tenant-isolation-tests.md) | Tenant isolation test harness | drafting |
 
 ---
 
@@ -490,14 +491,29 @@ per-kind after a shadow soak).
 - **WIP:** [0038](./wip/0038-secret-rotation.md) · **Design:** [0038](../designs/wip/0038-secret-rotation.md)
 - **Extends:** `service-accounts`, `continuous-deployment`, `admin-panel`, `impersonation`, `audit-log`
 
-### 0039 — Tenant isolation test harness (planned)
+### 0039 — Tenant isolation test harness (drafting)
 
-CI suite that provisions two projects and asserts no cross-tenant
-reads/writes are possible across every endpoint, token type, and
-worker path.
+A CI-enforced pytest suite that provisions two projects, then
+exercises every isolation boundary as a parametric matrix:
+(endpoint × token type × project) for every project-scoped API
+route, direct-DB row-visibility asserts for every
+`project_id`-bearing table, worker-path reads/writes driven through
+the real impersonation broker, and GCP Secret Manager asserts
+(cross-project reads must 403). Single source of truth is
+`tests/isolation/isolation_manifest.yaml`; a drift check
+(`scripts/check_isolation_manifest.py`) fails the build when a new
+endpoint with `Depends(require_project_auth)` is added without a
+manifest entry — so authorial intent to add an isolation boundary is
+what gets merged, not a silent miss. Coverage report emits
+`isolation_coverage.json` consumed by a new `/admin/isolation`
+trust-badge page (behind `VITE_ISOLATION_VIEW_ENABLED`). Rollout is
+a 4-stage ramp: manifest + API matrix non-blocking → add row/worker
+tests → wire GCP nightly + admin surface → flip
+`CI_ISOLATION_SUITE_BLOCKING=true` after 7 days of green.
 
-- **Status:** planned
-- **Extends:** `multi-tenancy`, `service-accounts`
+- **Status:** drafting
+- **WIP:** [0039](./wip/0039-tenant-isolation-tests.md) · **Design:** [0039](../designs/wip/0039-tenant-isolation-tests.md)
+- **Extends:** `multi-tenancy`, `service-accounts`, `impersonation`, `audit-log`, `knowledge-api`, `task-orchestration`
 
 ---
 
