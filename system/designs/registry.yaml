@@ -214,3 +214,19 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+- id: '0041'
+  title: Escalation policies & on-call routing
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0041-escalation-policies.md
+  implements_specs:
+  - '0041'
+  related_designs:
+  - system-overview
+  - worker-communication
+  - observability-and-cost-tracking
+  - audit-log
+  affects_services:
+  - coder-core
+  - coder-admin

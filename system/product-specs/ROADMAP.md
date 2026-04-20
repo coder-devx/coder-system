@@ -72,6 +72,7 @@ The system today, by logical component. Each links to its active spec
 | [0030](./wip/0030-model-tier-routing.md) | Model tier routing | drafting |
 | [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | drafting |
 | [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | drafting |
+| [0041](./wip/0041-escalation-policies.md) | Escalation policies & on-call routing | drafting |
 
 ---
 
@@ -498,14 +499,36 @@ with a 10-minute "undo" window.
 - **Status:** planned
 - **Extends:** `task-orchestration`, `observability`, `pm-worker`, `architect-worker`, `team-manager-worker`
 
-### 0041 — Escalation policies & human on-call routing (planned)
+### 0041 — Escalation policies & on-call routing (drafting)
 
-When a pipeline stalls, fails repeatedly, or exceeds SLA, route to a
-human via Slack/PagerDuty with full context. Per-project on-call
-rotation.
+A 1-minute Cloud Run Job `coder-core-escalation-watch` scans three
+pipeline-run-shaped trigger conditions — **stall** (`blocked_since`
+older than per-project `sla_stall_minutes`, default 60), **failure
+streak** (≥`failure_streak_n`=3 consecutive `tasks.status='failed'`
+in `failure_streak_window_minutes`=30), **SLA wall-clock breach**
+(run open longer than `sla_wall_clock_minutes`=720 = 12h) — and
+opens rows in a new `escalations` table (migration 0046). Dedupe
+enforced by a partial unique index on (project_id, trigger_kind,
+run_id) `WHERE status='open'`. Each escalation advances through a
+3-rung ladder per the project's `escalation_policy` (`off` /
+`standard` = L0 Slack channel → L1 DM on-call → L2 PagerDuty /
+`aggressive` = L0 → L2), with per-rung wait timers advanced by the
+same tick via `SELECT FOR UPDATE SKIP LOCKED`. Per-project on-call
+rotation in a new `on_call_schedules` table (migration 0047); new
+`projects` columns hold SLA thresholds + policy name + Slack channel
++ PagerDuty routing key (migration 0048). Acknowledge endpoint (API
++ Slack interactive button via `/v1/_hooks/slack/escalation_ack`
+with signing-secret verification) stops further rungs; resolve
+endpoint closes, reusable by 0042 self-healing as `actor='system'`.
+Every state change writes an `audit_events` row (five new
+`escalation.*` actions). Admin `/admin/escalations` + per-project
+`/projects/:id/escalations` tab behind `VITE_ESCALATIONS_ENABLED`.
+Fleet flag `CODER_ESCALATIONS_ENABLED` default off; 3-stage rollout
+(shadow → L0-only fleet → per-project full ladder opt-in).
 
-- **Status:** planned
-- **Extends:** `task-orchestration`, `observability`
+- **Status:** drafting
+- **WIP:** [0041](./wip/0041-escalation-policies.md) · **Design:** [0041](../designs/wip/0041-escalation-policies.md)
+- **Extends:** `task-orchestration`, `observability`, `audit-log`, `admin-panel`, `multi-tenancy`
 
 ### 0042 — Self-healing stuck pipelines (planned)
 
