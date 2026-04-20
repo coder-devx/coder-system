@@ -99,12 +99,16 @@ cost regressions with the commit range likely responsible.
 
 ## Acceptance criteria
 
-- [ ] `stage_cost_baseline` migration lands; nightly rollup
-  job populates it. **Deferred** — phase 1 computes the
-  7-day baseline on-the-fly via `rollup_role_metrics` over
-  the last 8 days of `tasks`. Pre-aggregation will matter
-  once we have enough traffic to make the on-the-fly query
-  slow; today it's fast enough.
+- [x] `stage_cost_baseline` migration (0040) lands; the
+  nightly regression cron calls
+  `upsert_stage_baseline_for_day` to populate yesterday's row
+  per `(role, model_id="", day_utc)`. Dedupe index on
+  `(role, model_id, day_utc)` keeps re-runs idempotent. The
+  7-day baseline detector still runs on-the-fly from `tasks`
+  for phase 1; the table is the read path for the admin
+  trend-line and the pre-aggregation step-up once traffic
+  warrants swapping the detector to read from it. Rows
+  returned by `GET /v1/_admin/regression/baseline?days=14`.
 - [x] `regression_events` table (migration 0038) captures
   detected regressions with
   `(role, metric, day_utc, baseline_value, current_value,
@@ -134,8 +138,11 @@ cost regressions with the commit range likely responsible.
 - [x] Acknowledge API: `POST
   /v1/_admin/regression/events/{id}/acknowledge` with an
   actor + optional note. Listed via `GET
-  /v1/_admin/regression/events?open_only=&limit=`.
-  Admin panel UI pending.
+  /v1/_admin/regression/events?open_only=&limit=`. Admin
+  panel's `/metrics/regressions` tab renders the open-first
+  event list with per-row acknowledge button + note input;
+  the same tab shows the 14-day baseline trendline per role
+  (median + p95 sparkline sourced from `stage_cost_baseline`).
 - [ ] 2-week shadow soak with the flag off produces a
   readable baseline and no false-positive regressions
   (false-positive = regression-event fires on a day where
