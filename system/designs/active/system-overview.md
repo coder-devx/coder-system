@@ -5,11 +5,11 @@ type: design
 status: active
 owner: ro
 created: 2026-04-08
-updated: 2026-04-15
-last_verified_at: 2026-04-15
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 implements_specs: []
 decided_by: ["0001", "0005", "0006", "0007", "0008"]
-related_designs: [worker-roles, impersonation, knowledge-repo-model]
+related_designs: [worker-roles, impersonation, knowledge-repo-model, audit-log]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin, coder-system]
 ---
@@ -102,6 +102,24 @@ pushes state changes to the admin panel.
   VibeTrade-coupled `coder-agent` / `coder-agent-admin`. All 8 build-plan
   specs reached 100% AC (51/51); VibeTrade was re-onboarded as project
   #1 on the new system.
+- `0036` — command palette & keyboard-first navigation: new
+  `CommandPalette.tsx` portal-mounted at the `App.tsx` shell, so the
+  `⌘K` / `Ctrl+K` modal is available on every route. Entry sources
+  are pluggable providers (nav, projects, tasks, artifacts, runs,
+  actions); a localStorage-backed recent-activation list boosts fuzzy
+  rank. Pure frontend — no coder-core changes, no new endpoints.
+  Hand-rolled fuzzy ranker keeps the bundle budget <20 kB gzipped.
+  Behind `VITE_COMMAND_PALETTE_ENABLED` (default on).
+- `0037` — audit log service: introduces a new `audit-log` component
+  (see `designs/active/audit-log.md`). `CorrelationMiddleware`
+  registers before the auth middleware so every request carries an
+  `X-Correlation-ID` (accepted as ULID, minted when absent, echoed on
+  the response). `coder_core.audit.record_audit_event` is the single
+  writer helper; 15 Phase-1 mutation handlers call it inside their
+  own transaction. New table `audit_events` (migration 0041, downgrade
+  raises by design). Read surfaces: `GET /v1/projects/{id}/audit-
+  events` (tenant) and `GET /v1/admin/audit-events` (fleet). Admin
+  `AuditLog.tsx` page. Behind `CODER_AUDIT_LOG_ENABLED` (default on).
 
 ## Links
 

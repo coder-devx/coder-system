@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 served_by_designs: [knowledge-write-api, knowledge-repo-model]
 related_specs: [knowledge-freshness]
 ---
@@ -100,6 +100,16 @@ checks, and actor attribution.
   powering the close-cycle backstop and the admin ship-gate panel;
   pre-commit validator enforces AC coverage, cross-link resolution
   against the post-merge snapshot, and template-path refusal.
+- 0035 Inline knowledge editor (shipped 2026-04-19, body-only) —
+  admin-panel now drives the existing `PUT /knowledge/{type}/{id}`
+  endpoint from the artifact view (body-only payload, shallow
+  frontmatter merge still server-supported for phase 2). No backend
+  changes. New `knowledge_edited` structured log event at save
+  (`{project_id, artifact_type, artifact_id, commit_sha}`) flows
+  through the existing `coder_core.api.knowledge` logger. SHA
+  conflicts bubble as 502 `github_upstream` for the editor's
+  "reload" branch; 422 `invalid_frontmatter` / broken cross-links
+  render inline.
 
 ## Links
 

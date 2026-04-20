@@ -11,7 +11,7 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**16 active components** describe the shipped system.
+**17 active components** describe the shipped system.
 
 **Pipeline proven end-to-end (2026-04-13):** PM draft → spec file in repo →
 pipeline run advances to `spec_approval` → ready for human approval →
@@ -24,18 +24,24 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-19 — **Phase 4 LIVE in prod.** All four specs
-(0029/0030/0031/0032) phase-1 deployed + flags flipped on. Fleet:
-`PROMPT_CACHING_ENABLED=true`, `REGRESSION_ALERTS_ENABLED=true`.
-Per-project: `coder` runs with `pin_top_tier=false` (tier routing
-routes reviewer tasks to Haiku). Migrations 0022, 0032-0038 all
-applied. Prod image `072323d6d71f` on revision `coder-core-00115-vhp`.
-Remaining Phase 4 work is deferred increments (yaml policy table
-for 0030, rollup pre-aggregation for 0031/0032, admin UI surfaces)
-— each has an explicit phase-2 note on its WIP spec. 2026-04-18:
-0044 (write-through enforcement) and 0043 (freshness signals)
-shipped into `active/`. Phase 3 complete: 0023, 0025, 0026, 0027,
-0028 all shipped.
+Last updated: 2026-04-19 — **Phase 5 + Phase 6/0037 shipped into
+`active/`.** 0033 (live timeline), 0034 (PR viewer), 0035 (knowledge
+editor), 0036 (command palette), and 0037 (audit log) all folded:
+content merged into the relevant subject-named components (0037
+introduced the new `audit-log` component), numbered WIP files deleted,
+both registries updated. Every feature shipped behind its respective
+`VITE_*_ENABLED` / `CODER_AUDIT_LOG_ENABLED` flag (default on).
+**Phase 4 LIVE in prod.** All four specs (0029/0030/0031/0032)
+phase-1 deployed + flags flipped on. Fleet: `PROMPT_CACHING_ENABLED=true`,
+`REGRESSION_ALERTS_ENABLED=true`. Per-project: `coder` runs with
+`pin_top_tier=false` (tier routing routes reviewer tasks to Haiku).
+Migrations 0022, 0032-0038, 0041 all applied. Prod image
+`072323d6d71f` on revision `coder-core-00115-vhp`. Remaining Phase 4
+work is deferred increments (yaml policy table for 0030, rollup
+pre-aggregation for 0031/0032, admin UI surfaces) — each has an
+explicit phase-2 note on its WIP spec. 2026-04-18: 0044 (write-through
+enforcement) and 0043 (freshness signals) shipped into `active/`.
+Phase 3 complete: 0023, 0025, 0026, 0027, 0028 all shipped.
 
 ---
 
@@ -61,6 +67,7 @@ The system today, by logical component. Each links to its active spec
 | Continuous Deployment | [continuous-deployment](./active/continuous-deployment.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
 | Observability | [observability](./active/observability.md) | [observability-and-cost-tracking](../designs/active/observability-and-cost-tracking.md) |
 | Branch cleanup | [branch-cleanup](./active/branch-cleanup.md) | [branch-cleanup](../designs/active/branch-cleanup.md) |
+| Audit log | [audit-log](./active/audit-log.md) | [audit-log](../designs/active/audit-log.md) |
 
 ---
 
@@ -72,11 +79,11 @@ The system today, by logical component. Each links to its active spec
 | [0030](./wip/0030-model-tier-routing.md) | Model tier routing | drafting |
 | [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | drafting |
 | [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | drafting |
-| [0041](./wip/0041-escalation-policies.md) | Escalation policies & on-call routing | drafting |
-| [0042](./wip/0042-self-healing.md) | Self-healing stuck pipelines | drafting |
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | drafting |
 | [0039](./wip/0039-tenant-isolation-tests.md) | Tenant isolation test harness | drafting |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | drafting |
+| [0041](./wip/0041-escalation-policies.md) | Escalation policies & on-call routing | drafting |
+| [0042](./wip/0042-self-healing.md) | Self-healing stuck pipelines | drafting |
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
 | [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | drafting |
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
@@ -420,39 +427,58 @@ Migration 0038.
 > list of rows; it should be a live view of what the system is doing,
 > with every common action one keystroke away.
 
-### 0033 — Live pipeline timeline (planned)
+### 0033 — Live pipeline timeline (shipped 2026-04-19)
 
-Replace the flat task list with a timeline view per pipeline run:
-horizontal swim-lanes per role, stage durations as bars, SSE-driven
-progress tick, hover for logs, click for detail.
+Replaces the flat task list with a per-run timeline: four horizontal
+swim-lanes (pm_draft, architect, team_manager, pm_accept), stage
+durations as bars reassembled from `task_stage_runs`, SSE-driven
+progress tick via `pipeline_run.changed`, click-through for detail.
+New endpoint `GET /v1/projects/{id}/pipeline-runs/{run_id}/timeline`;
+no new storage. Admin component behind `VITE_RUN_TIMELINE_ENABLED`.
 
-- **Status:** planned
-- **Extends:** `admin-panel`, `task-orchestration`
+- **Status:** shipped → merged into
+  [`admin-panel`](./active/admin-panel.md),
+  [`task-orchestration`](./active/task-orchestration.md) /
+  [`worker-communication`](../designs/active/worker-communication.md).
 
-### 0034 — In-panel diff & PR viewer (planned)
+### 0034 — In-panel diff & PR viewer (shipped 2026-04-19)
 
-View PR diffs, reviewer comments, and commit history directly in the
-admin panel. Approve/request-changes buttons call through to `coder-core`.
+View PR diffs and the reviewer's verdict/body inline in the admin
+panel. New `/tasks/{id}/pr` endpoint parses `pr_url` and fans out
+`fetch_pr` + `fetch_pr_diff` GitHubClient calls; frontend
+`PrViewer.tsx` renders unified diffs with a custom Tailwind renderer.
+Admin component behind `VITE_PR_VIEWER_ENABLED`.
 
-- **Status:** planned
-- **Extends:** `admin-panel`, `developer-worker`
+- **Status:** shipped → merged into
+  [`admin-panel`](./active/admin-panel.md),
+  [`task-orchestration`](./active/task-orchestration.md) /
+  [`worker-communication`](../designs/active/worker-communication.md).
 
-### 0035 — Inline knowledge editor with approvals (planned)
+### 0035 — Inline knowledge editor with approvals (shipped 2026-04-19)
 
-Edit spec/design markdown in-browser with frontmatter form + body
-editor + live preview. Approve/reject buttons adjacent.
+Edit spec/design markdown body in-browser with live preview; Save
+calls the existing `PUT /knowledge/{type}/{id}` (no backend changes).
+Approve/reject buttons stay adjacent but disable while there are
+unsaved edits. Body-only; frontmatter form deferred to phase 2 per
+the original WIP's non-goals. Admin component behind
+`VITE_KNOWLEDGE_EDITOR_ENABLED`.
 
-- **Status:** planned
-- **Extends:** `admin-panel`, `knowledge-api`
+- **Status:** shipped → merged into
+  [`admin-panel`](./active/admin-panel.md),
+  [`knowledge-api`](./active/knowledge-api.md) /
+  [`knowledge-write-api`](../designs/active/knowledge-write-api.md).
 
-### 0036 — Command palette & keyboard-first navigation (planned)
+### 0036 — Command palette & keyboard-first navigation (shipped 2026-04-19)
 
-`⌘K` palette: jump to project, task, spec, run; trigger common actions
-(approve, retry, override); fuzzy-search knowledge. Full keyboard
-navigation of tables and forms.
+`⌘K` / `Ctrl+K` palette portal-mounted at the admin SPA shell: mixed
+navigation (projects, tasks, specs, runs) + runnable actions (retry
+stuck tasks, grant budget override, open run override) with fuzzy
+match and recent-activation boost. Pure frontend — no backend changes.
+Behind `VITE_COMMAND_PALETTE_ENABLED`.
 
-- **Status:** planned
-- **Extends:** `admin-panel`
+- **Status:** shipped → merged into
+  [`admin-panel`](./active/admin-panel.md) /
+  [`system-overview`](../designs/active/system-overview.md).
 
 ---
 
@@ -461,15 +487,39 @@ navigation of tables and forms.
 > Close the gap between "it works" and "it's safe to let a customer
 > near it." Preparation for external pilots.
 
-### 0037 — Centralized audit log service (planned)
+### 0037 — Centralized audit log service (shipped 2026-04-19)
 
 Every mutation (approve, reject, override, retry, merge, knowledge
-write, impersonation) lands in an append-only audit log with actor,
-project, target, before/after, and correlation ID. Queryable by admin,
-retained 1 year.
+write, impersonation) lands in an append-only `audit_events` log with
+actor, project, target, before/after, and correlation ID. Queryable
+per-tenant (`/v1/projects/{id}/audit-events`) and fleet
+(`/v1/admin/audit-events`). `CorrelationMiddleware` stamps / echoes
+`X-Correlation-ID`; `record_audit_event` writes inside the caller's
+transaction so mutation + audit row are atomic. Admin `AuditLog.tsx`
+page mounted at `/projects/:projectId/audit` and `/admin/audit`.
+Migration 0041 (downgrade raises by design). Retention stamp at
+`created_at + 365d` (GC is a later spec). Gated on
+`CODER_AUDIT_LOG_ENABLED` (default on). New `audit-log` active
+component owns the shape; existing components grow Evolution entries
+for their mutation-endpoint wirings.
 
-- **Status:** planned
-- **Extends:** `impersonation`, `admin-panel`, `task-orchestration`
+- **Status:** shipped → new [`audit-log`](./active/audit-log.md)
+  component / [`audit-log` design](../designs/active/audit-log.md);
+  evolution entries added to
+  [`admin-panel`](./active/admin-panel.md) (viewer page),
+  [`task-orchestration`](./active/task-orchestration.md) (mutation
+  wirings), [`impersonation`](./active/impersonation.md) (actor chain
+  + issue-token/revoke audits) /
+  [`system-overview`](../designs/active/system-overview.md)
+  (middleware slot),
+  [`worker-communication`](../designs/active/worker-communication.md)
+  (task-mutation wirings, worker-initiated correlation fallback),
+  [`knowledge-write-api`](../designs/active/knowledge-write-api.md)
+  (knowledge-mutation wirings),
+  [`impersonation`](../designs/active/impersonation.md) (actor chain
+  captured),
+  [`observability-and-cost-tracking`](../designs/active/observability-and-cost-tracking.md)
+  (adjacent operator surface).
 
 ### 0038 — Automated secret rotation (drafting)
 

@@ -13,6 +13,22 @@ specs:
   file: active/admin-panel.md
   served_by_designs:
   - system-overview
+  related_specs:
+  - audit-log
+- id: audit-log
+  title: Audit log
+  status: active
+  owner: ro
+  folder: active
+  file: active/audit-log.md
+  served_by_designs:
+  - audit-log
+  related_specs:
+  - admin-panel
+  - impersonation
+  - service-accounts
+  - task-orchestration
+  - knowledge-api
 - id: architect-worker
   title: Architect Worker
   status: active
@@ -57,6 +73,8 @@ specs:
   file: active/impersonation.md
   served_by_designs:
   - impersonation
+  related_specs:
+  - audit-log
 - id: knowledge-api
   title: Knowledge API
   status: active
@@ -140,6 +158,8 @@ specs:
   file: active/task-orchestration.md
   served_by_designs:
   - worker-communication
+  related_specs:
+  - audit-log
 - id: team-manager-worker
   title: Team Manager Worker
   status: active

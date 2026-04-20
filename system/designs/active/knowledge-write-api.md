@@ -5,11 +5,11 @@ type: design
 status: active
 owner: ro
 created: 2026-04-12
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 implements_specs: [knowledge-api]
 decided_by: []
-related_designs: [system-overview, knowledge-repo-model, pm-worker, architect-worker]
+related_designs: [system-overview, knowledge-repo-model, pm-worker, architect-worker, audit-log]
 affects_services: [coder-core]
 affects_repos: [coder-core]
 ---
@@ -197,6 +197,27 @@ Errors: `400` (immutable field change / bad YAML / AC gap / dangling
   and ref-SHA-based concurrency. Gated on
   `settings.ship_gate_enabled`. ADR 0015 explains the pipeline-side
   gate placement.
+- 0035 — inline knowledge editor: no backend changes; the existing
+  `PUT /knowledge/{type}/{id}` handler is now driven from the admin
+  panel's artifact view as well as the worker path. Save returns
+  the new `commit_sha` directly from `GitHubClient.update_file` for
+  the UI's "Saved · abc1234" badge. SHA-mismatch (concurrent edit)
+  surfaces as 502 `github_upstream`; the editor's error branch
+  turns this into a "Reload — content changed since you opened it"
+  message. `knowledge_edited` structured log event
+  (`{project_id, artifact_type, artifact_id, commit_sha}`) rides
+  the existing module logger.
+- 0037 — audit log wiring for knowledge mutations (shipped
+  2026-04-19): `knowledge.create_artifact`, `update_artifact`,
+  `update_checkboxes`, `approve`, and `reject` each call
+  `record_audit_event(...)` inside the handler's transaction with
+  a small `before` / `after` dict (frontmatter + path + commit_sha
+  on create/update; status transition on approve/reject). The
+  knowledge body is deliberately excluded — too large for the JSONB
+  column, and the commit SHA already points at it. Audit rows share
+  the request's correlation ID so one approve click surfaces every
+  downstream write in a single filter. See
+  [audit-log](./audit-log.md).
 
 ## Links
 

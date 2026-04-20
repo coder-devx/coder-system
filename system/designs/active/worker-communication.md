@@ -5,8 +5,8 @@ type: design
 status: active
 owner: ro
 created: 2026-04-12
-updated: 2026-04-15
-last_verified_at: 2026-04-17
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 implements_specs: [task-orchestration]
 decided_by: []
 related_designs: [system-overview, pm-worker, team-manager-worker]
@@ -160,6 +160,38 @@ Endpoints:
   the existing `events.py` publisher so the admin dashboard can stay
   live without polling. `api/ops.py` gains two endpoints for the
   step-stats rollup and its admin-triggered recompute.
+- `0033` — live pipeline-run timeline: new
+  `GET /v1/projects/{id}/pipeline-runs/{run_id}/timeline` in
+  `api/pipeline_runs.py` reconstructs per-run step timings from the
+  existing `task_stage_runs` archive, joined via the run's four
+  per-role task ids, enriched with `pipeline_step_stats` median/p75
+  per lane. A synthetic striped "blocked" bar is appended when
+  `pipeline_runs.blocked_since` is non-null and the run is in the
+  current lane's step. No new tables, no new events — the admin
+  `RunTimeline.tsx` subscribes to the same `pipeline_run.changed`
+  feed from 0026 and refetches the payload on change. Message-heavy
+  events (`message_created`, `task_updated`, `stage_changed`) are
+  filtered out of the refetch trigger.
+- `0034` — in-panel PR diff viewer: new
+  `GET /v1/projects/{id}/tasks/{task_id}/pr` in `api/tasks.py` parses
+  `tasks.pr_url` via `parse_pr_url` and fans out two concurrent
+  GitHub API calls — `GitHubClient.fetch_pr` (metadata) and
+  `fetch_pr_diff` (unified-diff text, `Accept: application/vnd.github.diff`)
+  — then stitches the reviewer's existing `review_verdict` /
+  `review_body` into a single envelope. Tasks without a PR return
+  `{pr_url: null}` instead of 404. Reuses the same installation-token
+  path the Knowledge API depends on; no new auth surface. Admin
+  `PrViewer.tsx` lazy-loads on toggle and renders with a custom
+  Tailwind-only diff renderer.
+- `0037` — audit log wiring for task mutations:
+  `tasks.retry` / `override` / `merge`, `task_plans.approve` /
+  `reject`, and `pipeline_runs.override` each call
+  `record_audit_event(...)` inside their existing transaction.
+  Worker-initiated writes (service-account callers) pass the task's
+  `pipeline_run_id` as `correlation_id` so a run's mutations cluster
+  on one ID without an inbound HTTP correlation header. No schema
+  change on the task side — actor/before/after land on
+  `audit_events` via the new audit-log component.
 
 ## Links
 

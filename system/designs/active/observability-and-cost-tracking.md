@@ -5,11 +5,11 @@ type: design
 status: active
 owner: ro
 created: 2026-04-12
-updated: 2026-04-15
-last_verified_at: 2026-04-15
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 implements_specs: [observability]
 decided_by: []
-related_designs: [system-overview]
+related_designs: [system-overview, audit-log]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin, coder-system]
 ---
@@ -115,6 +115,15 @@ flowchart TB
 - `0011-observability-and-cost-tracking` (spec 0018) — added
   migration 0014, the orchestrator duration hook, the metrics API,
   Slack alerts, and the admin dashboard in a single deploy cycle.
+- `0037` — audit log as an adjacent operator surface (shipped
+  2026-04-19): the audit log sits alongside `/metrics` and the
+  Slack alert stream as the third operator surface. Distinction:
+  observability answers "is the pipeline healthy?" and "what did
+  it cost?"; the audit log answers "who mutated what, when?".
+  No coupling on the write side; both read through the same
+  structured-log feed but write to separate tables
+  (`task_stage_durations`, `regression_events`, `gc_events` here;
+  `audit_events` there). See [audit-log](./audit-log.md).
 
 ## Links
 

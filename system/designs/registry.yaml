@@ -15,6 +15,23 @@ designs:
   - architect-worker
   affects_services:
   - coder-core
+- id: audit-log
+  title: Audit log
+  status: active
+  owner: ro
+  folder: active
+  file: active/audit-log.md
+  implements_specs:
+  - audit-log
+  related_designs:
+  - system-overview
+  - impersonation
+  - worker-communication
+  - observability-and-cost-tracking
+  - knowledge-write-api
+  affects_services:
+  - coder-core
+  - coder-admin
 - id: branch-cleanup
   title: Branch cleanup
   status: active

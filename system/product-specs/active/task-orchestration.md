@@ -8,7 +8,7 @@ created: 2026-04-11
 updated: 2026-04-19
 last_verified_at: 2026-04-19
 served_by_designs: [worker-communication]
-related_specs: []
+related_specs: [audit-log]
 ---
 
 # Task orchestration
@@ -198,6 +198,18 @@ and `/pipeline-runs` endpoints in `coder-core`.
 - `GET /v1/projects/{id}/pipeline-runs` and
   `POST /v1/projects/{id}/pipeline-runs/{id}/override` — end-to-end run
   visibility and pause/resume/cancel.
+- `GET /v1/projects/{id}/pipeline-runs/{run_id}/timeline` — per-run
+  swim-lane payload: one `TimelineLane` per pipeline step with bars
+  reassembled from `task_stage_runs` for the run's four per-role task
+  ids, plus `pipeline_step_stats` median/p75 per lane and a synthetic
+  striped "blocked" bar when `blocked_since` is set. Powers the
+  admin-panel `RunTimeline` component; no new storage.
+- `GET /v1/projects/{id}/tasks/{task_id}/pr` — returns PR metadata +
+  unified diff (two concurrent GitHubClient calls behind
+  `parse_pr_url`) plus the task row's existing `review_verdict` /
+  `review_body`. Returns `{pr_url: null}` when the task hasn't pushed
+  a PR yet; tenant isolation mirrors `GET /tasks/{id}`. Powers the
+  admin panel's inline `PrViewer`.
 
 ## Dependencies
 
@@ -295,6 +307,34 @@ and `/pipeline-runs` endpoints in `coder-core`.
   `(role, metric, day_utc)`. Acknowledge flow
   (`POST /v1/_admin/regression/events/{id}/acknowledge`) suppresses
   repeat fires. `REGRESSION_ALERTS_ENABLED=true` (2026-04-19).
+- `0033` — live pipeline-run timeline: new
+  `GET /v1/projects/{id}/pipeline-runs/{run_id}/timeline` endpoint
+  reconstructs per-run step timings from existing `task_stage_runs`
+  joined via the run's four per-role task ids; `pipeline_step_stats`
+  supplies per-lane median/p75. No new tables, no new SSE events — the
+  admin `RunTimeline.tsx` refetches on the existing
+  `pipeline_run.changed` stream. Empty lanes are emitted for
+  not-yet-started steps so the grid is stable. Rollout flag lives on
+  the frontend (`VITE_RUN_TIMELINE_ENABLED`, default on).
+- `0034` — in-panel PR diff viewer: new
+  `GET /v1/projects/{id}/tasks/{task_id}/pr` endpoint in
+  `api/tasks.py` fans out `GitHubClient.fetch_pr` +
+  `fetch_pr_diff` via `asyncio.gather`, stitches the reviewer's
+  existing `review_verdict` / `review_body` into a single payload.
+  `parse_pr_url` lives next to the client and rejects malformed URLs
+  with a typed error. No new tables, no GitHub writes — view-only.
+  Admin `PrViewer.tsx` renders the payload; behind
+  `VITE_PR_VIEWER_ENABLED` (default on).
+- `0037` — audit log wiring: `tasks.retry`, `tasks.override`,
+  `tasks.merge`, `task_plans.approve` / `reject`, and
+  `pipeline_runs.override` each grow a `record_audit_event(...)`
+  call inside the handler's existing transaction. Handlers add
+  `Annotated[str, Depends(get_correlation_id)]` to pick up the
+  request's correlation ID (worker-initiated writes reuse
+  `pipeline_run_id`). Mutation + audit row are atomic — a rollback
+  on the outer transaction rolls both back. Gated on
+  `CODER_AUDIT_LOG_ENABLED` (default on); short-circuit when off.
+  See [audit-log](./audit-log.md).
 
 ## Links
 

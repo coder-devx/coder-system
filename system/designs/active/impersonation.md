@@ -5,11 +5,11 @@ type: design
 status: active
 owner: ro
 created: 2026-04-08
-updated: 2026-04-15
-last_verified_at: 2026-04-15
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 implements_specs: []
 decided_by: ["0006"]
-related_designs: [worker-roles, system-overview]
+related_designs: [worker-roles, system-overview, audit-log]
 affects_services: [coder-core]
 affects_repos: [coder-core]
 ---
@@ -98,6 +98,13 @@ sequenceDiagram
 - Build plan step 7 (spec 0007) — shipped bearer auth, the `coder`
   CLI, sessions, and revocation end-to-end. Local Claude Code now
   impersonates `developer` for both `coder` and `vibetrade` projects.
+- `0037` — audit log integration (shipped 2026-04-19):
+  `CallerIdentity.actor` + `actor_method` are the authorship fields
+  on every `audit_events` row fleet-wide, so a broker token's
+  downstream mutations resolve back to the authorising human via the
+  `token_id` chain. `impersonate.issue_token` and
+  `sessions.revoke` themselves write audit rows. See
+  [audit-log](./audit-log.md).
 
 ## Links
 

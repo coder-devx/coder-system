@@ -5,10 +5,10 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-15
-last_verified_at: 2026-04-15
+updated: 2026-04-19
+last_verified_at: 2026-04-19
 served_by_designs: [impersonation]
-related_specs: []
+related_specs: [audit-log]
 ---
 
 # Local agent impersonation
@@ -65,6 +65,14 @@ tokens within seconds with no cache in the path.
   `0007_tasks_actor`, `0008_impersonation_sessions`.
 - `7c07ba6` — DX follow-ups: `coder project onboard` and
   `coder project doctor` (181 tests).
+- `0037` — audit log wiring (shipped 2026-04-19):
+  `impersonate.issue_token` and `sessions.revoke` each write an
+  `audit_events` row (action-only, `after.role` carries the
+  impersonated role on issuance; revoke records the `token_id`).
+  `CallerIdentity.actor` / `actor_method` are the authorship fields
+  on every audit row fleet-wide so a broker-issued token's actions
+  resolve back to the authorising human. See
+  [audit-log](./audit-log.md).
 
 ## Links
 
