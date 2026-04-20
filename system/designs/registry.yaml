@@ -337,3 +337,20 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+- id: '0047'
+  title: Template schema migration
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0047-template-schema-migration.md
+  implements_specs:
+  - '0047'
+  related_designs:
+  - knowledge-write-api
+  - knowledge-repo-model
+  - audit-log
+  - system-overview
+  - worker-communication
+  affects_services:
+  - coder-core
+  - coder-admin

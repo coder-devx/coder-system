@@ -79,6 +79,7 @@ The system today, by logical component. Each links to its active spec
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | drafting |
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
 | [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | drafting |
+| [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
 
 ---
 
@@ -788,18 +789,67 @@ flip → admin tab → fallback removal after 1-week soak.
 - **WIP:** [0046](./wip/0046-graph-aware-retrieval.md) · **Design:** [0046](../designs/wip/0046-graph-aware-retrieval.md)
 - **Extends:** `knowledge-api`, `knowledge-freshness`, `architect-worker`, `reviewer-worker`, `team-manager-worker`, `pm-worker`
 
-### 0047 — Template schema migration (planned)
+### 0047 — Template schema migration (drafting)
 
-When `template/` gains a new required field or renames one, every
-managed project's knowledge repo needs to adopt the change. Today
-this is manual and error-prone. Adds template versioning
-(`template_version` in each project repo), a migration script
-registry in `coder-system/migrations/`, and a Coder Core job that
-runs pending migrations per project as a reviewed PR. Makes schema
-evolution a regular event, not a crisis.
+A schema author writes one migration file in
+`coder-system/migrations/knowledge/00NN-<slug>.py` (or `.yaml` for
+declarative cases — `rename_frontmatter_key`,
+`add_frontmatter_key_with_default`, `remove_frontmatter_key`,
+`move_folder`, `rename_folder`); a Cloud Run Job
+`coder-core-template-migrate` (oneshot + weekly Cloud Scheduler)
+applies any pending migration to every managed project as a
+**reviewed PR** titled `template-migration: 00NN-<slug>`.
+**Per-project `template_version`** at the top of `system/repos.yaml`
+records what's applied; a migration with `NUMBER > version`
+applies, others skip. **Idempotent** at the row level
+(`template_migrations` table, migration 0055, unique on
+`(project_id, migration_number, batch_index)`). **Strict
+per-project ordering** via Postgres advisory lock keyed on
+`hash(project_id)` — migration N's PR must merge before N+1's
+opens; failure of N blocks N+1 on that project but not on
+other projects. **Pure SDK:** migration files import only
+`KnowledgeRepoView` (read-only snapshot) + intent dataclasses
+(`FileChange`, `MoveFile`, `DeleteFile`, `RegistryRewrite`),
+return `list[change]`; the runner owns Git Trees commit
+construction (sharing the helper with 0044's `/ship` endpoint),
+PR open via existing helpers, and DB tracking. Per-PR file cap
+(`template_migration_max_files_per_pr`=50) + `ALLOW_BATCHING=True`
+auto-splits into `-1`, `-2` PRs; only the final batch carries the
+`repos.yaml` version bump. **No-op for project** (e.g. migration
+touches `services/` and project has no services) opens a
+one-line `repos.yaml`-only PR explaining inapplicability —
+preserves "every change goes through review" symmetry. **Knowledge
+API integration:** `?min_schema_version=N` returns
+`409 SCHEMA_DRIFT` with `pending_migrations[]` if project's
+version is behind; new `GET /v1/projects/{id}/template/version`;
+admin matrix `GET /v1/_admin/template/migrations`. **Per-repo
+GitHub Action** `record-template-migration.yml` (distributed
+via `template/.github/workflows/` for new + one-time
+`seed_template_migration_action.py` sweep for existing) POSTs on
+PR merge to flip the row to `merged`. **`coder-system` is
+self-hosted** — the schema author updates `template/` + bumps
+`coder-system/system/repos.yaml.template_version` in the same PR
+as the migration file; the runner only operates on managed
+projects (same boundary as ADR 0008's CI validator). **CLI**
+`coder migrate test --against ./fixture-repo --migration <path>`
+runs a migration against a local fixture repo for the dev loop;
+`coder migrate status` prints the matrix. Tri-state
+`projects.template_migrations_enabled` (migration 0056) +
+`CODER_TEMPLATE_MIGRATIONS_ENABLED` fleet flag. Admin
+`/admin/template-migrations` matrix behind
+`VITE_TEMPLATE_MIGRATIONS_ENABLED`. **Out of scope:** rewriting
+artifact bodies, ADR migrations (append-only by contract), live
+read-time transformations (we want explicit drift signal not
+silent masking), auto-merging migration PRs (always reviewed).
+Headline KPI: median time from migration merged-to-coder-system →
+all-projects-merged ≤ 1 week. Rollout: SDK+runner+endpoints land
+no migrations → `0001-baseline.py` no-op proves the path → `coder`
+opt-in synthetic test → Action distribution sweep → fleet flip →
+first real schema change → admin UI on.
 
-- **Status:** planned
-- **Extends:** `knowledge-api`, `onboarding`
+- **Status:** drafting
+- **WIP:** [0047](./wip/0047-template-schema-migration.md) · **Design:** [0047](../designs/wip/0047-template-schema-migration.md)
+- **Extends:** `knowledge-api`, `onboarding`, `admin-panel`, `audit-log`
 
 ### 0048 — Cross-project pattern surfacing (planned)
 
