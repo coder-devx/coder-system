@@ -94,7 +94,7 @@ button for break-glass.
   the old value in place and fires a `secret_rotation.failed` Slack
   alert; the registry row keeps `last_error` + `last_error_at` so
   the admin page surfaces it.
-- **Backout in one flip.** `CODER_SECRET_ROTATION_ENABLED` gates the
+- **Backout in one flip.** `SECRET_ROTATION_ENABLED` gates the
   scheduler tick; flag-off leaves existing values alone.
 
 ## Non-goals
@@ -207,7 +207,7 @@ button for break-glass.
   any), "Rotate now" button per row. Red chip on past-due rows.
   Empty, loading, error states all render.
 
-- **Rollout flag** — `CODER_SECRET_ROTATION_ENABLED` (default false
+- **Rollout flag** — `SECRET_ROTATION_ENABLED` (default false
   in dev until the first green soak, then on in prod). Flag off →
   scheduler tick is a no-op; admin page shows the "Disabled"
   banner; break-glass endpoint returns 503 with a message.
@@ -226,7 +226,7 @@ button for break-glass.
   Onboarding inserts two rotation rows per project.
 - [ ] AC2: Cloud Run Job `coder-core-rotate-secrets` runs on the
   15-min Cloud Scheduler trigger when
-  `CODER_SECRET_ROTATION_ENABLED=true`. Flag off → scheduler hook
+  `SECRET_ROTATION_ENABLED=true`. Flag off → scheduler hook
   returns 204 without touching the DB.
 - [ ] AC3: For each of the four kinds, `rotate(...)` writes a new
   value, updates `last_rotated_at` / `next_due_at` /

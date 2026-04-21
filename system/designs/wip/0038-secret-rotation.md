@@ -260,7 +260,7 @@ flowchart TB
   cadence_days, last_rotated_at, next_due_at, old_value_expires_at,
   last_error, last_error_at}, ...]`. Table + red past-due chip +
   "Rotate now" button that calls the break-glass endpoint.
-  Disabled-banner when `CODER_SECRET_ROTATION_ENABLED=false`.
+  Disabled-banner when `SECRET_ROTATION_ENABLED=false`.
   Behind `VITE_SECRET_ROTATION_ENABLED` (default on).
 
 - **Terraform** — new Cloud Scheduler job
@@ -371,7 +371,7 @@ Three stages, flag-gated throughout.
 - **Stage 1 — registry + job + 1 kind wired.** Migration 0042 + 0043
   ship. `AdminJwtSigningKeyRotator` is the smoke test (low blast
   radius — admin-only surface, 2 h window). Admin page skeleton.
-  Cloud Run Job scheduled but `CODER_SECRET_ROTATION_ENABLED=false`
+  Cloud Run Job scheduled but `SECRET_ROTATION_ENABLED=false`
   in prod (manual invocation only during soak).
 - **Stage 2 — three more kinds wired.** `ProjectApiKeyRotator`,
   `GithubAppPrivateKeyRotator`, and `ProjectAnthropicKeyRotator`
@@ -383,7 +383,7 @@ Three stages, flag-gated throughout.
   (new `secret-rotation` component in both spec and design folders,
   per AGENTS.md rule 5) and retire 0038 from `wip/`.
 
-**Backout plan.** `CODER_SECRET_ROTATION_ENABLED=false` + redeploy.
+**Backout plan.** `SECRET_ROTATION_ENABLED=false` + redeploy.
 Next scheduler tick is a no-op. In-flight windows continue to close
 on their own (the dual-value window sweeper runs independently of
 the main rotator). Migrations 0042/0043 are forward-compatible;

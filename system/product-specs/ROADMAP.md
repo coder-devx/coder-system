@@ -79,7 +79,7 @@ The system today, by logical component. Each links to its active spec
 | [0030](./wip/0030-model-tier-routing.md) | Model tier routing | drafting |
 | [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | drafting |
 | [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | drafting |
-| [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | implemented, awaiting operator enable |
+| [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20 |
 | [0039](./wip/0039-tenant-isolation-tests.md) | Tenant isolation test harness | drafting |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | drafting |
 | [0041](./wip/0041-escalation-policies.md) | Escalation policies & on-call routing | drafting |
@@ -521,7 +521,7 @@ for their mutation-endpoint wirings.
   [`observability-and-cost-tracking`](../designs/active/observability-and-cost-tracking.md)
   (adjacent operator surface).
 
-### 0038 — Automated secret rotation (implemented, awaiting operator enable)
+### 0038 — Automated secret rotation (LIVE, first rotation 2026-05-20)
 
 Scheduled rotation of per-project API keys, per-project Anthropic
 keys, the admin JWT signing secret, and the shared GitHub App private
@@ -539,24 +539,26 @@ Every rotation emits an `audit_events` row (`action=secret.rotate`,
 `POST /v1/_admin/secrets/{canonical_name}/rotate-now` for incident
 response. Admin `/admin/secrets` page behind
 `VITE_SECRET_ROTATION_ENABLED`. Flag-gated fleet-wide on
-`CODER_SECRET_ROTATION_ENABLED` (default off on first deploy; flip
+`SECRET_ROTATION_ENABLED` (default off on first deploy; flip
 per-kind after a shadow soak).
 
-Code state as of 2026-04-21: migrations 0042+0043 landed; four kind
-rotators (`project_api_key`, `project_anthropic_key`,
-`admin_jwt_signing_key`, `github_app_private_key`), `tick()`
-dispatcher, and break-glass + tick endpoints live; admin page live
-behind `VITE_SECRET_ROTATION_ENABLED` (default on); 26 backend +
-6 frontend tests green. **Not yet live:** Cloud Scheduler job is
-not provisioned, and `CODER_SECRET_ROTATION_ENABLED` is still
-`false` fleet-wide — the feature does nothing until both flips.
-Operator steps in the
-[secret-rotation-scheduler runbook](../runbooks/secret-rotation-scheduler.md).
-Ship into `active/` is gated on a green soak after the enable; this
-entry stays in `wip/` until then.
+Live state as of 2026-04-21 16:10 UTC: migrations 0042+0043 applied;
+four kind rotators live; `tick()` dispatcher + break-glass + admin
+endpoints live; admin page live at `/admin/secrets` behind
+`VITE_SECRET_ROTATION_ENABLED` (default on); 26 backend + 6 frontend
+tests green. Cloud Run Job `coder-core-rotate-secrets` provisioned
+(same image + SA as service, entrypoint `python -m
+coder_core.rotation.job`); Cloud Scheduler `coder-core-rotate-secrets`
+invokes the Job every 15 min via the Cloud Run Admin API;
+`SECRET_ROTATION_ENABLED=true` on both service and Job. `GET
+/v1/_admin/secrets` returns `enabled: true`. First rotation naturally
+due 2026-05-20 (admin JWT, 30-day cadence); GitHub App key due
+2026-10-17. No per-project rows yet — onboarding hook needs backfill
+for the 4 existing projects. Ship into `active/` deferred until a
+30-day soak completes past the first real rotation.
 
-- **Status:** implemented, awaiting operator enable (Cloud Scheduler
-  + flag flip per the runbook)
+- **Status:** LIVE — scheduler ticking, zero rotations to date
+  (nothing due yet; first natural rotation 2026-05-20)
 - **WIP:** [0038](./wip/0038-secret-rotation.md) · **Design:** [0038](../designs/wip/0038-secret-rotation.md)
 - **Runbook:** [secret-rotation-scheduler](../runbooks/secret-rotation-scheduler.md)
 - **Extends:** `service-accounts`, `continuous-deployment`, `admin-panel`, `impersonation`, `audit-log`
