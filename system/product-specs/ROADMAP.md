@@ -79,7 +79,7 @@ The system today, by logical component. Each links to its active spec
 | [0030](./wip/0030-model-tier-routing.md) | Model tier routing | drafting |
 | [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | drafting |
 | [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | drafting |
-| [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | drafting |
+| [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | implemented, awaiting operator enable |
 | [0039](./wip/0039-tenant-isolation-tests.md) | Tenant isolation test harness | drafting |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | drafting |
 | [0041](./wip/0041-escalation-policies.md) | Escalation policies & on-call routing | drafting |
@@ -521,7 +521,7 @@ for their mutation-endpoint wirings.
   [`observability-and-cost-tracking`](../designs/active/observability-and-cost-tracking.md)
   (adjacent operator surface).
 
-### 0038 — Automated secret rotation (drafting)
+### 0038 — Automated secret rotation (implemented, awaiting operator enable)
 
 Scheduled rotation of per-project API keys, per-project Anthropic
 keys, the admin JWT signing secret, and the shared GitHub App private
@@ -542,8 +542,23 @@ response. Admin `/admin/secrets` page behind
 `CODER_SECRET_ROTATION_ENABLED` (default off on first deploy; flip
 per-kind after a shadow soak).
 
-- **Status:** drafting
+Code state as of 2026-04-21: migrations 0042+0043 landed; four kind
+rotators (`project_api_key`, `project_anthropic_key`,
+`admin_jwt_signing_key`, `github_app_private_key`), `tick()`
+dispatcher, and break-glass + tick endpoints live; admin page live
+behind `VITE_SECRET_ROTATION_ENABLED` (default on); 26 backend +
+6 frontend tests green. **Not yet live:** Cloud Scheduler job is
+not provisioned, and `CODER_SECRET_ROTATION_ENABLED` is still
+`false` fleet-wide — the feature does nothing until both flips.
+Operator steps in the
+[secret-rotation-scheduler runbook](../runbooks/secret-rotation-scheduler.md).
+Ship into `active/` is gated on a green soak after the enable; this
+entry stays in `wip/` until then.
+
+- **Status:** implemented, awaiting operator enable (Cloud Scheduler
+  + flag flip per the runbook)
 - **WIP:** [0038](./wip/0038-secret-rotation.md) · **Design:** [0038](../designs/wip/0038-secret-rotation.md)
+- **Runbook:** [secret-rotation-scheduler](../runbooks/secret-rotation-scheduler.md)
 - **Extends:** `service-accounts`, `continuous-deployment`, `admin-panel`, `impersonation`, `audit-log`
 
 ### 0039 — Tenant isolation test harness (drafting)

@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-21
+last_verified_at: 2026-04-21
 served_by_designs: ["0038"]
 related_specs: [service-accounts, continuous-deployment, multi-tenancy, admin-panel, impersonation, audit-log]
 ---
