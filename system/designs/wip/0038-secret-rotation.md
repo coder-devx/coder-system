@@ -11,7 +11,7 @@ implements_specs: ["0038"]
 decided_by: []
 related_designs: [system-overview, impersonation, observability-and-cost-tracking, audit-log]
 affects_services: [coder-core, coder-admin]
-affects_repos: [coder-core, coder-admin, coder-infra]
+affects_repos: [coder-core, coder-admin]
 ---
 
 # Automated secret rotation
