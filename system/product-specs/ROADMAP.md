@@ -88,7 +88,7 @@ The system today, by logical component. Each links to its active spec
 | [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | drafting |
 | [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | drafting |
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20 |
-| [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | drafting |
+| [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | infra wired, Stage 1 shadow |
 | [0041](./wip/0041-escalation-policies.md) | Escalation policies & on-call routing | drafting |
 | [0042](./wip/0042-self-healing.md) | Self-healing stuck pipelines | drafting |
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
@@ -597,7 +597,7 @@ blocking since ship day.
 > every run. Many are low-risk rubber-stamps. Let the system earn
 > auto-approval on the easy cases so humans focus on the hard ones.
 
-### 0040 — Confidence-scored auto-approval (drafting)
+### 0040 — Confidence-scored auto-approval (infra wired, Stage 1 shadow)
 
 PM, Architect, and TM outputs gain a required `self_confidence`
 envelope (score, justification, risk_flags from a fixed vocabulary).
@@ -618,11 +618,26 @@ task. Per-project tri-state opt-in on three new
 (four new actions). Admin surfaces a pending-auto-approval card
 adjacent to the existing Gate card on RunDetail + on knowledge
 artifact views behind `VITE_AUTO_APPROVE_ENABLED`. Fleet flag
-`CODER_AUTO_APPROVE_ENABLED` starts off; 4-stage ramp (shadow →
+`AUTO_APPROVE_ENABLED` starts off; 4-stage ramp (shadow →
 enable pending writes → `coder` spec only → expand).
 
-- **Status:** drafting
+Live state as of 2026-04-21: migrations 0044 + 0045 applied; domain
+model, evaluator, tick, finalize, undo, accept-now, 4 admin endpoints
+all deployed; admin panel pending-approval card live behind
+`VITE_AUTO_APPROVE_ENABLED` (default off). Cloud Run Job
+`coder-core-auto-approve-tick` + Cloud Scheduler (`* * * * *` UTC)
+provisioned on vibedevx; running every minute, currently emitting
+`skipped: "disabled"` because `AUTO_APPROVE_ENABLED=false` fleet-wide.
+All per-project opt-ins are `NULL`. This is **Stage 1** of the
+4-stage rollout — the spec's "schema-only shadow". Stages 2/3 are
+product decisions and gated on a green Stage 1 soak; see the
+[auto-approve-rollout](../runbooks/auto-approve-rollout.md) runbook
+for the flip procedure and the metrics to watch before each advance.
+
+- **Status:** infra wired, Stage 1 shadow (fleet flag off, tick
+  ticking, no auto-approvals created)
 - **WIP:** [0040](./wip/0040-confidence-auto-approve.md) · **Design:** [0040](../designs/wip/0040-confidence-auto-approve.md)
+- **Runbook:** [auto-approve-rollout](../runbooks/auto-approve-rollout.md)
 - **Extends:** `task-orchestration`, `observability`, `pm-worker`, `architect-worker`, `team-manager-worker`, `audit-log`, `admin-panel`
 
 ### 0041 — Escalation policies & on-call routing (drafting)

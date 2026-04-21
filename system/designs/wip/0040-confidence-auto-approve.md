@@ -5,8 +5,8 @@ type: design
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-21
+last_verified_at: 2026-04-21
 implements_specs: ['0040']
 related_designs:
   - worker-communication
@@ -715,7 +715,7 @@ New event shapes, using the existing observability feed:
 
 ### Environment flags
 
-- `CODER_AUTO_APPROVE_ENABLED` — master switch (default `false`).
+- `AUTO_APPROVE_ENABLED` — master switch (default `false`).
 - `CODER_AUTO_APPROVE_WINDOW_SECONDS` — default 600.
 - `CODER_AUTO_APPROVE_THRESHOLD_SPEC` — default 85.
 - `CODER_AUTO_APPROVE_THRESHOLD_DESIGN` — default 90.
@@ -765,7 +765,7 @@ evaluation and no schema-retry storm.
 
 ### Stage 2 — enable pending writes, week 2
 
-Flip `CODER_AUTO_APPROVE_ENABLED=true` fleet-wide. Per-project
+Flip `AUTO_APPROVE_ENABLED=true` fleet-wide. Per-project
 opt-in stays `NULL` (inherit fleet), but fleet flag is still off,
 so effective behaviour is unchanged except now `project_opted_out`
 is the logged reason. No pending rows written yet.
@@ -793,7 +793,7 @@ stay at defaults; phase-2 gets a tuning surface.
 
 ## Backout plan
 
-- Flip `CODER_AUTO_APPROVE_ENABLED=false`. Immediate effect:
+- Flip `AUTO_APPROVE_ENABLED=false`. Immediate effect:
   evaluator returns `Manual(flag_off)`; no new pending rows;
   existing pending rows still finalise on tick (because the tick
   doesn't re-check the flag — that's deliberate, no state stuck in

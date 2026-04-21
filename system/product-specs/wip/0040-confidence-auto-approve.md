@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-21
+last_verified_at: 2026-04-21
 served_by_designs: ['0040']
 related_specs:
   - task-orchestration
@@ -228,7 +228,7 @@ cascade into developer tasks.
   score, justification, and (on undo) the undo reason and spawned
   revision-task id.
 
-- **AC10.** Rolling out: `CODER_AUTO_APPROVE_ENABLED` default
+- **AC10.** Rolling out: `AUTO_APPROVE_ENABLED` default
   `false`. Stage 1 schema-only, Stage 2 evaluator runs but does not
   publish (shadow). Stage 3 flips the flag and the per-gate
   thresholds one at a time.
