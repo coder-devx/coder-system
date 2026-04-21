@@ -35,9 +35,11 @@ the product and technical views.
 - `coder-core` service + Job both have `SECRET_ROTATION_ENABLED=true`.
 - `GET /v1/_admin/secrets` returns `enabled: true`.
 - Registry rows: `admin_jwt_signing_key` (next due 2026-05-20) and
-  `github_app_private_key` (next due 2026-10-17). No per-project rows
-  yet — onboarding should start inserting them for new projects;
-  existing projects will need backfill.
+  `github_app_private_key` (next due 2026-10-17). Per-project rows
+  are auto-seeded by `POST /v1/projects` for new projects; existing
+  projects catch up via the idempotent backfill endpoint
+  `POST /v1/_admin/secrets/backfill-projects` (see
+  [Section 4a](#4a-backfill-existing-projects) below).
 - First rotation is one month out (admin JWT on 2026-05-20). Between
   now and then every tick is a no-op; that's the designed soak.
 
@@ -230,6 +232,45 @@ gcloud run jobs execute coder-core-rotate-secrets \
 Logs should now show `"skipped": null` with `rotated: []` /
 `windows_closed: []` (provided nothing is due). That's the steady
 state.
+
+### 4a. Backfill existing projects
+
+Projects created before spec 0038 shipped don't have rotation
+registry rows; the rotator simply ignores them. The onboarding
+path (`POST /v1/projects`) seeds new projects going forward, but
+the existing fleet needs a one-time backfill.
+
+```sh
+curl -sS -X POST \
+  -H "Authorization: Bearer $ADMIN_JWT" \
+  https://coder-core-<hash>.a.run.app/v1/_admin/secrets/backfill-projects
+```
+
+Response:
+
+```json
+{
+  "projects_scanned": 4,
+  "rows_created": 8,
+  "rows_skipped": 0,
+  "outcomes": [
+    {"project_id": "coder", "created": ["project:coder:anthropic_key", "project:coder:api_key"], "skipped": []},
+    ...
+  ]
+}
+```
+
+The endpoint is **idempotent** — re-running flips every `created` to
+`skipped` and leaves the registry alone. Archived projects are
+excluded on purpose: they have no recovery path, so a rotation row
+would be dead weight on the admin page. One `secret.rotate.seeded`
+audit row lands per inserted registry row, attributed to the admin
+who triggered the backfill.
+
+Confirm on the admin `/admin/secrets` page: every non-archived
+project now contributes two rows (`project:<id>:api_key` and
+`project:<id>:anthropic_key`), each with a staggered `next_due_at`
+within the per-kind cadence (90d for both by default).
 
 ### 5. Watch the first real tick
 

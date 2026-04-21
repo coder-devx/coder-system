@@ -560,9 +560,11 @@ invokes the Job every 15 min via the Cloud Run Admin API;
 `SECRET_ROTATION_ENABLED=true` on both service and Job. `GET
 /v1/_admin/secrets` returns `enabled: true`. First rotation naturally
 due 2026-05-20 (admin JWT, 30-day cadence); GitHub App key due
-2026-10-17. No per-project rows yet — onboarding hook needs backfill
-for the 4 existing projects. Ship into `active/` deferred until a
-30-day soak completes past the first real rotation.
+2026-10-17. Per-project rows: onboarding path (`POST /v1/projects`)
+seeds them for new projects; existing-project backfill via
+`POST /v1/_admin/secrets/backfill-projects` (idempotent, admin-gated).
+Ship into `active/` deferred until a 30-day soak completes past the
+first real rotation.
 
 - **Status:** LIVE — scheduler ticking, zero rotations to date
   (nothing due yet; first natural rotation 2026-05-20)
