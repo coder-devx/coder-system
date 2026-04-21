@@ -136,6 +136,21 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+- id: tenant-isolation
+  title: Tenant isolation test harness
+  status: active
+  owner: ro
+  folder: active
+  file: active/tenant-isolation.md
+  implements_specs:
+  - tenant-isolation
+  related_designs:
+  - system-overview
+  - impersonation
+  - audit-log
+  affects_services:
+  - coder-core
+  - coder-admin
 - id: worker-communication
   title: Worker Communication
   status: active
@@ -278,24 +293,6 @@ designs:
   - impersonation
   - observability-and-cost-tracking
   - audit-log
-  affects_services:
-  - coder-core
-  - coder-admin
-- id: '0039'
-  title: Tenant isolation test harness
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0039-tenant-isolation-tests.md
-  implements_specs:
-  - '0039'
-  related_designs:
-  - system-overview
-  - worker-roles
-  - impersonation
-  - audit-log
-  - worker-communication
-  - knowledge-write-api
   affects_services:
   - coder-core
   - coder-admin

@@ -168,6 +168,22 @@ specs:
   file: active/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
+- id: tenant-isolation
+  title: Tenant isolation test harness
+  status: active
+  owner: ro
+  folder: active
+  file: active/tenant-isolation.md
+  served_by_designs:
+  - tenant-isolation
+  related_specs:
+  - multi-tenancy
+  - service-accounts
+  - impersonation
+  - audit-log
+  - knowledge-api
+  - task-orchestration
+  - admin-panel
 - id: '0029'
   title: Prompt caching & shared context reuse
   status: wip
@@ -269,21 +285,6 @@ specs:
   - admin-panel
   - impersonation
   - audit-log
-- id: '0039'
-  title: Tenant isolation test harness
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0039-tenant-isolation-tests.md
-  served_by_designs:
-  - '0039'
-  related_specs:
-  - multi-tenancy
-  - service-accounts
-  - impersonation
-  - audit-log
-  - knowledge-api
-  - task-orchestration
 - id: '0040'
   title: Confidence-scored auto-approval
   status: wip

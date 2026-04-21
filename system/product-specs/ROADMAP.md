@@ -11,7 +11,8 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**17 active components** describe the shipped system.
+**17 active components** describe the shipped system (18 with
+`tenant-isolation` as of 2026-04-21).
 
 **Pipeline proven end-to-end (2026-04-13):** PM draft → spec file in repo →
 pipeline run advances to `spec_approval` → ready for human approval →
@@ -24,7 +25,13 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-19 — **Phase 5 + Phase 6/0037 shipped into
+Last updated: 2026-04-21 — **0039 (tenant isolation) shipped into
+`active/`** as the new `tenant-isolation` component; 145 isolation
+tests, manifest + coverage drift checks blocking CI on every PR,
+admin page live at `/admin/isolation`. AC5 (GCP IAM cross-tenant)
+deferred to a future CI-staging spec. **0038 (secret rotation) LIVE**
+— Cloud Run Job + Scheduler wired, flag flipped; first rotation
+naturally due 2026-05-20. **Phase 5 + Phase 6/0037 shipped into
 `active/`.** 0033 (live timeline), 0034 (PR viewer), 0035 (knowledge
 editor), 0036 (command palette), and 0037 (audit log) all folded:
 content merged into the relevant subject-named components (0037
@@ -68,6 +75,7 @@ The system today, by logical component. Each links to its active spec
 | Observability | [observability](./active/observability.md) | [observability-and-cost-tracking](../designs/active/observability-and-cost-tracking.md) |
 | Branch cleanup | [branch-cleanup](./active/branch-cleanup.md) | [branch-cleanup](../designs/active/branch-cleanup.md) |
 | Audit log | [audit-log](./active/audit-log.md) | [audit-log](../designs/active/audit-log.md) |
+| Tenant isolation test harness | [tenant-isolation](./active/tenant-isolation.md) | [tenant-isolation](../designs/active/tenant-isolation.md) |
 
 ---
 
@@ -80,7 +88,6 @@ The system today, by logical component. Each links to its active spec
 | [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | drafting |
 | [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | drafting |
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20 |
-| [0039](./wip/0039-tenant-isolation-tests.md) | Tenant isolation test harness | drafting |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | drafting |
 | [0041](./wip/0041-escalation-policies.md) | Escalation policies & on-call routing | drafting |
 | [0042](./wip/0042-self-healing.md) | Self-healing stuck pipelines | drafting |
@@ -137,7 +144,7 @@ flowchart TB
   subgraph sec ["Phase 6 — Security"]
     s36["Audit log"]
     s37["Secret rotation"]
-    s38["Tenant isolation tests"]
+    s38["Tenant isolation tests (shipped)"]
   end
 
   subgraph auto ["Phase 7 — Trusted Autonomy"]
@@ -226,10 +233,10 @@ flowchart TB
   classDef autoStyle fill:#d1c4e9,stroke:#4527a0,stroke-width:2px
   classDef knowStyle fill:#b2dfdb,stroke:#004d40,stroke-width:2px
 
-  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24,s25,s26,s27 activeStyle
+  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24,s25,s26,s27,s38 activeStyle
   class s28,s29,s30,s31 costStyle
   class s32,s33,s34,s35 adminStyle
-  class s36,s37,s38 secStyle
+  class s36,s37 secStyle
   class s39,s40,s41 autoStyle
   class s43,s44,s45,s46,s47,s48 knowStyle
 ```
@@ -563,29 +570,24 @@ for the 4 existing projects. Ship into `active/` deferred until a
 - **Runbook:** [secret-rotation-scheduler](../runbooks/secret-rotation-scheduler.md)
 - **Extends:** `service-accounts`, `continuous-deployment`, `admin-panel`, `impersonation`, `audit-log`
 
-### 0039 — Tenant isolation test harness (drafting)
+### 0039 — Tenant isolation test harness (shipped 2026-04-21)
 
-A CI-enforced pytest suite that provisions two projects, then
-exercises every isolation boundary as a parametric matrix:
-(endpoint × token type × project) for every project-scoped API
-route, direct-DB row-visibility asserts for every
-`project_id`-bearing table, worker-path reads/writes driven through
-the real impersonation broker, and GCP Secret Manager asserts
-(cross-project reads must 403). Single source of truth is
-`tests/isolation/isolation_manifest.yaml`; a drift check
-(`scripts/check_isolation_manifest.py`) fails the build when a new
-endpoint with `Depends(require_project_auth)` is added without a
-manifest entry — so authorial intent to add an isolation boundary is
-what gets merged, not a silent miss. Coverage report emits
-`isolation_coverage.json` consumed by a new `/admin/isolation`
-trust-badge page (behind `VITE_ISOLATION_VIEW_ENABLED`). Rollout is
-a 4-stage ramp: manifest + API matrix non-blocking → add row/worker
-tests → wire GCP nightly + admin surface → flip
-`CI_ISOLATION_SUITE_BLOCKING=true` after 7 days of green.
+Continuously-verified isolation across every project-scoped endpoint,
+every `project_id`-bearing table, every token type. The harness is a
+pytest suite in `coder-core/tests/isolation/` (145 tests), a manifest
+YAML as the single source of truth, two drift checks that block CI on
+any mismatch, and an admin coverage dashboard at `/admin/isolation`.
+Coverage at ship: 54/60 endpoints (6 skipped with explicit reasons),
+20/20 tables, 3/3 tokens. AC5 (GCP IAM cross-tenant Secret Manager
+reads) deferred to a future CI-staging spec — the three GCP surfaces
+are registered with `skip: true` + reasons so the drift check still
+fires for new additions. The harness was stricter than the spec's
+4-stage ramp called for: the suite ran green on first wire-up, so
+`CI_ISOLATION_SUITE_BLOCKING` was never needed — every PR has been
+blocking since ship day.
 
-- **Status:** drafting
-- **WIP:** [0039](./wip/0039-tenant-isolation-tests.md) · **Design:** [0039](../designs/wip/0039-tenant-isolation-tests.md)
-- **Extends:** `multi-tenancy`, `service-accounts`, `impersonation`, `audit-log`, `knowledge-api`, `task-orchestration`
+- **Status:** shipped → new [`tenant-isolation`](./active/tenant-isolation.md)
+  component / [`tenant-isolation` design](../designs/active/tenant-isolation.md)
 
 ---
 
