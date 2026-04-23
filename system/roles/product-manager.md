@@ -18,8 +18,10 @@ Owns the product side of the project: specs, roadmap, and acceptance.
 - The roadmap and cycle priorities.
 - The "is this task actually done from a product perspective" judgment.
 - **Competitive intelligence** for the project — the catalog of
-  competitors and the structured intelligence on each one. See
-  [`../designs/wip/0002-competitive-intelligence-pipeline.md`](../designs/wip/0002-competitive-intelligence-pipeline.md).
+  competitors and the structured intelligence on each one. Historical
+  design salvaged from the deleted `coder-agent` repo lives at
+  [`../designs/deprecated/0002-competitive-intelligence-pipeline.md`](../designs/deprecated/0002-competitive-intelligence-pipeline.md)
+  pending a fresh spec + roadmap slot to rehydrate it.
 
 ## Capabilities
 - Author and update product specs.

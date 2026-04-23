@@ -186,6 +186,19 @@ flowchart TB
   admin page + 15 mutation-endpoint wirings in a single cycle.
   Downgrade raises so a Cloud Run rollback never drops audit data.
   Gated on `CODER_AUDIT_LOG_ENABLED` (default on).
+- `0041 — escalation actions` (shipped 2026-04-22). Five new action
+  strings registered with `Actions`
+  (`escalation.{opened,rung_fired,acknowledged,resolved,expired}`);
+  new `actor_type='slack_external'` value for Slack-button acks
+  whose Slack user doesn't resolve to an internal user. The writer
+  helper and correlation middleware are reused unchanged.
+- `0042 — self-heal actions` (shipped 2026-04-22). Two new action
+  strings: `self_heal.remediated`, `self_heal.failed`. Only
+  successful and errored remediations emit audit events;
+  `skipped_cap` and `dry_run` are attempt-row only.
+- Claude OAuth `project.set_auth_mode` action (shipped 2026-04-22).
+  One new action emitted from admin auth-mode toggling; reuses the
+  existing before/after JSONB shape.
 
 ## Links
 

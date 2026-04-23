@@ -197,8 +197,22 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `CODER_AUDIT_LOG_ENABLED=false` state. Full component lives in
   `pages/AuditLog.tsx`; no new runtime deps. Behind
   `VITE_AUDIT_LOG_ENABLED` (default on).
+- 0041 Escalations admin pages (shipped 2026-04-22) — new
+  `/admin/escalations` fleet view + `/projects/:projectId/escalations`
+  per-project tab listing open / acknowledged / resolved escalations
+  with age, current rung, project, run link, and on-call identity.
+  Backed by `GET /v1/_admin/escalations` and
+  `GET /v1/projects/{id}/escalations`. Ack / resolve actions POST to
+  the same ack/resolve endpoints. Behind `VITE_ESCALATIONS_ENABLED`.
+  See [escalations](./escalations.md).
+- Claude OAuth auth-mode toggle (shipped 2026-04-22) — `ProjectDetail`
+  gains a per-project auth-mode selector (`api_key` default /
+  `oauth`) backed by `PATCH /v1/_admin/projects/{id}/auth-mode`.
+  Selects which credential the dispatcher hands to a worker's
+  `claude` process. See [service-accounts](./service-accounts.md)
+  Evolution for the server-side wiring.
 
 ## Links
 
 - Designs: (none yet)
-- Related components: multi-tenancy, knowledge-api
+- Related components: multi-tenancy, knowledge-api, escalations

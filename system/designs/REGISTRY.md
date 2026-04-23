@@ -9,15 +9,19 @@ Logical components of the Coder system as it exists today.
 | Slug | Title | Owner | Implements specs | Decided by |
 |---|---|---|---|---|
 | [architect-worker](./active/architect-worker.md) | Architect Worker | ro | [architect-worker](../product-specs/active/architect-worker.md) | — |
+| [audit-log](./active/audit-log.md) | Audit log | ro | [audit-log](../product-specs/active/audit-log.md) | — |
 | [branch-cleanup](./active/branch-cleanup.md) | Branch cleanup | ro | [branch-cleanup](../product-specs/active/branch-cleanup.md) | — |
+| [escalations](./active/escalations.md) | Escalations & on-call routing | ro | [escalations](../product-specs/active/escalations.md) | — |
 | [impersonation](./active/impersonation.md) | Impersonation | ro | — | [0006](../adrs/0006-per-role-service-accounts.md) |
 | [knowledge-freshness](./active/knowledge-freshness.md) | Knowledge Freshness | ro | [knowledge-freshness](../product-specs/active/knowledge-freshness.md) | [0014](../adrs/0014-freshness-from-declared-affects.md) |
 | [knowledge-repo-model](./active/knowledge-repo-model.md) | Knowledge Repo Model | ro | — | 0001, 0002, 0003, 0004, 0008 |
 | [knowledge-write-api](./active/knowledge-write-api.md) | Knowledge Write API | ro | [knowledge-api](../product-specs/active/knowledge-api.md) | — |
 | [observability-and-cost-tracking](./active/observability-and-cost-tracking.md) | Observability and Cost Tracking | ro | [observability](../product-specs/active/observability.md) | — |
 | [pm-worker](./active/pm-worker.md) | PM Worker | ro | [pm-worker](../product-specs/active/pm-worker.md) | — |
+| [self-healing](./active/self-healing.md) | Self-healing stuck pipelines | ro | [self-healing](../product-specs/active/self-healing.md) | — |
 | [system-overview](./active/system-overview.md) | System Overview | ro | — | 0001, 0005, 0006, 0007, 0008 |
 | [team-manager-worker](./active/team-manager-worker.md) | Team Manager Worker | ro | [team-manager-worker](../product-specs/active/team-manager-worker.md) | — |
+| [tenant-isolation](./active/tenant-isolation.md) | Tenant isolation test harness | ro | [tenant-isolation](../product-specs/active/tenant-isolation.md) | — |
 | [worker-communication](./active/worker-communication.md) | Worker Communication | ro | [task-orchestration](../product-specs/active/task-orchestration.md) | — |
 | [worker-roles](./active/worker-roles.md) | Worker Roles | ro | — | 0006, 0007 |
 
@@ -25,12 +29,19 @@ Logical components of the Coder system as it exists today.
 
 | ID | Title | Owner | Implements specs |
 |---|---|---|---|
-| [0002](./wip/0002-competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | ro | — |
 | [0029](./wip/0029-prompt-caching.md) | Prompt caching & shared context reuse | ro | [0029](../product-specs/wip/0029-prompt-caching.md) |
 | [0030](./wip/0030-model-tier-routing.md) | Model tier routing | ro | [0030](../product-specs/wip/0030-model-tier-routing.md) |
 | [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | ro | [0031](../product-specs/wip/0031-token-budgets.md) |
 | [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | ro | [0032](../product-specs/wip/0032-cost-regression-alerts.md) |
+| [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | ro | [0038](../product-specs/wip/0038-secret-rotation.md) |
+| [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | ro | [0040](../product-specs/wip/0040-confidence-auto-approve.md) |
+| [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | ro | [0045](../product-specs/wip/0045-cold-start-ingestion.md) |
+| [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | ro | [0046](../product-specs/wip/0046-graph-aware-retrieval.md) |
+| [0047](./wip/0047-template-schema-migration.md) | Template schema migration | ro | [0047](../product-specs/wip/0047-template-schema-migration.md) |
+| [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | ro | [0048](../product-specs/wip/0048-cross-project-patterns.md) |
 
 ## Deprecated
 
-_None yet._
+| ID | Title | Deprecated at | Reason |
+|---|---|---|---|
+| [0002](./deprecated/0002-competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | 2026-04-23 | Salvaged placeholder from deleted `coder-agent` repo; no spec authored, no roadmap phase scheduled. Rehydrate with a fresh WIP number if the capability is planned. |

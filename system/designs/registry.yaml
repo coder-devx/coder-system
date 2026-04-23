@@ -42,6 +42,22 @@ designs:
   - branch-cleanup
   affects_services:
   - coder-core
+- id: escalations
+  title: Escalations & on-call routing
+  status: active
+  owner: ro
+  folder: active
+  file: active/escalations.md
+  implements_specs:
+  - escalations
+  related_designs:
+  - system-overview
+  - worker-communication
+  - observability-and-cost-tracking
+  - audit-log
+  affects_services:
+  - coder-core
+  - coder-admin
 - id: impersonation
   title: Impersonation
   status: active
@@ -110,6 +126,23 @@ designs:
   - pm-worker
   affects_services:
   - coder-core
+- id: self-healing
+  title: Self-healing stuck pipelines
+  status: active
+  owner: ro
+  folder: active
+  file: active/self-healing.md
+  implements_specs:
+  - self-healing
+  related_designs:
+  - system-overview
+  - worker-communication
+  - worker-roles
+  - observability-and-cost-tracking
+  - audit-log
+  - escalations
+  affects_services:
+  - coder-core
 - id: system-overview
   title: System Overview
   status: active
@@ -175,10 +208,10 @@ designs:
   - coder-core
 - id: '0002'
   title: Competitive Intelligence Pipeline
-  status: wip
+  status: deprecated
   owner: ro
-  folder: wip
-  file: wip/0002-competitive-intelligence-pipeline.md
+  folder: deprecated
+  file: deprecated/0002-competitive-intelligence-pipeline.md
   affects_services:
   - coder-core
 - id: '0029'
@@ -243,40 +276,6 @@ designs:
   related_designs:
   - observability-and-cost-tracking
   - worker-communication
-  affects_services:
-  - coder-core
-  - coder-admin
-- id: '0041'
-  title: Escalation policies & on-call routing
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0041-escalation-policies.md
-  implements_specs:
-  - '0041'
-  related_designs:
-  - system-overview
-  - worker-communication
-  - observability-and-cost-tracking
-  - audit-log
-  affects_services:
-  - coder-core
-  - coder-admin
-- id: '0042'
-  title: Self-healing stuck pipelines
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0042-self-healing.md
-  implements_specs:
-  - '0042'
-  related_designs:
-  - system-overview
-  - worker-communication
-  - worker-roles
-  - observability-and-cost-tracking
-  - audit-log
-  - '0041'
   affects_services:
   - coder-core
   - coder-admin

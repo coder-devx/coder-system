@@ -335,6 +335,22 @@ and `/pipeline-runs` endpoints in `coder-core`.
   on the outer transaction rolls both back. Gated on
   `CODER_AUDIT_LOG_ENABLED` (default on); short-circuit when off.
   See [audit-log](./audit-log.md).
+- `0041` — escalation watcher observation surface (shipped
+  2026-04-22): the 1-minute escalation watcher reads `pipeline_runs`
+  (`blocked_since`, `started_at`, `step`), `tasks` (`status`,
+  `updated_at`), `task_messages`, and `DispatcherQueue.depth(project)`
+  to detect stall / failure-streak / SLA-breach conditions. Queued
+  tasks are explicitly excluded from stall detection so
+  DispatcherQueue blocking from 0028 doesn't misfire. See
+  [escalations](./escalations.md).
+- `0042` — self-healing watchdog (shipped 2026-04-22): the 5-minute
+  watchdog uses the same `tasks` + `pipeline_runs` +
+  `DispatcherQueue` read surface as 0041, plus the existing
+  override path (`launch_re_enqueue` → `_orchestrate_safe`) as the
+  idempotent remediation seam for the `stuck_queued` pattern. No
+  new writes to orchestration tables; the watchdog's side effects
+  land in `self_heal_attempts` and `audit_events`. See
+  [self-healing](./self-healing.md).
 
 ## Links
 

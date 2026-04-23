@@ -2,10 +2,20 @@
 id: "0002"
 title: Competitive Intelligence Pipeline
 type: design
-status: wip
+status: deprecated
 owner: ro
 created: 2026-04-08
-updated: 2026-04-08
+updated: 2026-04-23
+deprecated_at: 2026-04-23
+deprecated_reason: |
+  Salvaged from the deleted coder-agent repo on 2026-04-08 as a
+  placeholder for a future PM-worker capability, but no spec was
+  ever authored and no roadmap phase scheduled the rebuild. Sitting
+  in wip/ implied in-flight work when it wasn't. Deprecating
+  preserves the historical design for future rehydration while
+  clearing the active surface. Rehydrate by re-authoring a fresh
+  spec with a current WIP number when the roadmap actually plans
+  the capability.
 last_verified_at: 2026-04-15
 implements_specs: []
 decided_by: []

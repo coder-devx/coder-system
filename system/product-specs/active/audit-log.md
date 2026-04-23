@@ -111,9 +111,29 @@ an incident timeline, review a peer's actions, or answer a customer's
   `AuditLog.tsx` admin page + `listProjectAuditEvents` /
   `listFleetAuditEvents` client bindings. Behind
   `CODER_AUDIT_LOG_ENABLED` (default on).
+- 0041 Escalation action namespace (shipped 2026-04-22) — five new
+  actions registered with `Actions`: `escalation.opened`,
+  `escalation.rung_fired`, `escalation.acknowledged`,
+  `escalation.resolved`, `escalation.expired`. Every escalation
+  state transition writes an `audit_events` row inside the same
+  transaction as the `escalations` row update; the watcher's
+  system-initiated transitions use `actor_type='system'`,
+  `actor_id='escalation-watch'`. Slack-button acks from external
+  users that don't resolve to an internal `user` land
+  `actor_type='slack_external'` with the raw Slack handle captured
+  in the row for traceability. See [escalations](./escalations.md).
+- 0042 Self-heal action namespace (shipped 2026-04-22) — two new
+  actions: `self_heal.remediated`, `self_heal.failed`. The 5-minute
+  watchdog writes a row per successful or errored remediation;
+  `skipped_cap` and `dry_run` outcomes are attempt-row only (no
+  audit event, to avoid noise). See [self-healing](./self-healing.md).
+- Claude OAuth auth-mode action (shipped 2026-04-22) — new
+  `project.set_auth_mode` action registered with `Actions` and
+  emitted from the admin `PATCH /v1/_admin/projects/{id}/auth-mode`
+  handler. Captures the prior + new mode for the trail.
 
 ## Links
 
 - Designs: [audit-log](../../designs/active/audit-log.md)
 - Related components: admin-panel, impersonation, service-accounts,
-  task-orchestration, knowledge-api
+  task-orchestration, knowledge-api, escalations, self-healing

@@ -65,6 +65,20 @@ specs:
   file: active/developer-worker.md
   served_by_designs:
   - worker-roles
+- id: escalations
+  title: Escalations & on-call routing
+  status: active
+  owner: ro
+  folder: active
+  file: active/escalations.md
+  served_by_designs:
+  - escalations
+  related_specs:
+  - task-orchestration
+  - observability
+  - audit-log
+  - admin-panel
+  - multi-tenancy
 - id: impersonation
   title: Impersonation
   status: active
@@ -142,6 +156,20 @@ specs:
   file: active/reviewer-worker.md
   served_by_designs:
   - worker-roles
+- id: self-healing
+  title: Self-healing stuck pipelines
+  status: active
+  owner: ro
+  folder: active
+  file: active/self-healing.md
+  served_by_designs:
+  - self-healing
+  related_specs:
+  - task-orchestration
+  - observability
+  - audit-log
+  - escalations
+  - admin-panel
 - id: service-accounts
   title: Service Accounts
   status: active
@@ -242,34 +270,6 @@ specs:
   - observability
   - task-orchestration
   - continuous-deployment
-- id: '0041'
-  title: Escalation policies & on-call routing
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0041-escalation-policies.md
-  served_by_designs:
-  - '0041'
-  related_specs:
-  - task-orchestration
-  - observability
-  - audit-log
-  - admin-panel
-  - multi-tenancy
-- id: '0042'
-  title: Self-healing stuck pipelines
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0042-self-healing.md
-  served_by_designs:
-  - '0042'
-  related_specs:
-  - task-orchestration
-  - observability
-  - audit-log
-  - admin-panel
-  - '0041'
 - id: '0038'
   title: Automated secret rotation
   status: wip

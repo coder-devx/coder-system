@@ -11,44 +11,57 @@
 **North star:** Coder manages its own development end-to-end. The human
 is in an approval/override role, not a task-authoring role.
 
-**17 active components** describe the shipped system (18 with
-`tenant-isolation` as of 2026-04-21).
+**20 active components** describe the shipped system (as of
+2026-04-23, with `escalations` and `self-healing` added alongside
+`tenant-isolation`).
 
 **Pipeline proven end-to-end (2026-04-13):** PM draft → spec file in repo →
 pipeline run advances to `spec_approval` → ready for human approval →
 chain auto-creates architect task.
 
-**Next 9 months (May 2026–Feb 2027).** Six sequenced phases, 25
+**Next 9 months (May 2026–Feb 2027).** Six sequenced phases, 23
 planned items: Scale & Reliability → Cost & Token Efficiency → Admin
 Panel v2 → Security & Compliance → Trusted Autonomy → Knowledge Depth.
 The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-21 — **0039 (tenant isolation) shipped into
-`active/`** as the new `tenant-isolation` component; 145 isolation
-tests, manifest + coverage drift checks blocking CI on every PR,
-admin page live at `/admin/isolation`. AC5 (GCP IAM cross-tenant)
-deferred to a future CI-staging spec. **0038 (secret rotation) LIVE**
-— Cloud Run Job + Scheduler wired, flag flipped; first rotation
-naturally due 2026-05-20. **Phase 5 + Phase 6/0037 shipped into
-`active/`.** 0033 (live timeline), 0034 (PR viewer), 0035 (knowledge
-editor), 0036 (command palette), and 0037 (audit log) all folded:
-content merged into the relevant subject-named components (0037
-introduced the new `audit-log` component), numbered WIP files deleted,
-both registries updated. Every feature shipped behind its respective
+Last updated: 2026-04-23 — **0041 (escalations) and 0042 (self-healing
+v1) shipped into `active/`** as two new components (coder-core
+`c992a7b`, deployed 2026-04-22). 0041 lands the full 3-rung ladder
+watcher, Slack + PagerDuty dispatchers, per-project on-call schedule,
+admin pages; flag default off, rollout is the documented 3-stage
+ramp. 0042 lands v1 self-healing with the `stuck_queued` pattern and
+escalation close-out integration; flag default off, `dry_run` soak
+first. Also shipped same commit: **Claude OAuth auth-mode** — new
+`projects.auth_mode` column (migration 0050) + admin toggle +
+dispatcher credential selection; unspec'd, spec + ADR still owed.
+**`0002-competitive-intelligence-pipeline` deprecated** — sat orphan
+in `designs/wip/` since 2026-04-08 with no companion spec and no
+roadmap slot; moved to `designs/deprecated/` for future rehydration.
+2026-04-21: **0039 (tenant isolation) shipped into `active/`** as the
+new `tenant-isolation` component; 145 isolation tests, manifest +
+coverage drift checks blocking CI on every PR, admin page live at
+`/admin/isolation`. **0038 (secret rotation) LIVE** — Cloud Run Job
++ Scheduler wired, flag flipped; first rotation naturally due
+2026-05-20. **Phase 5 + Phase 6/0037 shipped into `active/`.** 0033
+(live timeline), 0034 (PR viewer), 0035 (knowledge editor), 0036
+(command palette), and 0037 (audit log) all folded: content merged
+into the relevant subject-named components (0037 introduced the new
+`audit-log` component), numbered WIP files deleted, both registries
+updated. Every feature shipped behind its respective
 `VITE_*_ENABLED` / `CODER_AUDIT_LOG_ENABLED` flag (default on).
 **Phase 4 LIVE in prod.** All four specs (0029/0030/0031/0032)
 phase-1 deployed + flags flipped on. Fleet: `PROMPT_CACHING_ENABLED=true`,
 `REGRESSION_ALERTS_ENABLED=true`. Per-project: `coder` runs with
 `pin_top_tier=false` (tier routing routes reviewer tasks to Haiku).
-Migrations 0022, 0032-0038, 0041 all applied. Prod image
-`072323d6d71f` on revision `coder-core-00115-vhp`. Remaining Phase 4
-work is deferred increments (yaml policy table for 0030, rollup
-pre-aggregation for 0031/0032, admin UI surfaces) — each has an
-explicit phase-2 note on its WIP spec. 2026-04-18: 0044 (write-through
-enforcement) and 0043 (freshness signals) shipped into `active/`.
-Phase 3 complete: 0023, 0025, 0026, 0027, 0028 all shipped.
+Prod image `c992a7be7aff` on revision `coder-core-00351-leg`.
+Remaining Phase 4 work is deferred increments (yaml policy table
+for 0030, rollup pre-aggregation for 0031/0032, admin UI surfaces)
+— each has an explicit phase-2 note on its WIP spec. 2026-04-18:
+0044 (write-through enforcement) and 0043 (freshness signals)
+shipped into `active/`. Phase 3 complete: 0023, 0025, 0026, 0027,
+0028 all shipped.
 
 ---
 
@@ -76,6 +89,8 @@ The system today, by logical component. Each links to its active spec
 | Branch cleanup | [branch-cleanup](./active/branch-cleanup.md) | [branch-cleanup](../designs/active/branch-cleanup.md) |
 | Audit log | [audit-log](./active/audit-log.md) | [audit-log](../designs/active/audit-log.md) |
 | Tenant isolation test harness | [tenant-isolation](./active/tenant-isolation.md) | [tenant-isolation](../designs/active/tenant-isolation.md) |
+| Escalations & on-call routing | [escalations](./active/escalations.md) | [escalations](../designs/active/escalations.md) |
+| Self-healing stuck pipelines | [self-healing](./active/self-healing.md) | [self-healing](../designs/active/self-healing.md) |
 
 ---
 
@@ -89,8 +104,6 @@ The system today, by logical component. Each links to its active spec
 | [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | drafting |
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20 |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | infra wired, Stage 1 shadow |
-| [0041](./wip/0041-escalation-policies.md) | Escalation policies & on-call routing | drafting |
-| [0042](./wip/0042-self-healing.md) | Self-healing stuck pipelines | drafting |
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
 | [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | drafting |
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
@@ -149,8 +162,8 @@ flowchart TB
 
   subgraph auto ["Phase 7 — Trusted Autonomy"]
     s39["Confidence auto-approve"]
-    s40["Escalation & on-call"]
-    s41["Self-healing"]
+    s40["Escalation & on-call (shipped)"]
+    s41["Self-healing v1 (shipped)"]
   end
 
   subgraph know ["Phase 8 — Knowledge Depth"]
@@ -233,11 +246,11 @@ flowchart TB
   classDef autoStyle fill:#d1c4e9,stroke:#4527a0,stroke-width:2px
   classDef knowStyle fill:#b2dfdb,stroke:#004d40,stroke-width:2px
 
-  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24,s25,s26,s27,s38 activeStyle
+  class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24,s25,s26,s27,s38,s40,s41 activeStyle
   class s28,s29,s30,s31 costStyle
   class s32,s33,s34,s35 adminStyle
   class s36,s37 secStyle
-  class s39,s40,s41 autoStyle
+  class s39 autoStyle
   class s43,s44,s45,s46,s47,s48 knowStyle
 ```
 
@@ -642,76 +655,70 @@ for the flip procedure and the metrics to watch before each advance.
 - **Runbook:** [auto-approve-rollout](../runbooks/auto-approve-rollout.md)
 - **Extends:** `task-orchestration`, `observability`, `pm-worker`, `architect-worker`, `team-manager-worker`, `audit-log`, `admin-panel`
 
-### 0041 — Escalation policies & on-call routing (drafting)
+### 0041 — Escalation policies & on-call routing (shipped 2026-04-22)
 
 A 1-minute Cloud Run Job `coder-core-escalation-watch` scans three
-pipeline-run-shaped trigger conditions — **stall** (`blocked_since`
-older than per-project `sla_stall_minutes`, default 60), **failure
-streak** (≥`failure_streak_n`=3 consecutive `tasks.status='failed'`
-in `failure_streak_window_minutes`=30), **SLA wall-clock breach**
-(run open longer than `sla_wall_clock_minutes`=720 = 12h) — and
-opens rows in a new `escalations` table (migration 0046). Dedupe
-enforced by a partial unique index on (project_id, trigger_kind,
-run_id) `WHERE status='open'`. Each escalation advances through a
-3-rung ladder per the project's `escalation_policy` (`off` /
-`standard` = L0 Slack channel → L1 DM on-call → L2 PagerDuty /
-`aggressive` = L0 → L2), with per-rung wait timers advanced by the
-same tick via `SELECT FOR UPDATE SKIP LOCKED`. Per-project on-call
-rotation in a new `on_call_schedules` table (migration 0047); new
-`projects` columns hold SLA thresholds + policy name + Slack channel
-+ PagerDuty routing key (migration 0048). Acknowledge endpoint (API
-+ Slack interactive button via `/v1/_hooks/slack/escalation_ack`
-with signing-secret verification) stops further rungs; resolve
-endpoint closes, reusable by 0042 self-healing as `actor='system'`.
-Every state change writes an `audit_events` row (five new
-`escalation.*` actions). Admin `/admin/escalations` + per-project
-`/projects/:id/escalations` tab behind `VITE_ESCALATIONS_ENABLED`.
-Fleet flag `CODER_ESCALATIONS_ENABLED` default off; 3-stage rollout
-(shadow → L0-only fleet → per-project full ladder opt-in).
+pipeline-run-shaped trigger conditions — stall, failure-streak, and
+SLA wall-clock breach — and advances escalations through a 3-rung
+Slack → DM → PagerDuty ladder per the project's `escalation_policy`.
+Migrations 0046 (`escalations`), 0047 (`on_call_schedules`), 0048
+(seven SLA + routing columns on `projects`). Ack endpoint (API +
+Slack interactive button) stops further rungs; resolve closes and
+is reused by 0042 self-healing as `actor='system'`. Every state
+change writes an `escalation.*` audit row. Admin pages live behind
+`VITE_ESCALATIONS_ENABLED`.
 
-- **Status:** drafting
-- **WIP:** [0041](./wip/0041-escalation-policies.md) · **Design:** [0041](../designs/wip/0041-escalation-policies.md)
-- **Extends:** `task-orchestration`, `observability`, `audit-log`, `admin-panel`, `multi-tenancy`
+- **Status:** shipped → new [`escalations`](./active/escalations.md)
+  component / [`escalations` design](../designs/active/escalations.md).
+  Evolution entries added to
+  [`task-orchestration`](./active/task-orchestration.md) (observation
+  surface),
+  [`admin-panel`](./active/admin-panel.md) (two admin pages),
+  [`audit-log`](./active/audit-log.md) (five new actions +
+  `slack_external` actor type).
+- **Flag:** `CODER_ESCALATIONS_ENABLED` default off; rollout is
+  shadow → L0-only fleet → per-project full ladder opt-in. `coder`
+  runs with `escalation_policy='off'` until Stage 3.
+- **Runbook:** [escalations-firing](../runbooks/escalations-firing.md)
+  (to be authored alongside Stage 2 flip).
 
-### 0042 — Self-healing stuck pipelines (drafting)
+### 0042 — Self-healing stuck pipelines (v1 shipped 2026-04-22)
 
-A 5-minute Cloud Run Job `coder-core-self-heal-watch` ticks per
-project, runs a small registry of `Remediator`s with a uniform
-`detect + remediate` interface, and each remediation is _provably
-safe_ (worst case = no change, never wrong change). v1 ships three
-patterns: **`stuck_queued`** (`tasks.status='queued'` >
-`stuck_queued_min_minutes`=15 with project DispatcherQueue depth 0
-and `worker_concurrency` not pinned → re-enqueue via existing
-override path; safe because re-enqueue is idempotent on task id),
-**`zombie_executing`** (`tasks.heartbeat_at` (new column, migration
-0049) older than `zombie_heartbeat_staleness_seconds`=180 + deadline
-elapsed + Cloud Run revision still alive → fail with
-`failure_kind='zombie'` then call existing `/tasks/{id}/retry` clone;
-safe because it's the manual-recovery flow), **`orphan_chain_hook`**
-(pipeline_runs step-advanced but next-role task absent + close-cycle
-backstop logged failure within 1h → idempotent
-`POST /v1/_admin/pipeline-runs/{id}/replay-chain`; safe because hook
-early-returns when next task exists). Each pattern gates on a
-per-target-per-pattern-per-day cap (lookup into `self_heal_attempts`,
-migration 0050) — second hit logs `outcome='skipped_cap'` and lets
-0041 escalate normally. Per-pattern mode `off`/`dry_run`/`apply` plus
-fleet kill switch `CODER_SELF_HEALING_ENABLED`. Workers update
-`tasks.heartbeat_at` every 30 s via a supervisor wrapper
-`with_heartbeat` in `coder_core/workers/_runtime.py` + new
-`PATCH /tasks/{id}/heartbeat` endpoint. Every remediation writes an
-`audit_events` row (`self_heal.remediated` / `.failed`); on success
-the watchdog enumerates open `escalations` matching the target and
-calls `/escalations/{id}/resolve` with
-`resolved_by_id='self-healing-watchdog'` (peer-consumer integration
-with 0041). Admin `/admin/self-heal` page lists fleet attempts behind
-`VITE_SELF_HEAL_ENABLED`. Headline KPI: count of escalations
-prevented per week, target ≥ 30% drop in 0041 L1+L2 fires after
-30 days. Rollout: 1-week shadow (every pattern in `dry_run`) →
-flip `stuck_queued` to `apply` → soak → expand.
+A 5-minute Cloud Run Job `coder-core-self-heal-watch` runs a small
+registry of `Remediator`s with a uniform `detect + remediate`
+interface; each remediation is _provably safe_ (worst case = no
+change). Migration 0049 (`self_heal_attempts`). On a successful
+remediation the watchdog enumerates open `escalations` matching the
+target and calls `/escalations/{id}/resolve` with
+`resolved_by_id='self_healing'` — peer-consumer integration with
+0041. Per-pattern mode `off`/`dry_run`/`apply` plus fleet kill switch
+`CODER_SELF_HEALING_ENABLED`.
 
-- **Status:** drafting
-- **WIP:** [0042](./wip/0042-self-healing.md) · **Design:** [0042](../designs/wip/0042-self-healing.md)
-- **Extends:** `task-orchestration`, `observability`, `audit-log`, `admin-panel`, `0041`
+**v1 ships one pattern: `stuck_queued`** (`tasks.status='queued'` >
+15 min with `DispatcherQueue.depth(project)=0` and
+`worker_concurrency` not pinned → re-enqueue via the existing
+idempotent override path). The `zombie_executing` and
+`orphan_chain_hook` patterns described in the original WIP are
+**deferred** pending the prerequisite surfaces (heartbeat column +
+endpoint + supervisor wrapper for zombies; replay-chain endpoint
+for orphan chains). Admin `/admin/self-heal` page also deferred
+until the fleet flag flips on and there's attempt data worth
+surfacing.
+
+- **Status:** shipped (v1) → new
+  [`self-healing`](./active/self-healing.md) component /
+  [`self-healing` design](../designs/active/self-healing.md).
+  Evolution entries added to
+  [`task-orchestration`](./active/task-orchestration.md) (reads the
+  same observation surface),
+  [`audit-log`](./active/audit-log.md)
+  (`self_heal.remediated`, `self_heal.failed` actions).
+- **Flag:** `CODER_SELF_HEALING_ENABLED` default off; pattern modes
+  start in `dry_run` per the rollout stages in the active design.
+- **Next:** flip `stuck_queued` to `apply` on `coder` after fleet
+  flag on + soak; measure escalation capture rate; then expand the
+  pattern registry (zombie + orphan) once the heartbeat +
+  replay-chain surfaces land.
 
 ---
 

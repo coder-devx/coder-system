@@ -65,6 +65,21 @@ into every token) and in IAM (per-secret bindings on
 - `337d5d1` (2026-04-10) — replaced Credential Access Boundary design
   with per-secret IAM bindings after discovering CABs do not support
   Secret Manager.
+- **Claude OAuth auth-mode (shipped 2026-04-22, `c992a7b`, unspec'd —
+  follow-up WIP pending).** Workers now resolve their Anthropic
+  credential through a per-project `auth_mode` column on `projects`
+  (migration 0050). `auth_mode='api_key'` (default) keeps the
+  existing Secret-Manager-backed API key path. `auth_mode='oauth'`
+  switches the worker to a Claude OAuth token. The
+  `coder_core.workers._auth_env` module assembles the env block
+  handed to each role's `claude` process; the dispatcher picks the
+  assembler based on the project's mode. Admin
+  `PATCH /v1/_admin/projects/{id}/auth-mode` sets the column and
+  writes a `project.set_auth_mode` audit event.
+  `scripts/verify_oauth_auth_mode.py` validates an OAuth-configured
+  project end-to-end. **This shipped ahead of its spec** — a proper
+  spec + ADR are owed to capture the decision (why OAuth, when to
+  pick which mode, secret storage shape, rotation story).
 
 ## Links
 
