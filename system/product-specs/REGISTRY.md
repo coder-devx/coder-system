@@ -44,6 +44,7 @@ in each component's `## Evolution` section and in git.
 | [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | ro | [0046](../designs/wip/0046-graph-aware-retrieval.md) |
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | ro | [0047](../designs/wip/0047-template-schema-migration.md) |
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | ro | [0048](../designs/wip/0048-cross-project-patterns.md) |
+| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | ro | [0049](../designs/wip/0049-mcp-agent-interface.md) |
 
 ## Deprecated
 

@@ -360,3 +360,20 @@ specs:
   - developer-worker
   - multi-tenancy
   - knowledge-freshness
+- id: '0049'
+  title: MCP agent interface
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0049-mcp-agent-interface.md
+  served_by_designs:
+  - '0049'
+  related_specs:
+  - impersonation
+  - service-accounts
+  - audit-log
+  - admin-panel
+  - multi-tenancy
+  - task-orchestration
+  - knowledge-api
+  - escalations

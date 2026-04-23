@@ -39,6 +39,7 @@ Logical components of the Coder system as it exists today.
 | [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | ro | [0046](../product-specs/wip/0046-graph-aware-retrieval.md) |
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | ro | [0047](../product-specs/wip/0047-template-schema-migration.md) |
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | ro | [0048](../product-specs/wip/0048-cross-project-patterns.md) |
+| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | ro | [0049](../product-specs/wip/0049-mcp-agent-interface.md) |
 
 ## Deprecated
 

@@ -390,3 +390,19 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+- id: '0049'
+  title: MCP agent interface
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0049-mcp-agent-interface.md
+  implements_specs:
+  - '0049'
+  related_designs:
+  - system-overview
+  - impersonation
+  - worker-communication
+  - audit-log
+  - knowledge-write-api
+  affects_services:
+  - coder-core

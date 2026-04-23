@@ -113,6 +113,7 @@ The system today, by logical component. Each links to its active spec
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20 |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | infra wired, Stage 1 shadow |
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
+| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | drafting |
 | [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | drafting |
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | drafting |
@@ -727,6 +728,24 @@ surfacing.
   flag on + soak; measure escalation capture rate; then expand the
   pattern registry (zombie + orphan) once the heartbeat +
   replay-chain surfaces land.
+
+### 0049 — MCP agent interface (drafting)
+
+Add an MCP server to `coder-core` so external agents can connect,
+authenticate with existing tokens, and drive Coder: read pipeline
+state, create tasks, approve plans, impersonate a role, subscribe
+to SSE-backed resources. Twelve v1 tools wrap existing HTTP
+handlers; the MCP layer is a transport + schema adapter, not a new
+permission model (impersonation + audit stay unchanged). Two flags:
+`CODER_MCP_ENABLED` (fleet) and `projects.mcp_enabled` (tri-state
+per project). Phase 7 fit: letting agents drive Coder is the
+autonomy increase 0040-0042 are a prerequisite for.
+
+- **Status:** drafting
+- **WIP:** [0049](./wip/0049-mcp-agent-interface.md) · **Design:** [0049](../designs/wip/0049-mcp-agent-interface.md)
+- **Extends:** `impersonation`, `service-accounts`, `audit-log`,
+  `admin-panel`, `multi-tenancy`, `task-orchestration`,
+  `knowledge-api`
 
 ---
 
