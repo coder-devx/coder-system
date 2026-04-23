@@ -65,21 +65,30 @@ into every token) and in IAM (per-secret bindings on
 - `337d5d1` (2026-04-10) — replaced Credential Access Boundary design
   with per-secret IAM bindings after discovering CABs do not support
   Secret Manager.
-- **Claude OAuth auth-mode (shipped 2026-04-22, `c992a7b`, unspec'd —
-  follow-up WIP pending).** Workers now resolve their Anthropic
-  credential through a per-project `auth_mode` column on `projects`
-  (migration 0050). `auth_mode='api_key'` (default) keeps the
-  existing Secret-Manager-backed API key path. `auth_mode='oauth'`
-  switches the worker to a Claude OAuth token. The
-  `coder_core.workers._auth_env` module assembles the env block
-  handed to each role's `claude` process; the dispatcher picks the
-  assembler based on the project's mode. Admin
-  `PATCH /v1/_admin/projects/{id}/auth-mode` sets the column and
-  writes a `project.set_auth_mode` audit event.
-  `scripts/verify_oauth_auth_mode.py` validates an OAuth-configured
-  project end-to-end. **This shipped ahead of its spec** — a proper
-  spec + ADR are owed to capture the decision (why OAuth, when to
-  pick which mode, secret storage shape, rotation story).
+- **Claude OAuth auth-mode (shipped 2026-04-22, `c992a7b`).**
+  Workers resolve their Anthropic credential through a tri-state
+  per-project `auth_mode` column on `projects` (migration 0050):
+  `NULL` = inherit fleet default (OAuth when
+  `settings.claude_code_oauth_token` is set, else API key),
+  `"oauth"` = force Claude OAuth, `"api_key"` = force API key.
+  Dispatcher's `_resolve_auth_mode()` picks the effective mode at
+  dispatch time and stamps it on `WorkerInput`; the shared
+  `coder_core.workers._auth_env.apply_claude_auth_env()` helper
+  assembles the env block handed to each role's `claude` subprocess
+  and explicitly *pops* the competing credential so the CLI's own
+  preference order can't silently cross-wire the wrong one. All
+  five role workers + the re-prompt helper use it. Admin
+  `PATCH /v1/_admin/projects/{id}/auth-mode` writes the column plus
+  a `project.set_auth_mode` audit event; `AuthModeCard` on
+  `ProjectDetail` exposes the three-option toggle.
+  `scripts/verify_oauth_auth_mode.py` exercises dispatcher +
+  env-helper + child-process env shape end-to-end (3 scenarios
+  green). 319 LoC of tests across `test_auth.py`,
+  `test_auth_env.py`, `test_auth_mode_admin.py`. Prod: `coder` runs
+  on `auth_mode=NULL` (fleet default). Decision-log ADR for why
+  OAuth, which credential storage shape, and rotation story is
+  nice-to-have for future reference but not blocking — the code +
+  audit trail are self-describing.
 
 ## Links
 

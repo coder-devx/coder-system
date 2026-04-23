@@ -33,9 +33,17 @@ watcher, Slack + PagerDuty dispatchers, per-project on-call schedule,
 admin pages; flag default off, rollout is the documented 3-stage
 ramp. 0042 lands v1 self-healing with the `stuck_queued` pattern and
 escalation close-out integration; flag default off, `dry_run` soak
-first. Also shipped same commit: **Claude OAuth auth-mode** — new
-`projects.auth_mode` column (migration 0050) + admin toggle +
-dispatcher credential selection; unspec'd, spec + ADR still owed.
+first. Also shipped same commit: **Claude OAuth auth-mode — complete.**
+Tri-state `projects.auth_mode` column (migration 0050), dispatcher
+`_resolve_auth_mode()`, shared `apply_claude_auth_env()` worker
+helper (pops the competing credential so the CLI can't cross-wire),
+wired through all five role workers + re-prompt, admin
+`PATCH /v1/_admin/projects/{id}/auth-mode` + `AuthModeCard` toggle,
+`project.set_auth_mode` audit action, 319 LoC of tests, green
+end-to-end verifier (`scripts/verify_oauth_auth_mode.py`). Prod:
+`coder` runs on `auth_mode=NULL` (fleet default). Decision-log ADR
+is a nice-to-have for future reference but not blocking — the
+feature is self-describing from code + audit trail.
 **`0002-competitive-intelligence-pipeline` deprecated** — sat orphan
 in `designs/wip/` since 2026-04-08 with no companion spec and no
 roadmap slot; moved to `designs/deprecated/` for future rehydration.
