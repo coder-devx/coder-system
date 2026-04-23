@@ -7,7 +7,8 @@ owner: ro
 created: 2026-04-23
 updated: 2026-04-23
 last_verified_at: 2026-04-23
-affects_repos: [coder-core, coder-admin]
+applies_to_services: [coder-core, coder-admin]
+applies_to_integrations: [slack, pagerduty]
 ---
 
 # Escalations — operator guide
