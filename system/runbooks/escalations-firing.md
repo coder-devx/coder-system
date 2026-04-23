@@ -1,205 +1,172 @@
 ---
 id: escalations-firing
-title: Escalations — watcher operation, rollout, and tuning
+title: Escalations — operator guide
 type: runbook
 status: active
 owner: ro
 created: 2026-04-23
 updated: 2026-04-23
 last_verified_at: 2026-04-23
-affects_repos: [coder-core, coder-admin]
+applies_to_services: [coder-core, coder-admin]
+applies_to_integrations: [gcp, slack]
 ---
 
-# Escalations — watcher operation, rollout, and tuning
+# Escalations — operator guide
 
-The escalation watcher is deployed (shipped 2026-04-22, `coder-core`
-`c992a7b`), flag-gated on `CODER_ESCALATIONS_ENABLED`, default off
-fleet-wide. This runbook covers day-to-day operation, the remaining
-rollout stages, and how to tune per-project settings.
-
-For the product view see the
-[escalations spec](../product-specs/active/escalations.md).
-For tables, endpoints, and the ladder state machine see the
-[escalations design](../designs/active/escalations.md).
+The escalations component (shipped coder-core `c992a7b`, 2026-04-22) opens
+a row and walks a three-rung paging ladder whenever a pipeline run stalls,
+fails repeatedly, or breaches SLA. This runbook covers operator day-2 tasks:
+tuning thresholds, reading the admin pages, rolling out the flag, and
+handling failures. Product view: [escalations spec](../product-specs/active/escalations.md).
+Technical design: [escalations design](../designs/active/escalations.md).
 
 ## What fires an escalation
 
-The watcher runs every minute and scans three trigger queries:
+The watcher (`coder-core-escalation-watch` Cloud Run Job, 1-minute tick)
+scans three trigger kinds:
 
-| Kind | Column | Default threshold |
-|---|---|---|
-| `stall` | `pipeline_runs.blocked_since` older than `projects.sla_stall_minutes` | 60 min |
-| `failure_streak` | ≥ `failure_streak_n` consecutive `tasks.status='failed'` within `failure_streak_window_minutes` | 3 failures / 30 min window |
-| `sla_breach` | `pipeline_runs` open longer than `projects.sla_wall_clock_minutes` | 720 min (12 h) |
+| Trigger | What's checked | Default threshold |
+|---------|----------------|-------------------|
+| `stall` | `pipeline_runs.blocked_since` | older than `sla_stall_minutes` (60 min) |
+| `failure_streak` | consecutive `tasks.status='failed'` within window | ≥ `failure_streak_n` (3) in `failure_streak_window_minutes` (30 min) |
+| `sla_breach` | `pipeline_runs` open longer than wall-clock limit | `sla_wall_clock_minutes` (720 min = 12 h) |
 
-DispatcherQueue-blocked tasks are excluded — queuing is not a stall.
-The same run can trigger multiple kinds (e.g. stall + sla_breach);
-they open as separate rows. A second stall signal on the same open run
-bumps `last_observed_at` without re-dispatching.
+DispatcherQueue-blocked tasks (`stage='queued'`) are excluded — queueing is
+not a stall. Dedupe is DB-enforced: a second signal on the same open
+escalation bumps `last_observed_at` without re-opening or re-dispatching.
+Different trigger kinds on the same run coexist independently.
 
 ## The three-rung ladder
 
-Each escalation row has a `policy_name` drawn from
-`config/escalation_policies.yaml`:
+| Rung | Destination | `standard` timer | `aggressive` timer |
+|------|-------------|------------------|--------------------|
+| L0 | Project Slack channel | — (immediate on open) | — |
+| L1 | Slack DM to on-call | 5 min after L0 | (skipped) |
+| L2 | PagerDuty Events API v2 | 10 min after L1 | 2 min after L0 |
 
-| Policy | Rungs |
-|---|---|
-| `off` | No rungs; watcher skips the project entirely |
-| `standard` | L0 post to project Slack channel → 5 min → L1 DM on-call → 10 min → L2 PagerDuty |
-| `aggressive` | L0 → 2 min → L2 PagerDuty (no DM rung) |
+Policy `off` means the watcher skips that project entirely. Policies are
+defined in `coder-core/src/coder_core/escalations/escalation_policies.yaml`.
+Rungs advance monotonically — acking stops further advancement; resolving
+closes the row.
 
-Rungs advance monotonically. Once a rung fires, `current_rung` only
-increases. `next_rung_due_at=NULL` removes the row from the advance
-query — this happens after the final rung fires, or on ack/resolve.
+## Acknowledging and resolving
 
-## Acknowledging an escalation
+An operator can acknowledge via:
 
-Ack stops further rungs but leaves the row open (`status='acknowledged'`).
-Resolve closes it (`status='resolved'`). Both are idempotent.
+- **Slack interactive button** — in the L0/L1 message; verifies the
+  `SLACK_SIGNING_SECRET`, maps Slack user ID → internal user (falls back to
+  `acknowledged_by_type='slack_external'` with the raw handle).
+- **API**: `POST /v1/projects/{id}/escalations/{esc_id}/ack`
+- **Admin panel**: `/admin/escalations` or `/projects/:id/escalations` → Ack
+  button on the row.
 
-Three paths to ack:
+Ack freezes the ladder (`next_rung_due_at=NULL`) but keeps `status='open'`.
+Resolve closes it: `POST /v1/projects/{id}/escalations/{esc_id}/resolve`.
+Both are idempotent — a second call on a non-`open` row returns 200 and does
+not re-audit.
 
-1. **Slack interactive button** — the L0 and L1 Slack messages carry
-   an Ack button. Clicking it posts to `POST /v1/_hooks/slack/escalation_ack`
-   (verified via `SLACK_SIGNING_SECRET`). The button is the fastest path
-   for the on-call.
-2. **API directly:**
-   ```sh
-   curl -X POST -H "Authorization: Bearer $ADMIN_JWT" \
-     https://coder-core-<hash>.a.run.app/v1/projects/<project_id>/escalations/<esc_id>/ack
-   ```
-3. **Admin panel** — click Acknowledge on `/admin/escalations` or
-   `/projects/:id/escalations`.
+## Reading the admin pages
 
-To resolve (close the incident):
-```sh
-curl -X POST -H "Authorization: Bearer $ADMIN_JWT" \
-  https://coder-core-<hash>.a.run.app/v1/projects/<project_id>/escalations/<esc_id>/resolve
-```
+`/admin/escalations` (fleet) and `/projects/:id/escalations` (per-project)
+both sit behind `VITE_ESCALATIONS_ENABLED`. Key columns:
 
-Resolving via the admin panel is also available. A PagerDuty ack
-does _not_ propagate back — you must ack in Coder separately (v1 gap,
-tracked in the design open questions).
+| Column | Meaning |
+|--------|---------|
+| `trigger_kind` | `stall`, `failure_streak`, or `sla_breach` |
+| `current_rung` | last rung dispatched: L0, L1, L2 |
+| `status` | `open` / `acknowledged` / `resolved` / `expired` |
+| `last_observed_at` | last watcher re-detection (bumped on dedupe) |
+| `rung_history` | JSONB array of `{rung, dispatched_at, outcome}` |
 
-## Reading the escalations views
-
-`/admin/escalations` shows the fleet view; `/projects/:id/escalations`
-shows the per-project view. Both are behind `VITE_ESCALATIONS_ENABLED`.
-
-Key columns:
-- **Age** — `now() - opened_at`. Long age + status `open` = rungs have
-  already fired or nobody has acked.
-- **Rung** — `current_rung` (`L0`/`L1`/`L2`). Shows the last rung
-  that fired.
-- **On-call** — the Slack user ID or fallback identity that received
-  L1. Clicking through goes to the project's
-  `/projects/:id/escalations/:id` detail.
-- **Run link** — links directly to the `pipeline_runs` row. From there
-  you can see every task and message for the stalled or failing run.
-- **`rung_history` (API only)** — `GET /v1/projects/{id}/escalations/{id}`
-  returns this as JSON; each entry has `rung`, `fired_at`,
-  `dispatcher`, and `outcome`. Use it to confirm dispatchers fired
-  and check for `error:` outcomes.
-
-To find the current on-call identity without an open escalation:
-```sh
-curl -sS -H "Authorization: Bearer $ADMIN_JWT" \
-  https://coder-core-<hash>.a.run.app/v1/projects/<project_id>/on-call
-```
+Click the pipeline run ID link to jump to the run detail. The on-call
+identity shown in the row is resolved live via
+`GET /v1/projects/{id}/on-call`. Check `rung_history[].outcome` for
+`skipped:<reason>` or `error:<detail>` on any rung that didn't reach
+its destination.
 
 ## Tuning per-project thresholds
 
-All four threshold columns are writeable via `PATCH /v1/projects/{id}`:
+All four threshold columns accept a `PATCH /v1/projects/{id}`:
 
 ```sh
 curl -X PATCH -H "Authorization: Bearer $ADMIN_JWT" \
   -H "Content-Type: application/json" \
   -d '{
-    "sla_stall_minutes": 45,
+    "sla_stall_minutes": 90,
     "failure_streak_n": 5,
     "failure_streak_window_minutes": 60,
-    "sla_wall_clock_minutes": 480
-  }' \
-  https://coder-core-<hash>.a.run.app/v1/projects/<project_id>
+    "sla_wall_clock_minutes": 1440
+  }' https://coder-core-<hash>.a.run.app/v1/projects/<project-id>
 ```
 
-Guidance: start with defaults (60/3/30/720). Lower `sla_stall_minutes`
-only for projects with tight SLAs and fast human response. Raise
-`failure_streak_n` if a project's tasks are frequently flaky and
-you're seeing false positives. The watcher picks up new thresholds on
-the next tick.
+Guidance: raise `sla_stall_minutes` for projects with long human-approval
+stages (spec/design reviews can legitimately block 2–4 hours). Raise
+`failure_streak_n` if two transient failures in a row are normal; lower it
+if two is already anomalous. Changes take effect on the next 1-minute tick.
 
-## Setting escalation policy and notification identifiers
+## Setting policy and routing
 
 ```sh
-# Set policy + Slack channel + PagerDuty routing key in one call.
 curl -X PATCH -H "Authorization: Bearer $ADMIN_JWT" \
   -H "Content-Type: application/json" \
   -d '{
     "escalation_policy": "standard",
     "escalation_slack_channel_id": "C0XXXXXXXXX",
-    "pagerduty_routing_key": "abcdef1234567890abcdef1234567890"
-  }' \
-  https://coder-core-<hash>.a.run.app/v1/projects/<project_id>
+    "pagerduty_routing_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  }' https://coder-core-<hash>.a.run.app/v1/projects/<project-id>
 ```
 
-- `escalation_policy`: `off` | `standard` | `aggressive`.
-- `escalation_slack_channel_id`: the Slack channel ID (not name) where
-  L0 notifications land. Point it at a throwaway channel while you tune
-  thresholds — zero code change, instant effect.
-- `pagerduty_routing_key`: Events API v2 routing key. Required for any
-  policy that includes L2. Absent → `skipped:no_routing_key` in
-  `rung_history.outcome` and a structured warning log. No L2 fires.
+L2 (PagerDuty) requires `pagerduty_routing_key`. Without it, the L2 rung
+records `outcome='skipped:no_routing_key'` and logs a structured warning;
+the rung is not re-tried.
 
-## Managing on-call schedules
+## Managing the on-call schedule
 
-The on-call resolver picks the most-recently-created `on_call_schedules`
-row whose `[starts_at, ends_at)` window covers `now()`. Gaps fall back
-to the project owner identity.
+The resolver picks the most-recently-created `on_call_schedules` entry
+whose `[starts_at, ends_at)` window covers `now()`. No matching entry →
+falls back to the project owner identity.
 
-List current schedule:
 ```sh
+# Who is on-call right now
 curl -sS -H "Authorization: Bearer $ADMIN_JWT" \
-  https://coder-core-<hash>.a.run.app/v1/projects/<project_id>/on-call/schedule
-```
+  https://coder-core-<hash>.a.run.app/v1/projects/<id>/on-call
 
-Replace with a new rotation:
-```sh
+# List all schedule windows
+curl -sS -H "Authorization: Bearer $ADMIN_JWT" \
+  https://coder-core-<hash>.a.run.app/v1/projects/<id>/on-call/schedule
+
+# Replace schedule (PATCH replaces all rows for the project)
 curl -X PATCH -H "Authorization: Bearer $ADMIN_JWT" \
   -H "Content-Type: application/json" \
-  -d '{
-    "entries": [
-      {
-        "slack_user_id": "U0AAAAAAAA",
-        "pagerduty_user_id": "PXXXXXXX",
-        "starts_at": "2026-04-28T00:00:00Z",
-        "ends_at": "2026-05-05T00:00:00Z",
-        "timezone": "Europe/London"
-      }
-    ]
-  }' \
-  https://coder-core-<hash>.a.run.app/v1/projects/<project_id>/on-call/schedule
+  -d '[
+    {"slack_user_id": "U0XXXXXXXXX", "pagerduty_user_id": "PXXXXXXX",
+     "starts_at": "2026-04-28T00:00:00Z", "ends_at": "2026-05-05T00:00:00Z",
+     "timezone": "Europe/Amsterdam"}
+  ]' https://coder-core-<hash>.a.run.app/v1/projects/<id>/on-call/schedule
 ```
 
-PATCH replaces the schedule for the project (doesn't append).
-Overlapping windows are allowed; the resolver always picks the
-most-recently-created one that covers `now()`.
+Overlapping windows are allowed; the most-recently-created wins. There is no
+gap-fill — if no window covers `now()`, the project owner is the fallback.
 
-## Stage 2 rollout — fleet flag on, all projects capped at L0
+## Stage 2 rollout — L0-only fleet
 
-Stage 1 (shadow) is already running — the watcher logs
-`escalation.would_open` events without writing rows.
+Prerequisites: migrations 0046/0047/0048 applied; Cloud Run Job
+`coder-core-escalation-watch` and its Scheduler trigger wired (same gcloud
+shape as the secret-rotation-scheduler runbook); `CODER_ESCALATIONS_ENABLED`
+is `false` on both service and Job.
 
-Stage 2 flips the fleet flag so the watcher starts opening real rows,
-but all projects remain at `escalation_policy='off'` except for one
-canary you promote to `standard` while capping actual rungs at L0 only.
+Cap every project at L0 to avoid Slack DMs or PagerDuty pages during
+threshold tuning. Two options:
 
-The cleanest L0 cap is via `config/escalation_policies.yaml` in
-`coder-core` — comment out the L1/L2 rungs from the `standard` and
-`aggressive` policies so the file has only L0 entries. Deploy that
-change before flipping the flag.
+- **Policy cap via config**: edit
+  `coder-core/src/coder_core/escalations/escalation_policies.yaml` to
+  strip L1/L2 rungs from `standard` and `aggressive` before flipping the
+  flag, then restore them when Stage 3 begins.
+- **Per-project opt-in control**: leave all projects at
+  `escalation_policy='off'` and opt in only the canary while the flag is on.
 
-Flip the fleet flag (service + Job):
+Flip the fleet flag:
+
 ```sh
 gcloud run services update coder-core \
   --project=vibedevx --region=europe-west1 \
@@ -210,36 +177,28 @@ gcloud run jobs update coder-core-escalation-watch \
   --update-env-vars=CODER_ESCALATIONS_ENABLED=true
 ```
 
-Alternatively, leave all projects at `escalation_policy='off'` and
-only opt in the `coder` project at `policy=standard` — this naturally
-caps the fleet at L0 because non-`coder` projects won't dispatch.
+**Soak checklist** — watch `/metrics` `escalations` block for ≥ 48 h:
 
-**Soak checklist** — watch `/metrics` escalations block for at least
-72 hours before advancing to Stage 3:
+| Metric | Healthy |
+|--------|---------|
+| `open` | stable count, not growing unbounded |
+| `mean_ack_minutes_7d` | < 30 min |
+| `rung2_rate_7d` | 0 (expected while capped at L0) |
+| `false_positive_rate_7d` | < 0.10 |
+| `by_trigger_7d` | distribution matches known stall patterns |
 
-| Metric | Healthy threshold | Revert signal |
-|---|---|---|
-| `open` | Steady (not climbing unbounded) | Monotonically rising → tick may be stuck |
-| `mean_ack_minutes_7d` | < 30 min | > 60 min signals thresholds too tight or on-call gap |
-| `rung2_rate_7d` | 0.0 (cap in effect) | Any non-zero → L0 cap not working |
-| `false_positive_rate_7d` | < 0.20 | > 0.30 → thresholds too sensitive, tune before Stage 3 |
-| `by_trigger_7d.stall` | Non-zero but bounded | Spike → DispatcherQueue exclusion may be broken |
+Revert trigger: `false_positive_rate_7d > 0.30`, `open` count growing
+unbounded (dedupe bug), or any L1/L2 rung firing while the cap is in place.
 
-If `rung2_rate_7d > 0` while the cap is supposed to be in place,
-confirm the policy YAML deployed correctly and that the Job image was
-updated.
+## Stage 3 rollout — per-project full ladder
 
-## Stage 3 rollout — per-project full-ladder opt-in
+Before opting a project in, verify:
 
-Prerequisites per project before switching from `off` to `standard` or
-`aggressive`:
+- `on_call_schedules` has at least one entry covering the next 7 days.
+- `escalation_slack_channel_id` is set.
+- `pagerduty_routing_key` is set if the policy will use L2.
 
-1. `on_call_schedules` has at least one entry covering the next 7 days.
-2. `escalation_slack_channel_id` is set to a real, monitored channel.
-3. `pagerduty_routing_key` is set (required if policy includes L2).
-
-Remove the L0-only cap from `escalation_policies.yaml` (or restore
-the full rung list), deploy, then opt in the `coder` project first:
+Start with `coder` as dogfood:
 
 ```sh
 curl -X PATCH -H "Authorization: Bearer $ADMIN_JWT" \
@@ -248,109 +207,77 @@ curl -X PATCH -H "Authorization: Bearer $ADMIN_JWT" \
   https://coder-core-<hash>.a.run.app/v1/projects/coder
 ```
 
-Watch `rung2_rate_7d` and `mean_ack_minutes_7d` for the canary project
-for one week. If metrics are healthy, repeat for other projects.
+Watch `mean_ack_minutes_7d` and `rung2_rate_7d` for a week before opting in
+the next project. Use `aggressive` only for projects where a 2-minute
+response window is genuinely expected; most start with `standard`.
 
-## Back-out and kill-switch
+## Back-out / kill-switch
 
-**Fleet kill-switch:**
-```sh
-gcloud run services update coder-core \
-  --project=vibedevx --region=europe-west1 \
-  --update-env-vars=CODER_ESCALATIONS_ENABLED=false
+In order of increasing blast radius:
 
-gcloud run jobs update coder-core-escalation-watch \
-  --project=vibedevx --region=europe-west1 \
-  --update-env-vars=CODER_ESCALATIONS_ENABLED=false
-```
+1. **Redirect noise**: set `escalation_slack_channel_id` to a throwaway
+   channel while tuning thresholds. No code change, takes effect next tick.
+2. **Per-project disable**: `PATCH /v1/projects/{id}` with
+   `escalation_policy='off'`. Watcher skips the project from the next tick.
+3. **Fleet kill-switch**:
+   ```sh
+   gcloud run services update coder-core \
+     --project=vibedevx --region=europe-west1 \
+     --update-env-vars=CODER_ESCALATIONS_ENABLED=false
+   gcloud run jobs update coder-core-escalation-watch \
+     --project=vibedevx --region=europe-west1 \
+     --update-env-vars=CODER_ESCALATIONS_ENABLED=false
+   ```
+   Existing `open` rows persist; no new rungs fire.
 
-Flag off → watcher short-circuits every tick. Existing `open` rows stay
-open in the DB but no new rungs fire and no new rows open. They will
-eventually age as `expired` when cleaned up, or you can resolve them
-manually.
-
-**Per-project silence** (faster than a deploy):
-```sh
-curl -X PATCH -H "Authorization: Bearer $ADMIN_JWT" \
-  -H "Content-Type: application/json" \
-  -d '{"escalation_policy": "off"}' \
-  https://coder-core-<hash>.a.run.app/v1/projects/<project_id>
-```
-
-**Redirect noise while tuning:**
-Set `escalation_slack_channel_id` to a throwaway channel — the watcher
-picks it up on the next tick with no restart.
-
-**When to force-expire rows in the DB:**
-Only necessary if you need to clear the admin view immediately after a
-back-out and don't want to wait for natural expiry. Use with care:
-```sql
-UPDATE escalations SET status='expired', resolved_at=now()
-WHERE status='open' AND project_id='<project_id>';
-```
-If you can let them ride, do so — the watcher's dedupe indexes prevent
-re-opening the same target while an open row exists.
+Manual DB intervention: use `UPDATE escalations SET status='expired' WHERE
+id=...` only when a row is genuinely stuck and the business context is
+resolved — not for bulk silencing. If the underlying run is still open, the
+watcher will re-detect after the next tick, which is often the right
+behaviour rather than expiring.
 
 ## Common failure modes
 
-**Slack signing-secret mismatch on the ack hook** — the hook returns
-HTTP 403 and logs `slack_signing_secret_mismatch`. Verify that
-`SLACK_SIGNING_SECRET` on the service matches the value in the Slack
-app's "App Credentials" page. The same secret is shared with the
-regression-detector hook; changing it affects both.
+**Slack Ack button returns an error** — signing secret mismatch. The hook
+verifies `SLACK_SIGNING_SECRET` on every inbound request. Check that the env
+var is set on the service:
+```sh
+gcloud run services describe coder-core \
+  --project=vibedevx --region=europe-west1 \
+  --format='value(spec.template.spec.containers[0].env)' \
+  | grep SLACK_SIGNING
+```
+If missing, set it and redeploy.
 
-**PagerDuty L2 silently skipped** — look for `skipped:no_routing_key`
-in `rung_history.outcome` for the escalation row (`GET
-/v1/projects/{id}/escalations/{id}`). The project's
-`pagerduty_routing_key` is null or wrong. Fix via PATCH; the next
-tick's `advance_rungs` won't re-fire an already-fired rung (rungs are
-monotonic), so you may need to resolve and let the next stall reopen.
+**PagerDuty rung silently skipped** — `rung_history[].outcome` will read
+`skipped:no_routing_key`. Set the project's `pagerduty_routing_key`. If the
+key is present but the outcome is `error:rate_limit`, PagerDuty's Events API
+is being throttled (120 req/min per integration key) — escalations fire at
+most one event per rung, so a sustained rate-limit usually means multiple
+projects share a routing key and are all firing simultaneously.
 
-**Dispatcher errors in `rung_history.outcome`** — `error:<detail>`
-entries mean the dispatcher threw. Check structured logs for
-`escalation.dispatch_error` with the same escalation ID. Common causes:
-Slack token expired (re-mint via the admin OAuth flow), PagerDuty API
-rate limit (transient; next tick retries if `next_rung_due_at` is
-still in the past — but rung monotonicity means it won't re-fire a
-completed rung on the same row).
+**Dispatcher errors in rung_history** — `error:<detail>` holds the exception
+message. Common causes: Slack bot token revoked, `PAGERDUTY_EVENTS_API_URL`
+misconfigured, network timeout. Search Cloud Logging for
+`jsonPayload.event="escalation.dispatch_error"` to see the full context.
 
-**DispatcherQueue tasks misreported as stalls** — they shouldn't be.
-The stall query explicitly excludes `pipeline_runs` whose only blocked
-tasks are in `DispatcherQueue` state. If you see a queued-task run
-triggering a stall escalation, check that the migration 0046 landed
-with the correct exclusion predicate.
+**DispatcherQueue tasks appearing as stalls** — should not happen; the stall
+detector excludes tasks with `stage='queued'`. If you observe a stall
+escalation on a run that is genuinely only waiting for dispatcher capacity,
+the exclusion query may have drifted — file a bug.
 
-**Tick executions going red** — a per-row error is captured in
-`rung_history` and the watcher moves on; the Job still exits 0. A
-systemic red (every execution fails) usually means DB connectivity or
-Cloud SQL IAM. Check `gcloud run jobs executions describe
-<exec-id> --region=europe-west1` for the exit reason.
+## Self-healing integration
 
-## Relationship with self-healing (0042)
+When the 0042 self-healing watchdog remediates a stalled or failed run before
+a human responds, it calls
+`POST /v1/projects/{id}/escalations/{esc_id}/resolve` with
+`resolved_by_id='self_healing'`. The row then shows:
 
-When the self-healing watchdog remediates a stuck or failing run before
-a human acks, it calls `.../resolve` with `resolved_by_id='self_healing'`.
-The escalation row transitions to `resolved` with `resolved_by`
-identifying the self-healing actor and `resolved_at` set. Further rungs
-stop immediately. The `audit_events` row has
-`action='escalation.resolved'` with `actor_method='system'` and
-`after.resolved_by_id='self_healing'`.
+- `status='resolved'`
+- `resolved_by_id='self_healing'`, `resolved_at=<timestamp>`
+- Audit event `escalation.resolved` with `actor_method='system'` and
+  `after.resolved_by_id='self_healing'`.
 
-On the admin panel the row appears under the "resolved" filter with the
-on-call identity blank and the resolved-by field showing the system
-actor. The `/metrics` `false_positive_rate_7d` counts these as
-non-false-positive (the stall was real; self-healing just beat the
-human). A high proportion of self-healing-resolved escalations in
-`by_trigger_7d` is a positive signal for 0042 capture rate.
-
-## Related
-
-- Spec: [escalations](../product-specs/active/escalations.md)
-- Design: [escalations](../designs/active/escalations.md)
-- Adjacent runbooks:
-  [pipeline-run-blocked](./pipeline-run-blocked.md) (manual triage
-  of a stalled run before escalation fires),
-  [secret-rotation-scheduler](./secret-rotation-scheduler.md) (same
-  Cloud Run Job + Scheduler pattern),
-  [auto-approve-rollout](./auto-approve-rollout.md) (same staged
-  flag-rollout pattern).
+Compare `resolved_by_id='self_healing'` vs human-resolved counts in
+`/admin/escalations` or the audit log to measure the watchdog capture rate
+over time.
