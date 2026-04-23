@@ -301,54 +301,44 @@ already knows how to write an `audit_events` row.
 - **Impersonation tokens minted / hr** — separate from HTTP-path
   impersonation; shows agent-driven-impersonation volume.
 
-## Open questions
+## Decisions (closed open questions)
 
-- **OQ1 — MCP session lifetime.** Does one MCP session hold one
-  bearer token for its lifetime (simple; forces a new session to
-  switch roles), or can the session refresh/rotate the bearer
-  mid-session (supports the impersonation handoff in a single
-  session)? Leaning: v1 = one bearer per session; `impersonate`
-  returns the new token and the client opens a new session with
-  it. Simpler, auditable.
+- **D1 — MCP session lifetime: one bearer per session.** The
+  bearer is chosen at `initialize` and fixed for the session's
+  life. Agents stay in-role indefinitely on one session; a role
+  switch requires a new session with a different bearer. Rejected
+  the in-session-rotation alternative because it complicates audit
+  attribution (who owns the rows during a swap window?) for little
+  gain — most agents authenticate once at startup and never
+  switch.
 
-- **OQ2 — Project API key scope for MCP.** Today a project API
-  key lets the caller hit any project-scoped HTTP endpoint. Same
-  breadth via MCP means a shared project key used across several
-  agents is a blast-radius concern. Leaning: no new mechanism in
-  v1 (same as HTTP); spec 0038's rotation covers key compromise.
-  Revisit if a phase-2 wants per-agent sub-keys.
+- **D2 — Project API key blast radius stays as-is.** A project API
+  key used via MCP has the same breadth it does via HTTP today. No
+  new per-agent sub-keys in v1. Key compromise is already covered
+  by 0038 rotation. Revisit only if a concrete abuse pattern
+  emerges.
 
-- **OQ3 — Impersonation handoff UX.** After `impersonate()` returns
-  a JWT, the client has to open a new MCP session to act as the new
-  role. That's two round-trips where operators want one. Possible
-  extension: `impersonate` also performs a session-level swap in
-  the response so the same session starts handling subsequent calls
-  as the impersonated role. Needs more thought on idempotency
-  + audit attribution (whose actor on the audit rows during the
-  "swapped" window?). Leaning: v1 = new session; document the
-  idiom.
+- **D3 — Impersonation handoff: two round-trips.** `impersonate`
+  returns `{token, role, project_id, exp}`; the client opens a
+  fresh MCP session with the new token to act as the role. Every
+  audit row in a given session has exactly one caller identity —
+  no swap-window ambiguity. Documented as the canonical idiom.
 
-- **OQ4 — SSE subscription fan-out.** Each subscribed resource holds
-  an SSE connection from MCP server → internal stream. At fleet
-  scale (say 50 connected agents each watching 3 projects), that's
-  150 concurrent SSE fan-outs. Current implementation handles ~20
-  admin-panel connections fine. Phase 2 may need a shared fan-out
-  broker. v1 cap: reject new subscriptions past
-  `MCP_MAX_SUBSCRIPTIONS_PER_SESSION=10` with JSON-RPC error.
+- **D4 — Subscription cap: 10 per session (hard).** Cheap
+  insurance against a pathological client opening thousands of
+  subscriptions on one session. 10 is generous enough that no
+  honest agent hits it. If fleet-wide SSE fan-out ever becomes a
+  load problem, solve it then with a shared-broker layer — not a
+  v1 concern.
 
-- **OQ5 — Dogfood: should workers use MCP?** The developer worker
-  today reads knowledge via `KnowledgeRepoView` (direct GitHub).
-  The architect worker fetches via the HTTP API. Using MCP
-  internally would unify the fetch path and prove the surface
-  under real load — but it adds an in-process MCP client dep and
-  latency. Leaning: v1 external-only; revisit when the surface
-  is battle-tested externally.
+- **D5 — External-only v1; workers don't use MCP internally.**
+  Developer worker keeps reading knowledge via `KnowledgeRepoView`;
+  architect keeps using the HTTP API. Revisit dogfood only after
+  the external surface has soaked under real load.
 
-- **OQ6 — Tool naming convention.** `list_tasks` vs `tasks.list`
-  vs `tasks/list`. MCP spec is neutral. Leaning: flat
-  snake_case verbs (`list_tasks`) since that reads naturally in
-  tool-call contexts and matches the emerging convention in most
-  MCP servers shipped to date.
+- **D6 — Tool naming: flat snake_case verbs.** `list_tasks`,
+  `create_task`, `approve_task_plan`. Reads naturally in tool-call
+  contexts and matches the convention most shipped MCP servers use.
 
 ## Links
 
