@@ -360,11 +360,20 @@ In-flight notes to bridge sessions. Deleted when this WIP folds into
 
 ### Session handoff — 2026-04-24 (end-of-session)
 
-**Status.** Stage 1 + nine Stage 2 slices merged. All 13 v1 tools listed
-in the Scope / "v1 tool surface" subsection live on `coder-core` `main`
-behind `CODER_MCP_ENABLED=false`. The admin-UI toggle merged on
-`coder-admin`. Only the SSE subscription resources remain to close out
-Stage 2.
+**Status.** Stage 1 + nine Stage 2 slices + the SSE resource slice
+merged behind `CODER_MCP_ENABLED=false`. All 13 v1 tools and all 3
+v1 resources (pipeline-runs/live, tasks/{id}/messages, metrics)
+ship on `coder-core` `main`. The admin-UI toggle lives on
+`coder-admin`. **Stage 2 is done; next step is Stage 3 rollout.**
+
+> **Update 2026-04-24 (late session).** SSE resources landed via
+> [coder-core#20](https://github.com/coder-devx/coder-core/pull/20).
+> Went with the hand-rolled dispatcher (not the `mcp` Python SDK) —
+> see the PR description for reasoning. Subscription cap (D4)
+> enforced per `(actor, bound_project_id)` since the current
+> transport is session-less. The "What to start with next session"
+> checklist below is kept for historical context but is satisfied
+> by the merged PR.
 
 Design decisions D1–D6 above are locked — don't re-litigate. Relevant
 ones for the SSE slice: D1 (one bearer per session — role switch needs
