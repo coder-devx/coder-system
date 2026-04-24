@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-23
-updated: 2026-04-23
-last_verified_at: 2026-04-23
+updated: 2026-04-24
+last_verified_at: 2026-04-24
 served_by_designs: ['0049']
 related_specs:
   - impersonation
@@ -352,3 +352,142 @@ already knows how to write an `audit_events` row.
   [knowledge-api](../active/knowledge-api.md)
 - Roadmap: Phase 7 — Trusted Autonomy (agents driving Coder is
   the autonomy increase this unlocks)
+
+## Working log
+
+In-flight notes to bridge sessions. Deleted when this WIP folds into
+`active/`.
+
+### Session handoff — 2026-04-24 (end-of-session)
+
+**Status.** Stage 1 + nine Stage 2 slices merged. All 13 v1 tools listed
+in the Scope / "v1 tool surface" subsection live on `coder-core` `main`
+behind `CODER_MCP_ENABLED=false`. The admin-UI toggle merged on
+`coder-admin`. Only the SSE subscription resources remain to close out
+Stage 2.
+
+Design decisions D1–D6 above are locked — don't re-litigate. Relevant
+ones for the SSE slice: D1 (one bearer per session — role switch needs
+a new session), D4 (hard cap 10 subscriptions per session), D6 (flat
+snake_case tool/resource naming).
+
+#### What's already in place
+
+**Transport** — `coder_core/mcp/app.py`
+
+- Hand-rolled JSON-RPC 2.0 over plain HTTP POST (no `mcp` Python SDK
+  dep yet — skipped in Stage 1 since tools-only didn't need it).
+- Handles `initialize`, `tools/list`, `tools/call`, `ping`.
+- Per-request contextvar threads `correlation_id` to tool handlers.
+- `_ParamError`, `MCPAuthError`, `ValidationError`, `HTTPException`
+  all translate to proper JSON-RPC error codes.
+
+**Auth adapter** — `coder_core/mcp/auth.py`
+
+- `resolve_caller` tries: admin JWT → broker JWT → project API key.
+- `authorise_for_project` enforces per-project opt-out via
+  `projects.mcp_enabled`; admin bypasses.
+- Broker-JWT revocation check via `ImpersonationSessionRow.revoked_at`.
+
+**Tool registry** — `coder_core/mcp/tools/__init__.py`
+
+- 13 tools in stable order.
+- `ToolDef` has `required_admin` for visibility filtering in
+  `tools/list`.
+- Thin-shim pattern: each tool delegates to an existing HTTP handler
+  via `request_stub_with_correlation_id`.
+
+`SSEBroker` already exists in `coder-core` and is consumed by the admin
+panel today. Pipeline-run events flow through it as
+`pipeline_run.changed` / `pipeline_run.gate_blocked`.
+
+#### The SSE slice — what needs to happen
+
+Scope (from the "v1 resource surface" subsection above):
+
+- Three resources:
+  - `coder://projects/{id}/pipeline-runs/live` (subscribable) — wraps
+    existing `pipeline_run.changed`.
+  - `coder://projects/{id}/tasks/{id}/messages` (subscribable) — wraps
+    the `task_messages` feed.
+  - `coder://projects/{id}/metrics` (not subscribable, just fetch) —
+    returns the metrics rollup.
+- Three new JSON-RPC methods: `resources/list`, `resources/read`,
+  `resources/subscribe`.
+- Per-session subscription cap = 10 (already in config as
+  `mcp_max_subscriptions_per_session`, per D4).
+
+**Transport change required.** The current `app.py` returns a single
+`JSONResponse` per request. Subscriptions need the server to hold a
+response stream open and push multiple JSON-RPC notification frames.
+Two paths:
+
+- **Option A — adopt the `mcp` Python SDK now.** Its
+  `streamable_http_app()` handles subscription plumbing + reconnection
+  + spec-compliant event-id framing. Trade-off: adds a runtime dep and
+  requires refactoring the existing tool registry to the SDK's
+  decorator pattern. The SDK is mature enough (it's what Anthropic's
+  own servers use). **Recommended.**
+- **Option B — hand-roll SSE on top of existing app.** FastAPI has
+  `StreamingResponse` for SSE. Keep the tool surface untouched, just
+  add a POST `/mcp` variant (or a separate GET for SSE channel opening
+  per the MCP spec) that serves `text/event-stream`. Smaller diff,
+  less spec-compliant, harder to debug from an MCP client's
+  perspective.
+
+Pick A unless there's a strong reason not to.
+
+**Files to touch for Option A:**
+
+- `src/coder_core/mcp/app.py` — wrap existing handlers in the SDK's
+  `Server` construct, mount via `streamable_http_app()`.
+- `src/coder_core/mcp/resources/` (new package) — one module per
+  resource with `read` + optional `subscribe` generator.
+- `src/coder_core/mcp/tools/__init__.py` — likely needs adapting to
+  the SDK's tool-registration API (small).
+- `pyproject.toml` — `uv add mcp`.
+- Tests: `tests/test_mcp_resources.py` — subscribe + deliver one
+  event on a pushed `pipeline_run.changed`.
+- Isolation manifest: no entries needed (MCP already noted as
+  project-id-via-body, not URL).
+
+#### Operational state
+
+- Fleet flag `CODER_MCP_ENABLED` is off in prod. Leave off until an
+  external agent is actually being onboarded.
+- `projects.mcp_enabled` is `NULL` for every project (fleet default).
+- Prod image: whatever the latest merge landed as. All today's PRs
+  deploy via push-to-main CI.
+
+#### Known debt noted in today's commits
+
+- `submit_knowledge` update-of-missing-artifact leaks
+  `-32603 internal` instead of `-32602 invalid_params`. The
+  knowledge-service error path doesn't bubble through the
+  `HTTPException` translator. Small fix in `coder-core` if operators
+  see internal-error alerts.
+- Worker pipeline can't reliably land multi-file code tasks. Today's
+  dogfood attempts on three slices hung at 20–25 min with no PR. Root
+  cause is multi-factor (cold context, cold dep cache, serial
+  pipeline stages, `max_turns=50` too tight, subprocess plumbing
+  overhead). The spawned E2E worker-health-probe WIP chip-dropped
+  earlier today is the right place to track this.
+- PR #9 (orphan-dispatch-reaper) closed as stale today. If 0042's
+  `zombie_executing` pattern slips and operators see runs stuck at
+  `status='running'`, the reaper code in the closed PR is still
+  valuable — open a fresh PR rebased on current `main`.
+
+#### What to start with next session
+
+1. Read this note + the "v1 resource surface" and "MCP server mounted
+   on `/mcp`" subsections of Scope above.
+2. Decide Option A vs. Option B.
+3. If A: `uv add mcp`, then draft one resource end-to-end
+   (`pipeline-runs/live`) to prove the SDK integration.
+4. Add a dedicated test that simulates an `SSEBroker.publish` and
+   asserts the subscribed MCP client receives the notification.
+5. Add the other two resources once the pattern holds.
+6. Ship as one PR (this slice is a single coherent change).
+
+Then Stage 2 is done; Stage 3 is rollout (canary on `coder`, soak,
+fleet-flag flip).
