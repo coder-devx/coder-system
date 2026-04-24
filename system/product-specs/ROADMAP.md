@@ -132,7 +132,7 @@ The system today, by logical component. Each links to its active spec
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20 |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | infra wired, Stage 1 shadow |
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
-| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | Stage 1 + 5 Stage 2 slices shipped; 4 remaining |
+| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | Stage 1 + 9 Stage 2 slices shipped; SSE resources remain |
 | [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | drafting |
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | drafting |
@@ -764,34 +764,44 @@ per project, Boolean).
 - **Stage 1 — PR #12.** Schema (migration 0051, tri-state
   `projects.mcp_enabled` Boolean), hand-rolled JSON-RPC 2.0
   transport at `/mcp`, auth adapter handling admin JWT + project
-  API key (broker JWT deferred to Stage 2), tool registry,
-  `list_tasks` tool end-to-end, `mcp.session_opened` audit action.
-  Self-review caught + fixed one real bug (HTTPException →
-  -32603 instead of -32602 translation).
+  API key, tool registry, `list_tasks` tool end-to-end,
+  `mcp.session_opened` audit action. Self-review caught + fixed
+  one real bug (HTTPException → -32603 instead of -32602
+  translation).
 - **Stage 2 reads — PR #13.** Four more read tools (`get_task`,
-  `list_pipeline_runs`, `get_pipeline_run`, `get_metrics`),
-  thin shims over existing HTTP handlers.
+  `list_pipeline_runs`, `get_pipeline_run`, `get_metrics`).
 - **Stage 2 knowledge reads — PR #14.** `list_knowledge` +
   `get_knowledge`, using the process-wide github client directly.
 - **Stage 2 first write — PR #15.** `create_task` plus a
   `pydantic.ValidationError` → -32602 handler in the transport.
-- **Stage 2 admin toggle — PR #16.** `POST /v1/_admin/projects/
-  {id}/mcp-enabled` endpoint + `project.set_mcp_enabled` audit
-  action; the path operators use to opt a project in.
+- **Stage 2 admin toggle endpoint — PR #16.** `POST /v1/_admin/
+  projects/{id}/mcp-enabled` + `project.set_mcp_enabled` audit
+  action.
+- **Stage 2 correlation-ID plumbing + 3 tools — PR #17.**
+  `coder_core.mcp.context` contextvar + `request_stub_with_
+  correlation_id` helper. Unlocks `approve_task_plan`,
+  `reject_task_plan`, and the admin-only `override_pipeline_run`.
+- **Stage 2 broker-JWT + `impersonate` — PR #18.** Third bearer
+  path on the auth adapter (verify + revocation check), plus the
+  impersonation tool that makes agent role-taking end-to-end.
+- **Stage 2 `submit_knowledge` — PR #19.** Final v1 tool — one
+  tool with a `mode` arg dispatching to create vs update.
+- **Stage 2 admin UI — coder-admin #3.** `MCPEnabledCard` on
+  ProjectDetail mirroring the AuthModeCard shape, consuming the
+  `/mcp-enabled` endpoint.
 
-Seven of the 12 v1 tools are live. Fleet flag stays off until an
-external agent is actually onboarded.
+**All 13 v1 tools live behind the flag** (12 from the spec's
+list plus `create_task` which the design split across reads +
+writes). Fleet flag `CODER_MCP_ENABLED` stays off until an
+external agent is onboarded.
 
 **Remaining Stage 2:**
 
-- Correlation-ID plumbing + the three writes that need it
-  (approve/reject task plan, submit_knowledge).
-- Broker-JWT path in the auth adapter + admin tools (`impersonate`,
-  `override_pipeline_run`).
 - SSE subscription resources (three resources over the existing
-  `SSEBroker`).
-- `coder-admin` UI toggle consuming the new `/mcp-enabled`
-  endpoint.
+  `SSEBroker`) — only piece left. Biggest new surface: the current
+  transport is one-shot request/response; subscriptions need the
+  server to hold a response stream open and push JSON-RPC
+  notifications.
 
 - **Status:** Stage 1 + half of Stage 2 shipped
 - **WIP:** [0049](./wip/0049-mcp-agent-interface.md) · **Design:** [0049](../designs/wip/0049-mcp-agent-interface.md)
