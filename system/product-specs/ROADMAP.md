@@ -26,8 +26,27 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-23 — **0041 (escalations) and 0042 (self-healing
-v1) shipped into `active/`** as two new components (coder-core
+Last updated: 2026-04-24 — **0049 (MCP agent interface) Stage 1
+shipped + Stage 2 half-landed**. Stage 1 machinery (schema + JSON-RPC
+transport + auth adapter + `list_tasks` tool) merged as PR #12;
+Stage 2 slices merged: reads (PR #13), knowledge reads (PR #14),
+`create_task` + `ValidationError` handler (PR #15), admin-PATCH
+endpoint for `projects.mcp_enabled` (PR #16). Seven of the spec's
+12 v1 tools now live behind the `CODER_MCP_ENABLED` flag (default
+off). Remaining Stage 2: correlation-id plumbing + the 3
+write tools that need it (approve/reject plan, submit_knowledge),
+broker-JWT adapter + admin tools (`impersonate`,
+`override_pipeline_run`), SSE subscription resources, admin panel
+UI toggle. Also shipped today: three infra fixes — worker model
+defaults bumped to Sonnet 4.6 (the previous default was retired
+API-side, silently breaking all dev tasks for 9+ days), fleet
+OAuth token rotated, Docker runtime stage gained `uv` so worker
+tasks on Python repos can actually run `uv sync` + `pytest`.
+**Orphan-dispatch reaper** (PR #9) also merged — re-queues tasks
+stuck at `status='running'` past 25 min; overlaps with 0042's
+deferred `zombie_executing` pattern but ships the simpler
+timestamp-based variant now. 2026-04-23 — **0041 (escalations) and
+0042 (self-healing v1) shipped into `active/`** as two new components (coder-core
 `c992a7b`, deployed 2026-04-22). 0041 lands the full 3-rung ladder
 watcher, Slack + PagerDuty dispatchers, per-project on-call schedule,
 admin pages; flag default off, rollout is the documented 3-stage
@@ -113,7 +132,7 @@ The system today, by logical component. Each links to its active spec
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20 |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | infra wired, Stage 1 shadow |
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
-| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | drafting |
+| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | Stage 1 + 5 Stage 2 slices shipped; 4 remaining |
 | [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | drafting |
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | drafting |
@@ -729,7 +748,7 @@ surfacing.
   pattern registry (zombie + orphan) once the heartbeat +
   replay-chain surfaces land.
 
-### 0049 — MCP agent interface (drafting)
+### 0049 — MCP agent interface (Stage 1 + 5 Stage 2 slices shipped)
 
 Add an MCP server to `coder-core` so external agents can connect,
 authenticate with existing tokens, and drive Coder: read pipeline
@@ -738,10 +757,43 @@ to SSE-backed resources. Twelve v1 tools wrap existing HTTP
 handlers; the MCP layer is a transport + schema adapter, not a new
 permission model (impersonation + audit stay unchanged). Two flags:
 `CODER_MCP_ENABLED` (fleet) and `projects.mcp_enabled` (tri-state
-per project). Phase 7 fit: letting agents drive Coder is the
-autonomy increase 0040-0042 are a prerequisite for.
+per project, Boolean).
 
-- **Status:** drafting
+**Shipped (2026-04-23 / 24):**
+
+- **Stage 1 — PR #12.** Schema (migration 0051, tri-state
+  `projects.mcp_enabled` Boolean), hand-rolled JSON-RPC 2.0
+  transport at `/mcp`, auth adapter handling admin JWT + project
+  API key (broker JWT deferred to Stage 2), tool registry,
+  `list_tasks` tool end-to-end, `mcp.session_opened` audit action.
+  Self-review caught + fixed one real bug (HTTPException →
+  -32603 instead of -32602 translation).
+- **Stage 2 reads — PR #13.** Four more read tools (`get_task`,
+  `list_pipeline_runs`, `get_pipeline_run`, `get_metrics`),
+  thin shims over existing HTTP handlers.
+- **Stage 2 knowledge reads — PR #14.** `list_knowledge` +
+  `get_knowledge`, using the process-wide github client directly.
+- **Stage 2 first write — PR #15.** `create_task` plus a
+  `pydantic.ValidationError` → -32602 handler in the transport.
+- **Stage 2 admin toggle — PR #16.** `POST /v1/_admin/projects/
+  {id}/mcp-enabled` endpoint + `project.set_mcp_enabled` audit
+  action; the path operators use to opt a project in.
+
+Seven of the 12 v1 tools are live. Fleet flag stays off until an
+external agent is actually onboarded.
+
+**Remaining Stage 2:**
+
+- Correlation-ID plumbing + the three writes that need it
+  (approve/reject task plan, submit_knowledge).
+- Broker-JWT path in the auth adapter + admin tools (`impersonate`,
+  `override_pipeline_run`).
+- SSE subscription resources (three resources over the existing
+  `SSEBroker`).
+- `coder-admin` UI toggle consuming the new `/mcp-enabled`
+  endpoint.
+
+- **Status:** Stage 1 + half of Stage 2 shipped
 - **WIP:** [0049](./wip/0049-mcp-agent-interface.md) · **Design:** [0049](../designs/wip/0049-mcp-agent-interface.md)
 - **Extends:** `impersonation`, `service-accounts`, `audit-log`,
   `admin-panel`, `multi-tenancy`, `task-orchestration`,
