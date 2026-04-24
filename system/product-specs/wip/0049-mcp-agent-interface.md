@@ -373,7 +373,11 @@ ship on `coder-core` `main`. The admin-UI toggle lives on
 > enforced per `(actor, bound_project_id)` since the current
 > transport is session-less. The "What to start with next session"
 > checklist below is kept for historical context but is satisfied
-> by the merged PR.
+> by the merged PR. Stage 3 rollout procedure is written up as
+> [mcp-agent-interface-rollout](../../runbooks/mcp-agent-interface-rollout.md)
+> — don't flip `CODER_MCP_ENABLED` until an external agent is
+> within a day of being onboarded (see runbook's "Stage 3 is
+> demand-driven" section).
 
 Design decisions D1–D6 above are locked — don't re-litigate. Relevant
 ones for the SSE slice: D1 (one bearer per session — role switch needs
