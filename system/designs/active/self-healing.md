@@ -17,7 +17,7 @@ affects_repos: [coder-core]
 
 ## What it is
 
-One Cloud Run Job (`coder-core-self-heal-watch`), one table
+One Cloud Run Job (`coder-core-self-heal-tick`), one table
 (`self_heal_attempts`), one registry of `Remediator`
 implementations, one tick function. Every 5 minutes `tick()` runs
 each registered remediator's `detect` against DB state, checks the
@@ -44,7 +44,7 @@ flowchart TB
     ae[(audit_events)]
   end
 
-  subgraph job ["Cloud Run Job:<br/>coder-core-self-heal-watch"]
+  subgraph job ["Cloud Run Job:<br/>coder-core-self-heal-tick"]
     tick[5-min tick]
     reg[registry iteration]
     cap[cap check]
@@ -225,6 +225,19 @@ the operationally-felt symptom is "rows stuck for hours/days after
 a Cloud Run instance died mid-dispatch", not "rows stuck for
 minutes" — the timestamp signal is fine for the slow case and
 needs zero schema work.
+
+### Watchdog infra deployed 2026-04-25
+
+The Cloud Run Job `coder-core-self-heal-tick` was created in prod
+on 2026-04-25 along with a matching Cloud Scheduler entry that
+triggers it every minute. Job runs `python -m coder_core.self_heal.watch`
+under the `coder-core-sa` service account against the prod database
+via the Cloud SQL Connector — same shape as the existing
+`coder-core-auto-approve-tick` job (image, env, secrets, network).
+Without this, `tick()` had no callsite — the patterns + master flag
+were inert. Verified: scheduled run at 15:06:36 UTC succeeded;
+empty `remediated`/`dry_runs` lists confirm no false positives on
+the (already-clean) dogfood project.
 
 ### Not yet shipped (v1 deferred)
 

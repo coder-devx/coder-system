@@ -27,17 +27,35 @@ trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
 Last updated: 2026-04-25 (later) — **0049 + 0050 Stage 3 + 4
-complete; both soaking before fold-to-active. Plus 3 follow-up
-PRs cleared known debt:** [coder-core#22](https://github.com/coder-devx/coder-core/pull/22)
+complete; both soaking before fold-to-active. Plus 5 follow-up
+PRs cleared known debt + advanced two flag-gated rollouts:**
+[coder-core#22](https://github.com/coder-devx/coder-core/pull/22)
 (`/override reject` now also flips status → cancelled, so rejected
 tasks don't appear under non-terminal MCP/admin filters),
 [coder-core#23](https://github.com/coder-devx/coder-core/pull/23)
 (MCP `tools/call` validates every required arg, not just
 `project_id` — missing fields land as `-32602` with named fields
-instead of the misleading `-32603 internal`), and [coder-core#24](https://github.com/coder-devx/coder-core/pull/24)
+instead of the misleading `-32603 internal`),
+[coder-core#24](https://github.com/coder-devx/coder-core/pull/24)
 (0042 self-heal `zombie_executing` v1.1 — pure-timestamp pattern
 that re-queues `status='running'` rows older than 25 min after a
-Cloud Run instance death; default off, dry_run → apply ramp). Full OAuth
+Cloud Run instance death; default off, dry_run → apply ramp),
+[coder-core#25](https://github.com/coder-devx/coder-core/pull/25)
+(`/override reject` works on legacy `stage IS NULL` rows so
+pre-pipeline tasks can finally be terminated), and
+[coder-core#26](https://github.com/coder-devx/coder-core/pull/26)
+(0040 `auto_approve_shadow_enabled` — Stage 2 of the auto-approval
+rollout: evaluator runs all four predicates regardless of
+fleet/project-opt-in state and the hook emits
+`auto_approve.shadow_decision` for the would-have-applied case;
+no rows written, no SSE published — pure data collection).
+**Two prod flips + one infra add the same day:**
+`AUTO_APPROVE_SHADOW_ENABLED=true` (Stage 2 soak begins),
+`SELF_HEALING_ENABLED=true` + `SELF_HEAL_PATTERN_ZOMBIE_EXECUTING_MODE=dry_run`,
+and a new `coder-core-self-heal-tick` Cloud Run Job + Cloud
+Scheduler created on 2026-04-25 to actually run the watchdog
+every minute (without it, `tick()` had no callsite — the master
+flag was a no-op). Full OAuth
 surface for MCP clients (RFC 8414 metadata, admin-only DCR,
 PKCE authorize/token, Google-callback, OAuth-aware MCP auth
 adapter, 3 new audit actions, migration `0052_oauth_tables`,

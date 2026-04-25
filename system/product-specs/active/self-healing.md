@@ -88,10 +88,11 @@ each remediator's worst case is no change — never a wrong change.
     (`python -m coder_core.self_heal.watch`); `tick()` is the
     orchestrator.
   - `models.py` — domain models shared across patterns.
-- **Cloud Run Job:** `coder-core-self-heal-watch` invoked every
-  five minutes by Cloud Scheduler.
-- **Env flags:** `CODER_SELF_HEALING_ENABLED` (default false),
-  per-pattern mode settings on the config object.
+- **Cloud Run Job:** `coder-core-self-heal-tick` invoked every
+  minute by Cloud Scheduler `coder-core-self-heal-tick` (matching
+  the cadence + naming convention of `coder-core-auto-approve-tick`).
+- **Env flags:** `SELF_HEALING_ENABLED` (default false), per-pattern
+  mode settings on the config object.
 - **Peer call:** `POST /v1/projects/{id}/escalations/{id}/resolve`
   (defined by [escalations](./escalations.md)).
 
@@ -129,6 +130,14 @@ each remediator's worst case is no change — never a wrong change.
   mid-dispatch) without any schema change. Pattern uses the
   established mode flag (`self_heal_pattern_zombie_executing_mode`,
   default `off`); rollout is the documented `dry_run` → `apply` ramp.
+- **Watchdog infra deployed 2026-04-25.** The Cloud Run Job
+  `coder-core-self-heal-tick` runs `python -m coder_core.self_heal.watch`
+  every minute, triggered by Cloud Scheduler of the same name —
+  matching the existing `coder-core-auto-approve-tick` shape.
+  Without this, `tick()` had no callsite and the
+  `self_healing_enabled` flag was effectively a no-op. Same deploy
+  flipped `SELF_HEALING_ENABLED=true` and
+  `SELF_HEAL_PATTERN_ZOMBIE_EXECUTING_MODE=dry_run` — soak begins.
 - The `orphan_chain_hook` (replay pipeline chain after hook failure)
   pattern is **not yet shipped** — needs
   `/v1/_admin/pipeline-runs/{id}/replay-chain` first.
