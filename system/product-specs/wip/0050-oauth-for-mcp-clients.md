@@ -388,6 +388,10 @@ goal is parity-with-admin-via-OAuth, not a new permission model.
   of 0049 v1; this spec re-opens it as its own work item.
 - Roadmap: Phase 7 — Trusted Autonomy (OAuth-for-MCP makes the
   agent surface reachable from the most-used Claude UI).
+- Rollout runbook:
+  [oauth-mcp-clients-rollout](../../runbooks/oauth-mcp-clients-rollout.md) —
+  Google OAuth client setup, fleet-flag flip, claude.ai
+  end-to-end smoke (AC10), rollback.
 - MCP authorisation spec:
   [https://modelcontextprotocol.io/specification/2025-03-26/basic/authorization](https://modelcontextprotocol.io/specification/2025-03-26/basic/authorization)
 - claude.ai connector docs:
