@@ -159,13 +159,23 @@ goal is parity-with-admin-via-OAuth, not a new permission model.
    `token_endpoint_auth_methods_supported: ["none"]` (PKCE-only
    public clients). Served on the same `coder-core` service.
 
-2. **Dynamic Client Registration (RFC 7591).** `POST /oauth/register`
-   accepts a JSON body `{client_name, redirect_uris, ...}` and
-   returns `{client_id, client_id_issued_at}`. `client_secret` is
-   not issued — public clients use PKCE. The registration is
-   stored in a new `oauth_clients` table for audit + revocation.
-   Rate-limited per source IP (10/hour) so a hostile client can't
-   spam the registry.
+2. **Admin-authenticated client registration.** `POST
+   /v1/admin/oauth/clients` (admin JWT required) accepts a JSON
+   body `{client_name, redirect_uris, software_id?,
+   software_version?}` and returns `{client_id,
+   client_id_issued_at}`. `client_secret` is not issued — public
+   clients use PKCE. The registration is stored in a new
+   `oauth_clients` table for audit + revocation. RFC 7591
+   public-DCR style (`POST /oauth/register` with no auth) is
+   intentionally **not** exposed: every email that could complete
+   the flow is already on the admin allowlist, so a public DCR
+   endpoint adds zero capability and one spam surface. The
+   metadata document at
+   `/.well-known/oauth-authorization-server` accordingly omits
+   `registration_endpoint`. Operators register a new MCP client
+   (e.g. claude.ai) by clicking "Register OAuth client" in the
+   admin panel; the resulting `client_id` is pasted into the MCP
+   client's connector form.
 
 3. **Authorisation endpoint with PKCE.** `GET /oauth/authorize`
    accepts `client_id, redirect_uri, code_challenge,
@@ -207,8 +217,9 @@ goal is parity-with-admin-via-OAuth, not a new permission model.
 
 7. **Audit integration.** Three new action strings on
    `audit_events`:
-   - `oauth.client_registered` (one per DCR call) —
-     `actor=client_name`, `actor_method=oauth_registration`.
+   - `oauth.client_registered` (one per admin-driven client
+     creation) — `actor=admin_email`, `actor_method=admin_token`,
+     `target_type=oauth_client`, `target_id=client_id`.
    - `oauth.code_issued` (one per successful Google-callback
      code mint) — `actor=email`, `actor_method=oauth_authorize`.
    - `oauth.token_issued` (one per successful token-endpoint
@@ -218,10 +229,10 @@ goal is parity-with-admin-via-OAuth, not a new permission model.
 
 8. **Fleet flag.** `MCP_OAUTH_ENABLED` (default `false`) gates
    every endpoint added by this spec. When `false`,
-   `/.well-known/oauth-authorization-server`, `/oauth/register`,
-   `/oauth/authorize`, `/oauth/google-callback`, and
-   `/oauth/token` all return 404 — no routes register. Backout =
-   one env flip.
+   `/.well-known/oauth-authorization-server`,
+   `/v1/admin/oauth/clients`, `/oauth/authorize`,
+   `/oauth/google-callback`, and `/oauth/token` all return 404 —
+   no routes register. Backout = one env flip.
 
 ### Out of scope
 
@@ -239,15 +250,19 @@ goal is parity-with-admin-via-OAuth, not a new permission model.
 
 - **AC1.** With `MCP_OAUTH_ENABLED=true`, `GET
   /.well-known/oauth-authorization-server` returns the RFC 8414
-  metadata document with the five endpoints listed above and
-  `code_challenge_methods_supported=["S256"]`. With the flag off,
-  the same path returns 404.
+  metadata document with `authorization_endpoint`,
+  `token_endpoint`, and
+  `code_challenge_methods_supported=["S256"]`. The
+  `registration_endpoint` field is **absent** (admin-only
+  registration; not part of the public discovery surface). With
+  the flag off, the same path returns 404.
 
-- **AC2.** `POST /oauth/register` with a valid client metadata
-  body returns 201 with `{client_id, client_id_issued_at}`. The
-  row in `oauth_clients` carries the `client_name` and registered
-  `redirect_uris`. Spam protection: 11 calls within an hour from
-  the same source IP returns 429 on the 11th.
+- **AC2.** `POST /v1/admin/oauth/clients` with a valid admin
+  JWT and a body `{client_name, redirect_uris[]}` returns 201
+  with `{client_id, client_id_issued_at}`. The row in
+  `oauth_clients` carries the `client_name`, registered
+  `redirect_uris`, and the registering admin's email. The same
+  call without an admin JWT returns 401.
 
 - **AC3.** A full auth-code+PKCE flow ending at `POST
   /oauth/token` returns a JWT whose decoded claims include
@@ -347,11 +362,18 @@ goal is parity-with-admin-via-OAuth, not a new permission model.
   transparently extend to OAuth tokens since both use HS256 with
   the same key. Confirm in design.
 
-- **OQ6 — Should DCR require a CAPTCHA or admin pre-approval?**
-  Public DCR is the spec-recommended shape but it's also a footgun
-  for spam registrations. Phase 1: rate-limit per IP + admin can
-  bulk-revoke from the panel. If spam shows up, add a per-client
-  rate budget on token issuance.
+- **OQ6 — Public DCR or admin-only client registration?**
+  **Decided 2026-04-25 — admin-only.** Public DCR (RFC 7591)
+  is the MCP-spec recommendation but adds zero capability when
+  the admin allowlist already gates who can complete the flow:
+  a hostile registrant can register a client but can't sign in.
+  Operationally, an admin pre-registers each MCP client (e.g.
+  claude.ai) once via `POST /v1/admin/oauth/clients` and pastes
+  the resulting `client_id` into the client's connector form.
+  If a future MCP client is DCR-only (claude.ai's connector form
+  exposes a manual `client_id` field today, so this isn't a
+  blocker), revisit by re-exposing the public endpoint behind a
+  separate flag.
 
 ## Links
 

@@ -41,7 +41,11 @@ reuse what's already wired.
 ## Architecture
 
 `coder-core` plays both roles defined by the MCP authorisation
-spec:
+spec. Client registration is an out-of-band admin action — an
+operator runs `POST /v1/admin/oauth/clients` once per MCP client
+to mint a `client_id`, then pastes it into the client's connector
+form. The `/oauth/*` flow below assumes the `client_id` is
+already in the third-party client's hands.
 
 ```mermaid
 flowchart LR
@@ -56,15 +60,14 @@ flowchart LR
   subgraph Google
     Goog[ID-token verifier]
   end
-  UA -- 1. /oauth/register --> AS
-  UA -- 2. /oauth/authorize --> AS
-  AS -- 3. redirect to Google sign-in --> UA
-  UA -- 4. ID token --> Goog
-  Goog -- 5. ID token + email --> AS
-  AS -- 6. redirect back with code --> UA
-  UA -- 7. /oauth/token (code+PKCE) --> AS
-  AS -- 8. access token --> UA
-  UA -- 9. /mcp (Authorization: Bearer) --> RS
+  UA -- 1. /oauth/authorize (using pre-registered client_id) --> AS
+  AS -- 2. redirect to Google sign-in --> UA
+  UA -- 3. ID token --> Goog
+  Goog -- 4. ID token + email --> AS
+  AS -- 5. redirect back with code --> UA
+  UA -- 6. /oauth/token (code+PKCE) --> AS
+  AS -- 7. access token --> UA
+  UA -- 8. /mcp (Authorization: Bearer) --> RS
 ```
 
 Same FastAPI app, two route prefixes (`/oauth/*` for the AS
@@ -75,19 +78,22 @@ admin + broker JWT issuance.
 
 All seven new routes mount conditionally on `MCP_OAUTH_ENABLED`.
 
-| Route                                        | Method | Body / params                                                                                              | Returns                                |
-|----------------------------------------------|--------|------------------------------------------------------------------------------------------------------------|----------------------------------------|
-| `/.well-known/oauth-authorization-server`    | GET    | (none)                                                                                                     | RFC 8414 metadata JSON                 |
-| `/oauth/register`                            | POST   | `{client_name, redirect_uris[], software_id?, software_version?}`                                          | 201 `{client_id, client_id_issued_at}` |
-| `/oauth/authorize`                           | GET    | `?client_id&redirect_uri&response_type=code&code_challenge&code_challenge_method=S256&state&scope=mcp`     | 302 redirect to Google                 |
-| `/oauth/google-callback`                     | GET    | Google's callback (`?code` from Google's flow + state we threaded through)                                 | 302 redirect back to client's URI with `?code&state` |
-| `/oauth/token`                               | POST   | form: `grant_type=authorization_code, code, code_verifier, client_id, redirect_uri`                        | 200 `{access_token, token_type=Bearer, expires_in}` |
-| `/oauth/clients/{id}/revoke` (admin only)    | POST   | (none)                                                                                                     | 204                                    |
-| `/oauth/sessions/{jti}/revoke` (admin only)  | POST   | (none)                                                                                                     | 204                                    |
+| Route                                                | Method | Auth         | Body / params                                                                                              | Returns                                |
+|------------------------------------------------------|--------|--------------|------------------------------------------------------------------------------------------------------------|----------------------------------------|
+| `/.well-known/oauth-authorization-server`            | GET    | none         | (none)                                                                                                     | RFC 8414 metadata JSON (no `registration_endpoint`) |
+| `/v1/admin/oauth/clients`                            | POST   | admin JWT    | `{client_name, redirect_uris[], software_id?, software_version?}`                                          | 201 `{client_id, client_id_issued_at}` |
+| `/v1/admin/oauth/clients`                            | GET    | admin JWT    | `?include_revoked=false`                                                                                   | `[{client_id, client_name, redirect_uris, registered_at, registered_by, revoked_at}]` (admin-panel listing) |
+| `/v1/admin/oauth/clients/{id}/revoke`                | POST   | admin JWT    | (none)                                                                                                     | 204 (cascades to active sessions)      |
+| `/v1/admin/oauth/sessions/{jti}/revoke`              | POST   | admin JWT    | (none)                                                                                                     | 204                                    |
+| `/oauth/authorize`                                   | GET    | none         | `?client_id&redirect_uri&response_type=code&code_challenge&code_challenge_method=S256&state&scope=mcp`     | 302 redirect to Google                 |
+| `/oauth/google-callback`                             | GET    | none         | Google's callback (`?code` from Google's flow + state we threaded through)                                 | 302 redirect back to client's URI with `?code&state` |
+| `/oauth/token`                                       | POST   | none (PKCE)  | form: `grant_type=authorization_code, code, code_verifier, client_id, redirect_uri`                        | 200 `{access_token, token_type=Bearer, expires_in}` |
 
-The two `/revoke` routes live on the OAuth surface for
-discoverability but are gated by the existing admin JWT — they're
-operator tools, not part of the OAuth dance.
+Admin-driven endpoints live under `/v1/admin/oauth/*` so they ride
+the existing admin-router auth middleware without bespoke wiring.
+The public OAuth dance endpoints live under `/oauth/*`. The split
+matches the threat model: admin endpoints are operator tools,
+public endpoints are the third-party client's API.
 
 `/oauth/google-callback` is the redirect URI we register with
 Google for the OAuth dance. We do *not* expose Google's
@@ -111,7 +117,7 @@ CREATE TABLE oauth_clients (
   software_id     TEXT,                        -- optional, RFC 7591 §2
   software_version TEXT,
   registered_at   TIMESTAMPTZ NOT NULL,
-  registered_ip   TEXT NOT NULL,               -- for rate-limit + audit
+  registered_by   TEXT NOT NULL,               -- admin email (audit + UI)
   revoked_at      TIMESTAMPTZ                  -- NULL = active
 );
 CREATE INDEX idx_oauth_clients_active ON oauth_clients (registered_at) WHERE revoked_at IS NULL;
@@ -258,8 +264,8 @@ works"), then expand.
 | Stage | Code change | Deploy state | Verification |
 |------:|------------|--------------|--------------|
 | 1 | Migration + tables; no routes registered. `MCP_OAUTH_ENABLED=false`. | Schema lands; flag off. | `oauth_clients` etc. exist; `/.well-known/oauth-authorization-server` 404s. |
-| 2 | Mount endpoints behind flag; rate-limit DCR; full flow except no production claude.ai client registered. | Flag on **fleet**, but no client in DB → no real users. | `/.well-known/...` returns valid metadata; `curl` of registration + auth + token round-trips against a CLI test client. |
-| 3 | Hand-register claude.ai's client_id (or let DCR fire when an operator clicks "Add custom connector"). Operator completes the flow on their own claude.ai account. | Same as Stage 2; first real user lands. | claude.ai chat session can call `list_tasks` against `coder` project. AC10 passes. |
+| 2 | Mount `/.well-known/...`, `/oauth/{authorize,google-callback,token}`, `/v1/admin/oauth/clients` behind flag. No clients pre-registered. | Flag on **fleet**, but no client in DB → no real users. | `/.well-known/...` returns valid metadata; admin can register a CLI test client via curl + admin JWT, then round-trip auth + token against it. |
+| 3 | Admin registers claude.ai's `client_id` (one curl call against `/v1/admin/oauth/clients` with the operator's redirect URI). Operator pastes the resulting `client_id` into claude.ai's "Add custom connector" form and completes the flow on their own claude.ai account. | Same as Stage 2; first real user lands. | claude.ai chat session can call `list_tasks` against `coder` project. AC10 passes. |
 | 4 | Admin panel UI grows the "Revoke OAuth client / session" buttons + a list view of active OAuth sessions. | UI ships; no backend change. | Operator can see + revoke active sessions from the admin panel. |
 | 5 | Soak for 30 days, then fold spec + design into `active/` per AGENTS.md rule 5. | No infra change. | Spec + design move to `active/`; WIP files deleted. |
 
@@ -283,8 +289,13 @@ gate from spec → design → code.
   other scope returns `invalid_scope`.
 - **OQ5 (key rotation interaction)** — handled transparently
   via `JwtVerifier`'s dual-key window. No new code.
-- **OQ6 (DCR spam)** — rate-limit per source IP (10/hour);
-  admin can bulk-revoke from the panel; no CAPTCHA in v1.
+- **OQ6 (DCR exposure)** — admin-only client registration via
+  `POST /v1/admin/oauth/clients`. Public DCR adds zero
+  capability when only allowlisted Google emails can complete
+  the flow; dropping it removes a spam surface. Operator
+  pre-registers each MCP client (e.g. claude.ai) once and
+  pastes the resulting `client_id` into the client's connector
+  form.
 
 ## Failure modes + mitigations
 
@@ -293,9 +304,11 @@ gate from spec → design → code.
   signed with the old key remains valid until expiry; new
   tokens use the new key. Worst case: the operator force-revokes
   all `oauth_sessions` rows, forcing every client to re-auth.
-- **Hostile client registration** — admin sees the row in the
-  panel + audit log; one click revokes the client and cascades
-  to all its sessions. Per-IP rate limit blunts the spam vector.
+- **Hostile client registration** — not a public attack
+  surface in v1: registration requires an admin JWT. Internal
+  threat (compromised admin) is covered by the existing audit
+  trail and the same revoke flow used for any compromised admin
+  session.
 - **Google outage** — the `/oauth/authorize` redirect to Google
   fails, the user can't complete the flow. Existing admin JWT
   callers (Google ID-token-driven) are similarly broken; this
