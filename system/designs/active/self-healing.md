@@ -207,12 +207,33 @@ flowchart TB
 - `coder-core/src/coder_core/config.py` — `self_healing_enabled`
   setting and per-pattern mode config.
 
+### Shipped 2026-04-25 — `zombie_executing` v1.1 (timestamp-based)
+
+Pattern at `patterns/zombie_executing.py`. Detects rows in
+`status='running'` whose `started_at` is older than
+`zombie_executing_min_minutes` (default 25). Remediates by
+CAS-updating `status` from `running` → `queued` (so an in-flight
+worker that legitimately races us across the tick wins the CAS
+and emits a benign `action='already_moved'`) then re-invoking
+`orchestrate_task` via the same launcher hook `stuck_queued` uses.
+Same mode flag conventions (`off` / `dry_run` / `apply`) and same
+attempt-row + audit shape — the watch loop doesn't need to know
+this is a different pattern.
+
+This shipped in place of the heartbeat-based design below because
+the operationally-felt symptom is "rows stuck for hours/days after
+a Cloud Run instance died mid-dispatch", not "rows stuck for
+minutes" — the timestamp signal is fine for the slow case and
+needs zero schema work.
+
 ### Not yet shipped (v1 deferred)
 
-- `zombie_executing` pattern — requires `tasks.heartbeat_at` column
-  and `PATCH /tasks/{id}/heartbeat` endpoint plus the
-  `with_heartbeat` supervisor wrapper in
-  `coder_core/workers/_runtime.py`.
+- `zombie_executing` heartbeat-based variant — would replace the
+  timestamp signal with `tasks.heartbeat_at` for sub-minute
+  detection. Needs the column, the `PATCH /tasks/{id}/heartbeat`
+  endpoint, and the `with_heartbeat` supervisor wrapper in
+  `coder_core/workers/_runtime.py`. Lands when "row stuck for 25
+  min" stops being the dominant symptom.
 - `orphan_chain_hook` pattern — requires
   `POST /v1/_admin/pipeline-runs/{id}/replay-chain` endpoint.
 - Admin UI `/admin/self-heal` + `VITE_SELF_HEAL_ENABLED` flag —

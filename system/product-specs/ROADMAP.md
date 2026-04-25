@@ -26,23 +26,55 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-25 — **0051 (coder-core modular monolith
-hardening) drafted** — new Scale & Reliability WIP records the
-decision to keep `coder-core` as one deployable service while
-tightening internal module boundaries, thin-router/application-service
-shape, transaction ownership, tenant access helpers, and extraction-
-ready interfaces for workers/knowledge/audit/event publication.
-**0049 (MCP agent interface) Stages 1+2
-complete on prod image; Stage 3 (rollout) gated on a real agent
-being onboarded.** SSE resource slice landed as
+Last updated: 2026-04-25 (later) — **0049 + 0050 Stage 3 + 4
+complete; both soaking before fold-to-active. Plus 3 follow-up
+PRs cleared known debt:** [coder-core#22](https://github.com/coder-devx/coder-core/pull/22)
+(`/override reject` now also flips status → cancelled, so rejected
+tasks don't appear under non-terminal MCP/admin filters),
+[coder-core#23](https://github.com/coder-devx/coder-core/pull/23)
+(MCP `tools/call` validates every required arg, not just
+`project_id` — missing fields land as `-32602` with named fields
+instead of the misleading `-32603 internal`), and [coder-core#24](https://github.com/coder-devx/coder-core/pull/24)
+(0042 self-heal `zombie_executing` v1.1 — pure-timestamp pattern
+that re-queues `status='running'` rows older than 25 min after a
+Cloud Run instance death; default off, dry_run → apply ramp). Full OAuth
+surface for MCP clients (RFC 8414 metadata, admin-only DCR,
+PKCE authorize/token, Google-callback, OAuth-aware MCP auth
+adapter, 3 new audit actions, migration `0052_oauth_tables`,
+13 tests covering AC1–AC9) merged as
+[coder-core#21](https://github.com/coder-devx/coder-core/pull/21)
+(commit `d70f913`). Same Cloud Run revision sets `MCP_ENABLED=true`
+and `MCP_OAUTH_ENABLED=true`, mounts `GOOGLE_OAUTH_CLIENT_SECRET`,
+and pins `MCP_OAUTH_PUBLIC_URL` — `/mcp/health` returns 200 with
+all 13 tools + 3 resources, `/.well-known/oauth-authorization-server`
+returns the metadata doc. **AC10 satisfied live**: claude.ai web
+registered as the first OAuth client (08:18 UTC), full
+`oauth.code_issued` → `oauth.token_issued` → `mcp.session_opened`
+chain landed in the audit log within the same minute (08:31 UTC),
+4 subsequent OAuth-driven MCP sessions opened through 11:25 UTC
+as the operator drove the prod system from claude.ai chat.
+**`coder.mcp_enabled=true`** flipped at 12:28 UTC — the dogfood
+project is the first project actively serving project-scoped MCP
+traffic. End-to-end smoke confirmed via three caller paths
+(project API key, admin JWT, OAuth user). Same-day cleanup:
+15 stale `coder`-project tasks (work for shipped specs
+0019/0023/0024/0049/0012) moved to `stage=rejected` via
+`POST /v1/projects/coder/tasks/{id}/override` so the dispatcher
+no longer re-attempts them. Soak window: ≥30 days per AGENTS.md
+rule 5 → fold both WIPs to `active/` around 2026-05-25.
+**0051 (coder-core modular monolith hardening) drafted** — new
+Scale & Reliability WIP records the decision to keep `coder-core`
+as one deployable service while tightening internal module
+boundaries, thin-router/application-service shape, transaction
+ownership, tenant access helpers, and extraction-ready interfaces
+for workers/knowledge/audit/event publication. Earlier today:
+**0049 (MCP agent interface) Stages 1+2 complete on prod image.**
+SSE resource slice landed as
 [coder-core#20](https://github.com/coder-devx/coder-core/pull/20)
-on 2026-04-24 — all 13 v1 tools + 3 v1 resources behind
-`CODER_MCP_ENABLED=false`. Rollout playbook:
-[mcp-agent-interface-rollout](../runbooks/mcp-agent-interface-rollout.md).
-**Also today: 0050 (OAuth 2.1 for MCP clients) drafted** — spec +
-design WIPs added in response to claude.ai web's connector flow
-requiring OAuth (D2 of 0049 was punted; this re-opens just the
-OAuth half). Phase tag-along with 0049 in Phase 7. Earlier history:
+on 2026-04-24 — all 13 v1 tools + 3 v1 resources, originally
+behind `CODER_MCP_ENABLED=false` (now on per above). Rollout
+playbook:
+[mcp-agent-interface-rollout](../runbooks/mcp-agent-interface-rollout.md). Earlier history:
 2026-04-24 — **0049 Stage 1 shipped + Stage 2 half-landed**. Stage
 1 machinery (schema + JSON-RPC transport + auth adapter +
 `list_tasks` tool) merged as PR #12;
@@ -149,11 +181,11 @@ The system today, by logical component. Each links to its active spec
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20 |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | infra wired, Stage 1 shadow |
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
-| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | Stage 1 + Stage 2 (incl. SSE resources) shipped; Stage 3 rollout pending |
+| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | Stages 1+2+3 shipped; `MCP_ENABLED=true` + `coder.mcp_enabled=true` in prod; soaking through ~2026-05-25 |
 | [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | drafting |
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | drafting |
-| [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients (claude.ai web) | drafting |
+| [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients (claude.ai web) | Stages 1+2+3+4 shipped; claude.ai web registered + driving MCP via OAuth in prod; soaking through ~2026-05-25 |
 | [0051](./wip/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | drafting |
 
 ---

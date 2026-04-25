@@ -367,6 +367,68 @@ already knows how to write an `audit_events` row.
 In-flight notes to bridge sessions. Deleted when this WIP folds into
 `active/`.
 
+### Session handoff — 2026-04-25 (later)
+
+**Stage 3 complete; soaking.** `MCP_ENABLED=true` on prod (set in
+the same Cloud Run revision that flipped `MCP_OAUTH_ENABLED`; see
+spec 0050's working log for the timing). `coder.mcp_enabled=true`
+flipped at 12:28 UTC via `POST /v1/_admin/projects/coder/mcp-enabled`
+— the `coder` dogfood project is the first project actively
+serving project-scoped MCP. End-to-end smoke from outside the
+cluster passes:
+
+```sh
+# AC1
+curl -sS https://coder-core-8534948335.europe-west1.run.app/mcp/health
+# → {"enabled":true,"version":"0.0.3","protocol_version":"2025-03-26",
+#    "tools":[...13 names...],"resources":[...3 URIs...]}
+
+# AC2 + AC3 (project-key caller — the 9 non-admin tools)
+curl -sS -X POST .../mcp -H "Authorization: Bearer $CODER_API_KEY" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize",...}'
+# → 200 with capabilities {tools, resources{subscribe:true}}
+```
+
+**Live audit evidence** (fleet `/v1/_admin/audit-events`):
+
+```
+12:28:32  project.set_mcp_enabled        admin:coder@vibedevx.com   project=coder
+11:49:08  mcp.session_opened             api_key                    project=coder
+11:25:42  mcp.session_opened             oauth:coder@vibedevx.com   (admin-equivalent)
+10:24:36  mcp.session_opened             oauth:coder@vibedevx.com
+10:24:01  mcp.session_opened             oauth:coder@vibedevx.com
+08:31:32  mcp.session_opened             oauth:coder@vibedevx.com   ← first OAuth-driven session
+```
+
+Three caller paths exercised live: project-API-key (this session),
+admin JWT (curl), and OAuth-issued tokens minted by claude.ai web
+via 0050. AC4 + AC5 (audit-row attribution) implicitly verified
+since these rows landed with the right `actor_method` mapping.
+
+**Remaining for fold-to-active** (per AGENTS.md rule 5, ≥30 days
+clean prod soak):
+
+1. Watch the audit log for any `actor_method='mcp'` 5xx or
+   `mcp.session_opened` from unexpected actors.
+2. Set additional `projects.mcp_enabled=true` only on demand.
+3. Around 2026-05-25, fold spec + design into `active/`.
+
+**Operational note — task-cleanup, 2026-04-25.** The dogfood
+project (`coder` tenant) had 17 stale tasks from the 0049/0023/
+0024/0019/0012 ramp — most queued or stuck running for shipped
+work. Cleared via `POST /v1/projects/coder/tasks/{id}/override`
+with `{"action":"reject"}` (project-API-key auth, sets
+`stage=REJECTED` only). 15/17 succeeded; 2 pre-pipeline legacy
+tasks (`stage IS NULL`) couldn't be overridden — they're inert
+because the dispatcher only picks up rows with a non-null stage.
+**Known gap surfaced by this cleanup:** `action=reject` only
+updates `stage`; `status` stays at its pre-reject value. The
+behavior is correct (dispatcher gates on stage) but the admin
+panel + MCP `list_tasks(status=...)` filter still surface
+rejected tasks under their old status until manual cleanup.
+Worth a one-line follow-up in `api/tasks.py:969` to set
+`status=FAILED` (or a new `CANCELLED`) alongside the stage flip.
+
 ### Session handoff — 2026-04-24 (end-of-session)
 
 **Status.** Stage 1 + nine Stage 2 slices + the SSE resource slice
@@ -483,11 +545,15 @@ Pick A unless there's a strong reason not to.
 
 #### Known debt noted in today's commits
 
-- `submit_knowledge` update-of-missing-artifact leaks
-  `-32603 internal` instead of `-32602 invalid_params`. The
-  knowledge-service error path doesn't bubble through the
-  `HTTPException` translator. Small fix in `coder-core` if operators
-  see internal-error alerts.
+- ~~`submit_knowledge` update-of-missing-artifact leaks
+  `-32603 internal` instead of `-32602 invalid_params`.~~ The
+  registry-not-found path was already correct (HTTPException 404 →
+  `-32602`); the actual leak was *missing required arguments*
+  bypassing `tools/call`'s arg-shape check (only `project_id` was
+  validated). Fixed via [coder-core#23](https://github.com/coder-devx/coder-core/pull/23):
+  `_handle_tools_call` now walks `input_schema['required']` and
+  raises `_ParamError` (→ `-32602`) for any missing field, naming
+  them in the message. Verified live in prod 2026-04-25.
 - Worker pipeline can't reliably land multi-file code tasks. Today's
   dogfood attempts on three slices hung at 20–25 min with no PR. Root
   cause is multi-factor (cold context, cold dep cache, serial

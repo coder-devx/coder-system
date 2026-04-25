@@ -115,15 +115,23 @@ each remediator's worst case is no change — never a wrong change.
   coder-core `c992a7b`).** Migration 0049, `coder_core.self_heal`
   package, Cloud Run Job watchdog, `stuck_queued` pattern, escalation
   close-out integration. Default flag off. 556 LoC of tests in
-  `tests/test_self_heal_watch.py`. **v1 scope is `stuck_queued` only.**
-  The `zombie_executing` (worker-heartbeat-based zombie detection)
-  and `orphan_chain_hook` (replay pipeline chain after hook failure)
-  patterns described in the original WIP are **not yet shipped** —
-  both require additional infrastructure (`tasks.heartbeat_at`
-  column + `/tasks/{id}/heartbeat` endpoint for zombie detection;
-  `/v1/_admin/pipeline-runs/{id}/replay-chain` endpoint for orphan
-  chain). They land in a follow-up when the `stuck_queued` rollout
-  justifies the broader surface.
+  `tests/test_self_heal_watch.py`. v1 ship scope was `stuck_queued`
+  only.
+- **`zombie_executing` v1.1 (timestamp-based) shipped 2026-04-25.**
+  Adds the second pattern from the original WIP, scoped down: detects
+  rows in `status='running'` whose `started_at` is older than
+  `zombie_executing_min_minutes` (default 25) and CAS-resets them to
+  `queued` for re-dispatch. Deliberately omits the heartbeat-based
+  variant (`tasks.heartbeat_at` + `/tasks/{id}/heartbeat`) — that
+  needs a migration and a worker-supervisor wrapper, both deferred.
+  The pure-timestamp version covers the operationally-felt symptom
+  (rows stuck running for hours after a Cloud Run instance died
+  mid-dispatch) without any schema change. Pattern uses the
+  established mode flag (`self_heal_pattern_zombie_executing_mode`,
+  default `off`); rollout is the documented `dry_run` → `apply` ramp.
+- The `orphan_chain_hook` (replay pipeline chain after hook failure)
+  pattern is **not yet shipped** — needs
+  `/v1/_admin/pipeline-runs/{id}/replay-chain` first.
 - **Admin UI.** `/admin/self-heal` listing attempts is **not yet
   shipped** — a follow-up once the fleet flag flips from `off` and
   there's real attempt data worth a page. Operator visibility in v1

@@ -396,3 +396,79 @@ goal is parity-with-admin-via-OAuth, not a new permission model.
   [https://modelcontextprotocol.io/specification/2025-03-26/basic/authorization](https://modelcontextprotocol.io/specification/2025-03-26/basic/authorization)
 - claude.ai connector docs:
   [https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp)
+
+## Working log
+
+In-flight notes to bridge sessions. Deleted when this WIP folds into
+`active/`.
+
+### Session handoff — 2026-04-25 (later)
+
+**Stages 1+2 shipped.** Full OAuth surface merged via
+[coder-core#21](https://github.com/coder-devx/coder-core/pull/21)
+(commit `d70f913`):
+
+- 9 routes registered conditionally on `MCP_OAUTH_ENABLED`
+  (RFC 8414 metadata, admin-only DCR, list/revoke clients, list/
+  revoke sessions, `/oauth/authorize`, `/oauth/google-callback`,
+  `/oauth/token`).
+- 4th `resolve_caller` branch in `coder_core.mcp.auth` —
+  OAuth-issued tokens are admin-equivalent in v1.
+- Migration `0052_oauth_tables` adds `oauth_clients`,
+  `oauth_codes`, `oauth_sessions`.
+- 13 tests covering AC1–AC9. AC10 is a manual claude.ai-vs-prod
+  smoke (Stage 4 below).
+
+**Stage 3 — flag flip done.** Same Cloud Run revision (deploy
+`2026-04-25T08:48Z`) sets `MCP_OAUTH_ENABLED=true`,
+`MCP_OAUTH_PUBLIC_URL=https://coder-core-ql732k45va-ew.a.run.app`,
+and mounts `GOOGLE_OAUTH_CLIENT_SECRET` from Secret Manager.
+`MCP_ENABLED=true` flipped at the same time (see 0049 working
+log). Verified live:
+
+```sh
+curl -sS https://coder-core-8534948335.europe-west1.run.app/.well-known/oauth-authorization-server
+# → 200 RFC 8414 doc with issuer, authorization_endpoint,
+#   token_endpoint, code_challenge_methods_supported=["S256"],
+#   token_endpoint_auth_methods_supported=["none"], scopes=["mcp"];
+#   registration_endpoint absent (admin-only DCR per OQ6).
+```
+
+**Stage 4 — first client onboarded ✓ AC10 satisfied.** Operator
+completed the registration + claude.ai sign-in flow on 2026-04-25:
+
+```
+08:18:48  oauth.client_registered  client_name="claude.ai web"
+                                   redirect_uri=https://claude.ai/api/mcp/auth_callback
+                                   software_id=claude-ai
+                                   registered_by=coder@vibedevx.com
+08:31:30  oauth.code_issued        actor=coder@vibedevx.com
+08:31:30  oauth.token_issued       actor=coder@vibedevx.com
+08:31:30  mcp.session_opened       actor=oauth:coder@vibedevx.com
+                                   method=oauth_user
+… 4 additional mcp.session_opened from the same OAuth identity
+  through 11:25 UTC (claude.ai web reconnecting per chat session).
+```
+
+The `oauth.code_issued` → `oauth.token_issued` → `mcp.session_opened`
+chain shipping in the same minute confirms AC1–AC4 + AC10 working
+end-to-end against prod. One active session sits in
+`oauth_sessions` (`token_id=6d6b4f66...`, `expires_at=2026-04-26T08:31`).
+
+**Remaining for fold-to-active** (per AGENTS.md rule 5, ≥30 days
+clean prod soak):
+
+1. Watch token-issuance error rate (`invalid_grant`
+   /`invalid_client` spikes on `/oauth/token`) — claude.ai's
+   client is the only registered consumer today, so any spike
+   would point at our side.
+2. After ~2026-05-25, fold spec + design into `active/`. New
+   active component name: `oauth-mcp` (or merge into a single
+   `mcp-agent-interface` active component alongside 0049 — TBD
+   at fold time per AGENTS.md "single component per concern"
+   guidance).
+
+**Open question OQ1 — hostname pinning.** The metadata doc's
+`issuer` is the current Cloud Run hash URL
+(`coder-core-ql732k45va-ew.a.run.app`). Fine for now;
+re-evaluate if/when a custom domain lands. Not blocking.
