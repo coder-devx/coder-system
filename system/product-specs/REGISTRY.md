@@ -45,6 +45,8 @@ in each component's `## Evolution` section and in git.
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | ro | [0047](../designs/wip/0047-template-schema-migration.md) |
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | ro | [0048](../designs/wip/0048-cross-project-patterns.md) |
 | [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | ro | [0049](../designs/wip/0049-mcp-agent-interface.md) |
+| [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients | ro | [0050](../designs/wip/0050-oauth-for-mcp-clients.md) |
+| [0051](./wip/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | ro | [0051](../designs/wip/0051-coder-core-modular-monolith.md) |
 
 ## Deprecated
 

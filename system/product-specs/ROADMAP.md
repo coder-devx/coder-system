@@ -19,14 +19,20 @@ is in an approval/override role, not a task-authoring role.
 pipeline run advances to `spec_approval` → ready for human approval →
 chain auto-creates architect task.
 
-**Next 9 months (May 2026–Feb 2027).** Six sequenced phases, 23
+**Next 9 months (May 2026–Feb 2027).** Six sequenced phases, 24
 planned items: Scale & Reliability → Cost & Token Efficiency → Admin
 Panel v2 → Security & Compliance → Trusted Autonomy → Knowledge Depth.
 The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-25 — **0049 (MCP agent interface) Stages 1+2
+Last updated: 2026-04-25 — **0051 (coder-core modular monolith
+hardening) drafted** — new Scale & Reliability WIP records the
+decision to keep `coder-core` as one deployable service while
+tightening internal module boundaries, thin-router/application-service
+shape, transaction ownership, tenant access helpers, and extraction-
+ready interfaces for workers/knowledge/audit/event publication.
+**0049 (MCP agent interface) Stages 1+2
 complete on prod image; Stage 3 (rollout) gated on a real agent
 being onboarded.** SSE resource slice landed as
 [coder-core#20](https://github.com/coder-devx/coder-core/pull/20)
@@ -148,6 +154,7 @@ The system today, by logical component. Each links to its active spec
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | drafting |
 | [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients (claude.ai web) | drafting |
+| [0051](./wip/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | drafting |
 
 ---
 
@@ -178,6 +185,7 @@ flowchart TB
     s25["Pipeline run dashboard (shipped)"]
     s26["Transient retry (shipped)"]
     s27["Concurrent pipelines (shipped)"]
+    s51["coder-core modular monolith"]
   end
 
   subgraph cost ["Phase 4 — Cost & Efficiency"]
@@ -226,6 +234,10 @@ flowchart TB
   dev --> s27
   to --> s27
   obs --> s27
+  to --> s51
+  ka --> s51
+  mt --> s51
+  obs --> s51
 
   ka --> s28
   obs --> s28
@@ -287,6 +299,7 @@ flowchart TB
   classDef knowStyle fill:#b2dfdb,stroke:#004d40,stroke-width:2px
 
   class mt,ka,ap,dev,rev,pm,arch,tm,sa,imp,onb,to,cd,obs,s23,s24,s25,s26,s27,s38,s40,s41 activeStyle
+  class s51 scaleStyle
   class s28,s29,s30,s31 costStyle
   class s32,s33,s34,s35 adminStyle
   class s36,s37 secStyle
@@ -400,6 +413,28 @@ widget) surface the dispatcher state.
   [`task-orchestration`](./active/task-orchestration.md) /
   [`worker-communication`](../designs/active/worker-communication.md).
 - **Runbook:** [concurrency-overflow](../runbooks/concurrency-overflow.md).
+
+### 0051 — coder-core modular monolith hardening (drafting)
+
+Keep `coder-core` as one deployable service, one Postgres schema, and
+one test suite, but make its internals behave like a clean modular
+monolith. The work tightens boundaries before any microservice split:
+thin FastAPI/MCP adapters, application services that own workflows,
+visible transaction ownership, central project-access helpers,
+project-scoped repositories, import-boundary checks, and in-process
+protocols for future extraction seams such as worker dispatch,
+knowledge repository access, audit recording, and event publication.
+
+The outcome should make future extraction possible without committing
+to it now. The default expected decision after this WIP is still "no
+microservice split yet"; extract the worker runtime only if concrete
+scaling, deployment, security, or ownership pressure appears.
+
+- **Status:** drafting
+- **WIP:** [0051](./wip/0051-coder-core-modular-monolith.md) ·
+  **Design:** [0051](../designs/wip/0051-coder-core-modular-monolith.md)
+- **Extends:** `task-orchestration`, `knowledge-api`, `multi-tenancy`,
+  `audit-log`, `observability`, role-worker components
 
 ---
 

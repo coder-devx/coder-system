@@ -391,3 +391,22 @@ specs:
   - audit-log
   - admin-panel
   - multi-tenancy
+- id: '0051'
+  title: coder-core modular monolith hardening
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0051-coder-core-modular-monolith.md
+  served_by_designs:
+  - '0051'
+  related_specs:
+  - task-orchestration
+  - knowledge-api
+  - multi-tenancy
+  - audit-log
+  - observability
+  - developer-worker
+  - reviewer-worker
+  - pm-worker
+  - architect-worker
+  - team-manager-worker
