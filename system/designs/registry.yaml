@@ -406,3 +406,17 @@ designs:
   - knowledge-write-api
   affects_services:
   - coder-core
+- id: '0050'
+  title: OAuth 2.1 for MCP clients
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0050-oauth-for-mcp-clients.md
+  implements_specs:
+  - '0050'
+  related_designs:
+  - system-overview
+  - impersonation
+  - audit-log
+  affects_services:
+  - coder-core

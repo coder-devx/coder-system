@@ -318,6 +318,15 @@ already knows how to write an `audit_events` row.
   by 0038 rotation. Revisit only if a concrete abuse pattern
   emerges.
 
+  > **Footnote (2026-04-25).** The OAuth-for-MCP-clients side of D2
+  > ("we already have three working token types; re-using them is
+  > less work") was reopened in
+  > [0050](./0050-oauth-for-mcp-clients.md) — claude.ai web's
+  > custom-connector flow only supports OAuth 2.1, not bearer
+  > headers, so the punt has a concrete cost. The project-API-key
+  > blast-radius half of D2 stands; only the OAuth half is being
+  > revisited.
+
 - **D3 — Impersonation handoff: two round-trips.** `impersonate`
   returns `{token, role, project_id, exp}`; the client opens a
   fresh MCP session with the new token to act as the role. Every

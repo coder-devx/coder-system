@@ -377,3 +377,17 @@ specs:
   - task-orchestration
   - knowledge-api
   - escalations
+- id: '0050'
+  title: OAuth 2.1 for MCP clients
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0050-oauth-for-mcp-clients.md
+  served_by_designs:
+  - '0050'
+  related_specs:
+  - impersonation
+  - service-accounts
+  - audit-log
+  - admin-panel
+  - multi-tenancy

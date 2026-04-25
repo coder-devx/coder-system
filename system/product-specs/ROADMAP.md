@@ -26,9 +26,20 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-24 — **0049 (MCP agent interface) Stage 1
-shipped + Stage 2 half-landed**. Stage 1 machinery (schema + JSON-RPC
-transport + auth adapter + `list_tasks` tool) merged as PR #12;
+Last updated: 2026-04-25 — **0049 (MCP agent interface) Stages 1+2
+complete on prod image; Stage 3 (rollout) gated on a real agent
+being onboarded.** SSE resource slice landed as
+[coder-core#20](https://github.com/coder-devx/coder-core/pull/20)
+on 2026-04-24 — all 13 v1 tools + 3 v1 resources behind
+`CODER_MCP_ENABLED=false`. Rollout playbook:
+[mcp-agent-interface-rollout](../runbooks/mcp-agent-interface-rollout.md).
+**Also today: 0050 (OAuth 2.1 for MCP clients) drafted** — spec +
+design WIPs added in response to claude.ai web's connector flow
+requiring OAuth (D2 of 0049 was punted; this re-opens just the
+OAuth half). Phase tag-along with 0049 in Phase 7. Earlier history:
+2026-04-24 — **0049 Stage 1 shipped + Stage 2 half-landed**. Stage
+1 machinery (schema + JSON-RPC transport + auth adapter +
+`list_tasks` tool) merged as PR #12;
 Stage 2 slices merged: reads (PR #13), knowledge reads (PR #14),
 `create_task` + `ValidationError` handler (PR #15), admin-PATCH
 endpoint for `projects.mcp_enabled` (PR #16). Seven of the spec's
@@ -132,10 +143,11 @@ The system today, by logical component. Each links to its active spec
 | [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20 |
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | infra wired, Stage 1 shadow |
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
-| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | Stage 1 + 9 Stage 2 slices shipped; SSE resources remain |
+| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | Stage 1 + Stage 2 (incl. SSE resources) shipped; Stage 3 rollout pending |
 | [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | drafting |
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | drafting |
+| [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients (claude.ai web) | drafting |
 
 ---
 
