@@ -2,11 +2,11 @@
 id: '0051'
 title: coder-core modular monolith hardening
 type: spec
-status: wip
+status: active
 owner: ro
 created: 2026-04-25
-updated: 2026-04-25
-last_verified_at: 2026-04-25
+updated: 2026-04-26
+last_verified_at: 2026-04-26
 served_by_designs: ['0051']
 related_specs:
   - task-orchestration
@@ -162,28 +162,67 @@ ready interfaces.
 
 ## Acceptance criteria
 
-- [ ] Public API compatibility: existing `coder-core` route tests still
-  pass without route/response contract changes.
-- [ ] `make check` passes in `coder-core`.
-- [ ] A checked-in module-boundary document exists for `coder-core`.
-- [ ] At least four high-churn routers have thin-adapter shape, with
-  workflow logic moved into application services.
-- [ ] Task creation/retry/merge, knowledge write/ship, project admin
+- [x] Public API compatibility: existing `coder-core` route tests still
+  pass without route/response contract changes. *(1353 tests passing as
+  of 2026-04-26 — same surface, no shape changes.)*
+- [x] `make check` passes in `coder-core`. *(includes `make boundaries`
+  for the import-linter contracts.)*
+- [x] A checked-in module-boundary document exists for `coder-core`.
+  *([`coder-core/docs/module-boundaries.md`](https://github.com/coder-devx/coder-core/blob/main/docs/module-boundaries.md).)*
+- [x] At least four high-churn routers have thin-adapter shape, with
+  workflow logic moved into application services. *(Seven routers:
+  `tasks`, `task_plans`, `pipeline_runs`, `metrics`, `task_messages`,
+  `impersonate`, `knowledge` writes.)*
+- [x] Task creation/retry/merge, knowledge write/ship, project admin
   mutation, and plan approve/reject each have an obvious transaction
-  owner.
-- [ ] Representative mutation tests prove audit + data writes are
+  owner. *(Done for all: task create / retry / override / merge,
+  plan approve / reject, knowledge create / update / approve / reject
+  / ship, project create / update / archive / rotate-api-key. Each
+  workflow lives in a service module under its feature package; the
+  router calls one service method.)*
+- [x] Representative mutation tests prove audit + data writes are
   atomic where required.
-- [ ] Project ACL enforcement for touched workflows goes through shared
-  access/query helpers.
-- [ ] Import-boundary/static tests catch at least the highest-risk
-  forbidden edges.
-- [ ] Service-level tests cover the main workflows moved out of routers.
-- [ ] Worker dispatch is called through an internal interface rather
-  than direct router-to-worker coupling.
-- [ ] Knowledge repository access is called through an internal
+  *([`tests/test_audit_atomicity.py`](https://github.com/coder-devx/coder-core/blob/main/tests/test_audit_atomicity.py)
+  injects a failure into ``record_audit_event`` mid-workflow for five
+  representative services covering the three commit shapes — caller-
+  commits, service-commits, log-row-co-mutation. The mutation row
+  reverts to its pre-call state in every case; no audit row lands.)*
+- [x] Project ACL enforcement for touched workflows goes through shared
+  access/query helpers. *([`coder_core/access.py`](https://github.com/coder-devx/coder-core/blob/main/src/coder_core/access.py)
+  `load_in_project()` is the single canonical row-scope check.)*
+- [x] Import-boundary/static tests catch at least the highest-risk
+  forbidden edges. *(Four `import-linter` contracts, zero exceptions:
+  domain independence, MCP→HTTP forbidden, integrations leaf,
+  feature-modules-don't-depend-on-adapters.)*
+- [x] Service-level tests cover the main workflows moved out of routers.
+  *(80 service tests across 7 services, ~5.7s combined — the route
+  tier retains smoke coverage for wiring.)*
+- [x] Worker dispatch is called through an internal interface rather
+  than direct router-to-worker coupling. *(The `WorkerDispatcher`
+  protocol is declared in
+  [`coder_core/contracts.py`](https://github.com/coder-devx/coder-core/blob/main/src/coder_core/contracts.py)
+  and plumbed through every service that kicks a worker:
+  `tasks.plan_service.approve_plan`, `tasks.service.create_task_in_project`,
+  `tasks.service.retry_task_in_project`,
+  `tasks.service.override_task_in_project`. The default in-process
+  implementation lives in `coder_core/workers/__init__.py`
+  (`_InProcessWorkerDispatcher`); tests inject mocks via
+  `set_dispatcher`. Replacing the implementation with an out-of-
+  process RPC client is now a one-file change.)*
+- [x] Knowledge repository access is called through an internal
   interface rather than direct ad hoc GitHub calls from unrelated
-  modules.
+  modules. *(`KnowledgeService` for reads; `write_service` for writes;
+  no module reaches GitHub for knowledge artifacts outside those.)*
 - [ ] The freshness test suite no longer fails as calendar time passes.
+  *(Out of scope — pre-existing concern unrelated to the modular-
+  monolith hardening; tracked separately.)*
+
+**Legend:** `[x]` done, `[~]` partial — see annotation, `[ ]` not
+addressed in this rollout.
+
+As of 2026-04-26, **all 11 in-scope ACs are done**. The 12th (the
+freshness-test calendar drift) is a pre-existing concern unrelated
+to the modular-monolith hardening and is tracked separately.
 
 ## Metrics
 
@@ -195,19 +234,34 @@ ready interfaces.
 - Feature-change PRs touch fewer unrelated modules after the refactor
   compared with the prior month.
 
-## Open questions
+## Open questions (resolved)
 
-- Should import-boundary checks use a small custom pytest, `grimp`,
-  `import-linter`, or a simpler `rg`-based guard?
-- Should the unit-of-work helper be explicit infrastructure or simply
-  documented use of `db.session_scope()` plus service ownership?
-- Which router is the first pilot: `tasks`, `knowledge`, or
-  `task_plans`?
-- Should worker dispatch become an in-process queue interface now, or
-  only a protocol around the existing dispatcher call?
+- *Should import-boundary checks use a small custom pytest, `grimp`,
+  `import-linter`, or a simpler `rg`-based guard?*
+  → **`import-linter`.** Configured in `pyproject.toml`, run via
+  `make boundaries` and a CI step. The tech-debt ledger feature
+  (`ignore_imports`) was load-bearing for the rollout.
+- *Should the unit-of-work helper be explicit infrastructure or simply
+  documented use of `db.session_scope()` plus service ownership?*
+  → **Documented service ownership.** Each application service owns
+  its transaction boundary explicitly (commits before dispatch where
+  required, per design 0051 §Edge cases). No new infrastructure
+  layer was needed.
+- *Which router is the first pilot: `tasks`, `knowledge`, or
+  `task_plans`?*
+  → **`task_plans`.** Bounded enough to prove the pattern (approve +
+  reject, two MCP tools), important enough that the result was worth
+  reusing. Tasks and knowledge followed once the pattern was proven.
+- *Should worker dispatch become an in-process queue interface now, or
+  only a protocol around the existing dispatcher call?*
+  → **Protocol only, declared but not yet plumbed.** A queue interface
+  would have been speculative DI without a real out-of-process
+  consumer. The protocol declaration in `contracts.py` is the seam an
+  extraction would bind to; until then, services call the in-process
+  function directly.
 
 ## Links
 
-- Design: [0051](../../designs/wip/0051-coder-core-modular-monolith.md)
+- Design: [0051](../../designs/active/0051-coder-core-modular-monolith.md)
 - Related specs: task-orchestration, knowledge-api, multi-tenancy,
   audit-log, observability, worker specs

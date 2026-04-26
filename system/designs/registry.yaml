@@ -422,10 +422,10 @@ designs:
   - coder-core
 - id: '0051'
   title: coder-core modular monolith hardening
-  status: wip
+  status: active
   owner: ro
-  folder: wip
-  file: wip/0051-coder-core-modular-monolith.md
+  folder: active
+  file: active/0051-coder-core-modular-monolith.md
   implements_specs:
   - '0051'
   related_designs:
