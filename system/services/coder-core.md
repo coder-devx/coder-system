@@ -24,9 +24,9 @@ exposes:
   - protocol: http
     port: 8080
     path: /v1/projects/{id}/knowledge/{path}
-implements_designs: [system-overview, worker-roles]
+implements_designs: [system-overview, worker-roles, "0051"]
 decided_by: ["0005", "0006", "0010", "0011"]
-last_verified_at: 2026-04-15
+last_verified_at: 2026-04-26
 ---
 
 # Coder Core
@@ -53,25 +53,33 @@ acts across projects without an explicit fan-out.
 - **Impersonation**: mint short-lived, role-scoped tokens for local agents.
 - **Admin Panel backend**: status, override, debug surfaces.
 
-## Current state (as of 2026-04-11)
+## Current state (as of 2026-04-26)
 
-- **v0.0.3** — deployed to Cloud Run. Full multi-tenant orchestrator with
-  all 8 design-0004 specs shipped (51/51 ACs).
-- URL: <https://coder-core-ql732k45va-ew.a.run.app>
-- Runtime SA: `coder-core-sa@vibedevx.iam.gserviceaccount.com`
+- **v0.0.3** — deployed to Cloud Run via push-to-main with Workload
+  Identity Federation. CI canary-deploys, health-checks
+  `/v1/health`, runs Alembic migrations, syncs recurring jobs, then
+  shifts traffic.
+- URL: <https://coder-core-ql732k45va-ew.a.run.app> (also
+  <https://coder-core-8534948335.europe-west1.run.app> — same service).
+- Runtime SA: `coder-core-sa@vibedevx.iam.gserviceaccount.com`.
 - Ingress: `allow-unauthenticated`. Public endpoints: `/v1/health`,
   `/v1/projects` list/get/create. Authenticated (per-project `X-Api-Key`
-  or `Authorization: Bearer`): knowledge API, tasks, impersonation,
-  sessions.
-- DB: `coder-core-db` Cloud SQL Postgres 17 (IAM auth only). Migration
-  `0008` (head). See [`../integrations/cloud-sql.md`](../integrations/cloud-sql.md).
-- Auth: GitHub App (Coder DevX, app ID 3325027) for repo access. Per-project
-  Anthropic API keys in Secret Manager for worker dispatch. Admin JWT
-  (Google OAuth) for admin panel operations (spec 0012).
-- Projects: `coder` (coder-devx org), `vibetrade` (ViberTrade org).
-- CLI: `coder impersonate`, `coder token`, `coder status`,
-  `coder project onboard`, `coder project doctor`.
-- Tests: 181 passing.
+  or `Authorization: Bearer`): knowledge API, tasks, pipeline runs,
+  metrics, impersonation, sessions, MCP.
+- DB: `coder-core-db` Cloud SQL Postgres 17 (IAM auth only).
+- Auth: GitHub App (Coder DevX, app ID 3325027) for repo access. Per-
+  project Anthropic API keys in Secret Manager for worker dispatch.
+  Admin JWT (Google OAuth) for admin panel operations (spec 0012).
+  MCP OAuth (spec 0050) for agent-to-MCP authentication.
+- Tests: **1369 passing** (route-level + service-level).
+- Architecture: **modular monolith** per [design 0051](../designs/active/0051-coder-core-modular-monolith.md).
+  Routers are thin adapters; workflow logic lives in feature-package
+  service modules (`coder_core/tasks`, `pipelines`, `metrics`,
+  `impersonation`, `projects`, `knowledge`). The dependency graph is
+  enforced in CI via `import-linter` with zero `ignore_imports`
+  exceptions. The `WorkerDispatcher` protocol (in
+  `coder_core/contracts.py`) is the seam an out-of-process worker
+  extraction would bind to.
 
 ## Walking-skeleton milestone — reached
 
@@ -164,9 +172,13 @@ flowchart LR
 - **Pipeline state:** Postgres rows with a state machine
   (`queued → running → succeeded / failed / timed_out`). No external
   workflow engine — `asyncio.create_task` dispatches workers in-process.
-- **Worker launch:** in-process modules inside coder-core. The dispatcher
-  leases tasks with `SELECT ... FOR UPDATE SKIP LOCKED` and shells out
-  to `claude`. Splitting into separate repos deferred until scale demands.
+- **Worker launch:** in-process modules inside coder-core. The
+  dispatcher leases tasks with `SELECT ... FOR UPDATE SKIP LOCKED` and
+  shells out to `claude`. Services kick the dispatcher through the
+  `WorkerDispatcher` protocol (per design 0051) so a future extraction
+  to per-role Cloud Run jobs is an implementation swap rather than a
+  rewrite. The decision to keep workers in-process is recorded in
+  the *Extraction decision* section of design 0051.
 - **Orphan recovery:** a background reaper runs inside every instance
   and re-queues tasks stuck at `status='running'` past the worker
   timeout (default: 1500 s threshold, 60 s scan interval, 3-reap cap).
@@ -175,4 +187,6 @@ flowchart LR
   [ADR 0011](../adrs/0011-orphan-dispatch-reaper.md). The planned
   structural fix is Cloud Tasks; the reaper is the near-term safety net.
 - **Knowledge cache:** pull-on-read with a 60-second in-memory TTL cache.
-  `_metrics` endpoint exposes hit/miss counters.
+  `_metrics` endpoint exposes hit/miss counters. Owned by
+  `coder_core.knowledge`; HTTP, MCP, and write workflows all share the
+  same instance via `get_knowledge_service()`.

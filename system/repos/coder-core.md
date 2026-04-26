@@ -13,9 +13,9 @@ ci:
   workflows: [ci]
 cd:
   target: cloud-run
-  trigger: manual
+  trigger: push-to-main
 decided_by: ["0005", "0006", "0010"]
-last_verified_at: 2026-04-08
+last_verified_at: 2026-04-26
 ---
 
 # coder-core
@@ -27,50 +27,64 @@ worker dispatch, knowledge API, impersonation token issuance, pipeline
 runner. Likely also the initial home of the role-typed workers until
 they split into their own repos.
 
-## Layout (proposed)
+## Layout
+
+Modular monolith per design 0051. Routers in `api/` and `mcp/` are
+thin adapters; workflow code lives in feature-package service
+modules. The dependency graph is enforced in CI via `import-linter`
+(see `docs/module-boundaries.md` in the repo).
 
 ```
 src/coder_core/
-  api/                 FastAPI app
-    projects.py
-    knowledge.py
-    workers.py
-    impersonate.py
-    chat.py
-  domain/              project, worker, task, pipeline models
-  pipeline/            enrich / execute / fix / test runner
-  knowledge/           GitHub-backed knowledge repo client + cache
-  workers/             role-typed worker implementations
-    architect.py
-    pm.py
-    tm.py
-    developer.py
-    reviewer.py
-    sysadmin.py
-    consultant.py
-  integrations/        github, gcp, slack, notion, anthropic clients
-  auth/                project ACL, role-scoped tokens
-migrations/            alembic
-tests/
+  main.py            FastAPI app factory
+  config.py          pydantic-settings
+  errors.py          ServiceError base for domain errors
+  access.py          load_in_project — canonical row-scope check
+  contracts.py       WorkerDispatcher / KnowledgeRepository / … protocols
+  admin_jwt.py       Admin JWT mint + decode
+  budget.py          Project token budget policy
+  api/               HTTP transport — adapters only, no workflow logic
+  mcp/               MCP JSON-RPC transport — adapters only
+  tasks/             Task lifecycle workflows (services)
+  pipelines/         Pipeline run workflows (services)
+  metrics/           Aggregation workflow (service)
+  impersonation/     Broker token mint workflow (service)
+  projects/          Project admin workflows (services)
+  knowledge/         Read service, write_service, ship workflow
+  workers/           In-process role workers + dispatcher seam
+  approvals/  escalations/  ops/  rotation/  self_heal/  oauth/
+  integrations/      External adapters: GitHub, GCP, Slack, Anthropic
+  domain/            SQLAlchemy models — pure data layer
+docs/                module-boundaries.md, architectural docs
+migrations/          alembic
+tests/               route-level + service-level coverage
 ```
 
-## Current state (as of commit #1 · 2026-04-08)
+## Current state (as of 2026-04-26)
 
-- Repo exists at [`github.com/coder-devx/coder-core`](https://github.com/coder-devx/coder-core) on GitHub.
-- v0.0.1 walking skeleton: FastAPI on Python 3.12, `GET /v1/health` only.
-- Uses **uv** for dependency management. `pip` is banned per this repo's `AGENTS.md`.
-- Follows ADR 0010: `AGENTS.md` at root, `CLAUDE.md` and `.cursor/rules/coder-core.mdc` as thin pointers.
-- Not yet deployed. Commit #2 adds the manual Cloud Run deploy.
+- v0.0.3 in production via Cloud Run, push-to-main CD.
+- 1369 tests passing. Four `import-linter` boundary contracts hold
+  with zero `ignore_imports` exceptions.
+- Uses **uv** for dependency management. `pip` is banned per
+  `AGENTS.md`.
+- Follows ADR 0010: `AGENTS.md` at root, `CLAUDE.md` and
+  `.cursor/rules/coder-core.mdc` as thin pointers.
 
 ## CI / CD
 
-- **CI** (`ci` workflow): `ruff check`, `ruff format --check`, `mypy src` (strict), `pytest`, `docker buildx build`. Runs on every PR and push to `main`. Passed clean on the first push.
-- **CD**: not wired yet. Manual `make deploy` runbook lands in commit #2; push-to-main CD lands in commit #5.
+- **CI** (`ci` workflow): `ruff check`, `ruff format --check`,
+  `mypy src` (strict), `lint-imports` (4 contracts), `pytest`,
+  `docker buildx build`, plus capability-matrix and isolation-manifest
+  drift checks. Runs on every PR and push to `main`.
+- **CD**: push-to-main → WIF auth → AR push → canary deploy at 0%
+  traffic → `/v1/health` health check → Alembic migrations via Cloud
+  Run job → recurring-jobs image sync → 100% traffic shift → Slack
+  notify. See [`deploy-coder-core.md`](../runbooks/deploy-coder-core.md).
 
 ## Branching
 
-- `main` is always deployable.
-- Feature branches → PR → review → merge → deploy.
+- `main` is always deployable; pushes auto-deploy.
+- Feature branches → PR → CI green → review → squash-merge → deploy.
 
 ## Linked services
 
@@ -78,8 +92,8 @@ tests/
 
 ## Notes
 
-- Replaces the old `coder-agent`. Built clean from the new design — does
-  **not** lift code from `coder-agent` wholesale.
-- Worker fleet may eventually move to per-role repos
-  (`coder-worker-developer`, etc.) — track that as a future ADR when the
-  size warrants it.
+- Replaces the old `coder-agent`. Built clean from the new design.
+- Worker fleet stays in-process for now. The `WorkerDispatcher`
+  protocol from design 0051 is the seam an extraction would bind to;
+  the bar for extracting is recorded in the design's *Extraction
+  decision* section.
