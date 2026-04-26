@@ -24,6 +24,7 @@ Logical components of the Coder system as it exists today.
 | [tenant-isolation](./active/tenant-isolation.md) | Tenant isolation test harness | ro | [tenant-isolation](../product-specs/active/tenant-isolation.md) | — |
 | [worker-communication](./active/worker-communication.md) | Worker Communication | ro | [task-orchestration](../product-specs/active/task-orchestration.md) | — |
 | [worker-roles](./active/worker-roles.md) | Worker Roles | ro | — | 0006, 0007 |
+| [0051-coder-core-modular-monolith](./active/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | ro | [0051](../product-specs/active/0051-coder-core-modular-monolith.md) | — |
 
 ## WIP — numbered, roadmap-aligned
 
@@ -41,7 +42,6 @@ Logical components of the Coder system as it exists today.
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | ro | [0048](../product-specs/wip/0048-cross-project-patterns.md) |
 | [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | ro | [0049](../product-specs/wip/0049-mcp-agent-interface.md) |
 | [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients | ro | [0050](../product-specs/wip/0050-oauth-for-mcp-clients.md) |
-| [0051](./wip/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | ro | [0051](../product-specs/wip/0051-coder-core-modular-monolith.md) |
 
 ## Deprecated
 
