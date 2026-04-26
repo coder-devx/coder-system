@@ -393,10 +393,10 @@ specs:
   - multi-tenancy
 - id: '0051'
   title: coder-core modular monolith hardening
-  status: wip
+  status: active
   owner: ro
-  folder: wip
-  file: wip/0051-coder-core-modular-monolith.md
+  folder: active
+  file: active/0051-coder-core-modular-monolith.md
   served_by_designs:
   - '0051'
   related_specs:

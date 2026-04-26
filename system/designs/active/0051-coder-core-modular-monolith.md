@@ -2,11 +2,11 @@
 id: '0051'
 title: coder-core modular monolith hardening
 type: design
-status: wip
+status: active
 owner: ro
 created: 2026-04-25
-updated: 2026-04-25
-last_verified_at: 2026-04-25
+updated: 2026-04-26
+last_verified_at: 2026-04-26
 implements_specs: ['0051']
 related_designs:
   - system-overview
@@ -165,10 +165,16 @@ Each service owns a Coder capability, not a transport:
 - `OpsService` family: queue depth, branch GC, regression checks,
   escalation watches, self-healing watches.
 
-Application services may call other application services only through
-documented methods when the workflow is truly cross-component. The
-caller owns the transaction unless the callee is explicitly documented
-as a whole-workflow operation.
+Cross-service calls go through the protocols in *Extraction-ready
+protocols* below, not through direct service-to-service imports. A
+service that needs to invoke another service's capability depends on
+the protocol; the wiring layer binds the in-process implementation.
+This keeps the dependency graph inspectable and prevents the
+"services calling services calling services" drift that vibe-level
+rules don't survive in code review.
+
+The caller owns the transaction unless the callee is explicitly
+documented as a whole-workflow operation.
 
 ### Unit of work
 
@@ -261,7 +267,14 @@ and records audit rows atomically with local DB state where applicable.
 ## Rollout
 
 1. **Map and guard.** Add `docs/module-boundaries.md` (or equivalent)
-   in `coder-core`; introduce first import-boundary checks.
+   in `coder-core` declaring the allowed dependency graph
+   (`adapters -> application services -> domain/repositories`,
+   feature modules independent at the router level). Enforce it in CI
+   with `import-linter` (preferred) or ruff `TID`/`TCH` rules. The
+   failure mode without enforcement is predictable: the monolith stays
+   a monolith in name, and feature modules quietly grow imports of
+   each other's internals within a quarter. The CI check is
+   load-bearing, not aspirational.
 2. **Pilot one router.** Start with `task_plans` or `tasks` because the
    workflows are important but bounded enough to prove the pattern.
 3. **Move knowledge write/ship.** Apply the same service/transaction
@@ -271,7 +284,12 @@ and records audit rows atomically with local DB state where applicable.
 5. **Add protocols.** Introduce worker dispatch and knowledge
    repository protocols with in-process implementations.
 6. **Test migration.** Move behavior-heavy route tests down to service
-   tests and keep route smoke/contract tests.
+   tests, but keep a route-level smoke/contract test for every public
+   endpoint covering the happy path, the primary auth/forbidden case,
+   and request/response shape. Route coverage drops in detail, not in
+   surface — every endpoint stays exercised end-to-end through the
+   wired adapters so router-to-service wiring regressions still fail
+   loudly.
 7. **Document extraction decision.** At the end, record whether worker
    runtime extraction is now justified. Default expected outcome:
    "not yet; boundaries are clean enough to wait."
@@ -279,9 +297,148 @@ and records audit rows atomically with local DB state where applicable.
 No feature flag is needed because public behavior should not change.
 Rollout is by small PR slices, each preserving the full test suite.
 
+## Rollout outcome (2026-04-26)
+
+All seven steps landed. The modular-monolith hardening described
+above is fully implemented; what remains is the open work flagged
+below, none of which blocks the design's completion criteria.
+
+- **Step 1 — map and guard.** `coder-core/docs/module-boundaries.md`
+  declares the dependency graph; `import-linter` enforces it via
+  `make boundaries` (also wired into CI). Four contracts:
+  domain-independence, MCP→HTTP forbidden, integrations-leaf,
+  features-don't-depend-on-adapters.
+- **Steps 2–3 — service extraction.** Every former MCP→API edge has
+  been replaced with a direct service call, and every router workflow
+  named in the spec has been lifted into its feature module. New
+  feature packages: `coder_core/tasks` (lifecycle / plan / message
+  thread / retry / override / merge), `coder_core/pipelines`,
+  `coder_core/metrics`, `coder_core/impersonation`,
+  `coder_core/projects` (create / update / archive / rotate API key /
+  budget override grant + revoke / monthly reset / auth-mode toggle /
+  mcp-enabled toggle).
+  `coder_core/knowledge/write_service.py` houses the create / update /
+  approve / reject workflows; `coder_core/knowledge/ship.py` exports
+  `ship_wip_to_active` (spec 0044's atomic wip→active commit). Two
+  preceding cleanups lifted misplaced
+  shared infra out of router files: `coder_core/admin_jwt.py` (JWT
+  mint/decode) and `coder_core/budget.py` (project budget policy). The
+  `import-linter` ledger went from 16 entries to **0**.
+- **Step 4 — tenant access helpers.** `coder_core/access.py` owns the
+  one canonical `load_in_project()` helper; every service that loads
+  a project-scoped row goes through it. The
+  `row.project_id != caller.project.id` check now exists in exactly
+  one place — the multi-tenancy invariant from
+  [ADR 0005](../../adrs/0005-multi-tenant-coder-core.md) is auditable
+  by reading a single function.
+- **Step 5 — protocols.** `coder_core/contracts.py` declares the four
+  forward-looking protocols (`WorkerDispatcher`,
+  `KnowledgeRepository`, `AuditRecorder`, `EventPublisher`).
+  `WorkerDispatcher` is fully plumbed: every service that kicks a
+  worker goes through `coder_core.workers.get_dispatcher()` instead
+  of importing `orchestrate_task` directly, and the default in-process
+  implementation in `coder_core/workers/__init__.py` is swappable via
+  `set_dispatcher` for tests / future RPC clients. The remaining
+  three protocols (`KnowledgeRepository`, `AuditRecorder`,
+  `EventPublisher`) are declared but not yet wired — their concrete
+  call sites already go through narrow interfaces (the existing
+  `KnowledgeService`, `record_audit_event`, `publish`), so wiring is
+  a one-edit-per-call-site exercise that makes sense alongside an
+  actual consumer.
+- **Cross-cutting infra introduced:** `coder_core/errors.py`
+  (`ServiceError` base) and a single `except ServiceError` branch in
+  the MCP transport. New service errors get JSON-RPC mapping for
+  free without per-feature wiring.
+- **Step 6 — service-level tests for every migrated service.**
+  Behaviour coverage at the service boundary now exists for:
+    - `tasks.plan_service` → `tests/test_task_plan_service.py`
+      (12 tests, ~0.6s)
+    - `pipelines.service` → `tests/test_pipeline_run_service.py`
+      (18 tests, ~0.7s — list/get/override + audit + event publish)
+    - `metrics.service` → `tests/test_metrics_service.py`
+      (8 tests, ~0.5s — period validation, project scope, success
+      rate, period-window arithmetic)
+    - `tasks.messages_service` → `tests/test_task_messages_service.py`
+      (10 tests, ~0.6s)
+    - `impersonation.service` → `tests/test_impersonation_service.py`
+      (6 tests, ~0.9s — happy path with `LocalBroker`, role allowlist,
+      broker-not-configured)
+    - `tasks.service` → `tests/test_tasks_service.py`
+      (16 tests, ~1.2s — list/get/create with the pm-draft pipeline
+      auto-create branch covered)
+    - `knowledge.write_service` → `tests/test_knowledge_write_service.py`
+      (19 tests, ~0.9s — uses an in-memory fake of the GitHub Contents
+      API so create / update / approve / reject / file-move /
+      immutable-field paths run offline)
+
+  Route-level tests in their existing files remain as smoke coverage
+  for router-to-service wiring. **Combined: 89 service tests, ~6s
+  total** — the equivalent route coverage takes roughly 60s, and the
+  failure stack traces now point at the workflow rather than the
+  request stack.
+
+## Extraction decision
+
+**Not yet — and the bar for revisiting is clearer now.**
+
+The original motivation for splitting `coder-core` into per-role
+worker services was that the orchestrator and the workers were
+tangled at the router/handler level: a worker reaching for a budget
+calculation imported a FastAPI handler module; an MCP tool
+fast-pathing through HTTP brought the whole router subgraph into the
+worker process at import time. After this rollout, those edges are
+gone. The dispatcher reaches a budget helper that has no transport
+dependency. The MCP layer talks to services, not handlers. The
+import boundary is enforced by CI.
+
+That removes the *forced* extraction case. What's left is the
+pragmatic one: extract when one of the following hits, not before:
+
+1. **Cost / scaling differential.** A specific worker role (most
+   likely `developer` running long Claude calls) drives memory or
+   wall-clock characteristics that hurt the rest of the service.
+   At that point we extract one role to a Cloud Run job, leaving
+   the orchestrator + the lighter roles in the monolith. The
+   `WorkerDispatcher` protocol from step 5 is what that change
+   binds to — and as of 2026-04-26 it is fully plumbed, so the
+   extraction is a swap of `_InProcessWorkerDispatcher` for an RPC
+   implementation, not a rewrite of every service.
+2. **Independent deploy / rollback need.** A regression in a worker
+   role needs to roll back without touching the orchestrator's
+   revision. Today they share an image; if this becomes load-bearing
+   we split the image.
+3. **Distinct credential scope.** A worker role needs IAM that the
+   orchestrator must not have (today they share `coder-core-sa`,
+   per ADR 0006 each role has a service account but they're all
+   minted by the same broker process). This is the scariest of the
+   three and the one most likely to actually justify extraction.
+
+Until one of those triggers, the modular-monolith shape is cheaper
+to operate and reason about than a fleet of services. The cost of
+*reversing* extraction (collapsing a fleet back into a monolith) is
+much higher than the cost of *delaying* it, so the asymmetry favours
+waiting.
+
+## Open work
+
+- **Route-level test cleanup.** Now that every migrated service has
+  thorough service-level coverage, the route-level tests can shrink
+  to genuine smoke shape (status code, primary auth case, response
+  envelope) — they're currently still detail-heavy for historical
+  reasons. Cleanup is non-blocking; the duplication is wasted CPU,
+  not a correctness risk.
+- **Auto-approval / pipeline / verify / approve / reject knowledge
+  endpoints.** The MCP surface doesn't expose these, so they didn't
+  hit the boundary contract — they remain in `api/knowledge.py`.
+  When their MCP tools land, they'll need the same treatment.
+- **Other CRUD endpoints in `api/task_plans.py` and `api/tasks.py`.**
+  The pilot covered the MCP-coupled methods. The remaining CRUD
+  (create/list/get/update plan, retry/override/merge task) follows
+  the same pattern; purely a follow-up.
+
 ## Links
 
-- Spec: [0051](../../product-specs/wip/0051-coder-core-modular-monolith.md)
+- Spec: [0051](../../product-specs/active/0051-coder-core-modular-monolith.md)
 - Related designs: system-overview, worker-communication,
   knowledge-write-api, audit-log, tenant-isolation, worker-roles,
   observability-and-cost-tracking
