@@ -29,6 +29,7 @@ in each component's `## Evolution` section and in git.
 | [task-orchestration](./active/task-orchestration.md) | Task Orchestration | ro | [worker-communication](../designs/active/worker-communication.md) |
 | [team-manager-worker](./active/team-manager-worker.md) | Team Manager Worker | ro | [team-manager-worker](../designs/active/team-manager-worker.md) |
 | [tenant-isolation](./active/tenant-isolation.md) | Tenant isolation test harness | ro | [tenant-isolation](../designs/active/tenant-isolation.md) |
+| [0051-coder-core-modular-monolith](./active/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | ro | [0051](../designs/active/0051-coder-core-modular-monolith.md) |
 
 ## WIP — numbered, roadmap-aligned
 
@@ -46,7 +47,6 @@ in each component's `## Evolution` section and in git.
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | ro | [0048](../designs/wip/0048-cross-project-patterns.md) |
 | [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | ro | [0049](../designs/wip/0049-mcp-agent-interface.md) |
 | [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients | ro | [0050](../designs/wip/0050-oauth-for-mcp-clients.md) |
-| [0051](./wip/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | ro | [0051](../designs/wip/0051-coder-core-modular-monolith.md) |
 
 ## Deprecated
 

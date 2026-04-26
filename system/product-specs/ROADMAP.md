@@ -26,7 +26,40 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-25 (later) — **0049 + 0050 Stage 3 + 4
+Last updated: 2026-04-26 — **0051 (coder-core modular monolith
+hardening) shipped to prod end-to-end across 5 PRs.** Routers are
+now thin adapters; every workflow named in the spec lives in a
+feature-package service module (`coder_core/{tasks,pipelines,
+metrics,impersonation,projects,knowledge}`); audit-mutation
+atomicity is proven by tests
+([test_audit_atomicity.py](https://github.com/coder-devx/coder-core/blob/main/tests/test_audit_atomicity.py)
+injects a failure mid-workflow for five representative services and
+confirms rollback); the four extraction-ready protocols
+(`WorkerDispatcher`, `EventPublisher`, `AuditRecorder`,
+`KnowledgeReader`) are plumbed end-to-end with `set_*`-swappable
+singletons and exercised by spy-injection tests
+([test_protocol_seams.py](https://github.com/coder-devx/coder-core/blob/main/tests/test_protocol_seams.py));
+1372 tests pass; four `import-linter` boundary contracts hold with
+zero `ignore_imports` exceptions. Design + spec graduated wip →
+active. PRs:
+[coder-core#29](https://github.com/coder-devx/coder-core/pull/29)
+(refactor + 95 service tests),
+[coder-system#6](https://github.com/coder-devx/coder-system/pull/6)
+(graduation),
+[coder-core#30](https://github.com/coder-devx/coder-core/pull/30)
+(AGENTS.md + README.md refresh),
+[coder-system#7](https://github.com/coder-devx/coder-system/pull/7)
+(service / repo / glossary refresh),
+[coder-core#31](https://github.com/coder-devx/coder-core/pull/31)
+(remaining three protocols plumbed). All 11 in-scope ACs done; the
+12th (freshness-test calendar drift) is pre-existing and tracked
+separately. Production verified: canary `/v1/health` green,
+authenticated admin-panel walkthrough confirmed migrated services
+serve real data (4 projects rendered, 21 pipeline runs listed, 8
+recent tasks, 17% 7-day success metric — every number through
+migrated code paths). Earlier the same day:
+
+Earlier — 2026-04-25 (later) — **0049 + 0050 Stage 3 + 4
 complete; both soaking before fold-to-active. Plus 5 follow-up
 PRs cleared known debt + advanced two flag-gated rollouts:**
 [coder-core#22](https://github.com/coder-devx/coder-core/pull/22)
@@ -204,7 +237,7 @@ The system today, by logical component. Each links to its active spec
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | drafting |
 | [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients (claude.ai web) | Stages 1+2+3+4 shipped; claude.ai web registered + driving MCP via OAuth in prod; soaking through ~2026-05-25 |
-| [0051](./wip/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | drafting |
+| [0051](./active/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | shipped to prod 2026-04-26; graduated wip → active |
 
 ---
 
@@ -464,25 +497,35 @@ widget) surface the dispatcher state.
   [`worker-communication`](../designs/active/worker-communication.md).
 - **Runbook:** [concurrency-overflow](../runbooks/concurrency-overflow.md).
 
-### 0051 — coder-core modular monolith hardening (drafting)
+### 0051 — coder-core modular monolith hardening (shipped)
 
-Keep `coder-core` as one deployable service, one Postgres schema, and
-one test suite, but make its internals behave like a clean modular
-monolith. The work tightens boundaries before any microservice split:
-thin FastAPI/MCP adapters, application services that own workflows,
-visible transaction ownership, central project-access helpers,
-project-scoped repositories, import-boundary checks, and in-process
-protocols for future extraction seams such as worker dispatch,
-knowledge repository access, audit recording, and event publication.
+Kept `coder-core` as one deployable service, one Postgres schema, and
+one test suite, while making its internals a clean modular monolith.
+Routers became thin FastAPI/MCP adapters; workflow logic moved into
+feature-package application services with visible transaction
+ownership; tenant access lives in one canonical helper; the
+import-linter contracts in CI hold with zero `ignore_imports`
+exceptions; the four extraction-ready protocols (`WorkerDispatcher`,
+`EventPublisher`, `AuditRecorder`, `KnowledgeReader`) are plumbed
+through `set_*`-swappable singletons, exercised by spy-injection
+tests.
 
-The outcome should make future extraction possible without committing
-to it now. The default expected decision after this WIP is still "no
-microservice split yet"; extract the worker runtime only if concrete
-scaling, deployment, security, or ownership pressure appears.
+Extraction decision (recorded in the design): **not yet**. The bar
+for revisiting is documented — cost/scaling differential, independent
+deploy/rollback need, or distinct credential scope. None of those
+are pressing. When one does appear, the protocol seams mean
+extraction is an implementation swap, not a service rewrite.
 
-- **Status:** drafting
-- **WIP:** [0051](./wip/0051-coder-core-modular-monolith.md) ·
-  **Design:** [0051](../designs/wip/0051-coder-core-modular-monolith.md)
+- **Status:** shipped to prod 2026-04-26 across 5 PRs
+  ([coder-core#29](https://github.com/coder-devx/coder-core/pull/29),
+  [coder-system#6](https://github.com/coder-devx/coder-system/pull/6),
+  [coder-core#30](https://github.com/coder-devx/coder-core/pull/30),
+  [coder-system#7](https://github.com/coder-devx/coder-system/pull/7),
+  [coder-core#31](https://github.com/coder-devx/coder-core/pull/31)).
+  All 11 in-scope ACs done; 1 deferred (freshness-test calendar drift,
+  pre-existing concern).
+- **Spec:** [0051](./active/0051-coder-core-modular-monolith.md) ·
+  **Design:** [0051](../designs/active/0051-coder-core-modular-monolith.md)
 - **Extends:** `task-orchestration`, `knowledge-api`, `multi-tenancy`,
   `audit-log`, `observability`, role-worker components
 
