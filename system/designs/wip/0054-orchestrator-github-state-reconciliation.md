@@ -54,15 +54,18 @@ flowchart TB
 
 ## Parts
 
-- **`coder_core/workers/orchestrator.py`** (existing, edit) — add the
-  `_reconcile_pr_url_from_github` helper and the call site inside the
-  `succeeded|executing|no pr_url` branch (current line ~775 per
-  `git blame` at HEAD as of 2026-04-27). Estimated change: ~80 LoC
-  including the helper.
-- **`coder_core/integrations/github.py`** (existing, may need a thin
-  helper) — if a `list_open_prs_by_head(org, repo, branch)` helper
-  doesn't already exist on `GitHubClient`, add one. Single-call
-  wrapper around the existing GitHub HTTP layer.
+- **`coder_core/workers/orchestrator.py`** (existing, edit) — add
+  the `_reconcile_pr_url_from_github` helper and the call site
+  inside `_after_dispatch` lines **769-801** (the existing
+  `succeeded|executing|no pr_url` branch). Lines verified by the
+  architect dispatch (task `62e0c95e`) against HEAD as of
+  2026-04-27. Estimated change: ~80 LoC including the helper.
+- **`coder_core/integrations/github.py`** — **no new method
+  needed.** `GitHubClient.list_pulls` already exists at line 678
+  and accepts `head` + `state` parameters; it auto-qualifies the
+  head as `{org}:{branch}`. The reconciliation helper calls this
+  directly. (Original draft hedged "may need to add a helper";
+  architect verified the existing method covers the case.)
 - **`coder_core/audit/__init__.py`** (or wherever the action enum
   lives) — register the two new action strings.
 - **`coder_core/config.py`** (existing, edit) — add the
@@ -81,12 +84,15 @@ flowchart TB
    → STUCK.
 4. Helper resolves the project's `github_org` via the existing
    `projects` table lookup; constructs `org/repo`.
-5. Helper calls `GitHubClient.list_open_prs_by_head(org, repo,
-   branch_name)`. Returns a list of PR objects.
-6. Filter to worker-authored PRs (the GitHub App installation's bot
-   identity, comparable against `pr.user.type == 'Bot'` and
-   `pr.user.login == coder-devx[bot]` or equivalent — exact identity
-   pinned by the project's GitHub App config).
+5. Helper calls `GitHubClient.list_pulls(repo, head=f"{org}:{branch_name}",
+   state="open")`. Returns a list of PR objects. (Existing method —
+   no new helper needed; verified at `integrations/github.py:678`
+   by architect dispatch `62e0c95e`.)
+6. Filter to worker-authored PRs via `pr["user"]["type"] == "Bot"`
+   — a stable GitHub API invariant that's True for all GitHub App
+   PRs and False for human accounts. **See ADR 0016** for why
+   login-match was rejected (no `bot_login` field in Settings;
+   misconfiguration risk; type=Bot is more robust).
 7. Pick the most recently created from the filtered list. Read
    `pr.html_url`.
 8. Write audit row: `action='task.pr_url_reconciled_from_github'`,
