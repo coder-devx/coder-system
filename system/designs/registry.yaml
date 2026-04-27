@@ -420,6 +420,41 @@ designs:
   - audit-log
   affects_services:
   - coder-core
+- id: '0052'
+  title: Managed-repo GitHub Action distribution
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0052-managed-repo-action-distribution.md
+  implements_specs:
+  - '0052'
+  related_designs:
+  - '0045'
+  - '0047'
+  - knowledge-write-api
+  affects_services:
+  - coder-core
+  affects_repos:
+  - coder-core
+  - coder-system
+- id: '0053'
+  title: Post-PR CI fix loop
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0053-post-pr-ci-fix-loop.md
+  implements_specs:
+  - '0053'
+  related_designs:
+  - '0052'
+  - worker-roles
+  - worker-communication
+  - escalations
+  affects_services:
+  - coder-core
+  affects_repos:
+  - coder-core
+  - coder-system
 - id: '0051'
   title: coder-core modular monolith hardening
   status: active

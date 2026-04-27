@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-27
+last_verified_at: 2026-04-27
 served_by_designs: ['0047']
 related_specs:
   - knowledge-api
@@ -446,68 +446,60 @@ operation should ship with a paired reversal migration).
   current schema and the project is increasingly behind;
   prioritises merging the pending PRs.
 
+## Decisions
+
+Resolved 2026-04-27 ahead of architect dispatch.
+
+- **No-op migrations bump `template_version` via a one-line
+  `system/repos.yaml` PR.** Preserves the symmetry that every
+  migration goes through review. The faster alternative
+  (direct commit to a no-op branch the runner fast-forwards)
+  violates "no path writes to `main` without a human merge"
+  and is rejected.
+- **`coder migrate test` synthetic fixtures live in
+  `coder-system/migrations/_fixtures/`.** Hand-curated
+  edge-case projects (large, small, missing-folder, repos with
+  unusual layouts). Testing against `template/` snapshot alone
+  misses real-project variance. Initial fixtures land
+  alongside the `0001-baseline.py` migration in Stage 1.
+- **Concurrent migration ordering — sequential per-project.**
+  If 47 and 48 land back-to-back in `coder-system`, the runner
+  opens 47's PR per project; only after it merges does 48's
+  PR open. Slower for fast-following migrations but bounds the
+  reviewer queue and keeps intermediate states one-at-a-time.
+  Other projects independently sequence on their own
+  `(project_id)` advisory lock.
+- **Failed-migration recovery — strict per-project ordering.**
+  If 47 fails on project A, A stays at `template_version=46`
+  until A's 47-migration PR lands. Meanwhile 48 can still
+  apply on project B (the failure is per-project, not fleet).
+  Fleet-wide inconsistency is visible on the admin matrix;
+  operator intervention (re-issuing the migration with a new
+  number once the bug is fixed) closes it. **Failed rows are
+  terminal** — re-running 47 against A is not the recovery
+  path; writing 49 with the corrected logic is.
+- **Renames + cross-link integrity — alias-tolerance window
+  in the validator.** ADR 0008's CI validator gains an
+  alias-tolerance mechanism: a `rename_frontmatter_key`
+  migration declares the alias at the same time the migration
+  lands; the validator accepts both `from` and `to` field
+  names while any project is below the migration's
+  `template_version`; the alias auto-removes once the admin
+  matrix shows fleet-wide adoption. **This is pre-work for
+  any rename migration** — a small validator change must land
+  before Stage 5 if the first real migration is a rename.
+  See 0047 design's rollout for the alias-tolerance ship
+  ordering. (If the first real migration is purely additive,
+  alias-tolerance can ship later.)
+- **`glossary.md` — SDK exposes it via `iter_files('glossary')`.**
+  Single file, not a registered artifact, but migrations may
+  need to touch it (e.g. add a frontmatter key). The SDK's
+  `iter_files` pattern handles it explicitly so a
+  glossary-touching migration doesn't surprise.
+
 ## Open questions
 
-- **Bumping `template_version` for no-op migrations.** When a
-  migration produces no `FileChange[]` for a project (e.g.
-  the migration touches services and the project has no
-  services), should the version bump still happen? Two options:
-  (a) open a one-line `system/repos.yaml` PR; (b) commit the
-  bump directly to a no-op-version-bump branch the runner
-  fast-forwards onto `main` without review. (b) is faster but
-  violates "no path writes to `main` without a human merge."
-  Leaning (a) for symmetry — every migration goes through the
-  same path even when the diff is one line.
-
-- **Synthetic-repo fixtures for `coder migrate test`.** The
-  CLI smoke-test wants a deterministic fixture project repo to
-  run a migration against. Where does that fixture live? Two
-  options: (a) `coder-system/template/` itself (run the
-  migration against the template snapshot); (b) a separate
-  `coder-system/migrations/_fixtures/` folder with hand-curated
-  edge-case projects (large, small, missing-folder, etc.).
-  Leaning (b) — testing against template alone misses the
-  variance real projects exhibit.
-
-- **Migration ordering with concurrent merges to
-  `coder-system`.** If two migrations land in `coder-system`
-  back-to-back (47 then 48), the runner sees both as pending
-  for every project. Should it open one PR for 47, wait for
-  merge, then open 48 — or open both PRs sequenced by number?
-  Leaning: open them sequentially per-project, but only open
-  the Nth migration's PR after the (N-1)th's PR is merged.
-  Avoids review-list overload + keeps the project repo's
-  intermediate states bounded. Slower for fast-following
-  migrations.
-
-- **Failed-migration recovery.** If migration 47 fails on
-  project A but succeeds on project B, the schema is
-  inconsistent fleet-wide. Does that block migration 48 from
-  being attempted on project A? Leaning: yes, per-project
-  ordering is strict — A stays at version 46 until 47 lands;
-  meanwhile 48 can still apply on B. Fleet-wide
-  inconsistency is visible on the admin matrix; operator
-  intervention closes it.
-
-- **Renames + cross-link integrity.** A rename migration
-  (`affects_services` → `relates_to_services`) breaks every
-  cross-link reference until the migration applies. The
-  validator (ADR 0008) would fail on the project's CI between
-  the migration landing and the project's PR merging. Two
-  fixes: (a) the validator tolerates _both_ field names for
-  one cycle (add `relates_to_services` to the alias list at
-  the same time the migration lands; remove it after the
-  fleet's at the new version); (b) the migration's PR is the
-  validator's first chance to see the new name, so this only
-  bites if a non-migration commit lands during the gap.
-  Probably (a) — the alias-tolerance window matches the
-  migration's deployment window.
-
-- **What about `glossary.md`?** It's a single file, not a
-  registered artifact; the SDK's `iter_files('glossary')`
-  pattern needs to support it. Trivial implementation, but
-  worth being explicit so migrations don't surprise on
-  glossary touches.
+_None — all resolved. See Decisions above._
 
 ## Links
 

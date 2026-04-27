@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-25
-updated: 2026-04-25
-last_verified_at: 2026-04-25
+updated: 2026-04-27
+last_verified_at: 2026-04-27
 served_by_designs: ['0050']
 related_specs:
   - impersonation
@@ -324,56 +324,52 @@ goal is parity-with-admin-via-OAuth, not a new permission model.
   signal — if this grows unbounded, we'll need refresh tokens
   sooner than phase 2.
 
+## Decisions
+
+OQ6 was decided 2026-04-25 (admin-only DCR — see below). OQ1–5
+resolved 2026-04-27 ahead of fold-to-active.
+
+- **OQ1 — Public hostname: pin to current Cloud Run URL for
+  now; custom domain (`mcp.coder.<your-domain>`) tracked as
+  a follow-up.** The Cloud Run URL is brittle if the service
+  is recreated, but no current operational work is forcing
+  recreation. Custom domain requires DNS + cert work; defer
+  until a triggering need (recreation, multi-region, or
+  branding) shows up. Document the recreation risk in the
+  runbook so an operator about to recreate the service knows
+  the issuer-field URL changes.
+- **OQ2 — Authorisation code TTL: 5 minutes.** Long enough
+  to absorb a slow Google callback; short enough that
+  long-lived codes don't sit around. RFC ≤ 10 min ceiling
+  preserved as an upper bound; 1 min was tighter than needed.
+- **OQ3 — `redirect_uri` matching: exact.** Strict exact
+  match across registered URIs. Clients with multiple
+  subpaths register each one explicitly. Safer surface; the
+  ergonomics cost is small in practice.
+- **OQ4 — OAuth scope claim: `mcp` only.** Reject any other
+  requested scope (including `mcp impersonate`) with
+  `invalid_scope`. Defensive — scope claims are aspirational
+  for v1 and admin-parity isn't a requested use case yet.
+- **OQ5 — broker rotation interaction with OAuth tokens —
+  needs explicit test.** The dual-key verifier already
+  handles admin tokens during the 2h rotation window and
+  *should* extend transparently to OAuth tokens (same HS256
+  key). Add an explicit test in the implementation's test
+  suite: rotate `broker_signing_key`, verify both pre- and
+  post-rotation OAuth tokens decode within the 2h window.
+- **OQ6 — Public DCR or admin-only client registration:
+  admin-only.** (Decided 2026-04-25.) Public DCR (RFC 7591)
+  is the MCP-spec recommendation but adds zero capability
+  when the admin allowlist already gates who can complete
+  the flow. Operationally, an admin pre-registers each MCP
+  client via `POST /v1/admin/oauth/clients` and pastes the
+  resulting `client_id` into the client's connector form. If
+  a future MCP client is DCR-only, revisit by re-exposing
+  the public endpoint behind a separate flag.
+
 ## Open questions
 
-- **OQ1 — Public hostname for OAuth metadata.** RFC 8414 requires
-  the issuer field in the metadata doc to be the canonical HTTPS
-  URL of the auth server. coder-core's Cloud Run URL works
-  (`https://coder-core-<hash>.<region>.run.app`) but it's
-  hash-y and changes if the service is recreated. Decide: pin to
-  the current Cloud Run URL (cheap, brittle), set up a stable
-  custom domain (`mcp.coder.<your-domain>`, DNS work + cert), or
-  serve the OAuth surface on coder-admin (closer to the user-facing
-  domain but means routing across services).
-
-- **OQ2 — Authorisation code TTL.** RFC 6749 §10.5 says ≤ 10
-  minutes. We could go shorter (1 minute) since the user is in an
-  active flow. Probably 5 minutes — enough to absorb a slow
-  Google callback without leaving long-lived codes lying around.
-
-- **OQ3 — `redirect_uri` exact match vs. prefix match.** Strict
-  exact match is safer; prefix match is more forgiving for
-  clients that register many subpaths. Default to exact.
-
-- **OQ4 — Scope claim "mcp" only, or include the human-equivalent
-  of impersonation?** v1 grants `scope=mcp`. If a client requests
-  `scope=mcp impersonate`, do we honour it (admin parity, so yes
-  in principle) or reject (defensive, scope claims are aspirational
-  for v1 anyway)? Lean reject — accept only `mcp`, reject anything
-  else with `invalid_scope`.
-
-- **OQ5 — How does the existing admin-session rotation interact
-  with OAuth tokens?** The `broker_signing_key` rotator
-  ([0038](./0038-secret-rotation.md)) keeps the previous key
-  valid for 2 h after rotation. OAuth tokens signed with the old
-  key during the window remain valid until expiry; new OAuth
-  tokens use the new key. Dual-key verification on the resource
-  side already handles this for admin tokens — it should
-  transparently extend to OAuth tokens since both use HS256 with
-  the same key. Confirm in design.
-
-- **OQ6 — Public DCR or admin-only client registration?**
-  **Decided 2026-04-25 — admin-only.** Public DCR (RFC 7591)
-  is the MCP-spec recommendation but adds zero capability when
-  the admin allowlist already gates who can complete the flow:
-  a hostile registrant can register a client but can't sign in.
-  Operationally, an admin pre-registers each MCP client (e.g.
-  claude.ai) once via `POST /v1/admin/oauth/clients` and pastes
-  the resulting `client_id` into the client's connector form.
-  If a future MCP client is DCR-only (claude.ai's connector form
-  exposes a manual `client_id` field today, so this isn't a
-  blocker), revisit by re-exposing the public endpoint behind a
-  separate flag.
+_None — all resolved. See Decisions above._
 
 ## Links
 

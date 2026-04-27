@@ -26,7 +26,23 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-26 — **0051 (coder-core modular monolith
+Last updated: 2026-04-27 — **Open-question sweep across all
+in-flight WIPs: 45 OQs resolved, 9 specs scope-sealed
+(0029/0030/0031/0032/0040/0045/0046/0047/0048), 1 new mini-spec
+created (0052 — managed-repo Action distribution, pre-work for
+the 0045 + 0047 fleet-sweep Action stages).** All Phase 4
+phase-2 increments + all Phase 8 specs + 0052 are now ready for
+architect dispatch. 0040 has two new pre-Stage-3 ACs (AC11
+static risk-flag check, AC12 SELECT FOR UPDATE on the
+auto_approvals row) that must land before the fleet flag flips
+from shadow → live. 0038 retains 3 narrower OQs (GitHub App
+dual-key window, rate-limit interaction, scheduler drift).
+0046 + 0047 + 0048 + 0052 are the load-bearing Phase 8
+sequence; 0045 deferred to next onboarding. Decision Q45 —
+start dispatch now, not waiting for the 0049/0050 soak window
+to close 2026-05-25.
+
+Earlier — 2026-04-26 — **0051 (coder-core modular monolith
 hardening) shipped to prod end-to-end across 5 PRs.** Routers are
 now thin adapters; every workflow named in the spec lives in a
 feature-package service module (`coder_core/{tasks,pipelines,
@@ -225,18 +241,20 @@ The system today, by logical component. Each links to its active spec
 
 | ID | Title | Status |
 |---|---|---|
-| [0029](./wip/0029-prompt-caching.md) | Prompt caching & shared context reuse | drafting |
-| [0030](./wip/0030-model-tier-routing.md) | Model tier routing | drafting |
-| [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | drafting |
-| [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | drafting |
-| [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20 |
-| [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | infra wired, Stage 1 shadow |
-| [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | drafting |
+| [0029](./wip/0029-prompt-caching.md) | Prompt caching & shared context reuse | scope sealed 2026-04-27 — phase-1 LIVE; phase-2 ready for dispatch |
+| [0030](./wip/0030-model-tier-routing.md) | Model tier routing | scope sealed 2026-04-27 — phase-1 LIVE on canary; phase-2 ready for dispatch |
+| [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | scope sealed 2026-04-27 — phase-1 LIVE per-project; phase-2 ready for dispatch |
+| [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | scope sealed 2026-04-27 — phase-1 LIVE alerts on; phase-2 ready for dispatch |
+| [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20; 3 of 6 OQs resolved 2026-04-27 |
+| [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | infra wired, Stage 2 shadow; OQs resolved 2026-04-27 — pre-Stage-3 work (AC11 static check, AC12 race lock) ready for dispatch |
+| [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | scope sealed 2026-04-27 — ready for architect dispatch |
 | [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | Stages 1+2+3 shipped; `MCP_ENABLED=true` + `coder.mcp_enabled=true` in prod; soaking through ~2026-05-25 |
-| [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | drafting |
-| [0047](./wip/0047-template-schema-migration.md) | Template schema migration | drafting |
-| [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | drafting |
-| [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients (claude.ai web) | Stages 1+2+3+4 shipped; claude.ai web registered + driving MCP via OAuth in prod; soaking through ~2026-05-25 |
+| [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | scope sealed 2026-04-26 — ready for architect dispatch |
+| [0047](./wip/0047-template-schema-migration.md) | Template schema migration | scope sealed 2026-04-27 — ready for architect dispatch (alias-tolerance is pre-work for first rename migration) |
+| [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | scope sealed 2026-04-27 — ready for architect dispatch |
+| [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients (claude.ai web) | Stages 1+2+3+4 shipped; claude.ai web registered + driving MCP via OAuth in prod; soaking through ~2026-05-25; OQs resolved 2026-04-27 |
+| [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | scope sealed 2026-04-27 — ready for architect dispatch (pre-work for 0045 + 0047 Action sweep stages) |
+| [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | scope sealed 2026-04-27 — ready for architect dispatch (closes the worker→CI feedback gap surfaced by PR #34's ruff failure) |
 | [0051](./active/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | shipped to prod 2026-04-26; graduated wip → active |
 
 ---
@@ -537,7 +555,7 @@ extraction is an implementation swap, not a service rewrite.
 > every worker re-sends the same context; every task runs on the most
 > expensive model regardless of complexity. Fix both.
 
-### 0029 — Prompt caching & shared context reuse (phase-1 LIVE, fleet-enabled)
+### 0029 — Prompt caching & shared context reuse (phase-1 LIVE, fleet-enabled; phase-2 scope sealed 2026-04-27)
 
 Populate + link + read + gate + per-project override + Slack cache-hit
 floor + runbook all live in prod with `PROMPT_CACHING_ENABLED=true`
@@ -554,7 +572,7 @@ Migrations 0022, 0032-0034.
   stabilise for 24-48 h at the measured rate. That also unblocks
   0030/0031/0032 cross-references from WIP to active docs.
 
-### 0030 — Model tier routing (phase-1 LIVE on canary)
+### 0030 — Model tier routing (phase-1 LIVE on canary; phase-2 scope sealed 2026-04-27)
 
 `resolve_tier_model` in the dispatcher + per-role low-tier config
 (`worker_model_low_tier_reviewer=claude-haiku-4-5-20251001`) +
@@ -572,7 +590,7 @@ route to Haiku; other projects stay on Sonnet. Migrations 0036, 0037.
   adds the yaml policy table + per-task-kind routing + schema-retry
   escalation.
 
-### 0031 — Per-project token budgets & cost gates (phase-1 LIVE, per-project)
+### 0031 — Per-project token budgets & cost gates (phase-1 LIVE, per-project; phase-2 scope sealed 2026-04-27)
 
 Per-project `budget_{soft,hard}_tokens` tri-state overrides +
 `resolve_budget_limits` + dispatcher hard gate + soft-breach Slack
@@ -590,7 +608,7 @@ machinery is ready when ops decides where to set caps. Migration 0035.
   rollup table + `status=budget_blocked` + admin override UI +
   monthly reset cron.
 
-### 0032 — Prompt & cost regression alerts (phase-1 LIVE, alerts on)
+### 0032 — Prompt & cost regression alerts (phase-1 LIVE, alerts on; phase-2 scope sealed 2026-04-27)
 
 Detector + `regression_events` persistence + dedupe + acknowledge
 flow + `GET|ack` endpoints live with
@@ -780,7 +798,7 @@ blocking since ship day.
 > every run. Many are low-risk rubber-stamps. Let the system earn
 > auto-approval on the easy cases so humans focus on the hard ones.
 
-### 0040 — Confidence-scored auto-approval (infra wired, Stage 1 shadow)
+### 0040 — Confidence-scored auto-approval (Stage 2 shadow; OQs resolved 2026-04-27)
 
 PM, Architect, and TM outputs gain a required `self_confidence`
 envelope (score, justification, risk_flags from a fixed vocabulary).
@@ -1017,7 +1035,7 @@ when `settings.ship_draft_dispatch_enabled` is on.
   (ship-draft mode)
 - **ADR:** [`0015 — ship gate lives in the Coder pipeline`](../adrs/0015-ship-gate-in-coder-pipeline.md)
 
-### 0045 — Cold-start knowledge ingestion (drafting)
+### 0045 — Cold-start knowledge ingestion (scope sealed 2026-04-27)
 
 A oneshot Cloud Run Job `coder-core-cold-start-ingest` takes
 `(project_id, code_repo_url, code_repo_ref)` and produces a single
@@ -1066,7 +1084,7 @@ behind `VITE_COLD_START_ENABLED`.
 - **WIP:** [0045](./wip/0045-cold-start-ingestion.md) · **Design:** [0045](../designs/wip/0045-cold-start-ingestion.md)
 - **Extends:** `onboarding`, `knowledge-api`, `architect-worker`, `knowledge-freshness`
 
-### 0046 — Graph-aware knowledge retrieval (drafting)
+### 0046 — Graph-aware knowledge retrieval (scope sealed 2026-04-26)
 
 New endpoint `GET /v1/projects/{id}/knowledge/graph` returns the
 subgraph reachable from a starting artifact (`?start=<type/id>`)
@@ -1108,11 +1126,14 @@ endpoint + expander dark → `coder` opt-in → architect conversion
 trial-flip → TM/reviewer/PM trial-flips one per day → fleet
 flip → admin tab → fallback removal after 1-week soak.
 
-- **Status:** drafting
+- **Status:** scope sealed 2026-04-26 — open questions resolved
+  inline (depth=0 semantics, explicit edge_types, truncation
+  reason field, stub-no-body, `min_freshness=70` decoupled to a
+  follow-up); ready for architect dispatch.
 - **WIP:** [0046](./wip/0046-graph-aware-retrieval.md) · **Design:** [0046](../designs/wip/0046-graph-aware-retrieval.md)
 - **Extends:** `knowledge-api`, `knowledge-freshness`, `architect-worker`, `reviewer-worker`, `team-manager-worker`, `pm-worker`
 
-### 0047 — Template schema migration (drafting)
+### 0047 — Template schema migration (scope sealed 2026-04-27)
 
 A schema author writes one migration file in
 `coder-system/migrations/knowledge/00NN-<slug>.py` (or `.yaml` for
@@ -1174,7 +1195,7 @@ first real schema change → admin UI on.
 - **WIP:** [0047](./wip/0047-template-schema-migration.md) · **Design:** [0047](../designs/wip/0047-template-schema-migration.md)
 - **Extends:** `knowledge-api`, `onboarding`, `admin-panel`, `audit-log`
 
-### 0048 — Cross-project pattern surfacing (drafting)
+### 0048 — Cross-project pattern surfacing (scope sealed 2026-04-27)
 
 A read-only fleet-scoped pattern index produced by a daily Cloud
 Run Job `coder-core-pattern-indexer` (03:00 UTC + manual
@@ -1244,6 +1265,79 @@ consult → first `template_drift`-driven 0047 promotion.
 - **Status:** drafting
 - **WIP:** [0048](./wip/0048-cross-project-patterns.md) · **Design:** [0048](../designs/wip/0048-cross-project-patterns.md)
 - **Extends:** `knowledge-api`, `admin-panel`, `architect-worker`, `pm-worker`, `team-manager-worker`, `reviewer-worker`, `developer-worker`, `multi-tenancy`, `knowledge-freshness`
+
+---
+
+## Cross-cutting pre-work
+
+Items that don't belong to a single phase but unblock multiple WIPs.
+
+### 0052 — Managed-repo GitHub Action distribution (scope sealed 2026-04-27)
+
+Both [0045](./wip/0045-cold-start-ingestion.md) (cold-start)
+and [0047](./wip/0047-template-schema-migration.md) (template
+migrations) need the same operational primitive: a per-managed-
+repo GitHub Action that POSTs back to coder-core when something
+happens in the project's knowledge repo. Without this spec,
+each ships its own seed script + receiver pattern and we end
+up with two divergent implementations of the same machinery.
+
+0052 extracts the shared primitive — a fleet-manifest
+(`coder-system/system/managed-workflows.yaml`), a reusable
+`install_workflow` / `verify_workflow` helper in coder-core, a
+common HMAC-verifying receiver middleware with handler
+registration, and an admin matrix at `/admin/managed-workflows`
+showing fleet × workflow installation state. Future managed-
+repo callbacks consume the helper without redesigning the
+machinery.
+
+**Sequencing.** Lands before 0045 Stage 3 (cold-start Action
+distribution sweep) and before 0047 Stage 3 (template-migration
+Action distribution sweep). 0045 and 0047 each register one
+workflow and one handler against the helper; their Stage 3 work
+becomes a one-line manifest entry plus the existing `coder
+managed-workflows sync`.
+
+- **Status:** scope sealed 2026-04-27 — ready for architect dispatch
+- **WIP:** [0052](./wip/0052-managed-repo-action-distribution.md) · **Design:** [0052](../designs/wip/0052-managed-repo-action-distribution.md)
+- **Extends:** `knowledge-api`, `onboarding`, `audit-log`, `admin-panel`
+- **Unblocks:** [0045](./wip/0045-cold-start-ingestion.md), [0047](./wip/0047-template-schema-migration.md)
+
+### 0053 — Post-PR CI fix loop (scope sealed 2026-04-27)
+
+The developer-worker pipeline today ends at `succeeded|accepted`
+once internal pytest passes and the reviewer accepts the PR.
+External GitHub Actions checks (ruff format, lint, build,
+terraform, deploy) run independently, and their failures are
+**not** observed by the orchestrator — once a task is terminal,
+the orchestrator stops watching, and a CI-failing PR sits open
+with no automated remediation.
+
+Realised pain: PR #34 (0046 GraphExpander, 2026-04-27) succeeded
+internally but failed CI on `ruff format --check` — a one-file
+whitespace fix that consumed operator time to push manually.
+
+0053 closes the loop with two stages:
+
+- **Stage 0 — pre-flight on the developer worker.** Run
+  `uv run ruff format` + `uv run ruff check --fix` (and per-repo
+  `preflight_commands`) before `git push`. Cheap prevention:
+  most mechanical issues never reach CI.
+- **Stage 1 — post-PR CI watcher + fix-up dispatcher.** A new
+  `coder_core/integrations/ci_watcher.py` subscribes to GitHub
+  `check_run` events on managed PRs; on failure, dispatches a
+  fix-up developer task (same branch, no new PR) up to
+  `MAX_CI_FIX_ATTEMPTS = 3`; on exhaustion, escalates via 0041's
+  on-call routing.
+
+Re-uses 0052's HMAC-webhook pattern. Re-uses 0041's escalation
+path. Re-uses spec 0025's `validate_and_retry` shape for the
+worker re-prompt.
+
+- **Status:** scope sealed 2026-04-27 — ready for architect dispatch
+- **WIP:** [0053](./wip/0053-post-pr-ci-fix-loop.md) · **Design:** [0053](../designs/wip/0053-post-pr-ci-fix-loop.md)
+- **Extends:** `developer-worker`, `reviewer-worker`, `task-orchestration`, `audit-log`, `admin-panel`
+- **Closes:** the worker→CI feedback gap surfaced by PR #34
 
 ---
 

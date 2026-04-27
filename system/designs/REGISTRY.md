@@ -42,6 +42,8 @@ Logical components of the Coder system as it exists today.
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | ro | [0048](../product-specs/wip/0048-cross-project-patterns.md) |
 | [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | ro | [0049](../product-specs/wip/0049-mcp-agent-interface.md) |
 | [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients | ro | [0050](../product-specs/wip/0050-oauth-for-mcp-clients.md) |
+| [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | ro | [0052](../product-specs/wip/0052-managed-repo-action-distribution.md) |
+| [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | ro | [0053](../product-specs/wip/0053-post-pr-ci-fix-loop.md) |
 
 ## Deprecated
 
