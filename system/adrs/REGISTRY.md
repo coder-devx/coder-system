@@ -19,3 +19,4 @@
 | 0013 | Transient retry lives inside the worker, not at the dispatcher | accepted | 2026-04-15 | [0013-worker-level-transient-retry.md](./0013-worker-level-transient-retry.md) |
 | 0014 | Knowledge freshness derives from declared affects, not semantic similarity | accepted | 2026-04-17 | [0014-freshness-from-declared-affects.md](./0014-freshness-from-declared-affects.md) |
 | 0015 | Ship gate lives in the Coder pipeline, not in GitHub branch protection | accepted | 2026-04-17 | [0015-ship-gate-in-coder-pipeline.md](./0015-ship-gate-in-coder-pipeline.md) |
+| 0016 | Worker-authored PR detection via user.type == "Bot" | accepted | 2026-04-27 | [0016-bot-identity-via-user-type.md](./0016-bot-identity-via-user-type.md) |

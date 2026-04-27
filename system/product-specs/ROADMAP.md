@@ -280,7 +280,8 @@ The system today, by logical component. Each links to its active spec
 | [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients (claude.ai web) | Stages 1+2+3+4 shipped; claude.ai web registered + driving MCP via OAuth in prod; soaking through ~2026-05-25; OQs resolved 2026-04-27 |
 | [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | scope sealed 2026-04-27 — ready for architect dispatch (pre-work for 0045 + 0047 Action sweep stages) |
 | [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | Stage 0a shipped 2026-04-27 (PR #36) — preflight live in prod; Stage 0b + Stage 1 still WIP |
-| [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | scope sealed 2026-04-27 — ready for architect dispatch (closes the "PR exists but task stuck" failure class surfaced by task `22089ec6` / PR #36) |
+| [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | scope sealed 2026-04-27 — architect-refined (task `62e0c95e`); ready for TM dispatch |
+| [0055](./wip/0055-non-developer-roles-need-github-write-access.md) | Non-developer-role workers need GitHub write access | drafting — surfaced by architect task `62e0c95e` failing to open a PR (no `GH_TOKEN` for non-developer roles) |
 | [0051](./active/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | shipped to prod 2026-04-26; graduated wip → active |
 
 ---
@@ -1385,10 +1386,42 @@ audit row, and let the next orchestrator tick proceed normally.
 Read-only against GitHub; flag-gated for shadow rollout; fail-soft
 to the existing stuck path on any error.
 
-- **Status:** scope sealed 2026-04-27 — ready for architect dispatch
-- **WIP:** [0054](./wip/0054-orchestrator-github-state-reconciliation.md) · **Design:** [0054](../designs/wip/0054-orchestrator-github-state-reconciliation.md)
+- **Status:** scope sealed 2026-04-27. Architect dispatch (task
+  `62e0c95e`) refined the design with exact line numbers (orchestrator.py
+  769-801), confirmed `GitHubClient.list_pulls` exists at
+  integrations/github.py:678 (no new helper needed), and produced
+  ADR 0016 for using `user.type == "Bot"` to identify worker-authored
+  PRs. Ready for TM dispatch.
+- **WIP:** [0054](./wip/0054-orchestrator-github-state-reconciliation.md) · **Design:** [0054](../designs/wip/0054-orchestrator-github-state-reconciliation.md) · **ADR:** [0016](../adrs/0016-bot-identity-via-user-type.md)
 - **Extends:** `developer-worker`, `task-orchestration`, `audit-log`
 - **Closes:** the "PR exists but task is stuck" failure class
+
+### 0055 — Non-developer-role workers need GitHub write access (drafting)
+
+Surfaced during the 0054 manual-chain dispatch on 2026-04-27.
+Architect task `62e0c95e` ran productively (read the spec, verified
+line numbers in orchestrator.py, found existing helpers, made an
+ADR-worthy design call about Bot detection) — but exited unable to
+open a PR: *"`gh` is unauthenticated and there's no `GH_TOKEN` in
+the environment."* The work was lost on container reap.
+
+Root cause: `developer.py` injects `GH_TOKEN` from
+`task.workspace.github_token`, but non-developer-role tasks don't
+have a workspace configured in the manual-dispatch path. So
+architect/TM/PM/reviewer can't ship their outputs through PRs.
+
+This blocks the full dogfood loop's upper roles. Fix is small
+(decouple `GH_TOKEN` injection from `task.workspace`, hoist to a
+shared helper called by all role workers). Spec is drafted as
+WIP; design is a stub pending architect pickup (which itself will
+be unblocked by this fix — chicken-and-egg solved by dispatching
+the implementation directly via the developer worker, the only
+role that currently works).
+
+- **Status:** drafting — implementation can be dispatched directly via developer worker, no architect cycle needed
+- **WIP:** [0055](./wip/0055-non-developer-roles-need-github-write-access.md) · **Design:** [0055](../designs/wip/0055-non-developer-roles-need-github-write-access.md) (stub)
+- **Extends:** `architect-worker`, `team-manager-worker`, `pm-worker`, `reviewer-worker`, `task-orchestration`
+- **Realised pain:** architect task `62e0c95e` (2026-04-27)
 
 ---
 
