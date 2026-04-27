@@ -418,6 +418,18 @@ specs:
   - task-orchestration
   - audit-log
   - admin-panel
+- id: '0054'
+  title: Orchestrator GitHub-state reconciliation
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0054-orchestrator-github-state-reconciliation.md
+  served_by_designs:
+  - '0054'
+  related_specs:
+  - developer-worker
+  - task-orchestration
+  - audit-log
 - id: '0051'
   title: coder-core modular monolith hardening
   status: active

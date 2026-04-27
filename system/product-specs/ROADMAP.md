@@ -26,7 +26,32 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-27 — **Open-question sweep across all
+Last updated: 2026-04-27 (later) — **First end-to-end dogfood
+push: 0046 GraphExpander + 0052 Stage 0 (manifest + receiver
+scaffold) + 0053 Stage 0a (developer-worker preflight) all
+shipped to prod via worker-dispatched PRs.** Six PRs landed:
+[coder-system#9](https://github.com/coder-devx/coder-system/pull/9)
+(empty manifest),
+[coder-core#33](https://github.com/coder-devx/coder-core/pull/33)
+(callback receiver scaffold),
+[coder-core#34](https://github.com/coder-devx/coder-core/pull/34)
+(GraphExpander + ruff format follow-up),
+[coder-system#10](https://github.com/coder-devx/coder-system/pull/10)
+(WIP open-question sweep + add 0052/0053 specs),
+[coder-core#35](https://github.com/coder-devx/coder-core/pull/35)
+(developer task timeout 1200s → 2400s),
+[coder-core#36](https://github.com/coder-devx/coder-core/pull/36)
+(developer-worker preflight live: every dev dispatch now runs
+`uv run ruff format` + `uv run ruff check --fix` before push).
+Plus operational: `SELF_HEAL_PATTERN_ZOMBIE_EXECUTING_MODE` flipped
+`dry_run` → `apply` (zombie-executing tasks now auto-recovered);
+[coder-system#11](https://github.com/coder-devx/coder-system/pull/11)
+(`dispatching-developer-tasks.md` runbook captures the operational
+lessons from the push). New WIP **0054 — Orchestrator GitHub-state
+reconciliation** scope sealed today, closing the "PR exists but task
+stuck" failure class observed during the 0053 dispatch.
+
+Earlier — 2026-04-27 — **Open-question sweep across all
 in-flight WIPs: 45 OQs resolved, 9 specs scope-sealed
 (0029/0030/0031/0032/0040/0045/0046/0047/0048), 1 new mini-spec
 created (0052 — managed-repo Action distribution, pre-work for
@@ -254,7 +279,8 @@ The system today, by logical component. Each links to its active spec
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | scope sealed 2026-04-27 — ready for architect dispatch |
 | [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients (claude.ai web) | Stages 1+2+3+4 shipped; claude.ai web registered + driving MCP via OAuth in prod; soaking through ~2026-05-25; OQs resolved 2026-04-27 |
 | [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | scope sealed 2026-04-27 — ready for architect dispatch (pre-work for 0045 + 0047 Action sweep stages) |
-| [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | scope sealed 2026-04-27 — ready for architect dispatch (closes the worker→CI feedback gap surfaced by PR #34's ruff failure) |
+| [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | Stage 0a shipped 2026-04-27 (PR #36) — preflight live in prod; Stage 0b + Stage 1 still WIP |
+| [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | scope sealed 2026-04-27 — ready for architect dispatch (closes the "PR exists but task stuck" failure class surfaced by task `22089ec6` / PR #36) |
 | [0051](./active/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | shipped to prod 2026-04-26; graduated wip → active |
 
 ---
@@ -1303,7 +1329,7 @@ managed-workflows sync`.
 - **Extends:** `knowledge-api`, `onboarding`, `audit-log`, `admin-panel`
 - **Unblocks:** [0045](./wip/0045-cold-start-ingestion.md), [0047](./wip/0047-template-schema-migration.md)
 
-### 0053 — Post-PR CI fix loop (scope sealed 2026-04-27)
+### 0053 — Post-PR CI fix loop (Stage 0a shipped 2026-04-27)
 
 The developer-worker pipeline today ends at `succeeded|accepted`
 once internal pytest passes and the reviewer accepts the PR.
@@ -1334,10 +1360,35 @@ Re-uses 0052's HMAC-webhook pattern. Re-uses 0041's escalation
 path. Re-uses spec 0025's `validate_and_retry` shape for the
 worker re-prompt.
 
-- **Status:** scope sealed 2026-04-27 — ready for architect dispatch
+- **Status:** Stage 0a shipped 2026-04-27 (coder-core#36 — preflight live in prod). Stage 0b (re-prompt path) and Stage 1 (post-PR CI watcher) still WIP.
 - **WIP:** [0053](./wip/0053-post-pr-ci-fix-loop.md) · **Design:** [0053](../designs/wip/0053-post-pr-ci-fix-loop.md)
 - **Extends:** `developer-worker`, `reviewer-worker`, `task-orchestration`, `audit-log`, `admin-panel`
 - **Closes:** the worker→CI feedback gap surfaced by PR #34
+
+### 0054 — Orchestrator GitHub-state reconciliation (scope sealed 2026-04-27)
+
+The orchestrator's "Fix #3" check (in `workers/orchestrator.py`)
+marks a developer task `succeeded|stuck` when the executing stage
+reports success but no PR URL was extracted from the worker's
+stdout. Realised pain (2026-04-27, task `22089ec6`): Claude wrote
+files, committed, pushed the branch, AND opened the PR — but its
+final message didn't include the PR URL. `parse_pr_url` returned
+None → task row's `pr_url` stayed null → orchestrator's Fix #3
+mis-marked the task stuck even though the artifact (a green-CI
+mergeable PR) existed. The operator had to manually check GitHub
+to discover the divergence.
+
+0054 closes this by having the orchestrator query GitHub for an
+open PR on the task's `branch_name` before transitioning to STUCK.
+On a worker-authored open PR found, populate `pr_url`, write an
+audit row, and let the next orchestrator tick proceed normally.
+Read-only against GitHub; flag-gated for shadow rollout; fail-soft
+to the existing stuck path on any error.
+
+- **Status:** scope sealed 2026-04-27 — ready for architect dispatch
+- **WIP:** [0054](./wip/0054-orchestrator-github-state-reconciliation.md) · **Design:** [0054](../designs/wip/0054-orchestrator-github-state-reconciliation.md)
+- **Extends:** `developer-worker`, `task-orchestration`, `audit-log`
+- **Closes:** the "PR exists but task is stuck" failure class
 
 ---
 

@@ -455,6 +455,21 @@ designs:
   affects_repos:
   - coder-core
   - coder-system
+- id: '0054'
+  title: Orchestrator GitHub-state reconciliation
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0054-orchestrator-github-state-reconciliation.md
+  implements_specs:
+  - '0054'
+  related_designs:
+  - worker-roles
+  - worker-communication
+  affects_services:
+  - coder-core
+  affects_repos:
+  - coder-core
 - id: '0051'
   title: coder-core modular monolith hardening
   status: active
