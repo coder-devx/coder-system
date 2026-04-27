@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-18
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-27
+last_verified_at: 2026-04-27
 served_by_designs: ["0031"]
 related_specs: [observability, task-orchestration, multi-tenancy, admin-panel]
 ---
@@ -160,22 +160,26 @@ tokens are the primary lever we control.
   month; a steady rise is a signal to raise the project's
   hard cap rather than keep overriding.
 
+## Decisions
+
+Resolved 2026-04-27 ahead of phase-2 increment dispatch.
+
+- **Hard-cap trip mid-run.** Already-dispatched tasks finish
+  (abandoning a running task loses more value than finishing
+  it). The pre-dispatch gate stops the rest — a pipeline with
+  10 queued dev tasks does not dispatch them all after the
+  cap trips. Pre-dispatch gate is the load-bearing piece.
+- **Budget period — calendar month.** Simpler for operators.
+  Invoice-cycle alignment would require coder-core to know the
+  Anthropic invoice boundary (which it doesn't today). Revisit
+  if a tenant requests it.
+- **Soft-breach notification — Slack webhook for v1.** Webhook
+  infrastructure already exists. Project-owner email is a
+  follow-up; not a v1 blocker.
+
 ## Open questions
 
-- What happens to already-dispatched tasks when hard cap trips
-  mid-run? Current thinking: let them finish (abandoning a
-  running task loses more value than finishing it). But a
-  pipeline with 10 queued dev tasks probably shouldn't
-  dispatch them all after the cap trips — the pre-dispatch
-  gate handles that.
-- Should the budget period align with the Anthropic invoice
-  cycle instead of calendar month? Calendar month is simpler
-  for operators; invoice alignment needs coder-core to know
-  the invoice boundary, which it doesn't today. Ship
-  calendar, revisit if needed.
-- Soft-breach notification: Slack webhook, or project-owner
-  email? Slack for the first cut (webhook already exists),
-  add email in a follow-up.
+_None — all resolved. See Decisions above._
 
 ## Links
 

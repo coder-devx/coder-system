@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-18
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-27
+last_verified_at: 2026-04-27
 served_by_designs: ["0029"]
 related_specs: [task-orchestration, observability, knowledge-api, pm-worker, architect-worker, team-manager-worker, developer-worker, reviewer-worker]
 ---
@@ -145,21 +145,28 @@ Out of scope for this WIP: 0030 (tier routing), 0031 (budgets),
   floor, which is the signal that the prefix is invalidating
   every call (prompt drift or a stale AGENTS.md edit loop).
 
+## Decisions
+
+Resolved 2026-04-27 ahead of phase-2 increment dispatch.
+
+- **Per-task min-freshness override on chain dispatch.** Yes —
+  a per-task override flag on the pipeline-chain dispatch lets
+  freshness-audit rewrite tasks (and similar deliberately-stale
+  cases) skip the project's default freshness floor. Design to
+  pin the dispatch-payload field name.
+- **AGENTS.md whitespace canonicalisation.** No. AGENTS.md is
+  stable enough across projects that exact-byte caching is fine;
+  the canary feed will surface any drift as a cache-miss rate
+  bump. Revisit only if drift shows up in metrics.
+- **Project-context block storage on re-dispatch.** Store it on
+  `pipeline_run_contexts`. Storage cost is bounded; the drift
+  risk from recomputation (new knowledge artifact lands between
+  dispatch and re-dispatch → caller sees a different context
+  for nominally the same task) outweighs the storage line.
+
 ## Open questions
 
-- Does the per-run context block need a min-freshness override
-  for pipelines that run against deliberately-stale artifacts
-  (e.g. a freshness-audit rewrite task)? Probably yes, as a
-  per-task override on the pipeline-chain dispatch; needs design
-  thought.
-- Anthropic's cache is keyed on exact byte match of the prefix.
-  Does `AGENTS.md` drift across projects enough that we want to
-  canonicalise whitespace before caching? Probably not — AGENTS.md
-  is stable — but worth a check on the canary.
-- Where does the project-context block live when a task is
-  re-dispatched? If we store the materialised block on
-  `pipeline_run_contexts` we pay storage; if we recompute, we
-  risk drift. Leaning "store it" — the design should pin this.
+_None — all resolved. See Decisions above._
 
 ## Links
 

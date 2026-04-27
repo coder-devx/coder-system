@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-18
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-27
+last_verified_at: 2026-04-27
 served_by_designs: ["0030"]
 related_specs: [task-orchestration, observability, pm-worker, architect-worker, team-manager-worker, developer-worker, reviewer-worker]
 ---
@@ -154,21 +154,27 @@ the cost equation: the per-token rate.
   continues; new per-tier quality alert fires if any tier's
   approval rate drops more than 2 pp over rolling 7 days.
 
+## Decisions
+
+Resolved 2026-04-27 ahead of phase-2 increment dispatch.
+
+- **Routing granularity — per-(role × task_kind).** "Architect
+  design → Opus, architect ship-draft → Sonnet" is the target
+  shape. Design pins the `(role, task_kind)` enum and the
+  routing-policy table keys on it.
+- **Schema-retry escalation — role-specific.** Per-role
+  escalation (e.g. architect retries on Sonnet after Haiku
+  schema-validation exhaustion; developer may have a different
+  ladder). Policy declares it explicitly per role.
+- **Tier-flapping inside one pipeline run — disallowed by
+  policy.** A pipeline run pins its tier at chain start; the
+  policy refuses to re-route mid-run. Avoids invalidating
+  0029's prompt cache on every step. Phase-2 may relax this
+  if it becomes a real cost driver.
+
 ## Open questions
 
-- What task-kind granularity is right? Per-role only ("all
-  architect work → Sonnet") is cheap but coarse; per-role ×
-  per-task-kind ("architect design → Opus, architect
-  ship-draft → Sonnet") is the target. Design needs to pin
-  the enum.
-- Escalation on schema-retry: blanket "retry on Sonnet after
-  Haiku failure" or role-specific? Probably role-specific,
-  but the policy should declare it.
-- How does a low-tier routing interact with 0029's prompt
-  caching? Different models have different cache keys — so
-  a tier change invalidates the cache. Not a blocker, but
-  the policy should avoid flapping tiers inside a pipeline
-  run.
+_None — all resolved. See Decisions above._
 
 ## Links
 

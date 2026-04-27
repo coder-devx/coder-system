@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-18
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-27
+last_verified_at: 2026-04-27
 served_by_designs: ["0032"]
 related_specs: [observability, task-orchestration, continuous-deployment]
 ---
@@ -165,21 +165,30 @@ cost regressions with the commit range likely responsible.
   acknowledge-or-fixed < 3 days. Longer means the alerts
   are landing but not actioning.
 
+## Decisions
+
+Resolved 2026-04-27 ahead of phase-2 increment dispatch.
+
+- **Threshold granularity — per-(role, task_kind).** Aligns
+  with 0030's `(role, task_kind)` enum; gives the detector
+  enough resolution to distinguish "architect design" from
+  "architect ship-draft" (inherently different cost shapes).
+  More tuning surface than per-role, but the accuracy gain is
+  worth it.
+- **Duration regressions — cost-only in v1.** Cost is the
+  primary signal. A 2× duration spike on the same cost is
+  interesting but secondary; add duration as a follow-up if
+  the detector has headroom and the cost-only signal proves
+  insufficient.
+- **Commit-range attribution scope — coder-core +
+  coder-system.** Both. Continuous-deployment already tracks
+  coder-system deploys via the validator run, so the join is
+  cheap; knowledge/prompt changes that drive cost regressions
+  would be invisible if scoped to coder-core alone.
+
 ## Open questions
 
-- Threshold per role or per `(role, task_kind)`? Per-role is
-  simpler to tune; per-task-kind is more accurate (Architect
-  design is inherently more variable than Architect
-  ship-draft). Leaning per-role with optional override, like
-  0030's policy.
-- Should we include duration regressions too? Cost is the
-  primary signal but a 2× duration spike on the same cost
-  is also interesting. Ship cost-only first; add duration
-  if the detector has headroom.
-- Commit-range attribution scope: coder-core only, or also
-  coder-system (knowledge/prompt changes)? Both —
-  continuous-deployment already tracks coder-system deploys
-  via the validator run.
+_None — all resolved. See Decisions above._
 
 ## Links
 

@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-27
+last_verified_at: 2026-04-27
 served_by_designs: ['0046']
 related_specs:
   - knowledge-api
@@ -157,14 +157,23 @@ Query parameters:
 - `start` (required) — `<type>/<artifact_id>` (e.g.
   `spec/architect-worker`, `design/0046`). The graph anchor.
 - `depth` (default `2`, max `3`) — BFS depth from the start node.
-  Depth 0 = just the start node + its one-hop edges _resolved_
-  (i.e. the existing single-`GET` shape's
-  `cross_links_resolved` block). Depth 1 = + one hop. Depth 2 =
-  + two hops. Hard cap at 3 — see "Bounds" below.
+  - **Depth 0** = the start node only. Its `edges[]` are listed
+    by `(edge_type, target_id)` but no targets are fetched. This
+    is **strictly more minimal** than the existing single-`GET`
+    shape's `cross_links_resolved` block (which fetches one hop).
+  - **Depth 1** = start node + first-hop targets fetched.
+    Equivalent to the existing single-`GET` shape's
+    `cross_links_resolved` resolution.
+  - **Depth 2** = + second-hop targets fetched.
+  - **Depth 3** = + third-hop. Hard cap — see "Bounds" below.
 - `edge_types` (default _all_) — comma-list restricting which
   cross-link fields are followed. e.g.
   `edge_types=served_by_designs,related_designs` walks only
-  those two field names.
+  those two field names. **Workers always pass an explicit
+  `edge_types` value** (named per-worker presets in
+  `coder_core/knowledge/graph_client.py`); the unspecified
+  default exists for admin / exploratory use only and is not a
+  worker code path.
 - `min_freshness` (default unset; semantics inherit
   `knowledge-freshness` 0043) — applied to every node. Below-
   floor nodes returned as stubs; their outgoing edges are not
@@ -172,9 +181,14 @@ Query parameters:
 - `max_nodes` (default `200`, hard cap `500`) — hard ceiling
   on node count in the response. A traversal that would exceed
   the cap is **truncated** with `truncated: true` and a list of
-  `(parent_id, edge_type, target_id)` tuples in the response
-  envelope's `truncated_at[]` field, so callers know what's
-  missing.
+  `{parent_id, edge_type, target_id, reason}` entries in the
+  response envelope's `truncated_at[]` field, so callers know
+  what's missing and why. `reason ∈ {"max_nodes",
+  "fan_out_cap"}`. If a single dropped edge is attributable to
+  both bounds (rare; e.g. a node hits the fan-out cap _and_ the
+  remaining slots would push the response past `max_nodes`), it
+  is logged once with `reason="fan_out_cap"` (the more specific
+  bound takes precedence).
 
 Response shape (typed):
 
@@ -203,7 +217,10 @@ Response shape (typed):
      "stub_reason": "below_min_freshness"}
   ],
   "truncated": false,
-  "truncated_at": [],
+  "truncated_at": [
+    // entries: {parent_id, edge_type, target_id, reason}
+    // reason ∈ {"max_nodes", "fan_out_cap"}
+  ],
   "meta": {
     "node_count": 17,
     "edge_count": 34,
@@ -227,15 +244,17 @@ rather than 5xx-errors:
 
 - **`max_nodes`** — BFS halts when the queue would push the
   count over the cap. Returns `truncated: true` and lists every
-  edge that would have been followed but wasn't.
+  edge that would have been followed but wasn't, each with
+  `reason="max_nodes"`.
 - **`depth`** — caller-specified, hard-capped at 3. Beyond depth
   3 the response stops following; not a truncation, just the
   natural BFS frontier.
 - **Per-node fan-out cap** — if a single node has > 50 outgoing
   edges across the requested edge types, only the first 50 (lex
   by `(edge_type, target_id)`) are followed. Remaining edges go
-  into `truncated_at[]`. This is a defence against a pathological
-  artifact pulling the whole repo into one fetch.
+  into `truncated_at[]` with `reason="fan_out_cap"`. This is a
+  defence against a pathological artifact pulling the whole repo
+  into one fetch.
 
 ### In scope — caching
 
@@ -258,13 +277,20 @@ rather than 5xx-errors:
 
 ### In scope — worker integration
 
-- Architect worker's pre-claude assembly switches from the serial
-  walk to one graph fetch with `depth=2, min_freshness=70,
+The four authoring workers convert their context-load step from
+a serial walk to a single graph fetch. **Initial conversion
+omits `min_freshness`** — the N+1 fix and the freshness-floor
+default flip are decoupled (see Decisions). Worker calls in this
+spec:
+
+- Architect worker's pre-claude assembly switches to one graph
+  fetch rooted at the spec with `depth=2,
   edge_types=served_by_designs,related_designs,decided_by`. The
   in-prompt context block is built from the resulting subgraph.
 - Team Manager worker's plan authoring switches from "load the
   approved design + walk its `decided_by`" to one graph fetch
-  rooted at the design with `depth=2`.
+  rooted at the design with `depth=2,
+  edge_types=decided_by,related_designs,affects_services`.
 - Reviewer worker's spec-context load (when the developer task
   references a spec) switches to one graph fetch rooted at the
   spec with `depth=1, edge_types=served_by_designs`.
@@ -275,6 +301,14 @@ rather than 5xx-errors:
 Each worker's prompt-construction code keeps its prior shape
 (injected `# Spec`, `# Active designs`, `# ADRs` sections) but
 the data source is the graph response, not N single-fetches.
+
+**Freshness-floor follow-up.** A separate, follow-up flip
+(tracked outside this spec) adds `min_freshness=70` to the
+worker calls and teaches each prompt to render below-floor
+stub_nodes as `# Stale: <id>` blocks. Decoupling keeps the
+N+1 latency win and the freshness-default change as
+independently reversible: a regression in either lands as one
+revertable change, not a tangled one.
 
 ### In scope — admin panel
 
@@ -319,12 +353,14 @@ the running PR's tree-snapshot to give the next batch a real
 - **AC3.** `max_nodes` truncation: a fetch with `max_nodes=10`
   on a subgraph that would otherwise return ≥ 15 nodes returns
   exactly 10 nodes, `truncated: true`, and ≥ 5 entries in
-  `truncated_at[]` each with `(parent_id, edge_type, target_id)`.
+  `truncated_at[]` each with
+  `{parent_id, edge_type, target_id, reason="max_nodes"}`.
 
 - **AC4.** Per-node fan-out cap: if any single node has > 50
   outgoing edges in the requested `edge_types`, only the first
   50 (lex by `(edge_type, target_id)`) are followed; the rest
-  appear in `truncated_at[]`.
+  appear in `truncated_at[]` each with
+  `reason="fan_out_cap"`.
 
 - **AC5.** Freshness gating: a fetch with `min_freshness=70`
   excludes any node with `freshness.score < 70` from `nodes`
@@ -340,15 +376,18 @@ the running PR's tree-snapshot to give the next batch a real
   pre-write content.
 
 - **AC7.** Architect worker's pre-claude assembly is converted
-  to a single graph fetch (`depth=2, min_freshness=70,
-  edge_types=served_by_designs,related_designs,decided_by`).
+  to a single graph fetch (`depth=2,
+  edge_types=served_by_designs,related_designs,decided_by`;
+  `min_freshness` omitted — see Decisions).
   Existing `architect` JSON-schema validation continues to pass.
   Pre-claude wall-clock latency drops measurably (target: p50
   ≤ 1.5 s on `coder` project's seed; pre-0046 baseline ≈ 6 s).
 
-- **AC8.** Team Manager and Reviewer workers each switch to a
-  graph fetch at their respective context-load site. Same
-  schema validations continue to pass.
+- **AC8.** Team Manager, Reviewer, and PM accept-mode workers
+  each switch to a graph fetch at their respective context-load
+  site (per the per-worker shapes in scope; `min_freshness`
+  omitted on initial conversion). Same schema validations
+  continue to pass.
 
 - **AC9.** Metrics:
   `knowledge_graph_fetch_seconds_bucket{project,depth_bucket}`
@@ -387,54 +426,56 @@ the running PR's tree-snapshot to give the next batch a real
   graph fetch when `min_freshness` is set. Trends over time
   show how often callers are seeing freshness-blind branches.
 
+## Decisions
+
+Resolved 2026-04-26 ahead of architect dispatch. Each item is
+folded into the relevant scope / AC text above; recorded here so
+the rationale stays visible.
+
+- **Edge-type defaults — workers always pass explicit
+  `edge_types`.** The unspecified default exists for admin /
+  exploratory use only; not a worker code path. Per-worker
+  presets live in `coder_core/knowledge/graph_client.py` so the
+  call sites are one-line and the presets are reviewable in one
+  place when we want to evolve them.
+
+- **`min_freshness` default for workers — decoupled from this
+  spec.** Initial worker conversions ship with `min_freshness`
+  omitted. A separate follow-up flip adds `min_freshness=70`
+  plus the prompt-side `# Stale: <id>` block rendering. Reason:
+  the freshness-default change is a behaviour change beyond the
+  N+1 fix and could surface latent stale artifacts as new
+  failures during Stage 2 ramp; decoupling keeps the latency
+  win and the freshness-floor flip independently reversible.
+
+- **Stub-node body inclusion — v1 keeps stub-no-body.** Stub
+  nodes carry no body in the response. If a caller needs bodies
+  of below-floor leaves they pass a lower `min_freshness`.
+  Two-param shape (`exclude_below=N`, `flag_below=M`) deferred
+  to a v2 if usage shows it's needed.
+
+- **`depth=0` semantics — start node only, edges listed but
+  targets not fetched.** Strictly more minimal than the existing
+  single-`GET` shape's `cross_links_resolved` block (which
+  fetches one hop). `depth=1` matches that one-hop-resolved
+  shape. Documented in scope to prevent off-by-one confusion.
+
+- **Multi-axis truncation logging — multiple entries with a
+  `reason` field.** `truncated_at[]` carries
+  `{parent_id, edge_type, target_id, reason}` per dropped edge,
+  with `reason ∈ {"max_nodes", "fan_out_cap"}`. An edge
+  attributable to both bounds logs once with
+  `reason="fan_out_cap"` (the more specific bound takes
+  precedence). Self-describing, no ambiguity in the response.
+- **Multi-start endpoint — v1 single-start.** A reviewer task
+  with three spec refs calls the endpoint N times client-side
+  in v1. Defer multi-start to v2 if the N-fetch overhead shows
+  up as a real cost or latency line; v1 doesn't carry the
+  request-shape complexity.
+
 ## Open questions
 
-- **Edge-type defaults.** AC2 says "all edge types" by default.
-  Some edges are noisy for reasoning use-cases — e.g.
-  `affects_repos` from a design pulls the deployment repo in,
-  which the architect doesn't need at prompt time. Should
-  workers default to a curated set, or always specify
-  `edge_types` explicitly? Leaning: workers always pass
-  explicit `edge_types`; the unspecified default is for admin /
-  exploratory use only. Design to specify per-worker constants.
-
-- **`min_freshness` default for workers.** Today every worker
-  reads without a freshness floor (so a stale design still
-  reaches the prompt). 0046 is the natural place to flip the
-  default to "70 unless overridden." But that's a behaviour
-  change beyond the N+1 fix and might surface latent stale
-  artifacts as new failures. Leaning: convert workers to use
-  `min_freshness=70` _and_ tolerate stub_nodes (treat each
-  as a `# Stale: <id>` block in the prompt). Risk: the stale
-  branches were silently informing prompts; now they won't.
-
-- **Stub-node body inclusion.** AC5 says stub nodes carry no
-  body. But for the worker tolerating-stale path, having the
-  body is useful even if stale (clearly labelled). Should
-  `min_freshness` separate "exclude entirely" vs "include but
-  flag"? Two query params (`exclude_below=N`, `flag_below=M`)
-  feels right but adds surface area. Leaning: v1 just
-  `min_freshness` with stub-no-body; if workers need bodies of
-  stale leaves they pass a lower floor.
-
-- **`depth` semantics for the start node's resolved cross-
-  links.** The current single-`GET` shape resolves cross-links
-  one hop deep (`cross_links_resolved`). Is graph `depth=0`
-  equivalent? Or is depth=0 = "just the start node, no edges
-  resolved at all"? Leaning: depth=0 = start node only with
-  `edges[]` listed but no targets fetched. depth=1 = + targets.
-  Documented clearly because the off-by-one is easy to confuse.
-
-- **Truncation policy under multi-axis pressure.** If a fetch
-  hits both `max_nodes` AND a per-node fan-out cap on the same
-  node, what's logged? Two entries in `truncated_at[]` for the
-  same parent? One? Design needs to specify.
-
-- **Should the graph endpoint accept a list of starts?** A
-  reviewer might want the graph rooted at multiple specs in one
-  call (e.g. a developer task that touches three specs). v1
-  is single-start; multi-start would just call the endpoint N
-  times client-side. Acceptable for now.
+_None — all resolved. See Decisions above._
 
 ## Links
 

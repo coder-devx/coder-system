@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-21
-last_verified_at: 2026-04-21
+updated: 2026-04-27
+last_verified_at: 2026-04-27
 served_by_designs: ["0038"]
 related_specs: [service-accounts, continuous-deployment, multi-tenancy, admin-panel, impersonation, audit-log]
 ---
@@ -278,31 +278,41 @@ button for break-glass.
   per-project auth-4xx rate, alert if +2σ within 1 h of a
   `secret.rotate` audit row.
 
+## Decisions
+
+Resolved 2026-04-27.
+
+- **Anthropic admin API access — needs investigation.** Before
+  the `project_anthropic_key` rotator can ship, an operator
+  must confirm whether Anthropic's customer API supports
+  programmatic per-project key creation/rotation. **If
+  unsupported:** phase-1 ships with three kinds live and
+  `project_anthropic_key` as a documented stub (rotator no-ops
+  with an explicit "unsupported" audit row). **If supported:**
+  ship as a live kind. Action item — needs an Anthropic API
+  capability check before next rotator-touching change.
+- **Admin JWT verifier — sequential `try secret_new else
+  try secret_old`.** No in-memory cache. The 2 h dual-value
+  window is short enough that the per-request second-decode
+  cost is negligible; cache adds invalidation surface for
+  little benefit.
+- **Per-project Anthropic key budget impact during rotation —
+  deferred to phase-2 observability.** Whether Anthropic
+  attributes a long-running call mid-rotation to the old or
+  new key is a `/metrics` `daily_cost` attribution edge case.
+  Cost-correctness during the rotation window is a known,
+  bounded gap; phase-2 line item to investigate + fix.
+
 ## Open questions
 
-- **Anthropic admin API access.** The `project_anthropic_key`
-  rotator needs a key that itself can issue new per-project keys.
-  Does Anthropic's current customer API support programmatic key
-  creation / rotation? If not, phase-1 punts this kind to manual
-  (rotator no-ops with an explicit "unsupported" audit row), and
-  the spec ships with three kinds live + one documented stub.
 - **Dual-value window on the GitHub App.** GitHub supports two
   active private keys per App but enforces a one-week grace once
-  a key is deleted. We should confirm our 6h window closes well
-  before that bound and doesn't accidentally rely on GitHub's
+  a key is deleted. Confirm our 6h window closes well before
+  that bound and doesn't accidentally rely on GitHub's
   deletion grace.
-- **Admin JWT verifier cache.** The FastAPI middleware decodes the
-  JWT per request today. Do we need an in-memory "accept both
-  secrets" set, or is the straightforward `try secret_new else
-  try secret_old` pattern fine for 2 h? Probably the latter.
 - **Rate-limit interaction.** Rotating an API key invalidates the
   caller's rate-limit bucket (keyed on project id, not key). No
   change expected, but worth explicit test.
-- **Per-project Anthropic key budget impact.** If we cycle the key
-  while a worker is deep in a long-running call, does Anthropic's
-  usage telemetry attribute the call to the old or new key? Affects
-  `/metrics` `daily_cost` attribution during the window. Deferred
-  to a phase-2 observability line.
 - **Scheduler drift vs 15-min tick.** If the Cloud Run Job takes >
   15 min (extremely unlikely — each rotation is seconds), the next
   tick may overlap. The advisory lock on `canonical_name` already

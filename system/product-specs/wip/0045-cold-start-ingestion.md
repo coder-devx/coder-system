@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-27
+last_verified_at: 2026-04-27
 served_by_designs: ['0045']
 related_specs:
   - onboarding
@@ -324,35 +324,55 @@ section of the PR body.
 - **Token spend per cold-start run** — total input + output tokens
   per run, observed against the `cold_start_max_tokens` ceiling.
 
+## Decisions
+
+Resolved 2026-04-27 ahead of architect dispatch.
+
+- **"Logical scope" batch fallback for flat repos —
+  char-budget-bounded alphabetical chunks.** Primary path
+  remains top-level deployable units (`pyproject.toml`,
+  `package.json`, `cmd/<name>/`, etc.). Fallback when the repo
+  is flat (everything under `src/`, no top-level deployable
+  signals): split by `cold_start_batch_max_input_tokens`
+  budget along alphabetical directory partition. Final
+  catchall batch handles repo-root + commit history as before.
+- **Cross-batch context-passing — yes, frontmatter+ids only,
+  no bodies.** Later batches see earlier batches' accepted
+  `artifacts[]` frontmatter + ids in the prompt's "Prior
+  batch output" section. Bodies omitted to stay under
+  `cold_start_batch_max_input_tokens`. Batch ordering: top-
+  level dirs first (services likely), then `src/<package>`
+  (designs), then catchall (ADRs + glossary). The aggregator
+  filters low-confidence + human-edited *before* exposing to
+  next batch — later batches only see the high-confidence
+  accepted set.
+- **`ingestion_provenance.confidence` vs 0040
+  `self_confidence` — independent schemas.** 0040 measures
+  per-envelope gate-decision faithfulness; cold-start measures
+  per-artifact source-faithfulness. Different units, different
+  calibration loops. Sharing a schema would couple two
+  unrelated tuning surfaces.
+- **Glossary aggregation — lowercase-exact dedupe, first-batch
+  wins, log conflicts.** The aggregator dedupes
+  `glossary_entry` by `term.lower()`; keeps first-batch's
+  proposal; logs collisions to the run summary so the operator
+  can spot subtly-different surface forms ("build pipeline"
+  vs "CI pipeline") in review. v2 may fold semantically-
+  similar entries; v1 is structural.
+- **Cold-start-Action distribution — sweep ships with 0045
+  release.** The `flip-cold-start-provenance.yml` workflow
+  lands in `template/.github/workflows/` (for new projects)
+  AND a one-time `seed_cold_start_action.py` sweep runs in
+  the same release to seed it into existing managed repos
+  (`coder`, `vibetrade`). Runbook documents the sweep
+  ordering: sweep must complete before any project can
+  invoke `coder project ingest`. **See 0052** —
+  shared "managed-repo Action distribution" helper landing as
+  pre-work; 0045's seed script consumes that helper.
+
 ## Open questions
 
-- **What does a "logical scope" batch look like in practice?**
-  Spec defers to design (0045-design batching strategy). For a
-  monorepo, top-level dirs is obvious; for a flat repo with
-  everything under `src/`, the batching needs a fallback.
-- **Should the architect worker get to read prior cold-start
-  artifacts from this run when generating the next batch?**
-  Leaning yes (so an inferred service in batch 1 can be referenced
-  by an inferred design in batch 2). Design needs to define the
-  batch ordering + the cross-batch context-passing wire. Trade-off
-  is more tokens.
-- **`ingestion_provenance.confidence` vs 0040
-  `self_confidence`.** Both are 0–100. 0040 is per-output-envelope;
-  here it's per-artifact-within-an-envelope. Should they share a
-  schema definition or stay independent? Leaning independent
-  because 0040 measures "this whole gate decision," cold-start
-  measures "this one inferred artifact" — different unit.
-- **Glossary aggregation.** Multiple batches will each propose
-  their own glossary entries. Dedupe across batches by term name?
-  Do we let the architect rewrite an entry a later batch already
-  defined? Leaning: dedupe by term, keep first-batch wins, log
-  conflicts. Design to confirm.
-- **GitHub Action distribution.** AC5 requires the cold-start-
-  provenance flip Action to land in every managed knowledge repo.
-  Is that done by `template/` (so onboarding gets it) + a one-time
-  fleet sweep (so existing projects gain it)? Onboarding spec's
-  `coder project onboard` command would need to pick up the new
-  workflow file. Design should pin the rollout sequence.
+_None — all resolved. See Decisions above._
 
 ## Links
 

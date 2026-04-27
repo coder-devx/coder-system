@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-27
+last_verified_at: 2026-04-27
 served_by_designs: ['0048']
 related_specs:
   - knowledge-api
@@ -454,69 +454,57 @@ also scheduled daily at 03:00 UTC):
   doesn't use the model; the others might in v2). Target:
   < 10 min per run at the current fleet size.
 
+## Decisions
+
+Resolved 2026-04-27 ahead of architect dispatch.
+
+- **Similarity threshold tuning — runbook documents the
+  tuning loop.** With fleet=2, the 0.5/0.4 Jaccard floors are
+  hand-eyeballed. The runbook (new, alongside the indexer
+  ship) specifies: spot-check 20 groups per run, label
+  false-positives and false-negatives, adjust thresholds in a
+  small reviewable PR carrying the labelling data. Repeat at
+  every fleet-size milestone (3, 4, 8 projects) until the
+  detector stabilises.
+- **`failure_taxonomy` to architect — v1 narrow,
+  `kinds=adr` only.** Architect's pre-claude consult ships
+  with ADR patterns only. Failure-taxonomy to architect
+  expands once Stage 3 data shows non-trivial architect
+  citation rate on the ADR surface. Endpoint shape supports
+  the additional kind from day 1; the architect prompt change
+  is the deferred bit.
+- **`role_prompt_delta` privacy — hunks for admin, hash+lines
+  for worker.** The indexer materialises `diff_summary` with
+  full hunks. Admin-scope responses include hunks; the
+  worker-consult response model strips to hash + line count
+  via Pydantic field exclusion. **Schema test enforces** that
+  worker-scope consult on `kinds=role_prompt_delta` (if ever
+  added) returns only hash + delta number. The schema test is
+  load-bearing — adding a future kind that exposes hunks to
+  worker scope must fail this test.
+- **Stable `pattern_id` — sticky on first appearance with
+  member-overlap matching.** Indexer's prior-run match pass
+  reuses an existing `pattern_id` when member-key Jaccard ≥
+  0.6 against the prior group; otherwise assigns a new id from
+  a deterministic first-appearance hash. Stability over time
+  is the load-bearing property — `informed_by_patterns`
+  citations in shipped ADRs stay resolvable across indexer
+  re-runs even when membership drifts.
+- **Per-tenant opt-out — `projects.fleet_patterns_index_opt_in`,
+  default true.** Ship for completeness even without a
+  requesting tenant. The indexer's per-project fetch step
+  respects the flag; opted-out projects' artifacts never
+  enter the pattern groups. Migration 0058 adds the column.
+- **Aging out old patterns — admin page filters to active in
+  last 90 days by default.** With a toggle to see all.
+  `pattern_groups` rows are kept regardless for history; the
+  filter is purely UI. Default chosen to surface recently-
+  relevant patterns and demote stale matches that no project
+  has cited or revisited.
+
 ## Open questions
 
-- **Similarity threshold tuning per kind.** The 0.5 / 0.4
-  Jaccard floors in the indexer description are first-cut
-  guesses. We won't know the right thresholds until we have
-  4+ projects with mature knowledge repos; with two we'll
-  hand-eyeball. Runbook should document the tuning loop:
-  spot-check 20 groups in a run, label false-positives + false-
-  negatives, adjust.
-
-- **Should the consult endpoint also surface `failure_taxonomy`
-  to the architect worker drafting an ADR?** A cross-project
-  failure pattern is a strong signal that the design should
-  pre-empt that failure mode. AC10's first cut is `kinds=adr`
-  only. Worth experimenting with `kinds=adr,failure_taxonomy`
-  but the worker would need to know how to use a failure
-  taxonomy in design context — prompt change, not endpoint
-  change. Leaning: ship narrow (adr only) in v1, expand once
-  we see how often the architect uses what's surfaced.
-
-- **Privacy of `role_prompt_delta` member content.** The
-  delta surfaces _that_ project A edited a role prompt and
-  approval-rate moved. The diff itself is in project A's
-  `roles/` file — readable to admin scope, not to project
-  B's worker scope. Question: when the indexer materialises
-  the `diff_summary` field, does it include the actual diff
-  hunks or just a hash + line count? Including hunks lets the
-  operator see at a glance "ah, they added a 'be more
-  conservative on null deref' instruction"; excluding them
-  forces a click-through. Leaning: include hunks because the
-  surface is admin-scope only. But a worker calling consult
-  on `kinds=role_prompt_delta` (if we ever add that) MUST
-  receive only the hash + delta number, not the hunks.
-
-- **Stable `pattern_id` across runs.** A pattern's id should
-  be stable across indexer runs so the
-  `informed_by_patterns` citation in a design doesn't break
-  when the indexer re-runs. Two options:
-  (a) deterministic id from
-  `hash(kind + sorted_member_keys)` — stable as long as
-  membership is stable, breaks when one project drifts in
-  or out;
-  (b) sticky id assigned on first appearance and carried
-  forward by the indexer matching new groups against
-  prior-run groups by member overlap.
-  Leaning (b) for stability; the validator's "id resolves"
-  check in AC5 stays meaningful longer. Implementation
-  cost: the indexer needs a "match against prior run"
-  pass.
-
-- **What about projects opting _out_ of being indexed?**
-  A future tenant might want their knowledge repo not to
-  contribute to fleet patterns (compliance reason). Add a
-  `projects.fleet_patterns_index_opt_in` (default true)
-  that the indexer respects? Leaning yes for completeness,
-  even though we have no requesting tenant yet.
-
-- **Aging out old patterns.** A pattern surfaced 6 months
-  ago that no project has cited or revisited may be noise.
-  Should the admin page filter to "active in last N days"
-  by default? Leaning yes (default 90 days; toggle to see
-  all). `pattern_groups` rows are kept regardless for
-  history.
+_None — all resolved. See Decisions above._
 
 ## Links
 

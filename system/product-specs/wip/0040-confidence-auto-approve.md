@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-21
-last_verified_at: 2026-04-21
+updated: 2026-04-27
+last_verified_at: 2026-04-27
 served_by_designs: ['0040']
 related_specs:
   - task-orchestration
@@ -233,6 +233,31 @@ cascade into developer tasks.
   publish (shadow). Stage 3 flips the flag and the per-gate
   thresholds one at a time.
 
+- **AC11. (pre-Stage-3)** Static risk-flag check — gate handler
+  computes the grep-able subset of `risk_flags`
+  (`migration_required`, `external_dependency_added`,
+  `large_blast_radius`) from the artifact body / plan and ORs
+  with the worker's self-reported flags before evaluating
+  predicate 4. Test: a worker that returns `risk_flags=[]` on
+  an artifact whose body contains a migration file path lands
+  as `Manual(reason="risk_flag_present")` (not auto-approved).
+
+- **AC12. (pre-Stage-3)** Undo / tick race — both the
+  `auto_approval_finalise_tick` and `POST .../undo` /
+  `POST .../accept-now` endpoints acquire `SELECT FOR UPDATE`
+  on the `auto_approvals` row before transitioning. Test:
+  concurrent tick + undo on the same `pending` row lands the
+  row in exactly one of {`applied`, `undone`}; the loser
+  observes the post-transition state and returns the
+  appropriate response (tick: no-op; undo: `409
+  reason="already_applied"`).
+
+- **AC13.** Revision task spawned on undo carries
+  `undone_reason ∈ {score_below_threshold, risk_flag_present,
+  historical_rate_below_95, insufficient_history}` (operator-
+  selected, optional) plus the operator's optional free-text
+  body. Default reason if operator selects none is null.
+
 ## Metrics
 
 - **Auto-approve rate per gate kind** — %of artifacts that reached
@@ -252,36 +277,50 @@ cascade into developer tasks.
   `insufficient_history`, `project_opted_out`. Operators read this
   to decide whether to lower a threshold or wait.
 
+## Decisions
+
+Resolved 2026-04-27. Three of these (static risk-flag check,
+undo/tick race lock, revision task structured `undone_reason`)
+are **pre-Stage-3 work** — they need to land before the
+fleet flag flips. See AC12 for the static check AC.
+
+- **`self_confidence` token cost — measure now using shadow-mode
+  data.** Stage 2 shadow already runs the evaluator on every
+  Phase 4 write; pull the per-output `self_confidence`-block
+  token counts from the structured-log feed and compare to the
+  pre-0040 0029 baseline. If the cost is materially > 200
+  tokens, surface to the cost-regression-alert (0032) feed
+  before Stage 3 flip.
+- **Per-project threshold override — phase-2.** Not v1. A
+  project demanding a stricter threshold than fleet is a
+  reasonable use case but doesn't block the rollout. Add via
+  `projects.auto_approve_*_threshold_override` columns when a
+  requesting tenant shows up.
+- **Risk-flag static check — yes, gate handler ORs the
+  worker's self-report with statically-computed flags.**
+  `migration_required`, `external_dependency_added`, and
+  `large_blast_radius` are grep-able from the artifact body
+  (migration filename present, dependency manifest delta,
+  task-count from the plan). Static check is fail-safe against
+  worker self-serving scoring. Lands as new AC12 below;
+  pre-Stage-3 work.
+- **Undo vs tick race — `SELECT FOR UPDATE` on the
+  `auto_approvals` row.** Both the tick and the undo endpoint
+  acquire the row lock before transitioning state. Whoever
+  lands first wins; the loser sees the new state and either
+  no-ops (tick on already-undone) or returns 409 (undo on
+  already-applied). Lands in implementation; pre-Stage-3 work.
+- **Revision task on undo — operator's optional text +
+  structured `undone_reason`.** The reason field is a small
+  enum of the four predicates (`score_below_threshold`,
+  `risk_flag_present`, `historical_rate_below_95`,
+  `insufficient_history`) that the operator believes the
+  evaluator should have caught. Builds grader data over
+  time. Schema change in the revision-task spawn payload.
+
 ## Open questions
 
-- **Worker prompt cost for `self_confidence`.** Asking the worker to
-  self-grade adds tokens. Preliminary estimate is < 200 tokens per
-  output; needs measurement against the shared-context baseline from
-  0029 before we call the feature free.
-
-- **Threshold per-project override.** Should a project be able to
-  require a _higher_ threshold than fleet (e.g., `coder` wants
-  design ≥ 95 not 90)? Leaning yes as a phase-2, not blocking.
-
-- **Risk-flag self-check vs static check.** `novel_component` is a
-  judgement call the worker makes; `migration_required` is
-  grep-able from the design body. Should the gate handler also
-  compute the static flags and OR with the worker's self-reported
-  flags? Probably yes — adds a fail-safe against worker
-  self-serving scoring. Noted for design.
-
-- **Undo during chain dispatch.** If the tick fires and begins chain
-  dispatch at the exact moment a user hits Undo, we race. Design
-  should define the resolution — probably: tick takes a SELECT FOR
-  UPDATE on the `auto_approvals` row before transitioning, and
-  the undo endpoint takes the same lock, so whoever lands first
-  wins. Revisit at implementation.
-
-- **Revision task prompt shape.** A manual reject spawns a revision
-  task with the reviewer's feedback body; what does an undo spawn?
-  Leaning: the operator's optional text body plus a structured
-  `undone_reason` (which of the four predicates the operator thinks
-  failed — so over time we can build a grader). Revisit in design.
+_None — all resolved. See Decisions above._
 
 ## Links
 
