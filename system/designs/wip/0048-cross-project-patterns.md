@@ -6,6 +6,7 @@ status: wip
 owner: ro
 created: 2026-04-19
 updated: 2026-04-28
+last_verified_at: '2026-04-28'
 implements_specs: ['0048']
 decided_by: ['0022', '0023', '0024']
 related_designs:
@@ -64,7 +65,7 @@ pre-seal draft (2026-04-19). Key refinements:
 - Worker integration section added: 4 KB hint payload cap +
   redaction rule.
 - Worked example (ADR pattern end-to-end) added.
-- ADRs 0019 (discovery mechanism), 0020 (surface choice), 0021
+- ADRs 0022 (discovery mechanism), 0023 (surface choice), 0024
   (enforcement boundary) drafted.
 
 ## Goals / non-goals
