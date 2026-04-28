@@ -4,9 +4,9 @@ title: Provision the coder-core-worker Cloud Run Job (spec 0056)
 type: runbook
 status: active
 owner: ro
-created: 2026-04-29
-updated: 2026-04-29
-last_verified_at: 2026-04-29
+created: 2026-04-28
+updated: 2026-04-28
+last_verified_at: 2026-04-28
 applies_to_services: [coder-core]
 applies_to_integrations: [cloud-run-jobs]
 ---
