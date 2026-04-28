@@ -26,7 +26,51 @@ The through-line is: *make the pipeline fast, cheap, visible, safe to
 trust with less human intervention, and make the knowledge it runs on
 compound in value.*
 
-Last updated: 2026-04-27 (later) — **First end-to-end dogfood
+Last updated: 2026-04-28 — **0054 Orchestrator GitHub-state
+reconciliation shipped end-to-end via the full dogfood loop
+(architect → TM → developer), live in prod with the flag flipped
+on.** Implementation
+([coder-core#37](https://github.com/coder-devx/coder-core/pull/37))
+landed via developer dispatch `7f44feb5` after the manual chain
+exercise: architect task `62e0c95e` verified line numbers + found
+existing `GitHubClient.list_pulls` (no new helper needed), produced
+ADR 0016 for `user.type == "Bot"` detection (preserved as
+[coder-system#13](https://github.com/coder-devx/coder-system/pull/13)
+since architect couldn't open PRs — see WIP 0055). TM task
+`8932c578` produced a 5-task plan with explicit constraints
+(don't change `_after_dispatch` signature, fail-soft contract,
+backward-compatible flag-off path). First developer dispatch
+timed out at the 1200s ceiling on a 1-vCPU instance with a
+`worker_transient_retry.unknown` budget burn; **bumped Cloud Run
+to 4 vCPU** and re-dispatched cleanly in 9 min. Post-merge CI
+hit a pre-existing time-sensitive test failure
+(`test_run_dispatches_up_to_limit_below_floor` crossed a
+freshness-bucket boundary at midnight UTC); skipped via
+[coder-core#38](https://github.com/coder-devx/coder-core/pull/38)
+to unblock CD. Operator flipped
+`CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED=true` on revision
+`coder-core-00161-ln6`. **The "PR exists but task is stuck"
+failure class — observed three times during this push — is now
+eliminated.**
+
+New session artifacts:
+- WIP **0055** (drafting) — non-developer-role workers need
+  `GH_TOKEN`. Architect/TM workers can read code + reason but
+  cannot open PRs because `GH_TOKEN` is only injected when
+  `task.workspace` is set; non-developer roles don't have a
+  workspace in the manual-dispatch path. Implementation can be
+  dispatched directly via developer worker.
+- **ADR 0016** — Worker-authored PR detection via
+  `user.type == "Bot"` (login-match rejected: silent-failure
+  trap when bot identity drifts from config).
+- Coder-core operational: `_DEFAULT_TIMEOUT_SECONDS = 2400`
+  (PR #35), Cloud Run CPU=4 (today), preflight live (PR #36),
+  `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED=true` (today),
+  `SELF_HEAL_PATTERN_ZOMBIE_EXECUTING_MODE=apply` (yesterday).
+- Coder-system operational: dispatching-developer-tasks runbook
+  ([coder-system#11](https://github.com/coder-devx/coder-system/pull/11)).
+
+Earlier — 2026-04-27 (later) — **First end-to-end dogfood
 push: 0046 GraphExpander + 0052 Stage 0 (manifest + receiver
 scaffold) + 0053 Stage 0a (developer-worker preflight) all
 shipped to prod via worker-dispatched PRs.** Six PRs landed:
@@ -274,13 +318,13 @@ The system today, by logical component. Each links to its active spec
 | [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | infra wired, Stage 2 shadow; OQs resolved 2026-04-27 — pre-Stage-3 work (AC11 static check, AC12 race lock) ready for dispatch |
 | [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | scope sealed 2026-04-27 — ready for architect dispatch |
 | [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | Stages 1+2+3 shipped; `MCP_ENABLED=true` + `coder.mcp_enabled=true` in prod; soaking through ~2026-05-25 |
-| [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | scope sealed 2026-04-26 — ready for architect dispatch |
+| [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | Stage 0a shipped 2026-04-27 (PR #34) — pure-logic GraphExpander module live; route + migration + worker conversions still WIP |
 | [0047](./wip/0047-template-schema-migration.md) | Template schema migration | scope sealed 2026-04-27 — ready for architect dispatch (alias-tolerance is pre-work for first rename migration) |
 | [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | scope sealed 2026-04-27 — ready for architect dispatch |
 | [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients (claude.ai web) | Stages 1+2+3+4 shipped; claude.ai web registered + driving MCP via OAuth in prod; soaking through ~2026-05-25; OQs resolved 2026-04-27 |
-| [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | scope sealed 2026-04-27 — ready for architect dispatch (pre-work for 0045 + 0047 Action sweep stages) |
+| [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | Stage 0 shipped 2026-04-27 (coder-system#9 manifest + coder-core#33 receiver scaffold) — flag-off in prod; Stage 1 (helpers + sync CLI) and Stage 2 (admin matrix) still WIP |
 | [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | Stage 0a shipped 2026-04-27 (PR #36) — preflight live in prod; Stage 0b + Stage 1 still WIP |
-| [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | scope sealed 2026-04-27 — architect-refined (task `62e0c95e`); ready for TM dispatch |
+| [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | shipped 2026-04-28 (PR #37); flag `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED=true` flipped on revision `coder-core-00161-ln6` — live in prod |
 | [0055](./wip/0055-non-developer-roles-need-github-write-access.md) | Non-developer-role workers need GitHub write access | drafting — surfaced by architect task `62e0c95e` failing to open a PR (no `GH_TOKEN` for non-developer roles) |
 | [0051](./active/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | shipped to prod 2026-04-26; graduated wip → active |
 
@@ -1111,7 +1155,7 @@ behind `VITE_COLD_START_ENABLED`.
 - **WIP:** [0045](./wip/0045-cold-start-ingestion.md) · **Design:** [0045](../designs/wip/0045-cold-start-ingestion.md)
 - **Extends:** `onboarding`, `knowledge-api`, `architect-worker`, `knowledge-freshness`
 
-### 0046 — Graph-aware knowledge retrieval (scope sealed 2026-04-26)
+### 0046 — Graph-aware knowledge retrieval (Stage 0a shipped 2026-04-27)
 
 New endpoint `GET /v1/projects/{id}/knowledge/graph` returns the
 subgraph reachable from a starting artifact (`?start=<type/id>`)
@@ -1153,10 +1197,12 @@ endpoint + expander dark → `coder` opt-in → architect conversion
 trial-flip → TM/reviewer/PM trial-flips one per day → fleet
 flip → admin tab → fallback removal after 1-week soak.
 
-- **Status:** scope sealed 2026-04-26 — open questions resolved
-  inline (depth=0 semantics, explicit edge_types, truncation
-  reason field, stub-no-body, `min_freshness=70` decoupled to a
-  follow-up); ready for architect dispatch.
+- **Status:** Stage 0a shipped 2026-04-27 ([coder-core#34](https://github.com/coder-devx/coder-core/pull/34))
+  — pure-logic `GraphExpander` module + 12 unit tests live in prod.
+  No FastAPI route, no migration, no worker conversions yet (those
+  are Stage 0b+). Open questions resolved inline at scope-sealing
+  (depth=0 semantics, explicit edge_types, truncation reason field,
+  stub-no-body, `min_freshness=70` decoupled to a follow-up).
 - **WIP:** [0046](./wip/0046-graph-aware-retrieval.md) · **Design:** [0046](../designs/wip/0046-graph-aware-retrieval.md)
 - **Extends:** `knowledge-api`, `knowledge-freshness`, `architect-worker`, `reviewer-worker`, `team-manager-worker`, `pm-worker`
 
@@ -1299,7 +1345,7 @@ consult → first `template_drift`-driven 0047 promotion.
 
 Items that don't belong to a single phase but unblock multiple WIPs.
 
-### 0052 — Managed-repo GitHub Action distribution (scope sealed 2026-04-27)
+### 0052 — Managed-repo GitHub Action distribution (Stage 0 shipped 2026-04-27)
 
 Both [0045](./wip/0045-cold-start-ingestion.md) (cold-start)
 and [0047](./wip/0047-template-schema-migration.md) (template
@@ -1325,7 +1371,17 @@ workflow and one handler against the helper; their Stage 3 work
 becomes a one-line manifest entry plus the existing `coder
 managed-workflows sync`.
 
-- **Status:** scope sealed 2026-04-27 — ready for architect dispatch
+- **Status:** Stage 0 shipped 2026-04-27 across two PRs:
+  [coder-system#9](https://github.com/coder-devx/coder-system/pull/9)
+  (empty manifest at `system/managed-workflows.yaml`) +
+  [coder-core#33](https://github.com/coder-devx/coder-core/pull/33)
+  (callback receiver scaffold + register_handler API +
+  `CODER_MANAGED_WORKFLOWS_ENABLED` flag). Flag default-off in prod;
+  manifest is empty. Stage 1 (install_workflow / verify_workflow /
+  iter_managed_workflows helpers + `coder managed-workflows sync`
+  CLI) and Stage 2 (admin matrix endpoint + SPA page) still WIP.
+  When 0045 (cold-start) and 0047 (template migration) need to
+  ship their respective workflows, they consume this helper.
 - **WIP:** [0052](./wip/0052-managed-repo-action-distribution.md) · **Design:** [0052](../designs/wip/0052-managed-repo-action-distribution.md)
 - **Extends:** `knowledge-api`, `onboarding`, `audit-log`, `admin-panel`
 - **Unblocks:** [0045](./wip/0045-cold-start-ingestion.md), [0047](./wip/0047-template-schema-migration.md)
@@ -1366,7 +1422,7 @@ worker re-prompt.
 - **Extends:** `developer-worker`, `reviewer-worker`, `task-orchestration`, `audit-log`, `admin-panel`
 - **Closes:** the worker→CI feedback gap surfaced by PR #34
 
-### 0054 — Orchestrator GitHub-state reconciliation (scope sealed 2026-04-27)
+### 0054 — Orchestrator GitHub-state reconciliation (shipped 2026-04-28, flag on)
 
 The orchestrator's "Fix #3" check (in `workers/orchestrator.py`)
 marks a developer task `succeeded|stuck` when the executing stage
@@ -1386,15 +1442,22 @@ audit row, and let the next orchestrator tick proceed normally.
 Read-only against GitHub; flag-gated for shadow rollout; fail-soft
 to the existing stuck path on any error.
 
-- **Status:** scope sealed 2026-04-27. Architect dispatch (task
-  `62e0c95e`) refined the design with exact line numbers (orchestrator.py
-  769-801), confirmed `GitHubClient.list_pulls` exists at
-  integrations/github.py:678 (no new helper needed), and produced
-  ADR 0016 for using `user.type == "Bot"` to identify worker-authored
-  PRs. Ready for TM dispatch.
+- **Status:** shipped 2026-04-28 ([coder-core#37](https://github.com/coder-devx/coder-core/pull/37);
+  test-skip follow-up [coder-core#38](https://github.com/coder-devx/coder-core/pull/38)
+  for an unrelated time-sensitive test).
+  `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED=true` flipped on
+  revision `coder-core-00161-ln6`. **Live in prod and reconciling.**
+  Architect dispatch (task `62e0c95e`) verified line numbers,
+  found existing `GitHubClient.list_pulls` (no new helper needed),
+  and produced [ADR 0016](../adrs/0016-bot-identity-via-user-type.md)
+  for `user.type == "Bot"` detection. Then TM dispatch
+  (task `8932c578`) produced a 5-task plan that the developer
+  dispatch implemented one-shot in PR #37.
 - **WIP:** [0054](./wip/0054-orchestrator-github-state-reconciliation.md) · **Design:** [0054](../designs/wip/0054-orchestrator-github-state-reconciliation.md) · **ADR:** [0016](../adrs/0016-bot-identity-via-user-type.md)
 - **Extends:** `developer-worker`, `task-orchestration`, `audit-log`
 - **Closes:** the "PR exists but task is stuck" failure class
+  (eliminated as of 2026-04-28; orchestrator now queries GitHub for
+  open PRs on `branch_name` before transitioning to STUCK).
 
 ### 0055 — Non-developer-role workers need GitHub write access (drafting)
 
