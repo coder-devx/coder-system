@@ -6,6 +6,7 @@ status: wip
 owner: ro
 created: 2026-04-27
 updated: 2026-04-28
+last_verified_at: 2026-04-28
 deprecated_at: null
 reason: null
 implements_specs: ["0053"]
