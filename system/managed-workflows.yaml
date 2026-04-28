@@ -18,3 +18,9 @@ workflows:
     receiver_endpoint: /v1/managed-workflows/callbacks/check-run-ci-fixup
     consuming_spec: "0053"
     introduced: 2026-04-28
+
+  - id: record-template-migration
+    template_path: template/.github/workflows/record-template-migration.yml
+    receiver_endpoint: /v1/_admin/template/migrations/{project_id}/{migration_number}/{batch_index}/merged
+    consuming_spec: "0047"
+    introduced: 2026-06-01
