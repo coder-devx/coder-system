@@ -22,3 +22,6 @@
 | 0016 | Worker-authored PR detection via user.type == "Bot" | accepted | 2026-04-27 | [0016-bot-identity-via-user-type.md](./0016-bot-identity-via-user-type.md) |
 | 0017 | One CI fix-up dispatch per failing SHA, not one per failing check | proposed | 2026-04-28 | [0017-ci-fixup-one-per-sha.md](./0017-ci-fixup-one-per-sha.md) |
 | 0018 | Skip divergent managed-workflow files by default; require --force to overwrite | proposed | 2026-04-28 | [0018-managed-workflows-divergent-file-policy.md](./0018-managed-workflows-divergent-file-policy.md) |
+| 0019 | Alias-tolerance window closes on fleet completion, not a fixed deadline | proposed | 2026-04-28 | [0019-alias-tolerance-fleet-completion-gate.md](./0019-alias-tolerance-fleet-completion-gate.md) |
+| 0020 | Migration runner is a worker-dispatched Cloud Run Job, not a sync API endpoint | proposed | 2026-04-28 | [0020-worker-dispatched-migration-runner.md](./0020-worker-dispatched-migration-runner.md) |
+| 0021 | Field removal requires two migrations — deprecate then remove | proposed | 2026-04-28 | [0021-deprecate-then-remove-two-migrations.md](./0021-deprecate-then-remove-two-migrations.md) |
