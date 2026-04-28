@@ -3,7 +3,7 @@ id: "0012"
 title: Re-prompt only, no programmatic repair, for malformed worker JSON
 type: adr
 status: accepted
-date: 2026-04-15
+date: 2026-04-28
 deciders: [ro]
 relates_to_designs: [pm-worker, architect-worker, team-manager-worker, worker-communication]
 ---
@@ -92,3 +92,60 @@ output and gets treated as such.
 - **Follow-up.** If operational data shows that >50% of schema
   failures are wrapper-only (fence, preamble), revisit with a
   narrow, logged, opt-in repair pass. Do not add repair quietly.
+
+## 2026-04-28 Amendment — narrow fence-strip exception
+
+### Trigger
+
+Wave 1 architect/TM dispatch (2026-04-28): 6 of 8 tasks failed schema
+despite the system-prompt fix in coder-core PR #42 that changed the
+output-format instruction to explicitly say "NO code fence". Analysis of
+the raw `last_raw` fields confirmed that claude-sonnet-4-6's fence prior
+overrides the system-prompt instruction in the majority of single-turn
+invocations. The "re-prompt teaches the model" argument held for two
+rounds but could not consistently suppress the fence within a 2-attempt
+budget, leading to exhausted tasks.
+
+### Change
+
+The Follow-up clause above is exercised here. A **single, narrow
+exception** is added to the parser:
+
+> If bare-JSON parse fails and the raw output matches the pattern
+> ` ```json\n<content>\n``` ` (outermost fence only, nothing before
+> or after), extract `<content>` and retry the parse. If the inner
+> content parses as valid JSON, proceed to schema validation exactly
+> as if it were clean output. If the inner content is itself malformed
+> or fails schema, return the normal failure without re-attempting the
+> strip.
+
+The fence-strip is implemented in `_parse_and_validate` in
+`coder_core/workers/_compliance.py` behind a narrow regex:
+
+```python
+_JSON_FENCE_RE = re.compile(
+    r'\A```json\s*\n(.*?)\n\s*```\s*\Z', re.DOTALL
+)
+```
+
+Anything that does not match this pattern exactly (mixed prose, other
+fence languages, nested fences, preamble/postamble) is **not** touched
+and continues to produce a re-prompt.
+
+### What this does NOT change
+
+- Structural schema errors still re-prompt. Fence-strip is only a
+  fallback on JSON parse failure.
+- The retry/re-prompt budget and metrics are unchanged.
+- `failure_detail` still contains the clean inner content (not the
+  fenced wrapper) so operators can see what was validated.
+- No permissive parsing, no comma tolerance, no type coercion.
+
+### Rationale
+
+The follow-up clause explicitly anticipated this scenario. The empirical
+threshold (6/8 = 75% wrapper-only failures) comfortably exceeds the
+">50%" trigger. Adding the strip after a failed bare parse preserves the
+"model is responsible for its output" invariant for structural errors
+while eliminating an entire class of spurious parse failures that the
+reprompt cannot reliably fix within budget.
