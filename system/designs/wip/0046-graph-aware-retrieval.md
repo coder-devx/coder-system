@@ -5,8 +5,8 @@ type: design
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-28
+last_verified_at: 2026-04-28
 implements_specs: ['0046']
 related_designs:
   - knowledge-write-api
@@ -59,7 +59,7 @@ per-node fan-out cap), and the metric instrumentation.
 flowchart TB
   caller["Worker / Admin UI"] -->|GET /knowledge/graph?start=...| handler["graph_handler<br/>(coder_core/api/knowledge_graph.py)"]
   handler -->|resolve main → SHA| gh1[(GitHub: get_ref)]
-  handler -->|BFS| expander["GraphExpander"]
+  handler -->|BFS| expander["GraphExpander<br/>(coder_core/knowledge/graph.py)"]
   expander -->|per node:<br/>cache.get(project, ref, path)| cache["TTL cache<br/>(existing)"]
   cache -.cache miss.-> gh2[(GitHub: get_contents)]
   expander -->|parse + freshness| read["existing single-read<br/>build_envelope()"]
@@ -79,11 +79,12 @@ flowchart TB
 - **`coder_core/api/knowledge_graph.py`** (new) — FastAPI route
   + handler. Owns parameter parsing, ref resolution, expander
   invocation, response assembly.
-- **`coder_core/knowledge/graph.py`** (new) — `GraphExpander`
-  class. Pure logic (no I/O of its own), takes a callback for
-  fetching one node so it's easily testable. Implements the
-  bounded BFS, ordering, truncation policy, freshness gating,
-  fan-out cap.
+- **`coder_core/knowledge/graph.py`** (shipped) — `expand()`
+  function + supporting dataclasses (`GraphParams`, `GraphResult`,
+  `NodeRef`, `Stub`, `TruncatedEdge`). Pure logic (no I/O of its
+  own), takes a `Fetch` callback so it's easily testable. Implements
+  the bounded BFS, ordering, truncation policy, freshness gating,
+  fan-out cap. **No changes required to wire the route.**
 - **`coder_core/knowledge/reader.py`** (existing) — already
   exposes `read_one(project, type, id, ref) -> Envelope`. The
   expander's fetch callback is a partial-applied call into this
@@ -116,9 +117,10 @@ flowchart TB
    (`GitHubClient.get_ref('heads/main') -> sha`). This SHA is
    the response's `ref` and the pinned read ref for everything
    below.
-4. Handler instantiates `GraphExpander(start, depth, edge_types,
-   min_freshness, max_nodes, fan_out_cap, fetch=partial(reader.
-   read_one, project=slug, ref=sha))`.
+4. Handler instantiates `GraphParams(depth, max_nodes, edge_types,
+   min_freshness)` and a `NodeRef(type, id)` for start, then calls
+   `expand(start, params, fetch=partial(service.get_artifact,
+   project=slug, ref=sha))`.
 5. Expander runs BFS:
    - **Init** — push `(start_type, start_id, depth=0)` onto a
      deque. Maintain `visited: dict[(type, id), Envelope|Stub]`,
@@ -157,7 +159,7 @@ flowchart TB
   addressed makes this hold.
 - **Bounded fan-out.** No fetch returns more than `max_nodes`
   nodes (default 200, hard cap 500 enforced server-side
-  regardless of caller value). Per-node fan-out cap (50 default,
+  regardless of caller value). Per-node fan-out cap (50,
   no caller override) prevents one runaway artifact from pulling
   the whole repo.
 - **No partial state.** The handler builds the whole response
@@ -222,10 +224,189 @@ the envelope's frontmatter (only for fields in the requested
 `types` set). The expander knows nothing about HTTP, GitHub, or
 the cache — it's a pure function over the fetch callback.
 
+## Route specification
+
+> Committed 2026-04-28. Covers the route shape only; migration
+> `0054`, fleet flag `CODER_KNOWLEDGE_GRAPH_ENABLED`, admin
+> endpoint, and worker conversions ship developer-direct in
+> follow-up tasks.
+
+### Path and mount order
+
+```
+GET /v1/projects/{project_id}/knowledge/graph
+```
+
+Mounted on a dedicated `graph_router` in
+`coder_core/api/knowledge_graph.py` and included in `main.py`
+**before** the main knowledge router. This prevents the literal
+path segment `graph` from being absorbed by the
+`/{artifact_type}` catch-all on the existing router. Pattern
+mirrors the `ship_router` mount introduced for spec 0044.
+
+**Auth.** Project-scoped `X-Api-Key` header via
+`require_project_auth`, identical to all other
+`/v1/projects/{id}/knowledge/*` routes.
+
+### Query parameters
+
+| Param | Type | Default | Hard cap | Notes |
+|---|---|---|---|---|
+| `start` | `str` (required) | — | — | `<type>/<id>` form, e.g. `spec/0046`. 400 if absent or malformed. `type` must be a key in `ARTIFACT_TYPES`. |
+| `depth` | `int` | `2` | `3` | BFS hops from start. Enforced by `graph.py:_MAX_DEPTH = 3`; `expand()` raises `ValueError` if exceeded. |
+| `max_nodes` | `int` | `200` | `500` | Total full nodes in response. Enforced by `graph.py:_MAX_NODES = 500`; `expand()` raises `ValueError` if exceeded. |
+| `edge_types` | CSV `str` | `served_by_designs,related_designs,decided_by` | — | Comma-separated list of `CROSS_LINK_FIELDS` keys. Any unrecognised value → 400. |
+| `min_freshness` | `int \| None` | unset | — | `0`–`100`; inherits spec 0043 semantics. 409 STALE if start node is below floor. |
+
+**`edge_types` default rationale.** The architect-worker preset
+(`served_by_designs,related_designs,decided_by`) is the primary
+caller; making it the API default reduces verbosity for that
+path. Workers that need a different edge set always pass an
+explicit `edge_types` value regardless.
+
+**Constructing GraphExpander from request inputs.** The route
+translates directly:
+
+```python
+start_ref = NodeRef(type=start_type, id=start_id)
+params = GraphParams(
+    depth=depth,
+    max_nodes=max_nodes,
+    edge_types=set(edge_types_csv.split(",")),
+    min_freshness=min_freshness,
+)
+fetch = lambda ref: service.get_artifact(project_repo, ref.type, ref.id, pinned_sha)
+result = expand(start_ref, params, fetch)
+```
+
+No changes to `graph.py` are required.
+
+### Cache-coherence invariant
+
+At request entry the handler calls
+`GitHubClient.get_ref(org, repo, "heads/main")` once to resolve
+the current commit SHA. That SHA is:
+
+1. Stored as `response.ref`.
+2. Passed as the `ref` argument to every `KnowledgeService.get_artifact`
+   call inside the BFS fetch callback.
+
+Every node in one response therefore reflects the same commit.
+A write that races between the SHA resolution and a subsequent
+node fetch lands on a different ref and does not affect this
+response's content.
+
+### Response envelope
+
+```json
+{
+  "ref": "1a2b3c4d5e6f...",
+  "start": {"type": "spec", "id": "0046"},
+  "params": {
+    "depth": 2,
+    "max_nodes": 200,
+    "edge_types": ["served_by_designs", "related_designs", "decided_by"],
+    "min_freshness": null
+  },
+  "nodes": [
+    {
+      "type": "spec",
+      "id": "0046",
+      "path": "system/product-specs/wip/0046-graph-aware-retrieval.md",
+      "frontmatter": {"id": "0046", "title": "...", "...": "..."},
+      "body_markdown": "# 0046 — ...\n\n...",
+      "freshness": {"score": 92, "last_verified_at": "2026-04-27", "reasons": []},
+      "out_edges": [
+        {"edge_type": "served_by_designs", "target_type": "designs", "target_id": "0046"}
+      ]
+    }
+  ],
+  "stub_nodes": [
+    {
+      "type": "designs",
+      "id": "0029",
+      "stub_reason": "below_min_freshness",
+      "freshness": {"score": 35, "last_verified_at": "2026-01-10", "reasons": [...]}
+    }
+  ],
+  "truncated": false,
+  "truncated_at": [
+    {
+      "parent_id": "0046",
+      "edge_type": "related_designs",
+      "target_id": "0034",
+      "reason": "max_nodes_cap"
+    }
+  ],
+  "meta": {
+    "node_count": 17,
+    "depth_reached": 2,
+    "fetched_at": "2026-04-28T12:00:00Z"
+  }
+}
+```
+
+**Node shape.** Each entry in `nodes[]` is the `ArtifactResponse`
+wire shape (frontmatter, body\_markdown, freshness from spec 0043,
+path) plus `out_edges[]`. `out_edges` lists the outgoing
+cross-link references within the requested `edge_types` set so
+callers can reconstruct graph topology without re-parsing
+frontmatter. The start node is always `nodes[0]`.
+
+**Stub shape.** `stub_nodes[]` entries carry `type`, `id`,
+`stub_reason` (`"below_min_freshness"` or `"not_found"`), and
+`freshness` (null for `not_found` stubs). Stubs have no
+`frontmatter`, `body_markdown`, or `out_edges`. Their outgoing
+edges are not traversed and not listed in `truncated_at[]`.
+
+### Truncation taxonomy
+
+`truncated_at[]` entries have shape
+`{parent_id, edge_type, target_id, reason}`. Only two reasons
+are emitted; both map directly from `graph.py`:
+
+| Wire reason | When emitted | `graph.py` mapping |
+|---|---|---|
+| `max_nodes_cap` | A node is popped when `len(order) >= max_nodes`; all its kept out-edges are logged | `TruncatedEdge.reason="max_nodes"` — route renames to `max_nodes_cap` |
+| `fan_out_cap` | A node has > 50 outgoing edges across `edge_types`; the overflow (sorted lex, tail) is logged | `TruncatedEdge.reason="fan_out_cap"` — wire name unchanged |
+
+**Why not `depth_cap` in `truncated_at[]`.** At the depth
+frontier `graph.py` stores the node and `continue`s without
+emitting any `TruncatedEdge` — depth capping is natural BFS
+termination, not an error or a truncation of a _followed_ edge.
+Callers know the explored depth from `meta.depth_reached`.
+
+**Why not `stub_below_freshness` in `truncated_at[]`.** Freshness-
+gated nodes appear in `stub_nodes[]` with
+`stub_reason="below_min_freshness"`. Their outgoing edges are
+never enumerated by `graph.py`; emitting them in `truncated_at`
+would require the expander to re-fetch or re-parse the stubbed
+artifact's frontmatter after marking it stale — a separate
+pass, not part of this route-only scope. Callers know a branch
+is unexplored via the stub's presence.
+
+**Multi-axis precedence.** An edge attributable to both bounds
+is logged once with `reason="fan_out_cap"` (the more specific
+bound). `graph.py` enforces this ordering: per-node fan-out
+overflow is recorded before the `max_nodes` check fires on the
+same node.
+
+### Error codes
+
+| HTTP | `code` field | Condition |
+|---|---|---|
+| `400` | `invalid_start` | `start` param absent, not in `<type>/<id>` form, or `type` is not a key in `ARTIFACT_TYPES` |
+| `400` | `invalid_edge_type` | Any CSV token in `edge_types` is not a key in `CROSS_LINK_FIELDS` |
+| `400` | `param_out_of_range` | `depth > 3`, `max_nodes > 500`, or `max_nodes < 1` |
+| `403` | `project_mismatch` | URL `project_id` does not match the caller's API-key tenant |
+| `409` | `stale` | `min_freshness` is set and the **start node's** `freshness.score < min_freshness`. Body mirrors spec 0043 single-artifact 409: includes `artifact` with full node data so callers can opt in to stale content. Only the start node triggers 409; reachable stale nodes become `stub_nodes[]` entries. |
+| `500` | `graph_internal_error` | Unclassified error |
+
 ## Interfaces
 
 - **API:** `GET /v1/projects/{id}/knowledge/graph` with the query
-  params from spec scope. Response shape per spec AC1.
+  params from spec scope. Response shape per spec AC1 and the
+  Route specification section above.
 - **Worker library:** new helper
   `coder_core/knowledge/graph_client.py` exposes
   `fetch_graph(project, start, depth, edge_types,
@@ -296,14 +477,9 @@ soak.
 
 - **Truncation under multi-axis pressure.** Spec OQ #4 — same
   parent hitting both `max_nodes` and per-node fan-out cap on
-  the same expansion. Implementation: process per-node fan-out
-  cap _first_ (so `truncated_at` gets the over-cap edges
-  recorded as such), then check `max_nodes`; if max_nodes also
-  trips the same parent's kept edges, those go into
-  `truncated_at` again with a different reason. Either log
-  duplicates or annotate `truncated_at` entries with `reason`
-  ∈ {`max_nodes`, `fan_out_cap`}. Leaning: annotate with
-  reason; design pins this as response shape.
+  the same expansion. Resolved: annotate with
+  `reason` ∈ {`max_nodes_cap`, `fan_out_cap`}; fan-out cap wins
+  when both apply (see Route specification above).
 
 - **What about `glossary.md`?** It's referenced from many
   artifacts implicitly (terms in the body) but isn't a
