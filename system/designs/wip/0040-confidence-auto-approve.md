@@ -5,8 +5,8 @@ type: design
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-21
-last_verified_at: 2026-04-21
+updated: 2026-04-28
+last_verified_at: 2026-04-28
 implements_specs: ['0040']
 related_designs:
   - worker-communication
@@ -648,6 +648,91 @@ New event shapes, using the existing observability feed:
 4. Accept-now acquires lock: sees `status='applied'`, returns 409
    `already_applied`. Admin panel shows the chain already running;
    the accept-now button was racey but resolved safely.
+
+## AC12 refinement — Finalize-tick race lock
+
+### Lock site
+
+**File:** `src/coder_core/approvals/tick.py`
+**Function:** `_finalize_one()`, the per-row session that does the actual
+state transition.
+
+```python
+# tick.py::_finalize_one(), line 125
+stmt = select(AutoApprovalRow).where(AutoApprovalRow.id == row_id).with_for_update()
+row = (await session.execute(stmt)).scalar_one_or_none()
+if row is None or row.status != AutoApprovalStatus.PENDING.value:
+    return FinalizedRow(..., succeeded=False, error=f"status_{row.status}")
+```
+
+### Two-phase locking
+
+The 1-minute tick path uses two distinct lock flavors across two
+sessions. Both are in `tick.py`.
+
+| Phase | Call site | Flavor | Purpose |
+|-------|-----------|--------|---------|
+| Bulk claim | `tick()` lines 87–93 | `with_for_update(skip_locked=True)` | Two concurrent Cloud Run Job instances running within the same minute get a disjoint set of row IDs; neither stalls waiting for the other's batch. |
+| Per-row finalize | `_finalize_one()` line 125 | `with_for_update()` — plain, no `skip_locked` | Must block, not skip. See rationale below. |
+
+**Why plain `FOR UPDATE` (not `SKIP LOCKED`) in `_finalize_one()`.**
+If `accept-now` or `undo` holds the row lock when the tick reaches
+`_finalize_one()`, using `SKIP LOCKED` would silently drop the row from
+this tick cycle — the tick skips it, the per-row session ends, and the
+row stays in `pending` until the next 1-minute interval. With plain
+`FOR UPDATE` the tick instead blocks, acquires the lock after the API
+call commits, reads `status != "pending"`, and returns a no-op. The row
+is handled correctly on this tick; no phantom-pending state.
+
+**Three concurrent paths that race on a single row:**
+
+1. `tick._finalize_one()` vs `POST .../accept-now`
+   (`api/auto_approvals.py::_load_row_for_update`) — most likely race;
+   operator clicks Accept-now while the window is about to close.
+2. `tick._finalize_one()` vs `POST .../undo`
+   (`api/auto_approvals.py::_load_row_for_update`) — operator clicks
+   Undo just as the tick fires at expiry.
+3. `tick._finalize_one()` vs `tick._finalize_one()` — two invocations
+   with the same `row_id` in their `due_ids` list (possible because the
+   claim session commits before per-row sessions open, leaving a gap).
+   The SKIP LOCKED claim reduces this to near-zero in practice, but the
+   plain per-row lock is the belt-and-suspenders guard.
+
+In every case: whoever acquires the per-row lock wins; the loser reads
+the post-transition status and exits cleanly.
+
+### Regression test shape
+
+**Arrange:** one `pending` row with `window_expires_at` in the past
+(already expired). Two concurrent `_finalize_one()` coroutines target
+the same `row_id`.
+
+**Act:**
+```python
+result_a, result_b = await asyncio.gather(
+    _finalize_one(row.id, now),
+    _finalize_one(row.id, now),
+)
+```
+
+**Assert:**
+- Exactly one result has `succeeded=True`; the other has
+  `succeeded=False` with `error` starting `"status_"` (e.g.
+  `"status_applied"`). The loser must not raise.
+- The database row is `status="applied"` (not rolled back, not
+  double-applied).
+- The audit table contains exactly **one** `auto_approve_applied` event
+  for `target_id=row.artifact_id` — the winner's commit; the loser
+  produced none.
+
+**Driver note:** SQLite ignores `FOR UPDATE` hints, so this test must
+run under the existing Postgres fixture
+(`tests/conftest.py::pg_session_factory`). The test lives at
+`tests/approvals/test_tick_concurrent.py`. Mock-based contention
+simulation (patching `session.execute` to insert a delay that lets the
+second coroutine queue behind the first) is acceptable when the Postgres
+fixture is unavailable in a given CI tier, but the real-lock variant
+must pass in the full integration suite.
 
 ## Invariants
 
