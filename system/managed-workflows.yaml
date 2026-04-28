@@ -4,7 +4,6 @@
 # and design 0052 (system/designs/wip/0052-managed-repo-action-distribution.md)
 # for the schema and the consuming feature stages.
 #
-# Empty until the first managed workflow lands in template/.github/workflows/.
 # Workflows are added by the consuming spec's PR (e.g. 0045 cold-start-provenance,
 # 0047 record-template-migration), each entry carrying:
 #   - id: kebab-slug stable across the fleet
@@ -13,4 +12,9 @@
 #   - consuming_spec: WIP id that introduced it
 #   - introduced: YYYY-MM-DD the workflow first shipped
 
-workflows: []
+workflows:
+  - id: check-run-ci-fixup
+    template_path: template/.github/workflows/check-run-ci-fixup.yml
+    receiver_endpoint: /v1/managed-workflows/callbacks/check-run-ci-fixup
+    consuming_spec: "0053"
+    introduced: 2026-04-28

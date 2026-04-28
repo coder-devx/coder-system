@@ -28,24 +28,24 @@ Logical components of the Coder system as it exists today.
 
 ## WIP — numbered, roadmap-aligned
 
-| ID | Title | Owner | Implements specs |
-|---|---|---|---|
-| [0029](./wip/0029-prompt-caching.md) | Prompt caching & shared context reuse | ro | [0029](../product-specs/wip/0029-prompt-caching.md) |
-| [0030](./wip/0030-model-tier-routing.md) | Model tier routing | ro | [0030](../product-specs/wip/0030-model-tier-routing.md) |
-| [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | ro | [0031](../product-specs/wip/0031-token-budgets.md) |
-| [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | ro | [0032](../product-specs/wip/0032-cost-regression-alerts.md) |
-| [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | ro | [0038](../product-specs/wip/0038-secret-rotation.md) |
-| [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | ro | [0040](../product-specs/wip/0040-confidence-auto-approve.md) |
-| [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | ro | [0045](../product-specs/wip/0045-cold-start-ingestion.md) |
-| [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | ro | [0046](../product-specs/wip/0046-graph-aware-retrieval.md) |
-| [0047](./wip/0047-template-schema-migration.md) | Template schema migration | ro | [0047](../product-specs/wip/0047-template-schema-migration.md) |
-| [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | ro | [0048](../product-specs/wip/0048-cross-project-patterns.md) |
-| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | ro | [0049](../product-specs/wip/0049-mcp-agent-interface.md) |
-| [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients | ro | [0050](../product-specs/wip/0050-oauth-for-mcp-clients.md) |
-| [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | ro | [0052](../product-specs/wip/0052-managed-repo-action-distribution.md) |
-| [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | ro | [0053](../product-specs/wip/0053-post-pr-ci-fix-loop.md) |
-| [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | ro | [0054](../product-specs/wip/0054-orchestrator-github-state-reconciliation.md) |
-| [0055](./wip/0055-non-developer-roles-need-github-write-access.md) | Non-developer-role workers need GitHub write access | ro | [0055](../product-specs/wip/0055-non-developer-roles-need-github-write-access.md) |
+| ID | Title | Owner | Implements specs | Decided by |
+|---|---|---|---|---|
+| [0029](./wip/0029-prompt-caching.md) | Prompt caching & shared context reuse | ro | [0029](../product-specs/wip/0029-prompt-caching.md) | — |
+| [0030](./wip/0030-model-tier-routing.md) | Model tier routing | ro | [0030](../product-specs/wip/0030-model-tier-routing.md) | — |
+| [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | ro | [0031](../product-specs/wip/0031-token-budgets.md) | — |
+| [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | ro | [0032](../product-specs/wip/0032-cost-regression-alerts.md) | — |
+| [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | ro | [0038](../product-specs/wip/0038-secret-rotation.md) | — |
+| [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | ro | [0040](../product-specs/wip/0040-confidence-auto-approve.md) | — |
+| [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | ro | [0045](../product-specs/wip/0045-cold-start-ingestion.md) | — |
+| [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | ro | [0046](../product-specs/wip/0046-graph-aware-retrieval.md) | — |
+| [0047](./wip/0047-template-schema-migration.md) | Template schema migration | ro | [0047](../product-specs/wip/0047-template-schema-migration.md) | — |
+| [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | ro | [0048](../product-specs/wip/0048-cross-project-patterns.md) | — |
+| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | ro | [0049](../product-specs/wip/0049-mcp-agent-interface.md) | — |
+| [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients | ro | [0050](../product-specs/wip/0050-oauth-for-mcp-clients.md) | — |
+| [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | ro | [0052](../product-specs/wip/0052-managed-repo-action-distribution.md) | — |
+| [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | ro | [0053](../product-specs/wip/0053-post-pr-ci-fix-loop.md) | [0017](../adrs/0017-ci-fixup-one-per-sha.md) |
+| [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | ro | [0054](../product-specs/wip/0054-orchestrator-github-state-reconciliation.md) | — |
+| [0055](./wip/0055-non-developer-roles-need-github-write-access.md) | Non-developer-role workers need GitHub write access | ro | [0055](../product-specs/wip/0055-non-developer-roles-need-github-write-access.md) | — |
 
 ## Deprecated
 
