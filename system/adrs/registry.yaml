@@ -120,3 +120,10 @@ adrs:
     date: 2026-04-28
     file: 0017-ci-fixup-one-per-sha.md
     relates_to_designs: ["0053"]
+
+  - id: "0018"
+    title: Skip divergent managed-workflow files by default; require --force to overwrite
+    status: proposed
+    date: 2026-04-28
+    file: 0018-managed-workflows-divergent-file-policy.md
+    relates_to_designs: ["0052"]
