@@ -5,8 +5,8 @@ type: runbook
 status: active
 owner: ro
 created: 2026-04-27
-updated: 2026-04-27
-last_verified_at: 2026-04-27
+updated: 2026-04-28
+last_verified_at: 2026-04-28
 applies_to_services: [coder-core]
 applies_to_integrations: [github, cloud-run]
 ---
@@ -222,6 +222,8 @@ orchestrator's Fix #3 marks the task stuck.
 will teach the orchestrator to query GitHub for an open PR on the
 task's `branch_name` before marking stuck — closing this gap
 automatically.
+
+**As of 2026-04-28: this is now automated.** The orchestrator queries GitHub for an open PR on the task's `branch_name` before transitioning to STUCK. If a worker-authored open PR is found (`pr.user.type == 'Bot'`, per [ADR 0016](../adrs/0016-bot-identity-via-user-type.md)), the orchestrator populates `pr_url` automatically and lets the next tick proceed normally. The manual `gh pr list` / `gh pr create` steps above are now the fallback if `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED` is off (e.g. during a backout). Track successful reconciliations via the `task.pr_url_reconciled_from_github` audit action; failures via `task.pr_url_reconcile_failed`.
 
 ### Timed out at the budget ceiling
 

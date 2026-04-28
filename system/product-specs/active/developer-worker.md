@@ -6,7 +6,7 @@ status: active
 owner: ro
 created: 2026-04-09
 updated: 2026-04-15
-last_verified_at: 2026-04-17
+last_verified_at: 2026-04-28
 served_by_designs: [worker-roles]
 related_specs: []
 ---
@@ -94,6 +94,7 @@ produces.
   adds `tasks.transient_retry_history`. ADR 0013 documents why the
   retry loop lives inside the worker and not at the dispatcher; the
   pre-0027 dispatcher-level wrapper was removed on ship.
+- 2026-04-28 — Orchestrator now reconciles `pr_url` from GitHub when a developer task succeeds but the worker stdout didn't include the URL (spec 0054). Eliminates the 'PR exists but task is stuck' failure class. Flag-gated via `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED`; live in prod as of revision `coder-core-00161-ln6`. See [ADR 0016](../../adrs/0016-bot-identity-via-user-type.md) for the bot-identity-detection design call (uses `pr.user.type == 'Bot'`, not login-match).
 
 ## Links
 
