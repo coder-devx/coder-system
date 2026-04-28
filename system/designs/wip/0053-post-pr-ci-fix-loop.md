@@ -5,10 +5,12 @@ type: design
 status: wip
 owner: ro
 created: 2026-04-27
-updated: 2026-04-27
-last_verified_at: 2026-04-27
+updated: 2026-04-28
+last_verified_at: 2026-04-28
+deprecated_at: null
+reason: null
 implements_specs: ["0053"]
-decided_by: []
+decided_by: ["0017"]
 related_designs:
   - "0052"
   - worker-roles
@@ -25,9 +27,16 @@ affects_repos:
 
 ## Context
 
-See [spec 0053](../../product-specs/wip/0053-post-pr-ci-fix-loop.md)
-for the problem framing. This design fills in the technical shape;
-the architect worker may revise during pickup.
+See [spec 0053](../../product-specs/wip/0053-post-pr-ci-fix-loop.md) for
+the problem framing. This design covers the full technical shape for both
+stages. Stage 0a (developer-worker pre-flight) shipped in coder-core PR
+#36. **This document's Stage 1 section is the subject of the current
+refinement** — it closes the post-PR external-CI feedback loop by wiring
+`check_run` events from managed repos into a fix-up dispatcher.
+
+Stage 0b (re-prompt path on internal pytest failures during the
+`TESTING` stage) is already handled by spec 0025's `validate_and_retry`
+pattern in the orchestrator; it is out of scope here.
 
 ## Goals / non-goals
 
@@ -36,218 +45,443 @@ Match the spec one-for-one. No expansion at the design layer.
 ## Architecture
 
 ```mermaid
-flowchart LR
-  worker["Developer worker<br/>(spec 0025 lifecycle)"] -->|after own tests pass| pre["pre-flight:<br/>ruff format · ruff check --fix · per-repo cmds"]
-  pre -->|push + open PR| pr[("PR opened on coder-core")]
-  pr -->|GitHub Actions runs| ci["check_runs (ruff/build/terraform/etc.)"]
-  ci -->|completed event| webhook["POST /v1/_internal/github/check-run-webhook"]
-  webhook -->|HMAC verify · filter to managed PR| watcher["ci_watcher.py"]
-  watcher -->|aggregate PR check status| status{any failure?}
-  status -->|yes, attempts < MAX| dispatcher["dispatch fix-up<br/>developer task"]
-  status -->|yes, attempts >= MAX| escalate["audit ci_fix_loop.escalated<br/>+ on-call (0041)"]
-  status -->|no, all green| done["audit ci_fix_loop.succeeded<br/>(if was a fix-up)"]
-  dispatcher -->|fix-up task with prompt # CI fix-up| worker
+flowchart TB
+  subgraph "managed repo (every project)"
+    GHA["GitHub Actions<br/>check_run completed"]
+    WF[".github/workflows/<br/>check-run-ci-fixup.yml"]
+    GHA -->|triggers| WF
+  end
+
+  subgraph "coder-core"
+    RECV["managed_repo_callbacks.py<br/>POST /v1/managed-workflows/callbacks/check-run-ci-fixup<br/>(0052 receiver — HMAC + project-id)"]
+    CIW["ci_watcher.py<br/>handle_check_run()"]
+    DEDUP["ci_fix_dedupes<br/>(task_id, head_sha)"]
+    TASKS["tasks table<br/>branch_name · ci_fix_attempts"]
+    DISP["orchestrate_task()<br/>developer role · same branch"]
+    ESC["open_escalation()<br/>trigger_kind=ci_fix_exhausted"]
+    AUD["audit_events<br/>task.ci_fix_dispatched<br/>task.ci_fix_exhausted"]
+  end
+
+  WF -->|POST + HMAC| RECV
+  RECV -->|registered handler| CIW
+  CIW -->|lookup branch_name| TASKS
+  CIW -->|INSERT OR IGNORE| DEDUP
+  DEDUP -->|duplicate → no-op| CIW
+  CIW -->|ci_fix_attempts < MAX| DISP
+  CIW -->|ci_fix_attempts >= MAX| ESC
+  CIW --> AUD
+  DISP -->|same branch, new commit| GHA
 
   classDef new fill:#d1c4e9,stroke:#4527a0,stroke-width:2px
-  class pre,webhook,watcher,dispatcher,escalate new
+  classDef existing fill:#e8f5e9,stroke:#1b5e20,stroke-width:1px
+  class WF,RECV,CIW,DEDUP new
+  class TASKS,DISP,ESC,AUD existing
 ```
 
-## Parts
+## Stage 0 — Pre-flight on the developer worker
 
-- **`coder_core/integrations/ci_watcher.py`** (new) — HMAC-verifying
-  webhook handler at
-  `POST /v1/_internal/github/check-run-webhook`. Filters to managed
-  PRs (`branch ~= ^task/` + author = worker SA), aggregates the
-  PR's check status, dispatches fix-up or escalates.
-- **`coder_core/integrations/ci_fix_dispatch.py`** (new) — pure
-  function that builds the fix-up task prompt from a failure
-  excerpt + dispatches via the existing `create_task_in_project`
-  service (NOT a new path; the watcher uses the same
-  task-creation API as a CLI dispatch would).
-- **`coder_core/workers/_preflight.py`** (new) — runs the
-  per-repo preflight commands in the worker's working dir before
-  `git push`. Returns either `Ok(applied_fixes: list[str])` or
-  `Failed(error_excerpt: str)`. Called by `developer.py` after
-  pytest passes and before push.
-- **`coder_core/workers/developer.py`** (existing, edit) — add
-  preflight invocation; on `Failed`, re-prompt the worker once
-  with the error excerpt; if it still fails, open the PR with a
-  body note describing the surviving issue.
-- **`coder_core/api/admin_ci_fix_loop.py`** (new) — admin
-  endpoint `GET /v1/_admin/ci-fix-loop/{pr_url:path}` returning
-  the fix-up history for one PR. Backed by the
-  `pr_to_task_map` table.
-- **Tables:**
-  - `pr_to_task_map` (migration 0057):
-    `(pr_url PRIMARY KEY, project_id, original_task_id,
-     current_fix_task_id, ci_fix_attempts, last_failure_kind,
-     last_failure_excerpt, escalated_at, created_at, updated_at)`
-- **`projects` columns** (migration 0058):
-  `ci_fix_loop_enabled BOOLEAN NULL` (tri-state).
-- **Frontmatter on `system/repos/<repo>.md`** — new optional
-  `preflight_commands:` list. Validator (ADR 0008) accepts
-  list-of-strings. When absent, defaults to
-  `["uv run ruff format", "uv run ruff check --fix"]` for Python
-  repos; empty for non-Python.
-- **Admin SPA:** `CIFixLoopCard.tsx` (new) on the existing
-  RunDetail / TaskDetail view, behind
-  `VITE_CI_FIX_LOOP_ENABLED`.
+Stage 0a shipped in coder-core PR #36. See
+[`coder_core/workers/_preflight.py`](../../../coder-core/src/coder_core/workers/_preflight.py)
+for the implementation. Key properties:
 
-## Data flow — pre-flight (Stage 0)
+- Runs after the worker's own pytest passes, before `git push`.
+- Default commands: `uv run ruff format`, `uv run ruff check --fix`.
+- Per-repo commands from `system/repos/<repo>.md`'s `preflight_commands:` list.
+- Auto-commit path: if the working dir is dirty after commands, commits
+  with message `chore: apply preflight fixes` and pushes.
+- Fail-soft: surviving failures are logged and posted as a PR body note
+  rather than aborting the push.
 
-1. Worker's pytest run completes successfully.
-2. Worker invokes `preflight.run(working_dir, repo_id)`.
-3. `_preflight` reads the repo's `system/repos/<repo>.md`'s
-   `preflight_commands` list (or default).
-4. Each command runs sequentially. Auto-fixing commands
-   (`ruff format`, `ruff check --fix`) modify in place.
-5. After all commands run, do a `git status` check. If the
-   working dir is dirty (commands made changes), commit with
-   message `chore: apply preflight fixes`.
-6. If any command exited non-zero AFTER its own auto-fix attempt
-   (e.g. `mypy` reports an error it can't fix), capture the
-   excerpt and:
-   - **Re-prompt path.** Re-prompt the worker once with the
-     failure excerpt + the failed-command name. The worker has
-     the chance to fix it semantically.
-   - **Fall-through.** If the re-prompt still produces
-     preflight-failing code, open the PR anyway with a body
-     note: `Pre-flight: <command> failed; <one-line summary>`.
-     CI will still fail on this; Stage 1 picks it up.
-7. `git push` + `gh pr create` proceed as before.
+Stage 0b (re-prompt path on internal `pytest` failures) is handled by the
+existing `validate_and_retry` mechanism in spec 0025's TESTING stage and
+is not repeated here.
 
-## Data flow — post-PR loop (Stage 1)
+## Stage 1 — Post-PR CI watcher and fix-up dispatcher
 
-1. GitHub Actions runs `check_run`s on the PR's HEAD SHA.
-2. Each `check_run.completed` event fires a webhook to
-   `POST /v1/_internal/github/check-run-webhook`.
-3. Watcher verifies HMAC (`X-Hub-Signature-256` against
-   `GITHUB_APP_WEBHOOK_SECRET`); 401 on mismatch.
-4. Filter: PR's `head_ref` matches `^task/`, PR's author is the
-   worker SA. Skip otherwise.
-5. Aggregate: pull all check_runs for the PR's HEAD SHA via
-   GitHub API. If any are `failure`, the PR is CI-red.
-6. Look up `pr_to_task_map.pr_url`. Two cases:
-   - **First failure on this PR** — insert row with
-     `original_task_id` from the PR-creating task,
-     `ci_fix_attempts = 0`.
-   - **Subsequent failure** — increment `ci_fix_attempts`. If at
-     `MAX_CI_FIX_ATTEMPTS`, write
-     `audit_events.action = ci_fix_loop.escalated` and stop. The
-     row's `escalated_at` blocks future dispatches for this PR.
-7. **Project flag check.** If
-   `projects.ci_fix_loop_enabled` is False (explicit), skip
-   without dispatching. Audit `ci_fix_loop.skipped_project_optout`.
-8. **Dispatch fix-up.** Pull the failed check's logs (top
-   `ci_fix_log_tail_lines`, default 200). Build fix_context with
-   `{check_name, command, log_excerpt, branch, head_sha}`. Call
-   `create_task_in_project` with role=developer, repo=PR's repo,
-   prompt=`# CI fix-up\n\nPR: <url>\nBranch: <branch>\nFailed
-   check: <name>\nFailure excerpt: <log tail>\n\nApply the
-   minimum diff to make CI green. Do not change semantics. Push
-   to the same branch — do NOT open a new PR.`,
-   `original_task_id=row.original_task_id`. Update
-   `current_fix_task_id` on the row.
-9. **Concurrency.** The watcher takes a Postgres advisory lock
-   on `hash(pr_url)` for the duration of steps 5-8. Concurrent
-   webhook events for the same PR serialise.
+### Module placement
+
+**`coder_core/integrations/ci_watcher.py`** — new module. Registers with
+the 0052 receiver scaffold at module-import time:
+
+```python
+from coder_core.integrations.managed_repo_callbacks import register_handler
+
+register_handler("check-run-ci-fixup", handle_check_run)
+```
+
+The handler signature matches the 0052 receiver contract:
+```python
+async def handle_check_run(project_id: str, request: Request) -> dict:
+    ...
+```
+
+HMAC verification, feature-flag gating, and project derivation are all
+handled by the receiver before this function is called. The handler
+therefore starts from a verified, project-scoped payload.
+
+### GitHub event subscription path
+
+A workflow file `check-run-ci-fixup.yml` is installed in
+`.github/workflows/` of every managed knowledge repo via the 0052
+`install_workflow` helper. The manifest entry in
+`system/managed-workflows.yaml`:
+
+```yaml
+- id: check-run-ci-fixup
+  template_path: template/.github/workflows/check-run-ci-fixup.yml
+  receiver_endpoint: /v1/managed-workflows/callbacks/check-run-ci-fixup
+  consuming_spec: "0053"
+  introduced: 2026-04-28
+```
+
+The workflow template (`template/.github/workflows/check-run-ci-fixup.yml`):
+
+```yaml
+name: report-check-run-to-coder
+on:
+  check_run:
+    types: [completed]
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: POST check_run payload to coder-core
+        run: |
+          BODY="$(echo '${{ toJson(github.event.check_run) }}')"
+          SIG="sha256=$(printf '%s' "$BODY" \
+            | openssl dgst -sha256 -hmac "${{ secrets.CODER_WEBHOOK_SECRET }}" \
+            | awk '{print $2}')"
+          curl -sf --retry 3 --retry-delay 2 \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-Hub-Signature-256: $SIG" \
+            -H "X-Coder-Project-Id: ${{ secrets.CODER_PROJECT_ID }}" \
+            -d "$BODY" \
+            "${{ vars.CODER_RECEIVER_BASE_URL }}/v1/managed-workflows/callbacks/check-run-ci-fixup"
+```
+
+Required per-repo GitHub secrets/vars (installed by `coder managed-workflows sync`):
+- `CODER_WEBHOOK_SECRET` — shared HMAC secret (same as `github_app_webhook_secret` in coder-core config)
+- `CODER_PROJECT_ID` — coder-core project id for this repo
+- `CODER_RECEIVER_BASE_URL` (var, not secret) — base URL of the coder-core service
+
+### check_run conclusion routing
+
+| `check_run.conclusion` | Action |
+|---|---|
+| `failure` | Trigger fix-up dispatch |
+| `timed_out` | Trigger fix-up dispatch |
+| `action_required` | Trigger fix-up dispatch |
+| `cancelled` | No-op (log at DEBUG) |
+| `skipped` | No-op (log at DEBUG) |
+| `success` / `neutral` / `stale` | No-op |
+| `null` (still in progress) | No-op (should not arrive on `completed` but guard anyway) |
+
+The handler short-circuits on any non-triggering conclusion before touching
+the database.
+
+### Payload fields consumed
+
+The handler reads only the following fields from the `check_run` JSON
+object (all others are ignored):
+
+| Field | Used for |
+|---|---|
+| `head_sha` | Dedupe key + fix-up prompt context |
+| `name` | Fix-up prompt (human-readable check name) |
+| `conclusion` | Routing decision (table above) |
+| `output.summary` | Included in fix-up prompt (first 2 000 chars) |
+| `output.text` | Appended to prompt excerpt (first 2 000 chars, after summary) |
+
+The head branch is **not** read from the payload; the watcher derives it
+from the task row to avoid trusting caller-controlled input for the
+branch lookup.
+
+### Schema changes (migration 0057)
+
+Two additions land together:
+
+**`tasks.ci_fix_attempts` (new column)**
+
+```sql
+ALTER TABLE tasks
+  ADD COLUMN ci_fix_attempts INTEGER NOT NULL DEFAULT 0;
+```
+
+Decision rationale — separate from `fix_attempts` (see ADR 0017 for the
+dedupe decision; the column-vs-table choice is addressed here):
+
+- `tasks.fix_attempts` tracks internal orchestrator loops (TESTING →
+  FIXING → TESTING) that run *during* an active pipeline. It is
+  incremented by the orchestrator's `_after_dispatch` while the task is
+  non-terminal.
+- `tasks.ci_fix_attempts` tracks external CI retries that fire *after* the
+  task is terminal (stage=`accepted` or `stuck`). These are temporally and
+  semantically distinct; conflating them would break the orchestrator's
+  `MAX_FIX_ATTEMPTS = 3` guard and hide which kind of loop exhausted.
+- Separate counters allow independent caps and independent observability
+  queries.
+
+**`ci_fix_dedupes` table**
+
+```sql
+CREATE TABLE ci_fix_dedupes (
+    task_id    VARCHAR(36) NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+    head_sha   CHAR(40)    NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (task_id, head_sha)
+);
+```
+
+This table provides the transactional `(task_id, head_sha)` dedupe gate
+(see Idempotency section below).
+
+### Fix-up dispatch shape
+
+When a triggering conclusion arrives for head SHA `S` on a branch that
+belongs to a managed task:
+
+1. **Resolve original task.** `SELECT * FROM tasks WHERE branch_name = <branch> AND project_id = <project_id> LIMIT 1`. If no match, log and return 200 (not this system's branch).
+
+2. **Check exhaustion.** If `task.ci_fix_attempts >= MAX_CI_FIX_ATTEMPTS` (3), call `open_escalation(...)` with:
+   ```python
+   TriggerCandidate(
+       project_id=task.project_id,
+       trigger_kind="ci_fix_exhausted",
+       task_id=task.id,
+       pipeline_run_id=None,
+   )
+   ```
+   Write audit row `task.ci_fix_exhausted` with payload `{task_id, head_sha, check_name, conclusion, summary_excerpt}`. Return.
+
+3. **Dedupe gate.** `INSERT INTO ci_fix_dedupes (task_id, head_sha) VALUES (%s, %s) ON CONFLICT DO NOTHING`. If 0 rows inserted → SHA already processed for this task → return 200 (idempotent).
+
+4. **Increment attempt counter.** `UPDATE tasks SET ci_fix_attempts = ci_fix_attempts + 1 WHERE id = %s`.
+
+5. **Build fix-up prompt.**
+   ```
+   # CI fix-up
+
+   PR: {task.pr_url}
+   Branch: {task.branch_name}
+   Failed check: {check_name}
+   Conclusion: {conclusion}
+   Failure excerpt:
+   {output_summary[:2000]}
+   {output_text[:2000]}
+
+   Apply the minimum diff to make CI green. Do not change semantics.
+   Push to the same branch — do NOT open a new PR.
+   ```
+
+6. **Dispatch new developer task.** Create a new `TaskRow` with:
+   - `role = "developer"`
+   - `repo = task.repo` (same repo)
+   - `branch_name = task.branch_name` (same branch — worker pushes to existing branch, not a new one)
+   - `pr_url = task.pr_url` (same PR — worker does not call `gh pr create`)
+   - `original_task_id = task.id`
+   - `stage = TaskStage.QUEUED`
+   - `prompt = <fix-up prompt above>`
+
+   Then call `orchestrate_task(new_task.id)` via the worker dispatcher.
+
+7. **Audit.** Write `task.ci_fix_dispatched` with payload `{original_task_id, fix_task_id, attempt_number, head_sha, check_name}`.
+
+The fix-up developer worker prompt instructs it to push to the existing
+branch. The existing developer completion contract (`_DEV_COMPLETION_CONTRACT`)
+requires a PR URL in the output; the fix-up variant relaxes this by
+injecting the existing PR URL directly in the prompt header so the worker
+records it rather than opening a new one.
+
+### Idempotency and dedupe
+
+**Problem.** A single PR's HEAD SHA can have N parallel check_run
+`completed` events (one per failing check). Without dedupe, each event
+would dispatch a separate fix-up task — N tasks racing to push to the same
+branch, producing conflicts and wasted token spend.
+
+**Solution.** The `ci_fix_dedupes(task_id, head_sha)` table provides a
+transactional dedupe gate:
+
+1. The handler atomically attempts `INSERT ON CONFLICT DO NOTHING`.
+2. First arrival for a given `(task_id, sha)` succeeds → fix-up dispatched.
+3. Subsequent arrivals for the same pair → 0 rows inserted → immediate 200
+   return with no dispatch.
+4. Concurrent webhook deliveries race on the DB constraint; only one
+   wins, the others return cleanly.
+
+The fix-up task's prompt aggregates the single check's details. If a later
+CI run on a *new* SHA triggers further failures, the new SHA is a distinct
+`(task_id, new_sha)` pair and correctly fires another attempt (subject to
+the `ci_fix_attempts` cap).
+
+See [ADR 0017](../../adrs/0017-ci-fixup-one-per-sha.md) for the
+rationale behind dispatching one fix-up per failing SHA rather than one
+per failing check.
+
+### MAX_CI_FIX_ATTEMPTS exhaustion path
+
+`MAX_CI_FIX_ATTEMPTS = 3` is a module-level constant in `ci_watcher.py`,
+matching `orchestrator.MAX_FIX_ATTEMPTS` for consistency.
+
+The limit is per **task** (i.e. per PR), not per check. Three consecutive
+CI-red SHAs on the same PR exhaust the budget regardless of whether they
+were the same check or different checks each time.
+
+On exhaustion, the watcher calls the 0041 escalation ladder's
+`open_escalation` with `trigger_kind="ci_fix_exhausted"`. This surfaces
+the PR in the existing on-call routing (Slack L0, DM L1, PagerDuty L2)
+with the failing check details in the escalation payload. No new
+notification channel is introduced.
+
+### Audit actions
+
+| Action string | When written | Key payload fields |
+|---|---|---|
+| `task.ci_fix_dispatched` | On each fix-up dispatch (step 7 above) | `original_task_id`, `fix_task_id`, `attempt_number`, `head_sha`, `check_name` |
+| `task.ci_fix_exhausted` | When `ci_fix_attempts >= MAX` | `task_id`, `head_sha`, `check_name`, `conclusion`, `summary_excerpt` |
+
+Both use `actor="system"`, `actor_method="webhook"` to distinguish
+watcher-driven actions from human-driven ones.
+
+### Feature flags
+
+- `coder_ci_fix_loop_enabled: bool = False` — fleet kill-switch. When off,
+  `handle_check_run` returns `{"status": "disabled"}` immediately after
+  the receiver's project resolution step. No DB writes.
+- `projects.ci_fix_loop_enabled BOOLEAN NULL` — per-project tri-state.
+  `NULL` inherits the fleet flag. `false` opts out even when the fleet
+  flag is on.
+
+## Data flow summary
+
+```mermaid
+sequenceDiagram
+  participant GHA as GitHub Actions
+  participant WF as check-run-ci-fixup.yml
+  participant RECV as managed_repo_callbacks
+  participant CIW as ci_watcher
+  participant DB as PostgreSQL
+  participant ORCH as orchestrate_task
+
+  GHA->>WF: check_run completed (any conclusion)
+  WF->>RECV: POST /v1/managed-workflows/callbacks/check-run-ci-fixup
+  RECV->>RECV: HMAC verify · flag check · project resolve
+  RECV->>CIW: handle_check_run(project_id, request)
+  CIW->>CIW: parse payload; check conclusion routing
+  alt non-triggering conclusion (cancelled/skipped/success)
+    CIW-->>RECV: {"status":"no_op"}
+  else triggering conclusion
+    CIW->>DB: SELECT tasks WHERE branch_name = ?
+    CIW->>DB: INSERT ci_fix_dedupes ON CONFLICT DO NOTHING
+    alt SHA already deduped
+      CIW-->>RECV: {"status":"deduped"}
+    else
+      CIW->>DB: check ci_fix_attempts vs MAX
+      alt exhausted
+        CIW->>DB: open_escalation(ci_fix_exhausted)
+        CIW->>DB: audit task.ci_fix_exhausted
+        CIW-->>RECV: {"status":"escalated"}
+      else attempts remaining
+        CIW->>DB: UPDATE tasks SET ci_fix_attempts += 1
+        CIW->>ORCH: orchestrate_task(fix_task_id)
+        CIW->>DB: audit task.ci_fix_dispatched
+        CIW-->>RECV: {"status":"dispatched"}
+      end
+    end
+  end
+```
 
 ## Invariants
 
-- **Pre-flight is a worker-side guarantee.** The worker's
-  `developer.py` runs preflight unconditionally (fleet flag
-  doesn't gate it; cheap and beneficial). Per-repo
-  `preflight_commands` may be empty, in which case the
-  preflight phase is a no-op.
-- **Fix-up tasks push to the same branch.** The fix-up
-  worker's prompt forbids `gh pr create`. It uses the existing
-  branch-push helper which pushes to the recorded
-  `branch_name` on the original task.
-- **Bounded retries.** Across the whole `pr_to_task_map.row`
-  lifetime, at most `MAX_CI_FIX_ATTEMPTS` fix-up tasks fire.
-  The `ci_fix_attempts` counter is the source of truth.
-- **Escalation is terminal for that PR.** Once
-  `escalated_at` is set, further check_run.failure events for
-  the same PR are no-ops (audit `ci_fix_loop.skipped_already_escalated`).
-- **Webhook is HMAC-only auth.** No JWT, no API key. The
-  signature gate is the entire trust boundary.
-
-## Interfaces
-
-- **API:**
-  - `POST /v1/_internal/github/check-run-webhook` — GitHub
-    webhook receiver. HMAC-verified. Returns 204 on accept,
-    401 on signature mismatch, 503 when fleet flag off.
-  - `GET /v1/_admin/ci-fix-loop/{pr_url:path}` — admin token.
-    Returns `pr_to_task_map` row + linked fix-up task ids.
-  - `PATCH /v1/projects/{id}` — set
-    `ci_fix_loop_enabled` (already exists; new column added).
-- **Worker:** `developer.py` invokes `_preflight.run()` after
-  pytest passes. Re-uses existing `validate_and_retry` (0025)
-  shape for the optional re-prompt path.
-- **Audit:** four new action strings (per AC7):
-  `ci_fix_loop.dispatched`, `ci_fix_loop.succeeded`,
-  `ci_fix_loop.failed`, `ci_fix_loop.escalated`. Plus
-  `ci_fix_loop.skipped_project_optout` and
-  `ci_fix_loop.skipped_already_escalated`.
+- **HMAC before any state write.** The 0052 receiver verifies the
+  signature before invoking `handle_check_run`. The handler never touches
+  the DB on an unverified payload.
+- **One fix-up dispatch per `(task_id, head_sha)`.** The
+  `ci_fix_dedupes` PRIMARY KEY is the correctness barrier.
+- **Same branch, same PR.** Fix-up tasks push to `task.branch_name` and
+  record `task.pr_url`; `gh pr create` is prohibited in the fix-up
+  prompt.
+- **Cap is per task, not per check.** `ci_fix_attempts` counts SHA
+  transitions, not individual failing checks on one SHA.
+- **Escalation is terminal for that task.** Once `ci_fix_attempts >=
+  MAX_CI_FIX_ATTEMPTS`, further check_run events for the same task are
+  logged and return cleanly without dispatching.
+- **No new notification channel.** Exhaustion paths into the existing
+  0041 ladder; no bespoke Slack message format.
 
 ## Open questions
 
 Inherited from spec — see
 [spec 0053 § Open questions](../../product-specs/wip/0053-post-pr-ci-fix-loop.md).
 
+Additional open questions surfaced during Stage 1 design:
+
+1. **`trigger_kind` extension for `ci_fix_exhausted`.** The 0041
+   escalation model's `EscalationTrigger` enum needs a new value.
+   Migration 0057 adds the DB check constraint; the Python enum needs a
+   matching change in `coder_core/domain/escalation.py`. Small, but
+   warrants a note for the implementing developer.
+
+2. **Branch resolution for non-`task/*` managed PRs.** The design
+   assumes `tasks.branch_name` follows the `task/<slug>` convention set
+   by the developer completion contract. If a future role breaks this
+   convention, the branch lookup will silently miss. Consider adding an
+   index on `(project_id, branch_name)` if it does not already exist.
+
+3. **Workflow secrets provisioning.** `coder managed-workflows sync`
+   today installs the workflow file but does not provision
+   `CODER_WEBHOOK_SECRET` or `CODER_PROJECT_ID`. Those secrets must be
+   set manually (or via the GitHub Secrets API) before the workflow can
+   deliver successfully. Automating secret provisioning is out of scope
+   for this stage.
+
 ## Rollout
 
-- **Stage 0a — pre-flight in shadow.** Ship `_preflight.py`
-  + `developer.py` integration with default `preflight_commands`
-  for Python repos. Initially the failure path is "open PR
-  anyway with body note" (no re-prompt). Soak 3 days. Headline
-  metric: count of PRs where preflight made a change.
+- **Stage 0a** — pre-flight in shadow. Shipped in coder-core PR #36.
+  Pre-flight runs unconditionally; failure path opens PR with body note.
 
-- **Stage 0b — pre-flight with re-prompt.** Add the re-prompt
-  path on hard pre-flight failures. Soak 3 days. Headline
-  metric: re-prompt success rate.
+- **Stage 0b** — re-prompt on hard pre-flight failures. Covered by
+  spec 0025 `validate_and_retry`; not in this PR.
 
-- **Stage 1a — watcher dark.** Ship the webhook receiver,
-  `pr_to_task_map` table, admin endpoint, but
-  `coder_ci_fix_loop_enabled = False`. Webhook returns 503.
-  Verify GitHub App webhook delivery infrastructure works
-  (200s in the GitHub UI's webhook log).
+- **Stage 1a — receiver registered, flag off.** Ship `ci_watcher.py`
+  with `register_handler("check-run-ci-fixup", ...)`, migration 0057
+  (`ci_fix_attempts`, `ci_fix_dedupes`), and the workflow template. Add
+  manifest entry. `coder_ci_fix_loop_enabled = False`. Webhook returns
+  `{"status":"disabled"}`. Run `coder managed-workflows sync` for the
+  `coder` project to install the workflow file. Verify GitHub delivers
+  webhooks (200s in the GitHub webhook log).
 
-- **Stage 1b — watcher live on `coder` only.**
-  `projects.ci_fix_loop_enabled = true` for `coder` only,
-  fleet flag still off. The webhook still returns 503 fleet-
-  wide; for `coder` it processes events. Watch fix-up dispatch
-  rate, success rate, escalation rate. Tune
-  `MAX_CI_FIX_ATTEMPTS` if needed.
+- **Stage 1b — flag on for `coder` project only.**
+  `projects.ci_fix_loop_enabled = true` for `coder`. Fleet flag still
+  off. Monitor: dispatch rate, dedupe rate, fix-up success rate,
+  escalation rate.
 
 - **Stage 1c — fleet flip.**
-  `CODER_CI_FIX_LOOP_ENABLED = true`. All managed projects
-  with `ci_fix_loop_enabled != false` get the loop.
+  `CODER_CI_FIX_LOOP_ENABLED = true`. All managed projects with
+  `ci_fix_loop_enabled != false` enter the loop.
 
-- **Stage 2 — admin UI on.**
-  `VITE_CI_FIX_LOOP_ENABLED = true`. CI Fix Loop card visible
-  on RunDetail / TaskDetail.
+- **Stage 2 — admin UI.** `VITE_CI_FIX_LOOP_ENABLED = true`. CI
+  Fix Loop card visible on RunDetail / TaskDetail.
 
 ## Backout plan
 
-- **Pre-flight off per repo.** Set
-  `system/repos/<repo>.md`'s `preflight_commands:` to `[]`
-  to disable for one repo.
-- **Watcher off per project.**
-  `PATCH /v1/projects/{id} ci_fix_loop_enabled=false`.
-- **Fleet kill switch.**
-  `CODER_CI_FIX_LOOP_ENABLED=false`. Webhook returns 503;
-  no new dispatches. In-flight fix-up tasks complete normally
-  (no mid-flight cancel).
-- **Wholesale removal.** `pr_to_task_map` table + the new
-  column can be dropped at next major version if abandoned.
+- **Per-repo.** Set `system/repos/<repo>.md`'s `preflight_commands: []`.
+- **Per-project.** `PATCH /v1/projects/{id}` with
+  `ci_fix_loop_enabled=false`.
+- **Fleet kill switch.** `CODER_CI_FIX_LOOP_ENABLED=false`. Webhook
+  returns disabled; no new dispatches. In-flight fix-up tasks complete
+  normally.
 
 ## Links
 
 - Spec: [0053](../../product-specs/wip/0053-post-pr-ci-fix-loop.md)
+- Stage 0 receiver scaffold: coder-core PR #33
+- Stage 0a developer pre-flight: coder-core PR #36
+- ADR: [0017](../../adrs/0017-ci-fixup-one-per-sha.md) — one fix-up per failing SHA
 - Related designs:
-  [0052](./0052-managed-repo-action-distribution.md) (HMAC webhook receiver shape, shared),
+  [0052](./0052-managed-repo-action-distribution.md) (receiver scaffold + `register_handler`),
   [worker-roles](../active/worker-roles.md),
   [worker-communication](../active/worker-communication.md),
   [escalations](../active/escalations.md)

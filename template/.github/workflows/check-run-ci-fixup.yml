@@ -1,0 +1,59 @@
+# Managed workflow — spec 0053 Stage 1
+# Installed and kept in sync by `coder managed-workflows sync` (spec 0052).
+# DO NOT hand-edit. Changes here are overwritten by the next sync.
+#
+# Fires on every check_run completion and POSTs the payload to coder-core's
+# managed-workflow callback receiver. coder-core verifies the HMAC signature,
+# derives the project from the X-Coder-Project-Id header, and dispatches a
+# fix-up developer task if the check failed and the PR is managed.
+#
+# Required secrets (provisioned during install):
+#   CODER_WEBHOOK_SECRET  — shared HMAC key matching github_app_webhook_secret
+#   CODER_PROJECT_ID      — coder-core project id for this repo
+#
+# Required variables (provisioned during install):
+#   CODER_RECEIVER_BASE_URL — base URL of the coder-core service
+#                             e.g. https://coder-core-abc123-uc.a.run.app
+
+name: report-check-run-to-coder
+
+on:
+  check_run:
+    types: [completed]
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    # Skip checks opened by coder-core itself to prevent fix-up loops
+    # from triggering on the fix-up commit's own CI run.
+    if: github.event.check_run.app.slug != 'coder-bot'
+    steps:
+      - name: POST check_run payload to coder-core
+        env:
+          CODER_WEBHOOK_SECRET: ${{ secrets.CODER_WEBHOOK_SECRET }}
+          CODER_PROJECT_ID: ${{ secrets.CODER_PROJECT_ID }}
+          CODER_RECEIVER_BASE_URL: ${{ vars.CODER_RECEIVER_BASE_URL }}
+        run: |
+          BODY="$(cat <<'PAYLOAD'
+          ${{ toJson(github.event.check_run) }}
+          PAYLOAD
+          )"
+          SIG="sha256=$(printf '%s' "$BODY" \
+            | openssl dgst -sha256 -hmac "$CODER_WEBHOOK_SECRET" \
+            | awk '{print $2}')"
+          HTTP_STATUS=$(curl -sf \
+            --retry 3 --retry-delay 2 --retry-connrefused \
+            -o /dev/null -w "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-Hub-Signature-256: $SIG" \
+            -H "X-Coder-Project-Id: $CODER_PROJECT_ID" \
+            -d "$BODY" \
+            "$CODER_RECEIVER_BASE_URL/v1/managed-workflows/callbacks/check-run-ci-fixup")
+          echo "coder-core response: $HTTP_STATUS"
+          # 2xx and 503 (fleet flag off) are both acceptable — the watcher
+          # may be intentionally disabled. Other 4xx/5xx are real errors.
+          case "$HTTP_STATUS" in
+            2*|503) exit 0 ;;
+            *)      echo "Unexpected status $HTTP_STATUS"; exit 1 ;;
+          esac

@@ -113,3 +113,10 @@ adrs:
     date: 2026-04-27
     file: 0016-bot-identity-via-user-type.md
     relates_to_designs: ["0054"]
+
+  - id: "0017"
+    title: One CI fix-up dispatch per failing SHA, not one per failing check
+    status: proposed
+    date: 2026-04-28
+    file: 0017-ci-fixup-one-per-sha.md
+    relates_to_designs: ["0053"]

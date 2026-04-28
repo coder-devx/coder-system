@@ -445,6 +445,8 @@ designs:
   file: wip/0053-post-pr-ci-fix-loop.md
   implements_specs:
   - '0053'
+  decided_by:
+  - '0017'
   related_designs:
   - '0052'
   - worker-roles
