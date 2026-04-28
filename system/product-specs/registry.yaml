@@ -444,6 +444,23 @@ specs:
   - pm-worker
   - reviewer-worker
   - task-orchestration
+- id: '0056'
+  title: Worker dispatch durability — move worker subprocesses out of the HTTP service
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0056-worker-dispatch-durability.md
+  served_by_designs:
+  - '0056'
+  related_specs:
+  - task-orchestration
+  - developer-worker
+  - architect-worker
+  - team-manager-worker
+  - reviewer-worker
+  - pm-worker
+  - continuous-deployment
+  - observability
 - id: '0051'
   title: coder-core modular monolith hardening
   status: active

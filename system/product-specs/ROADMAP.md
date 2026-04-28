@@ -326,6 +326,7 @@ The system today, by logical component. Each links to its active spec
 | [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | Stage 0a shipped 2026-04-27 (PR #36) — preflight live in prod; Stage 0b + Stage 1 still WIP |
 | [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | shipped 2026-04-28 (PR #37); flag `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED=true` flipped on revision `coder-core-00161-ln6` — live in prod |
 | [0055](./wip/0055-non-developer-roles-need-github-write-access.md) | Non-developer-role workers need GitHub write access | drafting — surfaced by architect task `62e0c95e` failing to open a PR (no `GH_TOKEN` for non-developer roles) |
+| [0056](./wip/0056-worker-dispatch-durability.md) | Worker dispatch durability — workers as Cloud Run Jobs | drafting 2026-04-28 — surfaced by wave-2 dispatch session where ~100% of workers zombied due to Cloud Run service-instance eviction killing the asyncio orchestrate_task before Phase 3b writeback. Three workarounds shipped today (PR #45 + reaper apply mode + threshold 25→45min) cover the symptom; this is the architectural fix |
 | [0051](./active/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | shipped to prod 2026-04-26; graduated wip → active |
 
 ---
