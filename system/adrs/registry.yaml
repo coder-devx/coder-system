@@ -128,6 +128,28 @@ adrs:
     file: 0018-managed-workflows-divergent-file-policy.md
     relates_to_designs: ["0052"]
 
+
+  - id: "0019"
+    title: Alias-tolerance window closes on fleet completion, not a fixed deadline
+    status: proposed
+    date: 2026-04-28
+    file: 0019-alias-tolerance-fleet-completion-gate.md
+    relates_to_designs: ["0047"]
+
+  - id: "0020"
+    title: Migration runner is a worker-dispatched Cloud Run Job, not a sync API endpoint
+    status: proposed
+    date: 2026-04-28
+    file: 0020-worker-dispatched-migration-runner.md
+    relates_to_designs: ["0047"]
+
+  - id: "0021"
+    title: Field removal requires two migrations — deprecate then remove
+    status: proposed
+    date: 2026-04-28
+    file: 0021-deprecate-then-remove-two-migrations.md
+    relates_to_designs: ["0047"]
+
   - id: "0022"
     title: Structural Jaccard similarity as the v1 pattern-discovery mechanism
     status: proposed
