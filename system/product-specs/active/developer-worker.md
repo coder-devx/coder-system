@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-15
-last_verified_at: 2026-04-28
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 served_by_designs: [worker-roles]
 related_specs: []
 ---
@@ -95,6 +95,13 @@ produces.
   retry loop lives inside the worker and not at the dispatcher; the
   pre-0027 dispatcher-level wrapper was removed on ship.
 - 2026-04-28 — Orchestrator now reconciles `pr_url` from GitHub when a developer task succeeds but the worker stdout didn't include the URL (spec 0054). Eliminates the 'PR exists but task is stuck' failure class. Flag-gated via `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED`; live in prod as of revision `coder-core-00161-ln6`. See [ADR 0016](../../adrs/0016-bot-identity-via-user-type.md) for the bot-identity-detection design call (uses `pr.user.type == 'Bot'`, not login-match).
+- 0055 — `GH_TOKEN` injection refactored through the shared
+  `_github_env.apply_github_token_env` helper (no behaviour change).
+  The inline `env["GH_TOKEN"] = task.workspace.github_token` access
+  becomes a call site that prefers the workspace token and falls
+  back to the dispatcher-resolved `WorkerInput.github_token`. Lifts
+  the credential out of workspace-prep so the same helper serves
+  every role worker.
 
 ## Links
 

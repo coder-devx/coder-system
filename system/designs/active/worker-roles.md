@@ -5,8 +5,8 @@ type: design
 status: active
 owner: ro
 created: 2026-04-08
-updated: 2026-04-15
-last_verified_at: 2026-04-17
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 implements_specs: []
 decided_by: ["0006", "0007"]
 related_designs: [system-overview, impersonation]
@@ -103,6 +103,23 @@ Reviewer is a distinct role from Product Manager per
   the shared `run_with_transient_retry` helper. Classification
   taxonomy + retry budget are shared across roles; ADR 0013 pins the
   retry loop inside the worker, not the dispatcher.
+- `0055` — shared `GH_TOKEN` injection for every role worker.
+  `workers/_github_env.apply_github_token_env(env, project_id,
+  settings, *, github_token)` sets `GH_TOKEN` in the subprocess
+  env independent of `task.workspace`; every role worker
+  (architect, TM, PM, reviewer, developer) calls it before
+  spawning `claude`. The dispatcher resolves the per-project
+  installation token at dispatch time — workspace-bearing roles
+  reuse `workspace.github_token`, non-workspace roles receive a
+  knowledge-repo-scoped token via
+  `tokens.get_token_for_repo(github_org, knowledge_repo)` on
+  `WorkerInput.github_token`. Closes the manual-dispatch failure
+  where architect / TM / PM tasks ran productively but couldn't
+  open PRs (realised pain: task `62e0c95e`, 2026-04-27).
+  Token-mint failures fall through with a warning so local-dev
+  paths without a GitHub App still work. Shipped via
+  [coder-core#41](https://github.com/coder-devx/coder-core/pull/41)
+  on 2026-04-28; covered by `tests/workers/test_github_env.py`.
 
 ## Links
 

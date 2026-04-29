@@ -480,21 +480,6 @@ designs:
   - coder-core
   affects_repos:
   - coder-core
-- id: '0055'
-  title: Non-developer-role workers need GitHub write access
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0055-non-developer-roles-need-github-write-access.md
-  implements_specs:
-  - '0055'
-  related_designs:
-  - worker-roles
-  - worker-communication
-  affects_services:
-  - coder-core
-  affects_repos:
-  - coder-core
 - id: '0056'
   title: Worker dispatch durability — move worker subprocesses out of the HTTP service
   status: wip

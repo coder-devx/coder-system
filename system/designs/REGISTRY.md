@@ -45,7 +45,6 @@ Logical components of the Coder system as it exists today.
 | [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | ro | [0052](../product-specs/wip/0052-managed-repo-action-distribution.md) | — |
 | [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | ro | [0053](../product-specs/wip/0053-post-pr-ci-fix-loop.md) | [0017](../adrs/0017-ci-fixup-one-per-sha.md) |
 | [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | ro | [0054](../product-specs/wip/0054-orchestrator-github-state-reconciliation.md) | — |
-| [0055](./wip/0055-non-developer-roles-need-github-write-access.md) | Non-developer-role workers need GitHub write access | ro | [0055](../product-specs/wip/0055-non-developer-roles-need-github-write-access.md) | — |
 
 ## Deprecated
 

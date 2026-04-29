@@ -5,8 +5,8 @@ type: design
 status: active
 owner: ro
 created: 2026-04-12
-updated: 2026-04-15
-last_verified_at: 2026-04-17
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 implements_specs: [pm-worker]
 decided_by: []
 related_designs: [team-manager-worker, knowledge-write-api, worker-communication, worker-roles]
@@ -138,6 +138,11 @@ write API.
 - `0027` — transient-failure retry: the claude spawn is wrapped in
   `run_with_transient_retry` with worker-level budget and backoff.
   ADR 0013.
+- 0055 — `GH_TOKEN` injection through the shared
+  `_github_env.apply_github_token_env` helper, populated from the
+  dispatcher-resolved `WorkerInput.github_token`. PM tasks no
+  longer need a workspace clone to authenticate `gh` commands.
+  See [worker-roles](./worker-roles.md).
 
 ## Links
 

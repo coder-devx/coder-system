@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 served_by_designs: [worker-communication]
 related_specs: [audit-log]
 ---
@@ -351,6 +351,21 @@ and `/pipeline-runs` endpoints in `coder-core`.
   new writes to orchestration tables; the watchdog's side effects
   land in `self_heal_attempts` and `audit_events`. See
   [self-healing](./self-healing.md).
+- `0055` — `GH_TOKEN` resolved at dispatch for all roles
+  (shipped 2026-04-28, [coder-core#41](https://github.com/coder-devx/coder-core/pull/41)).
+  Workspace-bearing roles (developer, reviewer) keep using
+  `workspace.github_token`; non-workspace roles (architect, TM,
+  PM) get a fresh installation token minted against the project's
+  knowledge repo via `tokens.get_token_for_repo(github_org,
+  knowledge_repo)`, passed through `WorkerInput.github_token`.
+  Each role worker calls the shared
+  `_github_env.apply_github_token_env` helper to populate
+  `GH_TOKEN` in the `claude` subprocess env. Closes the
+  manual-dispatch failure mode where architect / TM / PM tasks
+  exited with `gh is unauthenticated`. Token-mint failures log a
+  warning and leave the env untouched (graceful for local-dev
+  paths without a GitHub App). Realised pain: architect task
+  `62e0c95e` (2026-04-27).
 
 ## Links
 

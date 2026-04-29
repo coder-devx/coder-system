@@ -5,8 +5,8 @@ type: design
 status: active
 owner: ro
 created: 2026-04-12
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 implements_specs: [architect-worker]
 decided_by: []
 related_designs: [team-manager-worker, pm-worker, knowledge-write-api, worker-roles]
@@ -147,6 +147,14 @@ flowchart TB
   (idempotent via architect-task existence query) when
   `ship_draft_dispatch_enabled` is on. Non-ship-draft architect tasks
   unchanged. ADR 0015.
+- 0055 — `GH_TOKEN` injection moved to the shared
+  `_github_env.apply_github_token_env` helper, called between the
+  Claude-auth env apply and the `tempfile.TemporaryDirectory`
+  setup. The token is resolved at dispatch (knowledge-repo
+  installation) and arrives on `WorkerInput.github_token`. The
+  architect now opens PRs against `coder-system` instead of
+  writing designs to `/tmp` and exiting unauthenticated. See
+  [worker-roles](./worker-roles.md) for the cross-role design.
 
 ## Links
 
