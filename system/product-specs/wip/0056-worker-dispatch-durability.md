@@ -221,11 +221,55 @@ The design (spec 0056-design) refines:
 
 Phase 1: dual-mode — in-process subprocess (default) and Cloud Run Job
 (behind `CODER_WORKER_DISPATCH_VIA_JOB=true` per-project flag).
+**Status: shipped 2026-04-28 (PRs #45–#50, coder-system PRs #28–#34).**
 
 Phase 2: flip `coder` project to Job mode, soak for 1 week, watch
 zombie rate drop to ~0.
+**Status: opted in 2026-04-29; soak in progress.**
 
 Phase 3: flip fleet default. Decommission in-process path.
+
+### Issues surfaced + resolved during the start of Phase 2 soak (2026-04-29)
+
+The original Phase 1 ship was inert (no project opted in yet), so two
+latent issues only fired once `coder.worker_via_job_enabled = TRUE` and
+real architect tasks ran via the new path. Both are addressed in
+hotfix PRs landed the same day.
+
+1. **Architect's hardcoded 900s timeout fires for the first time.**
+   `src/coder_core/workers/architect.py` had `architect_timeout = 900`
+   (15 min). The deadline never bit before because Cloud Run service
+   eviction killed the worker subprocess earlier (this is the bug the
+   spec fixes). With Job-mode workers durable, real architect runs
+   exploring the codebase for sealed-spec design refinements
+   (empirically 25–46 min on 0046/0048) hit the 900s deadline cleanly.
+   Fixed by aligning architect with the other workers: reads
+   `settings.coder_developer_task_timeout_seconds` (2400s = 40 min in
+   prod), like `pm.py` / `team_manager.py` / `reviewer.py` /
+   `developer.py`. **coder-core PR #51.**
+
+2. **Runtime singletons not installed in the Job entry.**
+   `coder_core.workers.entry._run_one` calls `dispatch_task` outside
+   any FastAPI app, so the GH-token-provider, GH-client, and
+   broker-client singletons that `main.create_app.lifespan` installs
+   at service startup were never bootstrapped. `get_token_provider()`
+   returned `None`, `apply_github_token_env` no-op'd, the worker
+   subprocess got no `GH_TOKEN`, and `claude`'s `gh auth` / `git clone`
+   calls failed (`"gh CLI is not authenticated"` / `"Source files not
+   found"`). The legacy in-process path doesn't have this problem
+   because the FastAPI lifespan had already installed the singletons.
+   Fixed by adding `_install_runtime_singletons()` /
+   `_teardown_runtime_singletons()` to `entry.py`, mirroring the
+   lifespan wiring. **coder-core PR #52.**
+
+These both explain why "Phase 1 was fully merged and deployed" yet the
+architecture didn't *work* end-to-end until Phase 2 ramp surfaced
+them — the assumption "if the path runs the same `dispatch_task`,
+behaviour is identical" missed the implicit lifespan-side init that
+the legacy path inherited from the FastAPI app. Worth recording so the
+next system that inherits a "shared internal API runs in two
+container types" pattern remembers to look for app-startup-time side
+effects.
 
 ## Open questions
 
