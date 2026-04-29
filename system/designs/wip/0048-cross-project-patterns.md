@@ -5,8 +5,8 @@ type: design
 status: wip
 owner: ro
 created: 2026-04-19
-updated: 2026-04-28
-last_verified_at: '2026-04-28'
+updated: 2026-04-29
+last_verified_at: '2026-04-29'
 implements_specs: ['0048']
 decided_by: ['0022', '0023', '0024']
 related_designs:
@@ -47,6 +47,15 @@ admin endpoints + worker consult endpoint, the broker change that
 lets a project-scope worker call a fleet-scope pattern API without
 leaking content across tenants, and the admin UI page (deferred).
 
+**Dependency status (2026-04-29):** Spec 0046 (graph-aware
+retrieval) Stage 0a `GraphExpander` is live in production; the
+indexer's per-project snapshot fetch reuses `knowledge/graph.py`'s
+`expand()` directly. Spec 0046 route refinement (depth-control
+params, graph endpoint) is landing this wave and is a prerequisite
+for Stage 1's indexer runner. Spec 0049 (MCP agent interface) is
+shipped; 0048's MCP pattern resource is deferred to Stage 2 per
+ADR 0023 and the spec non-goals.
+
 The **isolation invariant** is the load-bearing constraint: nothing
 in this design lets project B's content reach project A through a
 worker call. The consult endpoint returns _structural metadata +
@@ -54,19 +63,15 @@ stable `pattern_id` + project-id list of origins_; to read another
 project's actual artifact body the operator must use the per-project
 admin API directly with their own admin scope.
 
-**Post-seal revisions (2026-04-28).** This document supersedes the
-pre-seal draft (2026-04-19). Key refinements:
-
-- Multi-tenancy tightened: `projects.share_patterns BOOLEAN NULL`
-  (migration 0059); NULL = opt-out, not opt-in-by-default. A
-  project must explicitly set `share_patterns=TRUE` to contribute.
-- Fleet flag renamed to `CODER_CROSS_PROJECT_PATTERNS_ENABLED`.
-- All pre-seal open questions resolved inline.
-- Worker integration section added: 4 KB hint payload cap +
-  redaction rule.
-- Worked example (ADR pattern end-to-end) added.
-- ADRs 0022 (discovery mechanism), 0023 (surface choice), 0024
-  (enforcement boundary) drafted.
+**Revision history:**
+- *2026-04-28 (seal)* — Supersedes pre-seal draft (2026-04-19).
+  Multi-tenancy tightened to `projects.share_patterns BOOLEAN NULL`
+  (NULL = opt-out); fleet flag named `CODER_CROSS_PROJECT_PATTERNS_ENABLED`;
+  all open questions resolved; worker integration (4 KB cap + redaction),
+  worked example, and ADRs 0022/0023/0024 added.
+- *2026-04-29 (refinement)* — Dependency status clarified: 0046
+  Stage 0a GraphExpander is live; 0049 is shipped; indexer runner
+  has a hard prerequisite on 0046 route landing.
 
 ## Goals / non-goals
 
