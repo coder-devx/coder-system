@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-15
-last_verified_at: 2026-04-17
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 served_by_designs: [pm-worker]
 related_specs: []
 ---
@@ -86,6 +86,11 @@ spec is promoted.
   leaves no side effect; ADR 0012 explains the re-prompt-only choice.
 - 0027 — transient-failure retry around the claude spawn; composes
   with 0025's schema loop. ADR 0013.
+- 0055 — `GH_TOKEN` injection for non-workspace roles. PM worker
+  calls the shared `_github_env.apply_github_token_env` helper from
+  the dispatcher-resolved `WorkerInput.github_token` so `gh`
+  commands inside the `claude` subprocess authenticate without a
+  workspace clone.
 
 ## Links
 

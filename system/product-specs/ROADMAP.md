@@ -325,7 +325,7 @@ The system today, by logical component. Each links to its active spec
 | [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | Stage 0 shipped 2026-04-27 (coder-system#9 manifest + coder-core#33 receiver scaffold) — flag-off in prod; Stage 1 (helpers + sync CLI) and Stage 2 (admin matrix) still WIP |
 | [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | Stage 0a shipped 2026-04-27 (PR #36) — preflight live in prod; Stage 0b + Stage 1 still WIP |
 | [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | shipped 2026-04-28 (PR #37); flag `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED=true` flipped on revision `coder-core-00161-ln6` — live in prod |
-| [0055](./wip/0055-non-developer-roles-need-github-write-access.md) | Non-developer-role workers need GitHub write access | drafting — surfaced by architect task `62e0c95e` failing to open a PR (no `GH_TOKEN` for non-developer roles) |
+| 0055 | Non-developer-role workers need GitHub write access | shipped 2026-04-28 ([coder-core#41](https://github.com/coder-devx/coder-core/pull/41)); WIP folded into `architect-worker` / `team-manager-worker` / `pm-worker` / `reviewer-worker` / `developer-worker` / `task-orchestration` and `worker-roles` design — recovery dispatch of architect `62e0c95e` opens PRs cleanly |
 | [0056](./wip/0056-worker-dispatch-durability.md) | Worker dispatch durability — workers as Cloud Run Jobs | drafting 2026-04-28 — surfaced by wave-2 dispatch session where ~100% of workers zombied due to Cloud Run service-instance eviction killing the asyncio orchestrate_task before Phase 3b writeback. Three workarounds shipped today (PR #45 + reaper apply mode + threshold 25→45min) cover the symptom; this is the architectural fix |
 | [0051](./active/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | shipped to prod 2026-04-26; graduated wip → active |
 
@@ -1460,7 +1460,7 @@ to the existing stuck path on any error.
   (eliminated as of 2026-04-28; orchestrator now queries GitHub for
   open PRs on `branch_name` before transitioning to STUCK).
 
-### 0055 — Non-developer-role workers need GitHub write access (drafting)
+### 0055 — Non-developer-role workers need GitHub write access (shipped 2026-04-28)
 
 Surfaced during the 0054 manual-chain dispatch on 2026-04-27.
 Architect task `62e0c95e` ran productively (read the spec, verified
@@ -1469,22 +1469,27 @@ ADR-worthy design call about Bot detection) — but exited unable to
 open a PR: *"`gh` is unauthenticated and there's no `GH_TOKEN` in
 the environment."* The work was lost on container reap.
 
-Root cause: `developer.py` injects `GH_TOKEN` from
+Root cause: `developer.py` injected `GH_TOKEN` from
 `task.workspace.github_token`, but non-developer-role tasks don't
 have a workspace configured in the manual-dispatch path. So
-architect/TM/PM/reviewer can't ship their outputs through PRs.
+architect/TM/PM/reviewer couldn't ship their outputs through PRs.
 
-This blocks the full dogfood loop's upper roles. Fix is small
-(decouple `GH_TOKEN` injection from `task.workspace`, hoist to a
-shared helper called by all role workers). Spec is drafted as
-WIP; design is a stub pending architect pickup (which itself will
-be unblocked by this fix — chicken-and-egg solved by dispatching
-the implementation directly via the developer worker, the only
-role that currently works).
+Fix shipped via [coder-core#41](https://github.com/coder-devx/coder-core/pull/41):
+new `workers/_github_env.apply_github_token_env(env, project_id,
+settings, *, github_token)` helper sets `GH_TOKEN`; every role
+worker calls it before spawning `claude`. The dispatcher resolves
+the per-project installation token at dispatch time —
+workspace-bearing roles reuse `workspace.github_token`,
+non-workspace roles get a knowledge-repo-scoped token via
+`tokens.get_token_for_repo(github_org, knowledge_repo)` passed on
+`WorkerInput.github_token`. Token-mint failures fall through with a
+warning so local-dev paths without a GitHub App still work.
+Implementation dispatched directly via the developer worker (the
+chicken-and-egg unblock).
 
-- **Status:** drafting — implementation can be dispatched directly via developer worker, no architect cycle needed
-- **WIP:** [0055](./wip/0055-non-developer-roles-need-github-write-access.md) · **Design:** [0055](../designs/wip/0055-non-developer-roles-need-github-write-access.md) (stub)
-- **Extends:** `architect-worker`, `team-manager-worker`, `pm-worker`, `reviewer-worker`, `task-orchestration`
+- **Status:** shipped 2026-04-28 — all roles can authenticate `gh` without a workspace; covered by `tests/workers/test_github_env.py`
+- **PR:** [coder-core#41](https://github.com/coder-devx/coder-core/pull/41)
+- **Folded into:** `architect-worker`, `team-manager-worker`, `pm-worker`, `reviewer-worker`, `developer-worker`, `task-orchestration` (specs); `worker-roles`, `architect-worker`, `team-manager-worker`, `pm-worker` (designs)
 - **Realised pain:** architect task `62e0c95e` (2026-04-27)
 
 ---

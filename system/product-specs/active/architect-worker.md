@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 served_by_designs: [architect-worker]
 related_specs: []
 ---
@@ -93,6 +93,13 @@ planner gets a concrete architecture to decompose.
   design envelope. Close-cycle backstop auto-dispatches ship-draft
   tasks (idempotent via task-existence query) when
   `ship_draft_dispatch_enabled` is on.
+- 0055 — `GH_TOKEN` injection for non-workspace roles. Architect
+  worker now calls the shared `_github_env.apply_github_token_env`
+  helper before spawning `claude`, populated from the
+  dispatcher-resolved `WorkerInput.github_token`. Closes the
+  manual-dispatch failure mode where architect tasks ran
+  productively but exited with `gh is unauthenticated`. Realised
+  pain: task `62e0c95e` (2026-04-27).
 
 ## Links
 

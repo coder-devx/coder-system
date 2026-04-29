@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 served_by_designs: [team-manager-worker]
 related_specs: []
 ---
@@ -96,6 +96,11 @@ dependency order.
   `ship_draft_dispatch_enabled`). Fails open on GitHub errors.
   ADR 0015 explains why the gate lives in the Coder pipeline rather
   than GitHub branch protection.
+- 0055 — `GH_TOKEN` injection for non-workspace roles. TM worker
+  calls the shared `_github_env.apply_github_token_env` helper from
+  the dispatcher-resolved `WorkerInput.github_token` so `gh`
+  commands inside the `claude` subprocess authenticate without a
+  workspace clone.
 
 ## Links
 
