@@ -5,8 +5,8 @@ type: runbook
 status: active
 owner: ro
 created: 2026-04-28
-updated: 2026-04-28
-last_verified_at: 2026-04-28
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 applies_to_services: [coder-core]
 applies_to_integrations: [cloud-run-jobs]
 ---
@@ -79,22 +79,46 @@ IMAGE=$(gcloud run services describe "$SERVICE" --project="$PROJECT" --region="$
         --format='value(spec.template.spec.containers[0].image)')
 RUNTIME_SA=$(gcloud run services describe "$SERVICE" --project="$PROJECT" --region="$REGION" \
         --format='value(spec.template.spec.serviceAccountName)')
+# NOTE: cloudsql-instances annotation lives on the *template* metadata,
+# not the service metadata. The service-metadata path returns empty.
 CLOUD_SQL_INSTANCE=$(gcloud run services describe "$SERVICE" --project="$PROJECT" --region="$REGION" \
-        --format='value(metadata.annotations."run.googleapis.com/cloudsql-instances")')
+        --format='value(spec.template.metadata.annotations."run.googleapis.com/cloudsql-instances")')
 
-# Dump env + secrets to a YAML file we'll re-apply to the Job
+# Dump env + secrets to a JSON file we'll cross-reference against the Job
 gcloud run services describe "$SERVICE" --project="$PROJECT" --region="$REGION" \
   --format=json \
   | jq '.spec.template.spec.containers[0] | {env, envFrom}' > /tmp/coder-core-env.json
 ```
 
-Inspect `/tmp/coder-core-env.json`. The keys you care about are
-`CLOUD_SQL_*`, `BROKER_SIGNING_KEY` (Secret Manager ref),
-`ANTHROPIC_API_KEY` (Secret Manager ref), `GH_APP_*`, and the spec
-0056 fleet flag `CODER_WORKER_DISPATCH_VIA_JOB` (don't include — the
-Job itself doesn't need to know whether it was kicked).
+Inspect `/tmp/coder-core-env.json`. **Use the actual secret names and
+env var names the live service has — they have changed historically
+and are NOT what older versions of this runbook documented.** As of
+2026-04-29 the relevant keys are:
+
+- `CLOUD_SQL_INSTANCE` / `CLOUD_SQL_USER` / `CLOUD_SQL_DATABASE` (plain env)
+- `BROKER_SIGNING_KEY` ← secret `coder-core-broker-signing-key:latest`
+- `ANTHROPIC_API_KEY` ← secret `ANTHROPIC_API_KEY:latest` (the secret
+  literally has the uppercase name)
+- `GITHUB_APP_PRIVATE_KEY` ← secret `coder-github-app-private-key:latest`
+  (note: env var is `GITHUB_APP_PRIVATE_KEY`, not `GH_APP_PRIVATE_KEY`)
+- `CLAUDE_CODE_OAUTH_TOKEN` ← secret `coder-claude-code-oauth-token:latest`
+  (used by the `claude` CLI subprocess; **easy to miss because older
+  runbook drafts didn't list it, but the worker will fail without it**)
+- `GITHUB_APP_ID`, `GCP_PROJECT_ID`, `GCS_WORKER_RUNS_BUCKET`, `ENVIRONMENT`
+  (plain env)
+
+Do NOT include the spec 0056 fleet flag `CODER_WORKER_DISPATCH_VIA_JOB`
+(the Job itself doesn't need to know whether it was kicked).
 
 ### 2. Create the Job
+
+**`--set-cloudsql-instances` is intentionally omitted.** The existing
+tick Jobs (`coder-core-self-heal-tick`, `coder-core-auto-approve-tick`,
+`coder-core-rotate-secrets`) all run the same `coder-core` image
+without the cloudsql-instances annotation and connect via the
+in-process `cloud-sql-python-connector` library using IAM auth. Adding
+the annotation would attach the Cloud Run-managed sidecar, slowing
+cold start without functional benefit. Match the tick Jobs.
 
 ```bash
 gcloud run jobs create coder-core-worker \
@@ -102,7 +126,6 @@ gcloud run jobs create coder-core-worker \
   --region="$REGION" \
   --image="$IMAGE" \
   --service-account="$RUNTIME_SA" \
-  --set-cloudsql-instances="$CLOUD_SQL_INSTANCE" \
   --command=python \
   --args="-m,coder_core.workers.entry" \
   --max-retries=0 \
@@ -111,20 +134,19 @@ gcloud run jobs create coder-core-worker \
   --memory=4Gi \
   --parallelism=1 \
   --tasks=1 \
-  --set-env-vars="CLOUD_SQL_INSTANCE=$CLOUD_SQL_INSTANCE,CLOUD_SQL_USER=coder-core-sa@vibedevx.iam,CLOUD_SQL_DATABASE=coder_core" \
-  --set-secrets="BROKER_SIGNING_KEY=broker-signing-key:latest,ANTHROPIC_API_KEY=anthropic-api-key:latest,GH_APP_PRIVATE_KEY=github-app-private-key:latest"
+  --set-env-vars="ENVIRONMENT=prod,CLOUD_SQL_INSTANCE=$CLOUD_SQL_INSTANCE,CLOUD_SQL_USER=coder-core-sa@vibedevx.iam,CLOUD_SQL_DATABASE=coder_core,GCS_WORKER_RUNS_BUCKET=vibedevx-coder-worker-runs,GITHUB_APP_ID=3325027,GCP_PROJECT_ID=vibedevx,SHIP_DRAFT_DISPATCH_ENABLED=true,PROMPT_CACHING_ENABLED=true,AUTO_APPROVE_SHADOW_ENABLED=true,CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED=true" \
+  --set-secrets="ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest,GITHUB_APP_PRIVATE_KEY=coder-github-app-private-key:latest,BROKER_SIGNING_KEY=coder-core-broker-signing-key:latest,CLAUDE_CODE_OAUTH_TOKEN=coder-claude-code-oauth-token:latest"
 ```
 
-Then **mirror the rest of the service's env** by running through
-`/tmp/coder-core-env.json` and adding any non-secret env vars the
-service has set. The most important for the worker are:
-
-- `GCP_PROJECT_ID=vibedevx`
-- `GH_APP_ID=...`
-- `GH_APP_INSTALLATION_ID=...`
-- Any feature flags the dispatcher reads (`CODER_DEVELOPER_TASK_TIMEOUT_SECONDS=2400`, etc.)
-
-Add them via `gcloud run jobs update coder-core-worker --update-env-vars=...`.
+This is a **curated subset** of the service env, not a full mirror.
+HTTP-server-only and tick-only flags are intentionally excluded:
+`CORS_ALLOWED_ORIGINS`, `MCP_*`, `ADMIN_ALLOWED_EMAILS`, `GOOGLE_OAUTH_*`,
+`DISPATCHER_ENABLED`, `SELF_HEAL*`, `ZOMBIE_EXECUTING_MIN_MINUTES`,
+`SECRET_ROTATION_ENABLED`, `REGRESSION_ALERTS_ENABLED`. They would be
+inert in worker context. Verify via `diff` between the env-name list of
+the new Job and `/tmp/coder-core-env.json` — anything new the service
+has added that the dispatcher reads must be added via
+`gcloud run jobs update coder-core-worker --update-env-vars=...`.
 
 ### 3. Smoke-test the Job
 
