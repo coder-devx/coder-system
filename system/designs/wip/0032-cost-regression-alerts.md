@@ -5,8 +5,8 @@ type: design
 status: wip
 owner: ro
 created: 2026-04-18
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 implements_specs: ["0032"]
 decided_by: []
 related_designs: [observability-and-cost-tracking, worker-communication]
@@ -152,18 +152,33 @@ flowchart TB
   }
   ```
   Lookup order: per-role override → fleet default.
-- **`continuous-deployment` integration** — existing
-  deploy-log table tracks `(commit_sha, author, deployed_at,
-  service)`. Attribution helper:
+- **`continuous-deployment` integration** — implemented in
+  `coder_core.ops.regression_attribution`. Continuous-
+  deployment is push-to-main for both `coder-core` and
+  `coder-admin`, with `coder-system` validator runs
+  tracking knowledge/prompt deploys in the same model — so
+  the canonical record of "what shipped" is the GitHub
+  commit history of those repos, not a separate
+  `deploy_log` table. The attributor pages
+  `GET /repos/{org}/{repo}/commits?since&until` for each
+  configured repo (default
+  `["coder-devx/coder-core", "coder-devx/coder-system"]`)
+  and JSON-encodes the SHA / author / message / repo list
+  onto every regression event landed for that UTC day:
   ```python
-  def commits_between(last_clean: datetime, current: datetime) -> list[Commit]:
-      return deploy_log.filter(service="coder-core")\
-                      .filter(deployed_at__gt=last_clean)\
-                      .filter(deployed_at__lte=current)
+  async def attribute_commit_range(
+      since: datetime, until: datetime, settings: Settings
+  ) -> list[CommitInfo]: ...
   ```
-  Also pulls coder-system deploys (knowledge/prompt
-  changes) — 0029/0030-era prompt rewrites are a likely
-  cost regressor.
+  Suspect persistence runs once per cron tick (one repo
+  pass per night, not per finding) and the same blob is
+  stamped onto every finding from the same window.
+  Graceful degrade: a server without GitHub credentials
+  installed sets `suspect_commit_range` to NULL and the
+  admin tab renders the row without the suspects strip.
+  Test seam: `set_commit_attributor(stub)` lets unit tests
+  inject canned commit lists without standing up the
+  GitHub Protocol module.
 - **Regressions API** — `GET /v1/_admin/regressions` (admin
   JWT). Returns open events + last 30 days of closed
   events. `POST /v1/_admin/regressions/{id}/ack` with
