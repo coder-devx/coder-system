@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 served_by_designs: [worker-roles]
 related_specs: []
 ---
@@ -82,6 +82,13 @@ developer-produced PR and a human-facing merge decision.
   the task carries the ship-mode flag and enforces AC coverage via
   the 0025 `validate_and_retry` gate. Non-ship reviews keep the
   existing schema unchanged.
+- 0055 — `GH_TOKEN` injection routed through the shared
+  `_github_env.apply_github_token_env` helper. Reviewer worker
+  prefers `task.workspace.github_token` when a workspace is
+  prepared and falls back to the dispatcher-resolved
+  `WorkerInput.github_token` otherwise — `gh pr diff` /
+  `gh pr review` keep working when reviewer tasks dispatch without
+  a workspace.
 
 ## Links
 

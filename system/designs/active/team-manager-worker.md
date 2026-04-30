@@ -5,8 +5,8 @@ type: design
 status: active
 owner: ro
 created: 2026-04-12
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 implements_specs: [team-manager-worker]
 decided_by: []
 related_designs: [system-overview, worker-roles, architect-worker, pm-worker]
@@ -175,6 +175,11 @@ pre-population is skipped.
   auto-dispatches a `knowledge-ship-draft` architect task (gated on
   `ship_draft_dispatch_enabled`, idempotent on the task-existence
   query). Fails open on GitHub errors. ADR 0015.
+- 0055 — `GH_TOKEN` injection through the shared
+  `_github_env.apply_github_token_env` helper, populated from the
+  dispatcher-resolved `WorkerInput.github_token`. TM tasks no
+  longer need a workspace clone to authenticate `gh` commands.
+  See [worker-roles](./worker-roles.md).
 
 ## Links
 

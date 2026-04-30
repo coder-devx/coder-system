@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-18
-updated: 2026-04-27
-last_verified_at: 2026-04-27
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 served_by_designs: ["0032"]
 related_specs: [observability, task-orchestration, continuous-deployment]
 ---
@@ -113,22 +113,35 @@ cost regressions with the commit range likely responsible.
   detected regressions with
   `(role, metric, day_utc, baseline_value, current_value,
   delta_ratio, detected_at, acknowledged_at,
-  acknowledged_by, note)`. Dedupe index on
-  `(role, metric, day_utc)` makes re-runs idempotent. The
+  acknowledged_by, note)`. Phase 2 (migration 0059) adds
   `task_kind`, `model_id`, and `suspect_commit_range`
-  columns are deferred until the per-task-kind discrimination
-  from 0030 phase 2 lands.
-- [x] Regression threshold is settings-configurable via the
-  `threshold` kwarg on `detect_regressions`; default +25%.
-  Per-role overrides deferred — fleet-wide threshold is
-  sufficient for phase 1 calibration.
-- [ ] Commit-range attribution pulls from
-  `continuous-deployment` deploy log and populates
-  `suspect_commit_range`. **Deferred** — the detector fires
-  an alert with role/metric/delta; operator reads
-  `git log` between the last clean day and the regression
-  day manually. Automated attribution lands after the
-  false-positive rate calibrates.
+  columns and widens the dedupe index to
+  `(role, task_kind, model_id, metric, day_utc)` so a
+  regression on `architect/design/sonnet` doesn't dedupe
+  with `architect/knowledge_audit/haiku` for the same UTC
+  day. Phase-1 rows persist with both qualifiers null and
+  coexist on the same day as phase-2 rows because null is a
+  distinct dedupe value.
+- [x] Regression threshold is settings-configurable via
+  `regression_default_threshold` (fleet-wide) and
+  `regression_thresholds_per_role_kind` (per-(role, task_kind)
+  overrides; lookup order cell → role → fleet default).
+  Default ships `architect: 0.35` to absorb the noisier
+  cost shape; the detector echoes the resolved threshold
+  back on the finding so the alert + audit row record what
+  bar tripped.
+- [x] Commit-range attribution pulls from
+  `continuous-deployment` deploys (push-to-main on
+  `coder-core` + `coder-system`) and populates
+  `suspect_commit_range` on every persisted event.
+  Implemented in `coder_core.ops.regression_attribution` —
+  the cron queries the GitHub commits between the
+  current-window start and end for both repos in one pass
+  per nightly run, JSON-encodes the SHA / author / message
+  list, and stamps it on every finding from the same UTC
+  day. Graceful degrade: a server without GitHub credentials
+  installed (or a test path) sets the column to NULL and
+  the admin tab falls back to "operator reads `git log`."
 - [x] Slack webhook fires on new regression events when
   `settings.regression_alerts_enabled=True`; acknowledged
   rows are filtered out before the Slack post so an

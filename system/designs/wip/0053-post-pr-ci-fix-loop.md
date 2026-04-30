@@ -5,8 +5,8 @@ type: design
 status: wip
 owner: ro
 created: 2026-04-27
-updated: 2026-04-28
-last_verified_at: 2026-04-28
+updated: 2026-04-29
+last_verified_at: 2026-04-29
 deprecated_at: null
 reason: null
 implements_specs: ["0053"]
@@ -100,7 +100,7 @@ is not repeated here.
 
 ### Module placement
 
-**`coder_core/integrations/ci_watcher.py`** — new module. Registers with
+**`coder_core/workers/ci_watcher.py`** — new module. Registers with
 the 0052 receiver scaffold at module-import time:
 
 ```python
@@ -118,6 +118,20 @@ async def handle_check_run(project_id: str, request: Request) -> dict:
 HMAC verification, feature-flag gating, and project derivation are all
 handled by the receiver before this function is called. The handler
 therefore starts from a verified, project-scoped payload.
+
+**Why ``workers/`` and not ``integrations/``** — the original draft of
+this design placed ``ci_watcher.py`` under
+``coder_core/integrations/``, but ``pyproject.toml``'s
+``Integrations are leaf adapters`` import-linter contract forbids
+``coder_core.integrations`` from depending on either
+``coder_core.workers`` (needed for ``orchestrate_task``) or
+``coder_core.escalations`` (needed for ``open_escalation``). Living
+under ``coder_core.workers`` keeps the module-graph clean while still
+letting it import the receiver's ``register_handler`` (the
+"Feature modules do not depend on adapters" contract only forbids the
+``api`` and ``mcp`` adapter packages). ``coder_core/main.py`` triggers
+the registration via ``import coder_core.workers.ci_watcher`` after
+the receiver router is mounted.
 
 ### GitHub event subscription path
 
@@ -198,9 +212,18 @@ The head branch is **not** read from the payload; the watcher derives it
 from the task row to avoid trusting caller-controlled input for the
 branch lookup.
 
-### Schema changes (migration 0057)
+### Schema changes (migration 0054)
 
-Two additions land together:
+Migration 0054 bundles all four schema deltas into one Alembic
+revision so the watcher can ship behind ``coder_ci_fix_loop_enabled``
+without partial-schema window:
+
+1. ``tasks.ci_fix_attempts INTEGER NOT NULL DEFAULT 0``
+2. ``ci_fix_dedupes`` table with composite PK ``(task_id, head_sha)``
+3. ``projects.ci_fix_loop_enabled BOOLEAN NULL``
+4. Widen ``ck_escalations_trigger_kind`` to allow the new
+   ``ci_fix_exhausted`` value via ``op.batch_alter_table`` (works for
+   both Postgres and the SQLite test driver)
 
 **`tasks.ci_fix_attempts` (new column)**
 
@@ -339,11 +362,13 @@ notification channel is introduced.
 
 | Action string | When written | Key payload fields |
 |---|---|---|
-| `task.ci_fix_dispatched` | On each fix-up dispatch (step 7 above) | `original_task_id`, `fix_task_id`, `attempt_number`, `head_sha`, `check_name` |
-| `task.ci_fix_exhausted` | When `ci_fix_attempts >= MAX` | `task_id`, `head_sha`, `check_name`, `conclusion`, `summary_excerpt` |
+| `task.ci_fix_dispatched` | On each fix-up dispatch (step 7 above) | `original_task_id`, `fix_task_id`, `attempt_number`, `head_sha`, `check_name`, `conclusion` |
+| `task.ci_fix_exhausted` | When `ci_fix_attempts >= MAX` | `task_id`, `head_sha`, `check_name`, `conclusion`, `summary_excerpt`, `ci_fix_attempts` |
 
-Both use `actor="system"`, `actor_method="webhook"` to distinguish
-watcher-driven actions from human-driven ones.
+Both use `actor="coder-core-ci-watcher"`, `actor_method="webhook"` so
+operators can grep audit dropdowns for watcher-driven activity. The
+two labels are added to the ``Actions`` namespace in
+``coder_core.audit`` (``CI_FIX_DISPATCHED`` / ``CI_FIX_EXHAUSTED``).
 
 ### Feature flags
 
@@ -446,12 +471,14 @@ Additional open questions surfaced during Stage 1 design:
   spec 0025 `validate_and_retry`; not in this PR.
 
 - **Stage 1a — receiver registered, flag off.** Ship `ci_watcher.py`
-  with `register_handler("check-run-ci-fixup", ...)`, migration 0057
-  (`ci_fix_attempts`, `ci_fix_dedupes`), and the workflow template. Add
-  manifest entry. `coder_ci_fix_loop_enabled = False`. Webhook returns
-  `{"status":"disabled"}`. Run `coder managed-workflows sync` for the
-  `coder` project to install the workflow file. Verify GitHub delivers
-  webhooks (200s in the GitHub webhook log).
+  with `register_handler("check-run-ci-fixup", ...)`, migration 0054
+  (`ci_fix_attempts`, `ci_fix_dedupes`, `projects.ci_fix_loop_enabled`,
+  widened `ck_escalations_trigger_kind`), and the workflow template
+  (already in coder-system). `coder_ci_fix_loop_enabled = False`.
+  Webhook returns `{"status":"disabled"}`. Run
+  `coder managed-workflows sync` for the `coder` project to install
+  the workflow file. Verify GitHub delivers webhooks (200s in the
+  GitHub webhook log).
 
 - **Stage 1b — flag on for `coder` project only.**
   `projects.ci_fix_loop_enabled = true` for `coder`. Fleet flag still
@@ -479,6 +506,10 @@ Additional open questions surfaced during Stage 1 design:
 - Spec: [0053](../../product-specs/wip/0053-post-pr-ci-fix-loop.md)
 - Stage 0 receiver scaffold: coder-core PR #33
 - Stage 0a developer pre-flight: coder-core PR #36
+- Stage 1 watcher: [coder-core PR #55](https://github.com/coder-devx/coder-core/pull/55) —
+  adds `coder_core/workers/ci_watcher.py`, migration 0054, audit
+  labels `task.ci_fix_dispatched` / `task.ci_fix_exhausted`, and the
+  `CI_FIX_EXHAUSTED` escalation trigger.
 - ADR: [0017](../../adrs/0017-ci-fixup-one-per-sha.md) — one fix-up per failing SHA
 - Related designs:
   [0052](./0052-managed-repo-action-distribution.md) (receiver scaffold + `register_handler`),

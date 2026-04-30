@@ -358,15 +358,23 @@ designs:
   file: wip/0047-template-schema-migration.md
   implements_specs:
   - '0047'
+  decided_by:
+  - '0019'
+  - '0020'
+  - '0021'
   related_designs:
   - knowledge-write-api
   - knowledge-repo-model
   - audit-log
   - system-overview
   - worker-communication
+  - '0052'
   affects_services:
   - coder-core
   - coder-admin
+  affects_repos:
+  - coder-core
+  - coder-system
 - id: '0048'
   title: Cross-project pattern surfacing
   status: wip
@@ -478,17 +486,22 @@ designs:
   - coder-core
   affects_repos:
   - coder-core
-- id: '0055'
-  title: Non-developer-role workers need GitHub write access
+- id: '0056'
+  title: Worker dispatch durability — move worker subprocesses out of the HTTP service
   status: wip
   owner: ro
   folder: wip
-  file: wip/0055-non-developer-roles-need-github-write-access.md
+  file: wip/0056-worker-dispatch-durability.md
   implements_specs:
-  - '0055'
+  - '0056'
   related_designs:
   - worker-roles
   - worker-communication
+  - architect-worker
+  - team-manager-worker
+  - pm-worker
+  - self-healing
+  - observability-and-cost-tracking
   affects_services:
   - coder-core
   affects_repos:
