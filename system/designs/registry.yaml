@@ -395,6 +395,12 @@ designs:
   - team-manager-worker
   - worker-roles
   - observability-and-cost-tracking
+  - '0046'
+  - '0049'
+  decided_by:
+  - '0022'
+  - '0023'
+  - '0024'
   affects_services:
   - coder-core
   - coder-admin
