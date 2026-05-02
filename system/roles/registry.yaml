@@ -45,6 +45,8 @@ roles:
     tasks:
       - draft
       - accept
+      - ship
+      - audit
 
   - id: developer
     name: Developer

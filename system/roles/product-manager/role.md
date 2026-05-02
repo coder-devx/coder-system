@@ -79,3 +79,5 @@ approves the second iteration for deploy.
 |---|---|---|
 | `draft` | task prompt starts with `draft: <problem statement>` | [`tasks/draft.md`](./tasks/draft.md) |
 | `accept` | task prompt starts with `accept: <spec_id>` | [`tasks/accept.md`](./tasks/accept.md) |
+| `ship` | task prompt starts with `# Knowledge ship draft` (wip-spec → active merge; spec-side counterpart of Architect's ship-draft) | [`tasks/ship.md`](./tasks/ship.md) |
+| `audit` | task prompt starts with `# Knowledge audit` (stale-spec freshness; spec-side counterpart of Architect's audit) | [`tasks/audit.md`](./tasks/audit.md) |
