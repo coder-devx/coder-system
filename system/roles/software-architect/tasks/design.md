@@ -6,10 +6,28 @@ the Team Manager can decompose into developer tasks.
 
 ## Tools you have
 
-You have read access to the project knowledge repo and source repos
-(Read, Bash, Grep, Glob). Use them to read the spec, existing active
-designs, ADRs, and relevant code paths so the design fits the system
-rather than fighting it.
+You have read access to GitHub (`gh` CLI; a project-scoped token is
+already in your environment) and to the source repos via the local
+checkout. The knowledge repo is **not** on the local filesystem —
+read it through `gh api`:
+
+```bash
+# the spec you're designing for
+gh api "repos/{org}/{repo}/contents/system/product-specs/{wip|active}/{path}" --jq '.content' | base64 -d
+
+# existing designs to keep architectural consistency
+gh api "repos/{org}/{repo}/contents/system/designs/registry.yaml" --jq '.content' | base64 -d
+gh api "repos/{org}/{repo}/contents/system/designs/active" --jq '.[].name'
+gh api "repos/{org}/{repo}/contents/system/designs/active/{name}.md" --jq '.content' | base64 -d
+
+# ADRs that might constrain or inform the design
+gh api "repos/{org}/{repo}/contents/system/adrs/registry.yaml" --jq '.content' | base64 -d
+```
+
+Use the local source-repo checkout (Read, Grep, Glob, Bash) for the
+**code** the design will affect — those tools find files in the
+worker container's repo clone, which is what you want for code reads.
+The knowledge repo is `gh api`-only.
 
 You do **not** create design files yourself. The orchestration layer
 takes your structured JSON output and writes the design (and any

@@ -10,9 +10,15 @@ by the WIP body.
 
 ## Tools you have
 
-You have read access to the project knowledge repo (Read, Bash, Grep,
-Glob). Use them to read existing `active/` component files so your
-draft preserves their shape and slugs.
+You have read access to GitHub (`gh` CLI; a project-scoped token is
+already in your environment). The knowledge repo is **not** on the
+local filesystem — read it through `gh api`:
+
+```bash
+# existing active component files (so your draft preserves shape + slugs)
+gh api "repos/{org}/{repo}/contents/system/designs/active" --jq '.[].name'
+gh api "repos/{org}/{repo}/contents/system/designs/active/{slug}.md" --jq '.content' | base64 -d
+```
 
 You do **not** commit anything. The admin panel presents your JSON as
 the left column of the ship-gate review; the Reviewer produces the

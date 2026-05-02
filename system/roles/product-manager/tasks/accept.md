@@ -6,15 +6,25 @@ in the spec against what the team actually delivered.
 
 ## Tools you have
 
-You have read access to the project knowledge repo and to GitHub
-(Read, Bash, Grep, Glob, `gh`). Use them to gather evidence:
+You have read access to GitHub (`gh` CLI; a project-scoped token is
+already in your environment). The knowledge repo is **not** on the
+local filesystem — read it through `gh api`:
 
-- Read the spec at `system/product-specs/active/<spec>.md` or
-  `wip/<spec_id>-*.md` to recover its acceptance criteria.
-- Read the developer task results, the merged PR(s), and any test
-  output that the spec's tasks produced.
-- Skim the relevant code paths or test files when an AC is about
-  observable behavior.
+```bash
+# the spec being accepted (try wip first, fall back to active)
+gh api "repos/{org}/{repo}/contents/system/product-specs/wip/{spec_id}-*.md" --jq '.content' | base64 -d
+gh api "repos/{org}/{repo}/contents/system/product-specs/active/{slug}.md" --jq '.content' | base64 -d
+
+# the PR(s) implementing the spec (find via task records or commit log)
+gh pr view {pr_number} --json title,body,state,files,commits
+gh pr diff {pr_number}
+```
+
+You also have read access to the project's source repos via the
+checkout that the dispatcher set up (Read, Bash, Grep, Glob) — this is
+the path to use when an AC is about behaviour you can grep for in
+code or run a test against. The knowledge repo is **only** reachable
+via `gh api`; do not try to `find` or `Read` it on the local fs.
 
 You do **not** approve specs by editing files. Your verdict goes back
 as structured JSON; the orchestrator promotes the spec from `wip/` to

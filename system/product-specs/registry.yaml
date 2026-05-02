@@ -447,6 +447,12 @@ specs:
   - pm-worker
   - continuous-deployment
   - observability
+- id: '0058'
+  title: Slack on-call page for stuck pipelines
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0058-slack-on-call-page-for-stuck-pipelines.md
 - id: '0051'
   title: coder-core modular monolith hardening
   status: active
