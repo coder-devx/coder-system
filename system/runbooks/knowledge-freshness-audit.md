@@ -5,8 +5,8 @@ type: runbook
 status: active
 owner: ro
 created: 2026-04-17
-updated: 2026-04-18
-last_verified_at: 2026-04-18
+updated: 2026-05-01
+last_verified_at: 2026-05-01
 applies_to_services: [coder-core, coder-admin]
 applies_to_integrations: []
 ---
@@ -28,45 +28,80 @@ one; ADR
 [0014](../adrs/0014-freshness-from-declared-affects.md) pins the
 "declared affects, not semantic similarity" constraint.
 
-## Setup — Cloud Scheduler wiring
+## Setup — Cloud Run Job + Cloud Scheduler
 
-The nightly audit is a POST to
-`/v1/_admin/knowledge-audit/run`. Admin JWT required. One scheduler
-job per GCP project, fleet-wide payload (`{}` → every non-archived
-project). Stagger projects by creating one job per project instead of
-one fleet-wide job when concurrent GitHub reads are a concern.
+The nightly audit runs as a **Cloud Run Job** that calls
+[`coder_core.ops.knowledge_audit_tick._cli`](../../../coder-core/src/coder_core/ops/knowledge_audit_tick.py),
+triggered nightly by a Cloud Scheduler entry. This mirrors the existing
+tick jobs (`coder-core-auto-approve-tick`,
+`coder-core-self-heal-tick`).
+
+> **Why a Job, not an HTTP scheduler hit?** The
+> `POST /v1/_admin/knowledge-audit/run` endpoint requires an admin JWT
+> signed with our `broker_signing_key`. Cloud Scheduler can mint OIDC
+> tokens but not our admin JWT; the Job-based pattern avoids that auth
+> hop by talking directly to the database. The HTTP endpoint stays
+> available for operators (admin-JWT bearer) and the **Run audit**
+> button on the admin Freshness tab — the Job is just the scheduled
+> path.
+
+### One-time provisioning (per GCP project)
 
 ```sh
-# Prereqs: the ``coder-core-invoker`` service account already exists
-# (IAM is managed via infra/terraform). Its email is in the terraform
-# outputs. The scheduler calls coder-core with an OIDC token so the
-# admin JWT verifier accepts it (same pattern as /v1/_admin/gc/branches).
+# Prereq: a coder-core image is already pushed to Artifact Registry.
+# Use the latest service image; CI's "Sync recurring job images" step
+# (see .github/workflows/ci.yml) keeps this in sync on every deploy.
+IMAGE="$(gcloud run services describe coder-core \
+  --project=vibedevx --region=europe-west1 \
+  --format='value(spec.template.spec.containers[0].image)')"
 
+# 1. Create the Cloud Run Job. Same SA + Cloud SQL + secrets as the
+#    other tick jobs so the audit can read projects + dispatch tasks.
+gcloud run jobs create coder-core-knowledge-audit-tick \
+  --project=vibedevx \
+  --region=europe-west1 \
+  --image="${IMAGE}" \
+  --service-account=coder-core-sa@vibedevx.iam.gserviceaccount.com \
+  --set-cloudsql-instances=vibedevx:europe-west1:coder-core-pg \
+  --set-env-vars=CLOUD_SQL_INSTANCE=vibedevx:europe-west1:coder-core-pg,CLOUD_SQL_USER=coder-core-sa@vibedevx.iam,CLOUD_SQL_DATABASE=coder_core \
+  --set-secrets=BROKER_SIGNING_KEY=coder-core-broker-signing-key:latest,GITHUB_APP_ID=coder-core-github-app-id:latest,GITHUB_APP_PRIVATE_KEY=coder-core-github-app-private-key:latest \
+  --command=python \
+  --args=-m,coder_core.ops.knowledge_audit_tick \
+  --max-retries=0 \
+  --task-timeout=900s
+
+# 2. Wire Cloud Scheduler to invoke the Job nightly. 03:00 UTC keeps
+#    the audit clear of the auto-approve + self-heal ticks that fire
+#    every minute and the rotate-secrets job that fires every 15.
 gcloud scheduler jobs create http knowledge-audit-nightly \
   --project=vibedevx \
   --location=europe-west1 \
   --schedule="0 3 * * *" \
   --time-zone="UTC" \
   --http-method=POST \
-  --uri="https://coder-core-<hash>.a.run.app/v1/_admin/knowledge-audit/run" \
-  --headers="Content-Type=application/json" \
-  --message-body='{"project_id": "_all", "floor": 40, "limit": 5}' \
-  --oidc-service-account-email="coder-core-invoker@vibedevx.iam.gserviceaccount.com" \
-  --oidc-token-audience="https://coder-core-<hash>.a.run.app"
+  --uri="https://europe-west1-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/vibedevx/jobs/coder-core-knowledge-audit-tick:run" \
+  --oauth-service-account-email=coder-core-sa@vibedevx.iam.gserviceaccount.com \
+  --oauth-scope=https://www.googleapis.com/auth/cloud-platform
 ```
 
-- **Schedule:** 03:00 UTC. Picked to avoid overlap with the branch-GC
-  job at 02:00 UTC and the regression-check job at 04:00 UTC.
-- **`floor=40`, `limit=5`** are the shipped defaults; override per
-  project by creating a dedicated job with a different payload.
+- **Schedule:** 03:00 UTC. Picked to keep the audit clear of the
+  per-minute ticks and the `*/15` rotation job; the Job can run for
+  several minutes when the fleet has many projects.
+- **Floor / limit:** `DEFAULT_FLOOR=40` and `DEFAULT_LIMIT=5` are
+  baked into `coder_core.ops.knowledge_audit.run_once`. Per-project
+  overrides still go through the admin endpoint (or the **Run audit**
+  button on the admin Freshness tab) — the scheduled job is the
+  fleet-wide default-floor pass.
 - **Manual verification:** `gcloud scheduler jobs run
-  knowledge-audit-nightly --location=europe-west1` triggers the
-  endpoint immediately; the admin Freshness tab should show the
-  new run within a minute.
-
-The same payload works from `curl` for operators who want to fire a
-one-off pass without waiting for the schedule — pass an admin JWT in
-`Authorization: Bearer` instead of the OIDC token.
+  knowledge-audit-nightly --location=europe-west1 --project=vibedevx`
+  triggers the Job immediately. The admin Freshness tab shows the
+  new run row within a minute, and `gcloud run jobs executions list
+  --job=coder-core-knowledge-audit-tick --region=europe-west1` shows
+  the underlying execution.
+- **One-off operator pass:** the admin Freshness tab's **Run audit**
+  button (`POST /v1/_admin/knowledge-audit/run` with admin JWT) is
+  still the ergonomic path for "I want to see what's stale right
+  now"; no Job invocation needed.
 
 ## When to run this
 
