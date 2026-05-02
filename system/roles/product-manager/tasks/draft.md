@@ -77,17 +77,18 @@ The shape (shown unfenced — your output must look exactly like this):
 
 ## Rules
 
-- The `id` field: zero-padded 4-digit number (e.g. `"0023"`). Pick the
-  next free ID by reading `system/product-specs/registry.yaml` —
-  highest existing WIP/deprecated ID + 1. **Numeric IDs are never
-  reused**, even after deprecation — if the registry says `0056` is the
-  highest, use `0057` (or higher), never recycle a deprecated ID.
+- The `id` field: zero-padded 4-digit number (e.g. `"0023"`). The
+  dispatcher pre-computes the next free ID and injects it as
+  `Next free spec ID` in your run context — **use that value directly**.
+  Do not read the registry to recompute it. Reading existing specs to
+  understand related work is fine; reading the registry just to figure
+  out which ID to pick is now redundant.
 - **Never re-emit an id that's already in the registry.** Even if you
   think an existing spec is "just a stub" you could flesh out, your
   job is to draft a *new* spec from the user's problem statement —
-  pick the next free id and reference the existing spec under
-  `related_specs` if relevant. The registry is the source of truth;
-  do not try to overwrite it.
+  use the `Next free spec ID` from run context and reference the
+  existing spec under `related_specs` if relevant. The registry is
+  the source of truth; do not try to overwrite it.
 - All three date fields (`created`, `updated`, `last_verified_at`) are
   required and must be `YYYY-MM-DD` strings. Use today's UTC date for a
   brand-new draft.
