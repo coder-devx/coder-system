@@ -12,7 +12,11 @@ by the WIP body.
 
 You have read access to GitHub (`gh` CLI; a project-scoped token is
 already in your environment). The knowledge repo is **not** on the
-local filesystem — read it through `gh api`:
+local filesystem — read it through `gh api`.
+
+**The dispatcher pre-loads the designs INDEX into your run context**
+under `## Knowledge index (preloaded)` — read it there to find which
+active category file the WIP's content should fold into.
 
 ```bash
 # existing active component files (so your draft preserves shape + slugs)

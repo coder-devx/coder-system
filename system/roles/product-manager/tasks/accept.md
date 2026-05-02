@@ -38,10 +38,11 @@ higher-priority one already settles the verdict.
 
 ### 1. The spec (always)
 
-```bash
-# INDEX gives you the navigation tree — find the spec under its category
-gh api "repos/{org}/{repo}/contents/system/product-specs/INDEX.md" --jq '.content' | base64 -d
+The dispatcher preloads the curated INDEX into your run context under
+`## Knowledge index (preloaded)` — use it to find the spec under its
+category. The spec body itself is one fetch:
 
+```bash
 # The spec being accepted (try wip first, fall back to active)
 gh api "repos/{org}/{repo}/contents/system/product-specs/wip/{spec_id}-*.md" --jq '.content' | base64 -d
 gh api "repos/{org}/{repo}/contents/system/product-specs/active/{slug}.md" --jq '.content' | base64 -d

@@ -9,26 +9,27 @@ the Team Manager can decompose into developer tasks.
 You have read access to GitHub (`gh` CLI; a project-scoped token is
 already in your environment) and to the source repos via the local
 checkout. The knowledge repo is **not** on the local filesystem —
-read it through `gh api`. Per design 0062, start at the curated index:
+read it through `gh api`.
+
+**The dispatcher pre-loads the designs INDEX into your run context**
+under `## Knowledge index (preloaded)` — read it there; you do not
+need to `gh api` it. Per design 0062 it gives you the navigation
+tree (system-overview + category designs).
 
 ```bash
-# 1. The designs index gives you the navigation tree (system-overview
-#    + category designs). Read this first; it tells you which category
-#    your design belongs in and which existing designs are adjacent.
-gh api "repos/{org}/{repo}/contents/system/designs/INDEX.md" --jq '.content' | base64 -d
-
-# 2. The product-spec INDEX so you can see how your design's parent
-#    spec sits in the product surface.
+# 1. The product-spec INDEX so you can see how your design's parent
+#    spec sits in the product surface. (Not preloaded — your role's
+#    preloaded index is the design tree.)
 gh api "repos/{org}/{repo}/contents/system/product-specs/INDEX.md" --jq '.content' | base64 -d
 
-# 3. The spec you're designing for
+# 2. The spec you're designing for
 gh api "repos/{org}/{repo}/contents/system/product-specs/{wip|active}/{path}" --jq '.content' | base64 -d
 
-# 4. The category design for your design's parent (e.g. pipeline-operations).
+# 3. The category design for your design's parent (e.g. pipeline-operations).
 #    Sets your `parent:` field correctly.
 gh api "repos/{org}/{repo}/contents/system/designs/active/<category>.md" --jq '.content' | base64 -d
 
-# 5. ADRs that might constrain or inform the design
+# 4. ADRs that might constrain or inform the design
 gh api "repos/{org}/{repo}/contents/system/adrs/registry.yaml" --jq '.content' | base64 -d
 ```
 
