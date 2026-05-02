@@ -6,7 +6,8 @@ status: active
 owner: ro
 created: 2026-04-15
 updated: 2026-04-15
-last_verified_at: 2026-04-15
+last_verified_at: 2026-05-02
+verified_by: knowledge-audit
 implements_specs: [branch-cleanup]
 decided_by: []
 related_designs: [worker-roles, worker-communication, observability-and-cost-tracking]
