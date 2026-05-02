@@ -5,7 +5,7 @@ type: role
 status: defined
 owner: ro
 seniority: mid
-last_verified_at: YYYY-MM-DD
+last_verified_at: 2026-05-02
 ---
 
 # Developer

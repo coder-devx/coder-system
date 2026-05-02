@@ -10,6 +10,6 @@ roles:
     owner: ro
     seniority: mid
     dir: developer
-    role_doc: developer/role.md
+    file: developer/role.md
     tasks:
       - implement

@@ -21,7 +21,7 @@ roles:
     status: defined
     owner: ro
     dir: software-architect
-    role_doc: software-architect/role.md
+    file: software-architect/role.md
     tasks:
       - design
       - audit
@@ -32,7 +32,7 @@ roles:
     status: defined
     owner: ro
     dir: team-manager
-    role_doc: team-manager/role.md
+    file: team-manager/role.md
     tasks:
       - decompose
 
@@ -41,7 +41,7 @@ roles:
     status: defined
     owner: ro
     dir: product-manager
-    role_doc: product-manager/role.md
+    file: product-manager/role.md
     tasks:
       - draft
       - accept
@@ -51,7 +51,7 @@ roles:
     status: defined
     owner: ro
     dir: developer
-    role_doc: developer/role.md
+    file: developer/role.md
     tasks:
       - implement
 
@@ -60,7 +60,7 @@ roles:
     status: defined
     owner: ro
     dir: reviewer
-    role_doc: reviewer/role.md
+    file: reviewer/role.md
     tasks:
       - review
 

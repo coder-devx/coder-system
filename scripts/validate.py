@@ -30,7 +30,10 @@ except ImportError:
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Files that are NOT knowledge artifacts even though they're MD.
-SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md"}
+# ``_common.md`` is the worker-prompt preamble (design 0057); not a
+# stand-alone artifact — its content is prepended to every worker
+# system prompt at runtime.
+SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md", "_common.md"}
 
 # Required frontmatter fields per artifact type. Spec 0043 adds
 # ``last_verified_at`` to every non-ADR type — ADRs are append-only
@@ -143,6 +146,12 @@ def collect_registries(root: Path) -> dict[str, dict[str, dict[str, Any]]]:
 def iter_md_files(root: Path):
     for path in root.rglob("*.md"):
         if path.name in SKIP_FILENAMES:
+            continue
+        # Per design 0057: ``roles/<role>/tasks/<mode>.md`` files are
+        # per-mode prompt contracts, not stand-alone knowledge artifacts.
+        # Their content is fetched directly by the dispatcher and
+        # concatenated into the worker's system prompt.
+        if path.parent.name == "tasks" and path.parent.parent.parent.name == "roles":
             continue
         yield path
 
