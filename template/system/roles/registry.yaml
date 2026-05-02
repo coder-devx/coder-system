@@ -1,6 +1,7 @@
 # Project-specific roles.
 # The developer role is required for the developer worker to load its
-# system prompt. Add more roles as needed.
+# system prompt. Add more roles as needed by following the worker-role
+# folder shape (see system/roles/_TEMPLATE.md and design 0057).
 
 roles:
   - id: developer
@@ -8,4 +9,7 @@ roles:
     status: defined
     owner: ro
     seniority: mid
-    file: developer.md
+    dir: developer
+    role_doc: developer/role.md
+    tasks:
+      - implement

@@ -1,5 +1,12 @@
 # Source of truth for the roles registry.
 # REGISTRY.md is generated from this file.
+#
+# Worker roles use the folder shape introduced by design 0057:
+#   <role-id>/role.md            — identity, scope, permissions
+#   <role-id>/tasks/<mode>.md    — per-mode task contract
+# Non-worker roles stay flat as <role-id>.md.
+# A common preamble at `_common.md` is prepended to every worker prompt
+# at runtime by the coder-core dispatcher.
 
 roles:
   # ── User-defined ────────────────────────────────────────────────
@@ -13,31 +20,49 @@ roles:
     name: Software Architect
     status: defined
     owner: ro
-    file: software-architect.md
+    dir: software-architect
+    role_doc: software-architect/role.md
+    tasks:
+      - design
+      - audit
+      - ship
 
   - id: team-manager
     name: Team Manager
     status: defined
     owner: ro
-    file: team-manager.md
+    dir: team-manager
+    role_doc: team-manager/role.md
+    tasks:
+      - decompose
 
   - id: product-manager
     name: Product Manager
     status: defined
     owner: ro
-    file: product-manager.md
+    dir: product-manager
+    role_doc: product-manager/role.md
+    tasks:
+      - draft
+      - accept
 
   - id: developer
     name: Developer
     status: defined
     owner: ro
-    file: developer.md
+    dir: developer
+    role_doc: developer/role.md
+    tasks:
+      - implement
 
   - id: reviewer
     name: Reviewer
     status: defined
     owner: ro
-    file: reviewer.md
+    dir: reviewer
+    role_doc: reviewer/role.md
+    tasks:
+      - review
 
   - id: consultant
     name: Consultant

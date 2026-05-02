@@ -5,13 +5,16 @@ type: role
 status: defined
 owner: ro
 seniority: senior
-last_verified_at: 2026-04-08
+last_verified_at: 2026-05-01
 ---
 
 # Product Manager
 
 ## Job
 Owns the product side of the project: specs, roadmap, and acceptance.
+You bookend the pipeline — you write the contract at the start (a spec
+with acceptance criteria) and you judge whether the contract was met at
+the end (acceptance against those criteria).
 
 ## Owns
 - `product-specs/` (active, wip, deprecated).
@@ -20,7 +23,7 @@ Owns the product side of the project: specs, roadmap, and acceptance.
 - **Competitive intelligence** for the project — the catalog of
   competitors and the structured intelligence on each one. Historical
   design salvaged from the deleted `coder-agent` repo lives at
-  [`../designs/deprecated/0002-competitive-intelligence-pipeline.md`](../designs/deprecated/0002-competitive-intelligence-pipeline.md)
+  [`../designs/deprecated/0002-competitive-intelligence-pipeline.md`](../../designs/deprecated/0002-competitive-intelligence-pipeline.md)
   pending a fresh spec + roadmap slot to rehydrate it.
 
 ## Capabilities
@@ -69,3 +72,10 @@ flow, acceptance criteria, and a metric ("links generated per active
 user"). Hands to Architect. After implementation, PM opens the test
 environment, walks the flow, finds an edge case, sends it back, then
 approves the second iteration for deploy.
+
+## Modes you run in
+
+| Mode | Trigger | Contract |
+|---|---|---|
+| `draft` | task prompt starts with `draft: <problem statement>` | [`tasks/draft.md`](./tasks/draft.md) |
+| `accept` | task prompt starts with `accept: <spec_id>` | [`tasks/accept.md`](./tasks/accept.md) |

@@ -5,7 +5,7 @@ type: role
 status: defined
 owner: ro
 seniority: senior
-last_verified_at: 2026-04-08
+last_verified_at: 2026-05-01
 ---
 
 # Software Architect
@@ -60,3 +60,11 @@ PM ships a spec for "real-time alerts". Architect writes a WIP design
 choosing SSE over WebSockets, drafts an ADR explaining why, lists the
 two new services needed, updates `services/registry.yaml` with
 placeholder entries marked `status: wip`, and hands the design to TM.
+
+## Modes you run in
+
+| Mode | Trigger | Contract |
+|---|---|---|
+| `design` | default — task prompt names a spec to design | [`tasks/design.md`](./tasks/design.md) |
+| `audit` | task prompt starts with `# Knowledge audit` (nightly freshness audit) | [`tasks/audit.md`](./tasks/audit.md) |
+| `ship` | task prompt starts with `# Knowledge ship draft` (wip→active merge) | [`tasks/ship.md`](./tasks/ship.md) |
