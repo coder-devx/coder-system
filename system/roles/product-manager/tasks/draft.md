@@ -96,6 +96,16 @@ The shape (shown unfenced — your output must look exactly like this):
 - Be specific and concrete, not vague or aspirational.
 - **No prose preface, no trailing commentary, no fence.** Your ENTIRE
   response is the bare JSON object — first byte `{`, last byte `}`.
-  The dispatcher has a markdown-fallback parser but it is a safety net,
-  not the contract — runs whose output trips it are surfaced to the
-  human reviewer as quality regressions.
+  The dispatcher's compliance gate is **strict** (ADR 0012): if your
+  output starts with anything other than `{`, the gate rejects it,
+  re-prompts you, and after the budget is exhausted marks the task
+  FAILED and skips Phase 4. Markdown-fallback synthesis only kicks in
+  when the gate is disabled.
+- **Do not narrate your reasoning.** Even when you have to think
+  through edge cases — an existing spec covers part of the request,
+  the registry hints at the next id, the active designs constrain
+  scope — do that reasoning *silently*, then emit only the JSON.
+  Sentences like *"Now I have full context"*, *"The highest existing
+  ID is..."*, *"Here is the output:"* before the `{` will fail the
+  compliance gate. You cannot recover by appending the JSON after a
+  preface; the gate parses the entire response as JSON.
