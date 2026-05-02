@@ -14,13 +14,17 @@ You have read access to GitHub (`gh` CLI; a project-scoped token is
 already in your environment) and to the source repos referenced from
 the artifact's frontmatter (`affects_services`, `affects_repos`) via
 the local checkout. The knowledge repo is **not** on the local
-filesystem — read it through `gh api`:
+filesystem — read it through `gh api`.
+
+**The dispatcher pre-loads two things into your run context, so you
+do not need to fetch them again:**
+
+- `## Knowledge index (preloaded)` — the curated design INDEX.
+- `## Audit target: designs/{id} (preloaded)` — the full body of
+  the artifact you're auditing.
 
 ```bash
-# the artifact you're auditing
-gh api "repos/{org}/{repo}/contents/{artifact_path}" --jq '.content' | base64 -d
-
-# recent commits on its declared affects_* targets
+# recent commits on the artifact's declared affects_* targets
 gh api "repos/{org}/{repo}/commits?path={service-or-repo-path}&since={last_verified_at}" --jq '.[] | {sha, commit: .commit.message}'
 ```
 

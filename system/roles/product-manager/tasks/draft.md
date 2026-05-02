@@ -16,25 +16,21 @@ environment).
 
 **Start at the curated index.** Per design 0062 the product specs
 are organised as a navigation tree: `INDEX.md` at the root → category
-specs → component specs. The index is the fastest way to orient and
-to find the *category* your draft belongs in.
+specs → component specs. **The dispatcher pre-loads the index into
+your run context** under `## Knowledge index (preloaded)` — read it
+there; you do not need to `gh api` it.
 
 ```bash
-# 1. The curated entry point — gives you the categories and the
-#    components in each. Read this first; it tells you which
-#    category your problem statement belongs in.
-gh api "repos/{org}/{repo}/contents/system/product-specs/INDEX.md" --jq '.content' | base64 -d
-
-# 2. Spec template — match its section shape exactly.
+# 1. Spec template — match its section shape exactly.
 gh api "repos/{org}/{repo}/contents/system/product-specs/_TEMPLATE.md" --jq '.content' | base64 -d
 
-# 3. The category spec for your draft's parent (e.g. pipeline-operations).
+# 2. The category spec for your draft's parent (e.g. pipeline-operations).
 #    Read it to understand the category's scope and existing components,
 #    so you can set `parent:` correctly and pick `related_specs` that
 #    actually exist.
 gh api "repos/{org}/{repo}/contents/system/product-specs/active/<category>.md" --jq '.content' | base64 -d
 
-# 4. (optional) A recent shipped spec or two to match tone.
+# 3. (optional) A recent shipped spec or two to match tone.
 gh api "repos/{org}/{repo}/contents/system/product-specs/wip" --jq '.[].name'
 ```
 

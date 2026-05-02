@@ -22,15 +22,16 @@ append-only and never ship-merged.
 
 You have read access to GitHub (`gh` CLI; a project-scoped token is
 already in your environment). The knowledge repo is **not** on the
-local filesystem — read it through `gh api`. Per design 0062, start
-at the curated index to find the right active category file:
+local filesystem — read it through `gh api`.
+
+**The dispatcher pre-loads the curated INDEX into your run context**
+under `## Knowledge index (preloaded)` — read it there; you do not
+need to `gh api` it. Use it to find the right active category file
+to merge the WIP's ACs into.
 
 ```bash
-# 1. The product-spec INDEX — categories and their components
-gh api "repos/{org}/{repo}/contents/system/product-specs/INDEX.md" --jq '.content' | base64 -d
-
-# 2. Existing active component files in the spec's category — read
-#    the ones whose scope is closest to this WIP's ACs.
+# Existing active component files in the spec's category — read
+# the ones whose scope is closest to this WIP's ACs.
 gh api "repos/{org}/{repo}/contents/system/product-specs/active" --jq '.[].name'
 gh api "repos/{org}/{repo}/contents/system/product-specs/active/{slug}.md" --jq '.content' | base64 -d
 ```

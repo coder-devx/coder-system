@@ -40,27 +40,33 @@ You have read access to GitHub (`gh` CLI; a project-scoped token is
 already in your environment). The knowledge repo is **not** on the
 local filesystem — read it through `gh api`. Source-code reading is
 **out of scope** for this audit (same role-separation rule as
-accept mode):
+accept mode).
+
+**The dispatcher pre-loads two things into your run context, so you
+do not need to fetch them again:**
+
+- `## Knowledge index (preloaded)` — the curated spec INDEX.
+- `## Audit target: specs/{id} (preloaded)` — the full body of the
+  spec you're auditing.
 
 ```bash
-# 1. The artifact you're auditing
-gh api "repos/{org}/{repo}/contents/{artifact_path}" --jq '.content' | base64 -d
-
-# 2. Recent merged PRs in the project's repos that might have
+# 1. Recent merged PRs in the project's repos that might have
 #    invalidated the spec's claims
 gh pr list --repo {org}/{source-repo} --state merged --search "merged:>={last_verified_at}" --json number,title,url,mergedAt --limit 30
 
-# 3. The spec's category file (per INDEX.md) — its peers may also
-#    have been touched, helping you understand the broader product
-#    motion since the spec was verified
-gh api "repos/{org}/{repo}/contents/system/product-specs/INDEX.md" --jq '.content' | base64 -d
+# 2. (optional) The spec's category file — its peers may also have
+#    been touched, helping you understand the broader product motion
+#    since the spec was verified. Read only when the index already
+#    surfaced isn't enough.
 gh api "repos/{org}/{repo}/contents/system/product-specs/active/{category}.md" --jq '.content' | base64 -d
 ```
 
 ## Instructions
 
 1. Read the artifact identified in the task prompt (format:
-   `Artifact: spec/{id}`).
+   `Artifact: specs/{id}`). Its body is preloaded under
+   `## Audit target` in your run context — you do not need to
+   refetch it.
 2. Read the artifact's `served_by_designs` / cross-links and skim
    the recent merged PRs in the project's source repos since the
    artifact's `last_verified_at`. Focus on user-facing changes
