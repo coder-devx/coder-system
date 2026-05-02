@@ -472,9 +472,9 @@ specs:
   - pm-worker
   - architect-worker
   - team-manager-worker
-  - id: 0059
-    title: Slack on-call page for stuck pipelines
-    status: wip
-    owner: ro
-    folder: wip
-    file: wip/0059-slack-on-call-page-for-stuck-pipelines.md
+- id: '0059'
+  title: Slack on-call page for stuck pipelines
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0059-slack-on-call-page-for-stuck-pipelines.md
