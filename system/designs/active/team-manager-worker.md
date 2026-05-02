@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [system-overview, worker-roles, architect-worker, pm-worker]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin]
+parent: worker-roles
 ---
 
 # Team Manager Worker

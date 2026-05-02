@@ -19,6 +19,7 @@ related_specs:
   - pm-worker
   - architect-worker
   - team-manager-worker
+parent: delivery-and-infra
 ---
 
 # 0051 — coder-core modular monolith hardening

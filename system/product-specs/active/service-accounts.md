@@ -9,6 +9,7 @@ updated: 2026-04-15
 last_verified_at: 2026-04-15
 served_by_designs: [worker-roles]
 related_specs: []
+parent: tenancy-and-access
 ---
 
 # Per-role service accounts

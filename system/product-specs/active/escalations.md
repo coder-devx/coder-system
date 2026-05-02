@@ -9,6 +9,7 @@ updated: 2026-04-23
 last_verified_at: 2026-04-23
 served_by_designs: [escalations]
 related_specs: [task-orchestration, observability, audit-log, admin-panel, multi-tenancy]
+parent: pipeline-operations
 ---
 
 # Escalations & on-call routing

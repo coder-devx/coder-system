@@ -9,6 +9,7 @@ updated: 2026-04-19
 last_verified_at: 2026-04-19
 served_by_designs: [knowledge-write-api, knowledge-repo-model]
 related_specs: [knowledge-freshness]
+parent: knowledge-and-admin
 ---
 
 # Knowledge API

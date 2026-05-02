@@ -12,18 +12,35 @@ The project's knowledge repo is **not** on the local filesystem.
 or any local path will not find spec templates or registries — the
 worker container holds coder-core source, not knowledge. Use the
 `gh` CLI (you already have a project-scoped GitHub token in the
-environment):
+environment).
+
+**Start at the curated index.** Per design 0062 the product specs
+are organised as a navigation tree: `INDEX.md` at the root → category
+specs → component specs. The index is the fastest way to orient and
+to find the *category* your draft belongs in.
 
 ```bash
-# spec template — match its section shape exactly
+# 1. The curated entry point — gives you the categories and the
+#    components in each. Read this first; it tells you which
+#    category your problem statement belongs in.
+gh api "repos/{org}/{repo}/contents/system/product-specs/INDEX.md" --jq '.content' | base64 -d
+
+# 2. Spec template — match its section shape exactly.
 gh api "repos/{org}/{repo}/contents/system/product-specs/_TEMPLATE.md" --jq '.content' | base64 -d
 
-# registry — pick the next free WIP ID by inspecting the highest used
-gh api "repos/{org}/{repo}/contents/system/product-specs/registry.yaml" --jq '.content' | base64 -d
+# 3. The category spec for your draft's parent (e.g. pipeline-operations).
+#    Read it to understand the category's scope and existing components,
+#    so you can set `parent:` correctly and pick `related_specs` that
+#    actually exist.
+gh api "repos/{org}/{repo}/contents/system/product-specs/active/<category>.md" --jq '.content' | base64 -d
 
-# (optional) a recent shipped spec or two to match tone
+# 4. (optional) A recent shipped spec or two to match tone.
 gh api "repos/{org}/{repo}/contents/system/product-specs/wip" --jq '.[].name'
 ```
+
+You generally do not need to read the registry yourself — the
+dispatcher pre-computes the next-free spec ID and surfaces it in your
+run context as `Next free spec ID`.
 
 The `{org}` and `{repo}` are the project's knowledge repo coordinates;
 they are part of the project's standing context (the `Coder System`
@@ -70,7 +87,8 @@ The shape (shown unfenced — your output must look exactly like this):
         "deprecated_at": null,
         "reason": null,
         "served_by_designs": [],
-        "related_specs": []
+        "related_specs": [],
+        "parent": "<category-id-from-INDEX>"
       },
       "body": "# Title\n\n**Phase:** ...\n**Progress:** 0 / N acceptance criteria\n\n## Problem\n...\n\n## Users / personas\n...\n\n## Goals\n...\n\n## Non-goals\n...\n\n## Scope\n...\n\n## Acceptance criteria\n- [ ] AC1: ...\n- [ ] AC2: ...\n\n## Open questions\n- ...\n\n## Links\n- ..."
     }

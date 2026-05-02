@@ -12,6 +12,7 @@ decided_by: ["0006"]
 related_designs: [worker-roles, system-overview, audit-log]
 affects_services: [coder-core]
 affects_repos: [coder-core]
+parent: tenancy-and-access
 ---
 
 # Impersonation

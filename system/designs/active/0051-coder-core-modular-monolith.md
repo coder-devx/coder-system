@@ -21,6 +21,7 @@ affects_services:
 affects_repos:
   - coder-core
   - coder-system
+parent: system-overview
 ---
 
 # 0051 — coder-core modular monolith hardening (design)

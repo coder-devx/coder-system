@@ -9,6 +9,7 @@ updated: 2026-04-18
 last_verified_at: 2026-04-18
 served_by_designs: [knowledge-freshness]
 related_specs: [knowledge-api, architect-worker, reviewer-worker, admin-panel, observability]
+parent: knowledge-and-admin
 ---
 
 # Knowledge Freshness

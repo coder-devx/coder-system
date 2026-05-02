@@ -15,6 +15,7 @@ specs:
   - system-overview
   related_specs:
   - audit-log
+  parent: knowledge-and-admin
 - id: audit-log
   title: Audit log
   status: active
@@ -29,6 +30,7 @@ specs:
   - service-accounts
   - task-orchestration
   - knowledge-api
+  parent: tenancy-and-access
 - id: architect-worker
   title: Architect Worker
   status: active
@@ -37,6 +39,7 @@ specs:
   file: active/architect-worker.md
   served_by_designs:
   - architect-worker
+  parent: worker-roles
 - id: branch-cleanup
   title: Branch cleanup
   status: active
@@ -49,6 +52,7 @@ specs:
   - developer-worker
   - task-orchestration
   - observability
+  parent: pipeline-operations
 - id: continuous-deployment
   title: Continuous Deployment
   status: active
@@ -57,6 +61,7 @@ specs:
   file: active/continuous-deployment.md
   served_by_designs:
   - system-overview
+  parent: delivery-and-infra
 - id: developer-worker
   title: Developer Worker
   status: active
@@ -65,6 +70,7 @@ specs:
   file: active/developer-worker.md
   served_by_designs:
   - worker-roles
+  parent: worker-roles
 - id: escalations
   title: Escalations & on-call routing
   status: active
@@ -79,6 +85,7 @@ specs:
   - audit-log
   - admin-panel
   - multi-tenancy
+  parent: pipeline-operations
 - id: impersonation
   title: Impersonation
   status: active
@@ -89,6 +96,7 @@ specs:
   - impersonation
   related_specs:
   - audit-log
+  parent: tenancy-and-access
 - id: knowledge-api
   title: Knowledge API
   status: active
@@ -100,6 +108,7 @@ specs:
   - knowledge-repo-model
   related_specs:
   - knowledge-freshness
+  parent: knowledge-and-admin
 - id: knowledge-freshness
   title: Knowledge Freshness
   status: active
@@ -114,6 +123,7 @@ specs:
   - reviewer-worker
   - admin-panel
   - observability
+  parent: knowledge-and-admin
 - id: multi-tenancy
   title: Multi-tenancy
   status: active
@@ -122,6 +132,7 @@ specs:
   file: active/multi-tenancy.md
   served_by_designs:
   - system-overview
+  parent: tenancy-and-access
 - id: observability
   title: Observability
   status: active
@@ -132,6 +143,7 @@ specs:
   - observability-and-cost-tracking
   related_specs:
   - knowledge-freshness
+  parent: pipeline-operations
 - id: onboarding
   title: Onboarding
   status: active
@@ -140,6 +152,7 @@ specs:
   file: active/onboarding.md
   served_by_designs:
   - system-overview
+  parent: knowledge-and-admin
 - id: pm-worker
   title: PM Worker
   status: active
@@ -148,6 +161,7 @@ specs:
   file: active/pm-worker.md
   served_by_designs:
   - pm-worker
+  parent: worker-roles
 - id: reviewer-worker
   title: Reviewer Worker
   status: active
@@ -156,6 +170,7 @@ specs:
   file: active/reviewer-worker.md
   served_by_designs:
   - worker-roles
+  parent: worker-roles
 - id: self-healing
   title: Self-healing stuck pipelines
   status: active
@@ -170,6 +185,7 @@ specs:
   - audit-log
   - escalations
   - admin-panel
+  parent: pipeline-operations
 - id: service-accounts
   title: Service Accounts
   status: active
@@ -178,6 +194,7 @@ specs:
   file: active/service-accounts.md
   served_by_designs:
   - worker-roles
+  parent: tenancy-and-access
 - id: task-orchestration
   title: Task Orchestration
   status: active
@@ -188,6 +205,7 @@ specs:
   - worker-communication
   related_specs:
   - audit-log
+  parent: pipeline-operations
 - id: team-manager-worker
   title: Team Manager Worker
   status: active
@@ -196,6 +214,7 @@ specs:
   file: active/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
+  parent: worker-roles
 - id: tenant-isolation
   title: Tenant isolation test harness
   status: active
@@ -212,14 +231,15 @@ specs:
   - knowledge-api
   - task-orchestration
   - admin-panel
-- id: '0029'
+  parent: delivery-and-infra
+- id: 0029
   title: Prompt caching & shared context reuse
   status: wip
   owner: ro
   folder: wip
   file: wip/0029-prompt-caching.md
   served_by_designs:
-  - '0029'
+  - 0029
   related_specs:
   - task-orchestration
   - observability
@@ -270,14 +290,14 @@ specs:
   - observability
   - task-orchestration
   - continuous-deployment
-- id: '0038'
+- id: 0038
   title: Automated secret rotation
   status: wip
   owner: ro
   folder: wip
   file: wip/0038-secret-rotation.md
   served_by_designs:
-  - '0038'
+  - 0038
   related_specs:
   - service-accounts
   - continuous-deployment
@@ -342,14 +362,14 @@ specs:
   - onboarding
   - admin-panel
   - audit-log
-- id: '0048'
+- id: 0048
   title: Cross-project pattern surfacing
   status: wip
   owner: ro
   folder: wip
   file: wip/0048-cross-project-patterns.md
   served_by_designs:
-  - '0048'
+  - 0048
   related_specs:
   - knowledge-api
   - admin-panel
@@ -360,14 +380,14 @@ specs:
   - developer-worker
   - multi-tenancy
   - knowledge-freshness
-- id: '0049'
+- id: 0049
   title: MCP agent interface
   status: wip
   owner: ro
   folder: wip
   file: wip/0049-mcp-agent-interface.md
   served_by_designs:
-  - '0049'
+  - 0049
   related_specs:
   - impersonation
   - service-accounts
@@ -447,7 +467,7 @@ specs:
   - pm-worker
   - continuous-deployment
   - observability
-- id: '0058'
+- id: 0058
   title: Slack on-call page for stuck pipelines
   status: wip
   owner: ro
@@ -472,7 +492,8 @@ specs:
   - pm-worker
   - architect-worker
   - team-manager-worker
-- id: '0059'
+  parent: delivery-and-infra
+- id: 0059
   title: Slack on-call page for stuck pipelines
   status: wip
   owner: ro
@@ -490,3 +511,79 @@ specs:
   owner: ro
   folder: wip
   file: wip/0061-stuck-pipeline-slack-page-enablement-message-spec.md
+- id: pipeline-operations
+  title: Pipeline operations
+  status: active
+  owner: ro
+  folder: active
+  file: active/pipeline-operations.md
+  served_by_designs:
+  - worker-communication
+  - observability-and-cost-tracking
+  - escalations
+  - self-healing
+  - branch-cleanup
+  related_specs:
+  - worker-roles
+  - tenancy-and-access
+  parent: null
+- id: worker-roles
+  title: Worker roles
+  status: active
+  owner: ro
+  folder: active
+  file: active/worker-roles.md
+  served_by_designs:
+  - worker-roles
+  - architect-worker
+  - pm-worker
+  - team-manager-worker
+  related_specs:
+  - pipeline-operations
+  - tenancy-and-access
+  - knowledge-and-admin
+  parent: null
+- id: tenancy-and-access
+  title: Tenancy & access
+  status: active
+  owner: ro
+  folder: active
+  file: active/tenancy-and-access.md
+  served_by_designs:
+  - impersonation
+  - audit-log
+  - tenant-isolation
+  related_specs:
+  - pipeline-operations
+  - worker-roles
+  - knowledge-and-admin
+  parent: null
+- id: knowledge-and-admin
+  title: Knowledge & admin
+  status: active
+  owner: ro
+  folder: active
+  file: active/knowledge-and-admin.md
+  served_by_designs:
+  - knowledge-repo-model
+  - knowledge-write-api
+  - knowledge-freshness
+  related_specs:
+  - worker-roles
+  - tenancy-and-access
+  - pipeline-operations
+  parent: null
+- id: delivery-and-infra
+  title: Delivery & infra
+  status: active
+  owner: ro
+  folder: active
+  file: active/delivery-and-infra.md
+  served_by_designs:
+  - system-overview
+  - '0051'
+  related_specs:
+  - pipeline-operations
+  - knowledge-and-admin
+  - tenancy-and-access
+  parent: null

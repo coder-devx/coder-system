@@ -8,14 +8,18 @@ in the spec against what the team actually delivered.
 
 You have read access to GitHub (`gh` CLI; a project-scoped token is
 already in your environment). The knowledge repo is **not** on the
-local filesystem — read it through `gh api`:
+local filesystem — read it through `gh api`. Per design 0062, start
+at the curated index to find the spec and its category:
 
 ```bash
-# the spec being accepted (try wip first, fall back to active)
+# 1. INDEX gives you the navigation tree — find the spec under its category
+gh api "repos/{org}/{repo}/contents/system/product-specs/INDEX.md" --jq '.content' | base64 -d
+
+# 2. The spec being accepted (try wip first, fall back to active)
 gh api "repos/{org}/{repo}/contents/system/product-specs/wip/{spec_id}-*.md" --jq '.content' | base64 -d
 gh api "repos/{org}/{repo}/contents/system/product-specs/active/{slug}.md" --jq '.content' | base64 -d
 
-# the PR(s) implementing the spec (find via task records or commit log)
+# 3. The PR(s) implementing the spec (find via task records or commit log)
 gh pr view {pr_number} --json title,body,state,files,commits
 gh pr diff {pr_number}
 ```

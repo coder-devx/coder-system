@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [team-manager-worker, knowledge-write-api, worker-communication, worker-roles]
 affects_services: [coder-core]
 affects_repos: [coder-core, coder-system]
+parent: worker-roles
 ---
 
 # PM Worker

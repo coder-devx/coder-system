@@ -12,6 +12,7 @@ decided_by: ["0006", "0007"]
 related_designs: [system-overview, impersonation]
 affects_services: [coder-core]
 affects_repos: [coder-core, coder-system]
+parent: system-overview
 ---
 
 # Worker Roles

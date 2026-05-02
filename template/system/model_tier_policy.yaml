@@ -1,0 +1,76 @@
+# Model-tier routing policy (spec 0030 phase 2).
+#
+# Per-(role, task_kind) tier policy that the worker dispatcher in
+# coder-core consults when ``settings.tier_routing_enabled`` is on
+# and the project hasn't pinned to top tier
+# (``projects.pin_top_tier=True``).
+#
+# This file is the per-project override surface. The fleet default
+# lives bundled with coder-core at
+# ``src/coder_core/workers/default_tier_policy.yaml`` — a project
+# without this file falls back to that policy. Projects that want
+# different tier choices (audit projects pinning more on top, cost-
+# sensitive projects demoting more to low) check this file in.
+#
+# Schema, validated by ``scripts/validate.py``:
+#
+#   defaults:           {top_tier, mid_tier, low_tier} → model id
+#   routes:             role → task_kind → {tier, escalation}
+#     tier:             one of low_tier | mid_tier | top_tier (the
+#                       initial tier for this dispatch)
+#     escalation:       ordered list of tier symbols the schema-retry
+#                       orchestrator walks. First entry must equal
+#                       `tier`. A retry past the last entry stays on
+#                       the last entry — there is no tier above
+#                       top_tier.
+#
+# Roles + task_kinds the dispatcher recognises today (kept in sync
+# with ``coder_core.workers._task_kind.infer_task_kind``):
+#
+#   pm:           draft, accept
+#   architect:    design, knowledge_audit, ship_draft
+#   team_manager: plan
+#   developer:    task
+#   reviewer:     review, ship_attestation
+
+defaults:
+  top_tier: claude-opus-4-7
+  mid_tier: claude-sonnet-4-6
+  low_tier: claude-haiku-4-5-20251001
+
+routes:
+  pm:
+    draft:
+      tier: mid_tier
+      escalation: [mid_tier, top_tier]
+    # Strong candidate for low_tier (rubber-stamp work) but ships at
+    # mid_tier so phase-2 enable is a true no-op. Demote per project
+    # once your per-tier approval-rate gauge confirms the safety bar.
+    accept:
+      tier: mid_tier
+      escalation: [mid_tier, top_tier]
+  architect:
+    design:
+      tier: mid_tier
+      escalation: [mid_tier, top_tier]
+    knowledge_audit:
+      tier: mid_tier
+      escalation: [mid_tier, top_tier]
+    ship_draft:
+      tier: mid_tier
+      escalation: [mid_tier, top_tier]
+  team_manager:
+    plan:
+      tier: mid_tier
+      escalation: [mid_tier, top_tier]
+  developer:
+    task:
+      tier: mid_tier
+      escalation: [mid_tier, top_tier]
+  reviewer:
+    review:
+      tier: low_tier
+      escalation: [low_tier, mid_tier]
+    ship_attestation:
+      tier: mid_tier
+      escalation: [mid_tier, top_tier]

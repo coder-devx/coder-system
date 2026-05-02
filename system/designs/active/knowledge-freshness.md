@@ -12,6 +12,7 @@ decided_by: ["0014"]
 related_designs: [knowledge-repo-model, knowledge-write-api, architect-worker, observability-and-cost-tracking]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin, coder-system]
+parent: knowledge-stack
 ---
 
 # Knowledge Freshness

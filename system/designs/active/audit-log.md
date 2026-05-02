@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [system-overview, impersonation, worker-communication, observability-and-cost-tracking, knowledge-write-api]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin]
+parent: tenancy-and-access
 ---
 
 # Audit log

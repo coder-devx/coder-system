@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [team-manager-worker, pm-worker, knowledge-write-api, worker-roles]
 affects_services: [coder-core]
 affects_repos: [coder-core, coder-system]
+parent: worker-roles
 ---
 
 # Architect Worker

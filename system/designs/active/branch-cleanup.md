@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [worker-roles, worker-communication, observability-and-cost-tracking]
 affects_services: [coder-core]
 affects_repos: [coder-core]
+parent: pipeline-operations
 ---
 
 # Branch cleanup

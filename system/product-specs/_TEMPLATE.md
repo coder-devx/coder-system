@@ -18,8 +18,10 @@ status: wip
 owner: ro
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
+last_verified_at: YYYY-MM-DD
 served_by_designs: []    # wip design ids (numeric) or active design slugs
 related_specs: []        # other spec ids/slugs
+parent: ~                # category id (e.g. pipeline-operations); ~ until landed in active/
 ---
 
 # {Title}
@@ -69,8 +71,10 @@ status: active
 owner: ro
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
+last_verified_at: YYYY-MM-DD
 served_by_designs: []     # design slugs describing this component
 related_specs: []         # adjacent component slugs
+parent: <category-id>     # required for active specs; pick from product-specs/INDEX.md
 ---
 
 # {Component Name}
