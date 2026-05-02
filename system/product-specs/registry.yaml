@@ -587,3 +587,10 @@ specs:
   - knowledge-and-admin
   - tenancy-and-access
   parent: null
+- id: '0062'
+  title: Actionable pipeline-stuck Slack notifications
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0062-actionable-pipeline-stuck-slack-notifications.md
+  parent: pipeline-operations
