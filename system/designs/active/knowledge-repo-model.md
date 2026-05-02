@@ -12,6 +12,7 @@ decided_by: ["0001", "0002", "0003", "0004", "0008"]
 related_designs: [system-overview, knowledge-write-api]
 affects_services: [coder-core]
 affects_repos: [coder-system]
+parent: knowledge-stack
 ---
 
 # Knowledge Repo Model

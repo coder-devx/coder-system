@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [system-overview, audit-log]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin, coder-system]
+parent: pipeline-operations
 ---
 
 # Observability and Cost Tracking

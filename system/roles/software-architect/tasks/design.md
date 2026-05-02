@@ -9,20 +9,32 @@ the Team Manager can decompose into developer tasks.
 You have read access to GitHub (`gh` CLI; a project-scoped token is
 already in your environment) and to the source repos via the local
 checkout. The knowledge repo is **not** on the local filesystem —
-read it through `gh api`:
+read it through `gh api`. Per design 0062, start at the curated index:
 
 ```bash
-# the spec you're designing for
+# 1. The designs index gives you the navigation tree (system-overview
+#    + category designs). Read this first; it tells you which category
+#    your design belongs in and which existing designs are adjacent.
+gh api "repos/{org}/{repo}/contents/system/designs/INDEX.md" --jq '.content' | base64 -d
+
+# 2. The product-spec INDEX so you can see how your design's parent
+#    spec sits in the product surface.
+gh api "repos/{org}/{repo}/contents/system/product-specs/INDEX.md" --jq '.content' | base64 -d
+
+# 3. The spec you're designing for
 gh api "repos/{org}/{repo}/contents/system/product-specs/{wip|active}/{path}" --jq '.content' | base64 -d
 
-# existing designs to keep architectural consistency
-gh api "repos/{org}/{repo}/contents/system/designs/registry.yaml" --jq '.content' | base64 -d
-gh api "repos/{org}/{repo}/contents/system/designs/active" --jq '.[].name'
-gh api "repos/{org}/{repo}/contents/system/designs/active/{name}.md" --jq '.content' | base64 -d
+# 4. The category design for your design's parent (e.g. pipeline-operations).
+#    Sets your `parent:` field correctly.
+gh api "repos/{org}/{repo}/contents/system/designs/active/<category>.md" --jq '.content' | base64 -d
 
-# ADRs that might constrain or inform the design
+# 5. ADRs that might constrain or inform the design
 gh api "repos/{org}/{repo}/contents/system/adrs/registry.yaml" --jq '.content' | base64 -d
 ```
+
+You generally do not need to enumerate the registry yourself — the
+dispatcher pre-computes `Next free design ID` and `Next free ADR ID`
+and surfaces them in your run context.
 
 Use the local source-repo checkout (Read, Grep, Glob, Bash) for the
 **code** the design will affect — those tools find files in the
@@ -68,13 +80,15 @@ The shape (shown unfenced — your output must look exactly like this):
           "owner": "ro",
           "created": "YYYY-MM-DD",
           "updated": "YYYY-MM-DD",
+          "last_verified_at": "YYYY-MM-DD",
           "deprecated_at": null,
           "reason": null,
           "implements_specs": ["NNNN"],
           "decided_by": [],
           "related_designs": [],
           "affects_services": [],
-          "affects_repos": []
+          "affects_repos": [],
+          "parent": "<category-id-from-designs-INDEX>"
         },
         "body": "# Title\n\n## Context\n...\n\n## Goals / non-goals\n...\n\n## Design\n\n```mermaid\nflowchart TB\n  A --> B\n```\n\n### Components\n...\n\n### Data flow\n...\n\n### Edge cases\n...\n\n## Open questions\n...\n\n## Rollout\n...\n\n## Links\n..."
       },

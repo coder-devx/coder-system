@@ -9,6 +9,7 @@ updated: 2026-04-19
 last_verified_at: 2026-04-19
 served_by_designs: [audit-log]
 related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api]
+parent: tenancy-and-access
 ---
 
 # Audit log

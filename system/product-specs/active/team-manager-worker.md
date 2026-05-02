@@ -9,6 +9,7 @@ updated: 2026-04-29
 last_verified_at: 2026-04-29
 served_by_designs: [team-manager-worker]
 related_specs: []
+parent: worker-roles
 ---
 
 # Team Manager worker

@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [system-overview, knowledge-repo-model, pm-worker, architect-worker, audit-log]
 affects_services: [coder-core]
 affects_repos: [coder-core]
+parent: knowledge-stack
 ---
 
 # Knowledge Write API

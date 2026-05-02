@@ -33,7 +33,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # ``_common.md`` is the worker-prompt preamble (design 0057); not a
 # stand-alone artifact — its content is prepended to every worker
 # system prompt at runtime.
-SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md", "_common.md"}
+# ``INDEX.md`` is the curated navigation entry point per artifact-type
+# folder (design 0062); narrative view over the registry, not a
+# knowledge artifact in its own right.
+SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "INDEX.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md", "_common.md"}
 
 # Required frontmatter fields per artifact type. Spec 0043 adds
 # ``last_verified_at`` to every non-ADR type — ADRs are append-only

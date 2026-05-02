@@ -11,6 +11,7 @@ implements_specs: [self-healing]
 related_designs: [system-overview, worker-communication, worker-roles, observability-and-cost-tracking, audit-log, escalations]
 affects_services: [coder-core]
 affects_repos: [coder-core]
+parent: pipeline-operations
 ---
 
 # Self-healing stuck pipelines

@@ -16,6 +16,7 @@ related_specs:
   - knowledge-api
   - task-orchestration
   - admin-panel
+parent: delivery-and-infra
 ---
 
 # Tenant isolation test harness

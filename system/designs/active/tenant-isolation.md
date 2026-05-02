@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [system-overview, impersonation, audit-log]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin]
+parent: tenancy-and-access
 ---
 
 # Tenant isolation test harness

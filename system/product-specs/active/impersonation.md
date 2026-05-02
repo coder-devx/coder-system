@@ -9,6 +9,7 @@ updated: 2026-04-19
 last_verified_at: 2026-04-19
 served_by_designs: [impersonation]
 related_specs: [audit-log]
+parent: tenancy-and-access
 ---
 
 # Local agent impersonation

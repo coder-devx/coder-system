@@ -9,6 +9,7 @@ updated: 2026-04-23
 last_verified_at: 2026-04-23
 served_by_designs: [self-healing]
 related_specs: [task-orchestration, observability, audit-log, escalations, admin-panel]
+parent: pipeline-operations
 ---
 
 # Self-healing stuck pipelines

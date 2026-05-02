@@ -15,6 +15,7 @@ designs:
   - architect-worker
   affects_services:
   - coder-core
+  parent: worker-roles
 - id: audit-log
   title: Audit log
   status: active
@@ -32,6 +33,7 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+  parent: tenancy-and-access
 - id: branch-cleanup
   title: Branch cleanup
   status: active
@@ -42,6 +44,7 @@ designs:
   - branch-cleanup
   affects_services:
   - coder-core
+  parent: pipeline-operations
 - id: escalations
   title: Escalations & on-call routing
   status: active
@@ -58,6 +61,7 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+  parent: pipeline-operations
 - id: impersonation
   title: Impersonation
   status: active
@@ -68,6 +72,7 @@ designs:
   - '0006'
   affects_services:
   - coder-core
+  parent: tenancy-and-access
 - id: knowledge-repo-model
   title: Knowledge Repo Model
   status: active
@@ -79,9 +84,10 @@ designs:
   - '0002'
   - '0003'
   - '0004'
-  - '0008'
+  - 0008
   affects_services:
   - coder-core
+  parent: knowledge-stack
 - id: knowledge-freshness
   title: Knowledge Freshness
   status: active
@@ -95,6 +101,7 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+  parent: knowledge-stack
 - id: knowledge-write-api
   title: Knowledge Write API
   status: active
@@ -105,6 +112,7 @@ designs:
   - knowledge-api
   affects_services:
   - coder-core
+  parent: knowledge-stack
 - id: observability-and-cost-tracking
   title: Observability and Cost Tracking
   status: active
@@ -116,6 +124,7 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+  parent: pipeline-operations
 - id: pm-worker
   title: PM Worker
   status: active
@@ -126,6 +135,7 @@ designs:
   - pm-worker
   affects_services:
   - coder-core
+  parent: worker-roles
 - id: self-healing
   title: Self-healing stuck pipelines
   status: active
@@ -143,6 +153,7 @@ designs:
   - escalations
   affects_services:
   - coder-core
+  parent: pipeline-operations
 - id: system-overview
   title: System Overview
   status: active
@@ -154,10 +165,11 @@ designs:
   - '0005'
   - '0006'
   - '0007'
-  - '0008'
+  - 0008
   affects_services:
   - coder-core
   - coder-admin
+  parent: null
 - id: team-manager-worker
   title: Team Manager Worker
   status: active
@@ -169,6 +181,7 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+  parent: worker-roles
 - id: tenant-isolation
   title: Tenant isolation test harness
   status: active
@@ -184,6 +197,7 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+  parent: tenancy-and-access
 - id: worker-communication
   title: Worker Communication
   status: active
@@ -195,6 +209,7 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
+  parent: pipeline-operations
 - id: worker-roles
   title: Worker Roles
   status: active
@@ -206,6 +221,7 @@ designs:
   - '0007'
   affects_services:
   - coder-core
+  parent: system-overview
 - id: '0002'
   title: Competitive Intelligence Pipeline
   status: deprecated
@@ -214,14 +230,14 @@ designs:
   file: deprecated/0002-competitive-intelligence-pipeline.md
   affects_services:
   - coder-core
-- id: '0029'
+- id: 0029
   title: Prompt caching & shared context reuse
   status: wip
   owner: ro
   folder: wip
   file: wip/0029-prompt-caching.md
   implements_specs:
-  - '0029'
+  - 0029
   related_designs:
   - worker-roles
   - worker-communication
@@ -279,14 +295,14 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
-- id: '0038'
+- id: 0038
   title: Automated secret rotation
   status: wip
   owner: ro
   folder: wip
   file: wip/0038-secret-rotation.md
   implements_specs:
-  - '0038'
+  - 0038
   related_designs:
   - system-overview
   - impersonation
@@ -359,7 +375,7 @@ designs:
   implements_specs:
   - '0047'
   decided_by:
-  - '0019'
+  - 0019
   - '0020'
   - '0021'
   related_designs:
@@ -375,14 +391,14 @@ designs:
   affects_repos:
   - coder-core
   - coder-system
-- id: '0048'
+- id: 0048
   title: Cross-project pattern surfacing
   status: wip
   owner: ro
   folder: wip
   file: wip/0048-cross-project-patterns.md
   implements_specs:
-  - '0048'
+  - 0048
   related_designs:
   - knowledge-write-api
   - knowledge-repo-model
@@ -396,7 +412,7 @@ designs:
   - worker-roles
   - observability-and-cost-tracking
   - '0046'
-  - '0049'
+  - 0049
   decided_by:
   - '0022'
   - '0023'
@@ -404,14 +420,14 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
-- id: '0049'
+- id: 0049
   title: MCP agent interface
   status: wip
   owner: ro
   folder: wip
   file: wip/0049-mcp-agent-interface.md
   implements_specs:
-  - '0049'
+  - 0049
   related_designs:
   - system-overview
   - impersonation
@@ -507,7 +523,8 @@ designs:
   affects_repos:
   - coder-core
 - id: '0057'
-  title: Role prompt knowledge layout — move per-role and per-mode worker prompts into the knowledge repo
+  title: Role prompt knowledge layout — move per-role and per-mode worker prompts
+    into the knowledge repo
   status: wip
   owner: ro
   folder: wip
@@ -519,6 +536,22 @@ designs:
   - team-manager-worker
   - knowledge-repo-model
   - worker-communication
+  affects_services:
+  - coder-core
+  affects_repos:
+  - coder-core
+  - coder-system
+- id: '0062'
+  title: Navigation tree pattern for specs, designs, and ADRs
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0062-navigation-tree-pattern.md
+  related_designs:
+  - knowledge-repo-model
+  - knowledge-write-api
+  - pm-worker
+  - architect-worker
   affects_services:
   - coder-core
   affects_repos:
@@ -542,3 +575,57 @@ designs:
   - observability-and-cost-tracking
   affects_services:
   - coder-core
+  parent: system-overview
+- id: pipeline-operations
+  title: Pipeline operations
+  status: active
+  owner: ro
+  folder: active
+  file: active/pipeline-operations.md
+  implements_specs:
+  - pipeline-operations
+  related_designs:
+  - system-overview
+  - worker-communication
+  - observability-and-cost-tracking
+  - self-healing
+  - escalations
+  - branch-cleanup
+  affects_services:
+  - coder-core
+  - coder-admin
+  parent: system-overview
+- id: tenancy-and-access
+  title: Tenancy & access
+  status: active
+  owner: ro
+  folder: active
+  file: active/tenancy-and-access.md
+  implements_specs:
+  - tenancy-and-access
+  related_designs:
+  - system-overview
+  - impersonation
+  - audit-log
+  - tenant-isolation
+  affects_services:
+  - coder-core
+  - coder-admin
+  parent: system-overview
+- id: knowledge-stack
+  title: Knowledge stack
+  status: active
+  owner: ro
+  folder: active
+  file: active/knowledge-stack.md
+  implements_specs:
+  - knowledge-and-admin
+  related_designs:
+  - system-overview
+  - knowledge-repo-model
+  - knowledge-write-api
+  - knowledge-freshness
+  affects_services:
+  - coder-core
+  - coder-admin
+  parent: system-overview

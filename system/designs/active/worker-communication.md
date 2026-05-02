@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [system-overview, pm-worker, team-manager-worker]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin]
+parent: pipeline-operations
 ---
 
 # Worker Communication
