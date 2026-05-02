@@ -16,7 +16,8 @@ deprecated_reason: |
   clearing the active surface. Rehydrate by re-authoring a fresh
   spec with a current WIP number when the roadmap actually plans
   the capability.
-last_verified_at: 2026-04-15
+last_verified_at: 2026-05-02
+verified_by: knowledge-audit
 implements_specs: []
 decided_by: []
 related_designs: [system-overview, worker-roles]
