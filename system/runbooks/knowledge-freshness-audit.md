@@ -57,18 +57,24 @@ IMAGE="$(gcloud run services describe coder-core \
 
 # 1. Create the Cloud Run Job. Same SA + Cloud SQL + secrets as the
 #    other tick jobs so the audit can read projects + dispatch tasks.
+#    The values below match what coder-core-auto-approve-tick uses
+#    today (instance, secret names, env vars). If you change one,
+#    change them all together so the prod fleet stays consistent.
 gcloud run jobs create coder-core-knowledge-audit-tick \
   --project=vibedevx \
   --region=europe-west1 \
   --image="${IMAGE}" \
   --service-account=coder-core-sa@vibedevx.iam.gserviceaccount.com \
-  --set-cloudsql-instances=vibedevx:europe-west1:coder-core-pg \
-  --set-env-vars=CLOUD_SQL_INSTANCE=vibedevx:europe-west1:coder-core-pg,CLOUD_SQL_USER=coder-core-sa@vibedevx.iam,CLOUD_SQL_DATABASE=coder_core \
-  --set-secrets=BROKER_SIGNING_KEY=coder-core-broker-signing-key:latest,GITHUB_APP_ID=coder-core-github-app-id:latest,GITHUB_APP_PRIVATE_KEY=coder-core-github-app-private-key:latest \
+  --execution-environment=gen2 \
+  --set-cloudsql-instances=vibedevx:europe-west1:coder-core-db \
+  --set-env-vars=ENVIRONMENT=prod,CLOUD_SQL_INSTANCE=vibedevx:europe-west1:coder-core-db,CLOUD_SQL_USER=coder-core-sa@vibedevx.iam,CLOUD_SQL_DATABASE=coder_core,GCP_PROJECT_ID=vibedevx,GITHUB_APP_ID=3325027 \
+  --set-secrets=GITHUB_APP_PRIVATE_KEY=coder-github-app-private-key:latest,BROKER_SIGNING_KEY=coder-core-broker-signing-key:latest \
   --command=python \
   --args=-m,coder_core.ops.knowledge_audit_tick \
   --max-retries=0 \
-  --task-timeout=900s
+  --task-timeout=900s \
+  --cpu=1000m \
+  --memory=512Mi
 
 # 2. Wire Cloud Scheduler to invoke the Job nightly. 03:00 UTC keeps
 #    the audit clear of the auto-approve + self-heal ticks that fire
@@ -81,7 +87,7 @@ gcloud scheduler jobs create http knowledge-audit-nightly \
   --http-method=POST \
   --uri="https://europe-west1-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/vibedevx/jobs/coder-core-knowledge-audit-tick:run" \
   --oauth-service-account-email=coder-core-sa@vibedevx.iam.gserviceaccount.com \
-  --oauth-scope=https://www.googleapis.com/auth/cloud-platform
+  --oauth-token-scope=https://www.googleapis.com/auth/cloud-platform
 ```
 
 - **Schedule:** 03:00 UTC. Picked to keep the audit clear of the
