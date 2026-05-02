@@ -61,6 +61,7 @@ REGISTRY_KEYS = {
     "product-specs": "specs",
     "roles":         "roles",
     "integrations":  "integrations",
+    "runbooks":      "runbooks",
 }
 
 # Cross-link fields → which registry's IDs they reference.

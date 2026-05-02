@@ -1,0 +1,114 @@
+# Source of truth for the runbooks registry.
+# REGISTRY.md is generated from this file.
+
+runbooks:
+- id: auto-approve-rollout
+  title: Auto-approval — infra wiring + staged flag rollout
+  status: active
+  owner: ro
+  file: auto-approve-rollout.md
+- id: branch-gc
+  title: Branch cleanup GC — operate, dry-run, force-delete
+  status: active
+  owner: ro
+  file: branch-gc.md
+- id: cache-hit-drop
+  title: Cache-hit ratio dropped overnight — diagnose and remediate
+  status: active
+  owner: ro
+  file: cache-hit-drop.md
+- id: cloud-sql-bootstrap
+  title: Bootstrap Cloud SQL for coder-core
+  status: active
+  owner: ro
+  file: cloud-sql-bootstrap.md
+- id: concurrency-overflow
+  title: Concurrency overflow — operator triage when the queue climbs
+  status: active
+  owner: ro
+  file: concurrency-overflow.md
+- id: deploy-coder-admin
+  title: Deploy coder-admin to Cloud Run
+  status: active
+  owner: ro
+  file: deploy-coder-admin.md
+- id: deploy-coder-core
+  title: Deploy coder-core to Cloud Run
+  status: active
+  owner: ro
+  file: deploy-coder-core.md
+- id: dispatching-developer-tasks
+  title: Dispatching tasks via the developer worker
+  status: active
+  owner: ro
+  file: dispatching-developer-tasks.md
+- id: escalations-firing
+  title: Escalations — operator guide
+  status: active
+  owner: ro
+  file: escalations-firing.md
+- id: knowledge-freshness-audit
+  title: Knowledge freshness audit — setup + weekly triage
+  status: active
+  owner: ro
+  file: knowledge-freshness-audit.md
+- id: mcp-agent-interface-rollout
+  title: MCP agent interface — Stage 3 staged rollout
+  status: active
+  owner: ro
+  file: mcp-agent-interface-rollout.md
+- id: oauth-mcp-clients-rollout
+  title: OAuth 2.1 for MCP clients — staged rollout
+  status: active
+  owner: ro
+  file: oauth-mcp-clients-rollout.md
+- id: onboard-project
+  title: Onboard a new project to coder-core
+  status: active
+  owner: ro
+  file: onboard-project.md
+- id: pipeline-run-blocked
+  title: Pipeline run blocked on a human gate — operator triage
+  status: active
+  owner: ro
+  file: pipeline-run-blocked.md
+- id: provision-coder-core-worker
+  title: Provision the coder-core-worker Cloud Run Job (spec 0056)
+  status: active
+  owner: ro
+  file: provision-coder-core-worker.md
+- id: run-migration-coder-core
+  title: Run an alembic migration against the prod coder-core DB
+  status: active
+  owner: ro
+  file: run-migration-coder-core.md
+- id: secret-rotation-scheduler
+  title: Secret rotation — Cloud Run Job + Scheduler wiring
+  status: active
+  owner: ro
+  file: secret-rotation-scheduler.md
+- id: ship-wip-into-active
+  title: Ship a WIP into active — Architect draft, Reviewer attest, TM close
+  status: active
+  owner: ro
+  file: ship-wip-into-active.md
+- id: update-agent-context
+  title: Update Coder Agent context without redeploy
+  status: active
+  owner: ro
+  file: update-agent-context.md
+- id: worker-schema-failure
+  title: Worker schema failure — diagnose and remediate
+  status: active
+  owner: ro
+  file: worker-schema-failure.md
+- id: worker-transient-failure
+  title: Worker transient failure — diagnose and remediate
+  status: active
+  owner: ro
+  file: worker-transient-failure.md
+- id: zombie-task-recovery
+  title: Recover from zombied worker dispatches
+  status: active
+  owner: ro
+  file: zombie-task-recovery.md
