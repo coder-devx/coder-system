@@ -4,15 +4,15 @@
 
 ## Defined
 
-| ID | Name | One-line job | File |
-|---|---|---|---|
-| `system-admin` | System Admin | Owns cloud resources and brokers access. | [system-admin.md](./system-admin.md) |
-| `software-architect` | Software Architect | Decides how the system is built. | [software-architect.md](./software-architect.md) |
-| `team-manager` | Team Manager | Plans cycles and breaks down work. | [team-manager.md](./team-manager.md) |
-| `product-manager` | Product Manager | Owns specs, roadmap, acceptance. | [product-manager.md](./product-manager.md) |
-| `developer` | Developer | Executes tasks and writes tests. | [developer.md](./developer.md) |
-| `reviewer` | Reviewer | Reviews completed tasks for code quality before PM acceptance. | [reviewer.md](./reviewer.md) |
-| `consultant` | Consultant | Async observer; improves prompts and process. | [consultant.md](./consultant.md) |
+| ID | Name | One-line job | Layout | Modes |
+|---|---|---|---|---|
+| `system-admin` | System Admin | Owns cloud resources and brokers access. | flat: [system-admin.md](./system-admin.md) | — |
+| `software-architect` | Software Architect | Decides how the system is built. | folder: [software-architect/](./software-architect/) | `design`, `audit`, `ship` |
+| `team-manager` | Team Manager | Plans cycles and breaks down work. | folder: [team-manager/](./team-manager/) | `decompose` |
+| `product-manager` | Product Manager | Owns specs, roadmap, acceptance. | folder: [product-manager/](./product-manager/) | `draft`, `accept` |
+| `developer` | Developer | Executes tasks and writes tests. | folder: [developer/](./developer/) | `implement` |
+| `reviewer` | Reviewer | Reviews completed tasks for code quality before PM acceptance. | folder: [reviewer/](./reviewer/) | `review` |
+| `consultant` | Consultant | Async observer; improves prompts and process. | flat: [consultant.md](./consultant.md) | — |
 
 ## Proposed (review and accept/reject)
 
@@ -24,6 +24,21 @@
 | `release-manager` | Release Manager | Coordinating releases across services and projects, changelogs, rollbacks — orthogonal to dev work. | [release-manager.md](./release-manager.md) |
 | `data-engineer` | Data Engineer | For data-heavy projects; otherwise a Developer specialization. Optional per project. | [data-engineer.md](./data-engineer.md) |
 | `doc-writer` | Documentation Writer | Keeps user-facing docs in sync. Optional per project. | [doc-writer.md](./doc-writer.md) |
+
+## Layout
+
+Worker roles (the ones the `coder-core` dispatcher invokes) follow the
+folder shape introduced by design [0057](../designs/wip/0057-role-prompt-knowledge-layout.md):
+
+- `<role-id>/role.md` — identity, scope, permissions
+- `<role-id>/tasks/<mode>.md` — per-mode task contract
+
+A shared `_common.md` is prepended to every worker prompt at runtime,
+establishing the Coder System mission and where the role sits on the
+project's team.
+
+Non-worker roles (`system-admin`, `consultant`, and the proposed
+roles) stay flat as `<role-id>.md` until they need worker dispatch.
 
 ## Notes
 

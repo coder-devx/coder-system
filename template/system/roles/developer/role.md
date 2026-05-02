@@ -5,7 +5,7 @@ type: role
 status: defined
 owner: ro
 seniority: mid
-last_verified_at: 2026-04-10
+last_verified_at: 2026-05-02
 ---
 
 # Developer
@@ -40,3 +40,9 @@ Executes tasks: writes code, writes tests, opens PRs for review.
 
 ## Escalates to
 - **System Admin** for any new resource or credential.
+
+## Modes you run in
+
+| Mode | Trigger | Contract |
+|---|---|---|
+| `implement` | default — every developer task | [`tasks/implement.md`](./tasks/implement.md) |

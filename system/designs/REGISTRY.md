@@ -45,6 +45,8 @@ Logical components of the Coder system as it exists today.
 | [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | ro | [0052](../product-specs/wip/0052-managed-repo-action-distribution.md) | — |
 | [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | ro | [0053](../product-specs/wip/0053-post-pr-ci-fix-loop.md) | [0017](../adrs/0017-ci-fixup-one-per-sha.md) |
 | [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | ro | [0054](../product-specs/wip/0054-orchestrator-github-state-reconciliation.md) | — |
+| [0056](./wip/0056-worker-dispatch-durability.md) | Worker dispatch durability — move worker subprocesses out of the HTTP service | ro | [0056](../product-specs/wip/0056-worker-dispatch-durability.md) | — |
+| [0057](./wip/0057-role-prompt-knowledge-layout.md) | Role prompt knowledge layout — move per-role and per-mode worker prompts into the knowledge repo | ro | — | — |
 
 ## Deprecated
 

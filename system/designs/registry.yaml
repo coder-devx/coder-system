@@ -506,6 +506,24 @@ designs:
   - coder-core
   affects_repos:
   - coder-core
+- id: '0057'
+  title: Role prompt knowledge layout — move per-role and per-mode worker prompts into the knowledge repo
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0057-role-prompt-knowledge-layout.md
+  related_designs:
+  - worker-roles
+  - pm-worker
+  - architect-worker
+  - team-manager-worker
+  - knowledge-repo-model
+  - worker-communication
+  affects_services:
+  - coder-core
+  affects_repos:
+  - coder-core
+  - coder-system
 - id: '0051'
   title: coder-core modular monolith hardening
   status: active

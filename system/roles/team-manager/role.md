@@ -5,7 +5,7 @@ type: role
 status: defined
 owner: ro
 seniority: senior
-last_verified_at: 2026-04-08
+last_verified_at: 2026-05-01
 ---
 
 # Team Manager
@@ -63,3 +63,9 @@ Architect lands a design with five components. TM breaks it into nine
 tasks, enriches each with the relevant service files and prior ADRs,
 runs them through the pipeline, watches the test step, sends failures
 back to `fix_task`, and marks each ready for PM review when green.
+
+## Modes you run in
+
+| Mode | Trigger | Contract |
+|---|---|---|
+| `decompose` | default — every team-manager task | [`tasks/decompose.md`](./tasks/decompose.md) |
