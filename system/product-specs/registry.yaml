@@ -484,3 +484,9 @@ specs:
   owner: ro
   folder: wip
   file: wip/0060-stuck-pipeline-slack-page-for-on-call-engineers.md
+- id: '0061'
+  title: Stuck-pipeline Slack page — enablement & message spec
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0061-stuck-pipeline-slack-page-enablement-message-spec.md
