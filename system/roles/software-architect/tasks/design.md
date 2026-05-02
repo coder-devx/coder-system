@@ -11,25 +11,25 @@ already in your environment) and to the source repos via the local
 checkout. The knowledge repo is **not** on the local filesystem —
 read it through `gh api`.
 
-**The dispatcher pre-loads the designs INDEX into your run context**
-under `## Knowledge index (preloaded)` — read it there; you do not
-need to `gh api` it. Per design 0062 it gives you the navigation
-tree (system-overview + category designs).
+**The dispatcher pre-loads three things into your run context, so you
+do not need to fetch them again:**
+
+- `## Knowledge index (preloaded)` — the designs navigation tree (your
+  role's primary index, per design 0062: system-overview + category
+  designs). Use it to set `parent:`.
+- `## Product-spec index (preloaded)` — the cross-tree spec INDEX, so
+  you know where the spec you're designing for sits in the product
+  surface. Use it to set `implements_specs`.
+- **The spec body itself** — the user message that opens this task
+  contains the full spec content under `Spec content:`. You do not
+  need to `gh api` the spec file.
 
 ```bash
-# 1. The product-spec INDEX so you can see how your design's parent
-#    spec sits in the product surface. (Not preloaded — your role's
-#    preloaded index is the design tree.)
-gh api "repos/{org}/{repo}/contents/system/product-specs/INDEX.md" --jq '.content' | base64 -d
-
-# 2. The spec you're designing for
-gh api "repos/{org}/{repo}/contents/system/product-specs/{wip|active}/{path}" --jq '.content' | base64 -d
-
-# 3. The category design for your design's parent (e.g. pipeline-operations).
+# 1. The category design for your design's parent (e.g. pipeline-operations).
 #    Sets your `parent:` field correctly.
 gh api "repos/{org}/{repo}/contents/system/designs/active/<category>.md" --jq '.content' | base64 -d
 
-# 4. ADRs that might constrain or inform the design
+# 2. ADRs that might constrain or inform the design
 gh api "repos/{org}/{repo}/contents/system/adrs/registry.yaml" --jq '.content' | base64 -d
 ```
 

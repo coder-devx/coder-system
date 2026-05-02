@@ -55,7 +55,7 @@ The shape (shown unfenced — your output must look exactly like this):
     {
       "merges": [
         {
-          "artifact_type": "spec",
+          "artifact_type": "design",
           "artifact_id": "knowledge-freshness",
           "action": "create",
           "patch": "---\nid: knowledge-freshness\n...---\n\n# Knowledge Freshness\n\n..."
@@ -66,6 +66,9 @@ The shape (shown unfenced — your output must look exactly like this):
 
 ## Important
 
+- `artifact_type` is always `"design"` for Architect ship tasks (the
+  parallel PM ship mode handles `"spec"`). The dispatcher routes by
+  `task.role`; you don't need to choose.
 - `artifact_id` is the subject-named slug (`knowledge-freshness`),
   never the numeric WIP id.
 - `action` is `create` for a brand-new active file, `edit` for an
