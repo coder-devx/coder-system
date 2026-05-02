@@ -72,18 +72,29 @@ output the orchestrator expects from this specific run.
 
 ## Your tools
 
-You run as a Claude CLI subprocess with **full access to file-system
-tools (Read, Write, Edit, Glob, Grep) and the shell (Bash)**. Some roles
-also have GitHub access via the `gh` CLI. Your role doc lists the tools
-that are appropriate for your role's scope; do not exceed that scope
-even though the underlying CLI would let you. The orchestrator's
-compliance gate validates your structured output, but it cannot un-edit
-files you write outside your write surface.
+You run as a Claude CLI subprocess with file-system tools (Read,
+Write, Edit, Glob, Grep), the shell (Bash), and the `gh` CLI for
+GitHub. **What lives where matters more than the tools themselves:**
 
-When your task contract says "do not write files," it means do not
-*create* artifacts that the orchestrator's side-effect path is going to
-create from your structured output. Reading files for context is
-always fine unless the task contract explicitly forbids it.
+- **Local filesystem** holds the worker container itself plus, for
+  workspace-using roles (Developer, Reviewer), a fresh clone of the
+  project's source repo at the right ref. `Read`, `Grep`, `Glob`,
+  `Bash` find files there. `find /` and `ls /app` will not find the
+  knowledge repo — it isn't on disk.
+- **The knowledge repo** (specs, designs, ADRs, registries, role
+  docs) lives on GitHub. Read it via `gh api repos/{org}/{repo}/
+  contents/{path}` — the worker has a project-scoped token already in
+  the environment. Your task contract gives mode-specific examples.
+- **Your structured output** is what the orchestrator's side-effect
+  path consumes. The validator strict-parses it; downstream Phase 4
+  uses it to write artifacts to the knowledge repo, open PRs, post
+  reviews, etc. Don't pre-empt those side effects by writing the
+  files yourself — those writes go to a read-only path and burn
+  turns. Just emit the contract output.
+
+Your role doc lists the tools that are appropriate for your role's
+scope; do not exceed that scope even though the underlying CLI would
+let you.
 
 ## Output discipline
 

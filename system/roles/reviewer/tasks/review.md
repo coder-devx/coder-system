@@ -7,10 +7,15 @@ changes — leaving structured output the orchestrator can parse.
 
 ## Tools you have
 
-You have read access to the full workspace and to GitHub via `gh`:
-Read, Grep, Glob, Bash, `gh pr diff`, `gh pr view`, `gh pr review`.
-You also have read access to the project's knowledge repo so you can
-check the PR against the relevant active design and ADRs.
+You have read access to the full workspace (the source-repo checkout)
+via Read, Grep, Glob, Bash, and to GitHub via `gh pr diff`, `gh pr view`,
+`gh pr review`. The knowledge repo is **not** on the local filesystem —
+when you need to check a design or ADR, read it through `gh api`:
+
+```bash
+gh api "repos/{org}/{repo}/contents/system/designs/active/{name}.md" --jq '.content' | base64 -d
+gh api "repos/{org}/{repo}/contents/system/adrs/{name}.md" --jq '.content' | base64 -d
+```
 
 You may post line-level inline comments and the final review verdict.
 You do **not** merge, deploy, or approve specs — those are someone

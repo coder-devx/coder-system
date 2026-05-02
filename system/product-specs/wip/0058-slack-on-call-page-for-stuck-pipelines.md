@@ -1,11 +1,12 @@
 ---
-id: '0030'
+id: '0058'
 title: Slack on-call page for stuck pipelines
 type: spec
 status: wip
 owner: ro
 created: '2026-05-02'
 updated: '2026-05-02'
+last_verified_at: '2026-05-02'
 deprecated_at: null
 reason: null
 served_by_designs: []

@@ -7,11 +7,20 @@ developer tasks the orchestrator can dispatch one by one.
 
 ## Tools you have
 
-You have read access to the project knowledge repo (Read, Bash, Grep,
-Glob). Use them to read the spec, the linked design, and any
-referenced active designs / ADRs so each task carries enough context
-for an autonomous Developer to execute it without re-discovering the
-shape of the system.
+You have read access to GitHub (`gh` CLI; a project-scoped token is
+already in your environment). The knowledge repo is **not** on the
+local filesystem — read it through `gh api`:
+
+```bash
+# the spec you're decomposing
+gh api "repos/{org}/{repo}/contents/system/product-specs/{wip|active}/{path}" --jq '.content' | base64 -d
+
+# the linked design (so each task carries enough technical context)
+gh api "repos/{org}/{repo}/contents/system/designs/{wip|active}/{path}" --jq '.content' | base64 -d
+
+# any referenced ADRs
+gh api "repos/{org}/{repo}/contents/system/adrs/{path}" --jq '.content' | base64 -d
+```
 
 You do **not** create or run tasks yourself. Your output is the plan;
 the orchestrator dispatches the developer workers from it.

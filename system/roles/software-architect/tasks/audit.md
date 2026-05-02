@@ -10,10 +10,24 @@ target artifact and its freshness signals.
 
 ## Tools you have
 
-You have read access to the project knowledge repo (Read, Bash, Grep,
-Glob) and the source repos referenced from the artifact's frontmatter
-(`affects_services`, `affects_repos`). Use them to compare the
-artifact's claims against current state.
+You have read access to GitHub (`gh` CLI; a project-scoped token is
+already in your environment) and to the source repos referenced from
+the artifact's frontmatter (`affects_services`, `affects_repos`) via
+the local checkout. The knowledge repo is **not** on the local
+filesystem — read it through `gh api`:
+
+```bash
+# the artifact you're auditing
+gh api "repos/{org}/{repo}/contents/{artifact_path}" --jq '.content' | base64 -d
+
+# recent commits on its declared affects_* targets
+gh api "repos/{org}/{repo}/commits?path={service-or-repo-path}&since={last_verified_at}" --jq '.[] | {sha, commit: .commit.message}'
+```
+
+Use the local source-repo checkout (Read, Grep, Glob, Bash) for the
+**code** behind `affects_services` / `affects_repos` — those tools
+find files in the worker container's repo clone. The knowledge repo
+is `gh api`-only.
 
 You do **not** rewrite the artifact yourself. The audit is a
 gating step: the consumer
