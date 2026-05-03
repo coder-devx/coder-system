@@ -1,6 +1,15 @@
 # Design templates
 
-Two templates — use the one matching the folder you're writing into.
+Three templates — use the one matching the file you're writing.
+
+- **`wip/`** designs are roadmap-aligned, numbered, temporal.
+- **`active/`** subject-named files describing one logical component
+  use the design template.
+- **`active/`** subject-named *category rollup* files (the engineering
+  counterparts of the product-spec category rollups —
+  `pipeline-operations`, `tenancy-and-access`) use the index template.
+  See [ADR 0025](../adrs/0025-type-index-for-category-rollup-artifacts.md).
+
 See [`README.md`](./README.md) for the two-lifecycle model.
 
 ---
@@ -62,6 +71,55 @@ How does this ship? Phases, flags, migration.
 - Specs: …
 - ADRs: …
 - Services: …
+```
+
+---
+
+## Template for `active/` (category rollup — `type: index`)
+
+Copy this when a design file's job is grouping engineering components,
+not describing one. Filename: `category-slug.md`. Required body
+sections: `What this category covers`, `Components`,
+`Cross-cutting concerns`, `Links`.
+
+```markdown
+---
+id: category-slug             # matches filename, stable identifier
+title: Category Name
+type: index
+status: active
+owner: ro
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+last_verified_at: YYYY-MM-DD
+implements_specs: []          # the matching product-spec category id, if any
+related_designs: []           # peer designs in or adjacent to this group
+affects_services: []
+affects_repos: []
+parent: <category-id-or-~>    # parent design rollup or ~ for top-level
+---
+
+# {Category Name}
+
+One-sentence framing: what this category groups and why.
+
+## What this category covers
+
+Short paragraph naming the boundary — what falls inside, what does not.
+
+## Components
+
+- [component-slug](./component-slug.md) — one-line role.
+
+## Cross-cutting concerns
+
+System-wide invariants this category leans on or enforces, with cross-links.
+
+## Links
+
+- Specs: …
+- Repos: …
+- Related categories: …
 ```
 
 ---
