@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-15
-last_verified_at: 2026-04-15
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 served_by_designs: [system-overview]
 related_specs: []
 parent: knowledge-and-admin
@@ -72,5 +72,9 @@ the two live projects running in parallel today.
 
 ## Links
 
-- Designs: …
-- Related components: …
+- Designs: [system-overview](../../designs/active/system-overview.md)
+- Related components: [multi-tenancy](./multi-tenancy.md),
+  [knowledge-api](./knowledge-api.md),
+  [service-accounts](./service-accounts.md),
+  [impersonation](./impersonation.md), [admin-panel](./admin-panel.md),
+  [continuous-deployment](./continuous-deployment.md)

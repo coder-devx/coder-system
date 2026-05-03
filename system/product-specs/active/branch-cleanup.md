@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-15
-updated: 2026-04-15
-last_verified_at: 2026-04-15
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 served_by_designs: [branch-cleanup]
 related_specs: [developer-worker, task-orchestration, observability]
 parent: pipeline-operations

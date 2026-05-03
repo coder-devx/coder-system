@@ -467,50 +467,6 @@ specs:
   - pm-worker
   - continuous-deployment
   - observability
-- id: 0058
-  title: Slack on-call page for stuck pipelines
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0058-slack-on-call-page-for-stuck-pipelines.md
-- id: '0051'
-  title: coder-core modular monolith hardening
-  status: active
-  owner: ro
-  folder: active
-  file: active/0051-coder-core-modular-monolith.md
-  served_by_designs:
-  - '0051'
-  related_specs:
-  - task-orchestration
-  - knowledge-api
-  - multi-tenancy
-  - audit-log
-  - observability
-  - developer-worker
-  - reviewer-worker
-  - pm-worker
-  - architect-worker
-  - team-manager-worker
-  parent: delivery-and-infra
-- id: 0059
-  title: Slack on-call page for stuck pipelines
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0059-slack-on-call-page-for-stuck-pipelines.md
-- id: '0060'
-  title: Stuck-pipeline Slack page for on-call engineers
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0060-stuck-pipeline-slack-page-for-on-call-engineers.md
-- id: '0061'
-  title: Stuck-pipeline Slack page — enablement & message spec
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0061-stuck-pipeline-slack-page-enablement-message-spec.md
 - id: pipeline-operations
   title: Pipeline operations
   status: active
@@ -586,6 +542,8 @@ specs:
   - pipeline-operations
   - knowledge-and-admin
   - tenancy-and-access
+  - tenant-isolation
+  - continuous-deployment
   parent: null
 - id: '0062'
   title: Actionable pipeline-stuck Slack notifications

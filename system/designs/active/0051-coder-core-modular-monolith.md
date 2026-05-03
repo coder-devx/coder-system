@@ -7,7 +7,7 @@ owner: ro
 created: 2026-04-25
 updated: 2026-04-26
 last_verified_at: 2026-04-26
-implements_specs: ['0051']
+implements_specs: [delivery-and-infra]
 related_designs:
   - system-overview
   - worker-communication

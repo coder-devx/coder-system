@@ -9,7 +9,7 @@ updated: '2026-05-03'
 last_verified_at: 2026-05-03
 verified_by: knowledge-audit
 implements_specs:
-- '0060'
+- '0062'
 decided_by: []
 related_designs:
 - escalations

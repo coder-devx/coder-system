@@ -106,5 +106,8 @@ produces.
 
 ## Links
 
-- Designs:
-- Related components:
+- Designs: [worker-roles](../../designs/active/worker-roles.md)
+- Related components: [reviewer-worker](./reviewer-worker.md),
+  [task-orchestration](./task-orchestration.md),
+  [branch-cleanup](./branch-cleanup.md),
+  [service-accounts](./service-accounts.md)

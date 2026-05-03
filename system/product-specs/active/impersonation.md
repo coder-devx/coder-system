@@ -77,5 +77,7 @@ tokens within seconds with no cache in the path.
 
 ## Links
 
-- Designs: …
-- Related components: …
+- Designs: [impersonation](../../designs/active/impersonation.md)
+- Related components: [audit-log](./audit-log.md),
+  [service-accounts](./service-accounts.md),
+  [multi-tenancy](./multi-tenancy.md), [admin-panel](./admin-panel.md)

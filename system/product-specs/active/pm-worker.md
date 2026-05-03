@@ -95,5 +95,10 @@ spec is promoted.
 
 ## Links
 
-- Designs:
-- Related components:
+- Designs: [pm-worker](../../designs/active/pm-worker.md),
+  [worker-roles](../../designs/active/worker-roles.md)
+- Related components: [architect-worker](./architect-worker.md),
+  [team-manager-worker](./team-manager-worker.md),
+  [knowledge-api](./knowledge-api.md),
+  [task-orchestration](./task-orchestration.md),
+  [service-accounts](./service-accounts.md)

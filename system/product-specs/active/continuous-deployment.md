@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-15
-last_verified_at: 2026-04-15
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 served_by_designs: [system-overview]
 related_specs: []
 parent: delivery-and-infra
@@ -62,5 +62,6 @@ commands by hand.
 
 ## Links
 
-- Designs: …
-- Related components: …
+- Designs: [system-overview](../../designs/active/system-overview.md)
+- Related components: [observability](./observability.md),
+  [audit-log](./audit-log.md), [onboarding](./onboarding.md)

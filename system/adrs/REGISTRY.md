@@ -25,3 +25,7 @@
 | 0019 | Alias-tolerance window closes on fleet completion, not a fixed deadline | proposed | 2026-04-28 | [0019-alias-tolerance-fleet-completion-gate.md](./0019-alias-tolerance-fleet-completion-gate.md) |
 | 0020 | Migration runner is a worker-dispatched Cloud Run Job, not a sync API endpoint | proposed | 2026-04-28 | [0020-worker-dispatched-migration-runner.md](./0020-worker-dispatched-migration-runner.md) |
 | 0021 | Field removal requires two migrations — deprecate then remove | proposed | 2026-04-28 | [0021-deprecate-then-remove-two-migrations.md](./0021-deprecate-then-remove-two-migrations.md) |
+| 0022 | Structural Jaccard for pattern discovery | proposed | 2026-04-28 | [0022-structural-jaccard-for-pattern-discovery.md](./0022-structural-jaccard-for-pattern-discovery.md) |
+| 0023 | Admin API + consult endpoint as the pattern surfaces | proposed | 2026-04-28 | [0023-admin-api-and-consult-endpoint-as-pattern-surfaces.md](./0023-admin-api-and-consult-endpoint-as-pattern-surfaces.md) |
+| 0024 | `share_patterns` column as the cross-project read enforcement boundary | proposed | 2026-04-28 | [0024-share-patterns-column-as-enforcement-boundary.md](./0024-share-patterns-column-as-enforcement-boundary.md) |
+| 0025 | `type: index` for category-rollup artifacts | accepted | 2026-05-03 | [0025-type-index-for-category-rollup-artifacts.md](./0025-type-index-for-category-rollup-artifacts.md) |

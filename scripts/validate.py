@@ -47,9 +47,26 @@ REQUIRED_FIELDS: dict[str, set[str]] = {
     "design":      {"id", "title", "type", "status", "owner", "created", "last_verified_at"},
     "adr":         {"id", "title", "type", "status", "date", "deciders"},
     "spec":        {"id", "title", "type", "status", "owner", "created", "last_verified_at"},
+    # ADR 0025: category-rollup artifacts use ``type: index``. Same
+    # frontmatter shape as a spec; the body has different required
+    # sections enforced below.
+    "index":       {"id", "title", "type", "status", "owner", "created", "last_verified_at"},
     "role":        {"id", "name", "type", "status", "owner", "last_verified_at"},
     "integration": {"id", "name", "type", "status", "owner", "auth", "last_verified_at"},
     "runbook":     {"id", "title", "type", "status", "owner", "created", "last_verified_at"},
+}
+
+# Required body sections per type. Kept narrow on purpose — only
+# enforced where deviation has bitten us. ``index`` files are the
+# first to use this; everything else stays unconstrained at the body
+# level (the template carries the convention).
+REQUIRED_SECTIONS: dict[str, list[str]] = {
+    "index": [
+        "## What this category covers",
+        "## Components",
+        "## Cross-cutting concerns",
+        "## Links",
+    ],
 }
 
 # Folder → registry key mapping (the YAML top-level list under registry.yaml).
@@ -88,7 +105,8 @@ def err(msg: str) -> None:
     errors.append(msg)
 
 
-def parse_frontmatter(path: Path) -> dict[str, Any] | None:
+def parse_frontmatter(path: Path) -> tuple[dict[str, Any], str] | None:
+    """Return (frontmatter, body) or None on malformed input."""
     text = path.read_text(encoding="utf-8")
     if not text.startswith("---\n"):
         err(f"{path}: missing frontmatter")
@@ -106,7 +124,8 @@ def parse_frontmatter(path: Path) -> dict[str, Any] | None:
     if not isinstance(data, dict):
         err(f"{path}: frontmatter must be a YAML mapping")
         return None
-    return data
+    body = text[end + len("\n---\n"):]
+    return data, body
 
 
 def load_registry(folder: Path) -> dict[str, dict[str, Any]]:
@@ -193,9 +212,10 @@ def validate_section(section_root: Path, section_label: str) -> None:
 
     # Walk every MD file and validate frontmatter + cross-links.
     for md in iter_md_files(section_root):
-        data = parse_frontmatter(md)
-        if data is None:
+        parsed = parse_frontmatter(md)
+        if parsed is None:
             continue
+        data, body = parsed
         artifact_type = data.get("type")
         if artifact_type not in REQUIRED_FIELDS:
             err(f"{md}: unknown or missing 'type' (got {artifact_type!r})")
@@ -203,6 +223,13 @@ def validate_section(section_root: Path, section_label: str) -> None:
         missing = REQUIRED_FIELDS[artifact_type] - set(data.keys())
         if missing:
             err(f"{md}: missing required frontmatter fields: {sorted(missing)}")
+
+        # Body-level structure check for types that have required
+        # sections. Match on the H2 heading verbatim (the template
+        # spells them out in full).
+        for required_heading in REQUIRED_SECTIONS.get(artifact_type, []):
+            if required_heading not in body:
+                err(f"{md}: missing required section: {required_heading!r}")
 
         # Spec 0043: ``last_verified_at`` must be a parseable date
         # (YYYY-MM-DD) and cannot be in the future. ADRs are exempt —

@@ -1,12 +1,12 @@
 ---
 id: knowledge-and-admin
 title: Knowledge & admin
-type: spec
+type: index
 status: active
 owner: ro
 created: 2026-05-02
-updated: 2026-05-02
-last_verified_at: 2026-05-02
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 served_by_designs: [knowledge-repo-model, knowledge-write-api, knowledge-freshness]
 related_specs: [worker-roles, tenancy-and-access, pipeline-operations]
 parent: ~

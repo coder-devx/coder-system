@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-23
-updated: 2026-04-23
-last_verified_at: 2026-04-23
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 served_by_designs: [escalations]
 related_specs: [task-orchestration, observability, audit-log, admin-panel, multi-tenancy]
 parent: pipeline-operations
@@ -48,12 +48,14 @@ a stall no longer waits for someone to open the admin panel.
   row whose window covers `now()`. Missing → falls back to the
   project owner identity.
 - **Acknowledge + resolve flow.** API `POST
-  /v1/projects/{id}/escalations/{id}/ack` and `.../resolve` plus a
-  Slack interactive-button hook at `POST
-  /v1/_hooks/slack/escalation_ack` (verified via the existing Slack
-  signing secret). Ack stops further rungs; resolve closes. Both are
-  idempotent — a second ack on the same row returns 200 without
-  re-auditing.
+  /v1/projects/{id}/escalations/{id}/acknowledge` and `.../resolve`
+  plus a Slack interactive-button hook at
+  `POST /v1/_hooks/slack/escalation_ack` (verified via the existing
+  Slack signing secret). Ack stops further rungs; resolve closes.
+  Calls take `SELECT FOR UPDATE` so a concurrent watcher rung-advance
+  serialises with the operator click; a repeat ack/resolve on a
+  non-`open` row returns 409 `already_<status>` rather than silent
+  re-application.
 - **DB-enforced dedupe.** Partial unique indexes on
   `(project_id, trigger_kind, pipeline_run_id)` and
   `(project_id, trigger_kind, task_id)` `WHERE status='open'`. A
@@ -94,9 +96,10 @@ a stall no longer waits for someone to open the admin panel.
 - **Endpoints:**
   - `GET /v1/projects/{id}/escalations`
   - `GET /v1/projects/{id}/escalations/{id}`
-  - `POST /v1/projects/{id}/escalations/{id}/ack`
+  - `POST /v1/projects/{id}/escalations/{id}/acknowledge`
   - `POST /v1/projects/{id}/escalations/{id}/resolve`
-  - `GET /v1/_admin/escalations?status=&trigger=`
+  - `GET /v1/_admin/escalations?project_id=&status=&trigger=&limit=`
+  - `GET /v1/_admin/escalations/{id}`
   - `POST /v1/_hooks/slack/escalation_ack`
   - `GET /v1/projects/{id}/on-call`
   - `GET /v1/projects/{id}/on-call/schedule`
@@ -132,10 +135,22 @@ a stall no longer waits for someone to open the admin panel.
   coder-core `c992a7b`).** Migrations 0046/0047/0048,
   `coder_core.escalations` package (watcher, detectors, policies,
   oncall, Slack + PagerDuty dispatchers), `api/escalations.py`,
-  `api/on_call.py`, `api/slack_hooks.py`, admin pages, Cloud Run Job
-  + Scheduler. 3,000+ LoC of tests. Default flag off fleet-wide;
-  rollout is the documented 3-stage ramp (shadow → L0-only fleet →
-  per-project full-ladder opt-in with `coder` first).
+  `api/on_call.py`, `api/slack_hooks.py`, Cloud Run Job + Scheduler.
+  3,000+ LoC of tests. Default flag off fleet-wide; rollout is the
+  documented 3-stage ramp (shadow → L0-only fleet → per-project
+  full-ladder opt-in with `coder` first).
+- **Admin UI shipped 2026-05-03.** `/admin/escalations` (fleet)
+  and `/projects/:projectId/escalations` (per-project) pages render
+  the existing `EscalationRead` rows from
+  `GET /v1/_admin/escalations` and `GET /v1/projects/{id}/escalations`
+  with status + trigger filters, rung chips, target run/task deep
+  links, and inline `Ack` / `Resolve` actions wired to the existing
+  POST endpoints. New `listProjectEscalations` /
+  `listFleetEscalations` / `acknowledgeEscalation` /
+  `resolveEscalation` client bindings; project sub-nav grows the
+  Escalations tab. 6 vitest cases. Behind `VITE_ESCALATIONS_ENABLED`
+  (default on). No backend changes — the UI rides the contract that
+  shipped on 2026-04-22.
 
 ## Links
 

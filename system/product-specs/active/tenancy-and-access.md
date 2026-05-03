@@ -1,12 +1,12 @@
 ---
 id: tenancy-and-access
 title: Tenancy & access
-type: spec
+type: index
 status: active
 owner: ro
 created: 2026-05-02
-updated: 2026-05-02
-last_verified_at: 2026-05-02
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 served_by_designs: [impersonation, audit-log, tenant-isolation]
 related_specs: [pipeline-operations, worker-roles, knowledge-and-admin]
 parent: ~

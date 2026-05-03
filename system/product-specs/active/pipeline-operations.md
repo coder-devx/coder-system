@@ -1,12 +1,12 @@
 ---
 id: pipeline-operations
 title: Pipeline operations
-type: spec
+type: index
 status: active
 owner: ro
 created: 2026-05-02
-updated: 2026-05-02
-last_verified_at: 2026-05-02
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 served_by_designs: [worker-communication, observability-and-cost-tracking, escalations, self-healing, branch-cleanup]
 related_specs: [worker-roles, tenancy-and-access]
 parent: ~
