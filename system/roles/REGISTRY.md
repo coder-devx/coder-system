@@ -9,7 +9,7 @@
 | `system-admin` | System Admin | Owns cloud resources and brokers access. | flat: [system-admin.md](./system-admin.md) | — |
 | `software-architect` | Software Architect | Decides how the system is built. | folder: [software-architect/](./software-architect/) | `design`, `audit`, `ship` |
 | `team-manager` | Team Manager | Plans cycles and breaks down work. | folder: [team-manager/](./team-manager/) | `decompose` |
-| `product-manager` | Product Manager | Owns specs, roadmap, acceptance. | folder: [product-manager/](./product-manager/) | `draft`, `accept` |
+| `product-manager` | Product Manager | Owns specs, roadmap, acceptance. | folder: [product-manager/](./product-manager/) | `draft`, `accept`, `ship`, `audit` |
 | `developer` | Developer | Executes tasks and writes tests. | folder: [developer/](./developer/) | `implement` |
 | `reviewer` | Reviewer | Reviews completed tasks for code quality before PM acceptance. | folder: [reviewer/](./reviewer/) | `review` |
 | `consultant` | Consultant | Async observer; improves prompts and process. | flat: [consultant.md](./consultant.md) | — |
