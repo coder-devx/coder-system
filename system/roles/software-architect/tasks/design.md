@@ -130,6 +130,24 @@ If decisions warrant ADRs, include them in the `adrs` array:
 - Only draft ADRs for genuinely non-obvious decisions, not routine
   implementation choices.
 
+### Schema-enforced frontmatter fields
+
+Per ADR 0014 the freshness scorer reads these directly; the schema
+now **requires** them on every design:
+
+- `last_verified_at` — `YYYY-MM-DD` (today's UTC date for a fresh draft).
+- `affects_services` — list of service slugs the design touches. Empty
+  array is allowed for genuinely abstract designs (rare); when empty,
+  the freshness scorer falls back to age-only and the design is harder
+  to audit.
+- `affects_repos` — list of source-repo names the design's targets
+  live in. Same emptiness rule as above.
+
+The other listed fields (`implements_specs`, `decided_by`,
+`related_designs`, `parent`) remain optional in the schema but should
+be filled in when relevant — empty arrays are fine when there's
+genuinely nothing to link.
+
 ## Frontmatter and body field shape
 
 - `frontmatter` is a **JSON object literal** (`{...}`), not a YAML
