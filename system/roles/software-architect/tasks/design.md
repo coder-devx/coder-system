@@ -9,7 +9,7 @@ developer tasks.
 
 ## What's preloaded for you
 
-The dispatcher inlines four things at the top of the system prompt:
+The dispatcher inlines four things into your prompt:
 
 - `# Run context` — `{org}/{repo}`, project id, role, mode, and the
   **`Next free design ID`** + **`Next free ADR ID`** (already

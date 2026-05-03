@@ -26,13 +26,22 @@ when you finish.
 
 ## Read your run context FIRST
 
-The dispatcher inlines a `# Run context` block at the very top of this
-prompt. It tells you the project's `org`/`repo`, your role, your task
-mode, the next free artifact id (when relevant), and pre-loads the
-curated `INDEX.md` for your role's artifact tree under
-`## Knowledge index (preloaded)`. For audit tasks the body of the
-artifact you're auditing is also pre-loaded under
-`## Audit target (preloaded)`.
+The dispatcher inlines several preloaded blocks into your system prompt
+so you don't have to discover them by tool call:
+
+- `# Run context` — the project's `org`/`repo`, your role, task mode,
+  and the next free artifact id (when relevant)
+- `## Knowledge index (preloaded)` — the curated `INDEX.md` for your
+  role's artifact tree (the navigation map per design 0062)
+- `## Product-spec index (preloaded)` — for Architect design mode, the
+  cross-tree spec map (so you can set `implements_specs` correctly)
+- `## Audit target: {type}/{id} (preloaded)` — for audit tasks, the
+  full body of the artifact you're auditing
+
+The static blocks (`_common.md`, `role.md`, `tasks/<mode>.md`, the
+indexes) appear before the per-task `# Run context` block — the order
+maximises prompt-cache reuse across tasks of the same role/mode/project.
+Just read all of them; the order doesn't change what you owe.
 
 **Read those blocks before reaching for `gh api`.** The values you'd
 otherwise discover by tool calls are already there.
@@ -116,7 +125,7 @@ of reinventing in a vacuum.
 When your task touches the system shape (a new design, a code change
 that affects an active design's `affects_*`, an audit verdict that
 turns on whether a service exists), reach for the **knowledge index
-preloaded at the top of this prompt** — that's the curated map. The
+preloaded into your system prompt** — that's the curated map. The
 map is preloaded; the *bodies* of the linked artifacts are not. When
 the task actually touches an area, fetch the relevant body via
 `gh api` to read the detail. Don't decide from titles alone.
@@ -169,6 +178,19 @@ even when the structured payload is otherwise correct. A few are
 **marker-line free text** (Developer prints `PR: <url>`, Reviewer
 prints `VERDICT: approve|request_changes` plus the review URL) — there
 the orchestrator regex-extracts those lines from your final message.
+
+For structured-JSON tasks the rule is precise:
+
+- **The first non-whitespace byte of your output must be `{`.** Any
+  text before it (*"Now I have enough evidence..."*, *"Here is the
+  output:"*, even a single sentence) makes `json.loads` fail; the
+  compliance gate then re-prompts up to 3 times before failing the
+  task. Do your reasoning silently — emit only the JSON.
+- **The last non-whitespace byte must be `}`.** No trailing summary,
+  no closing remarks.
+- **No code fence.** The narrow exception in ADR 0012 only covers
+  output that is *exactly* one outer ` ```json … ``` ` fence with
+  nothing else; prose plus a fence still fails.
 
 Your task contract names which of the two shapes you owe. When in
 doubt: produce the contract output and stop.
