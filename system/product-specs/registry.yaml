@@ -601,3 +601,10 @@ specs:
   folder: wip
   file: wip/0063-compliance-gate-retry-visibility.md
   parent: pipeline-operations
+- id: '0064'
+  title: 'Schema-gate recovery: persist and replay exhausted worker output'
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0064-schema-gate-recovery-persist-and-replay-exhausted-worker-output.md
+  parent: pipeline-operations
