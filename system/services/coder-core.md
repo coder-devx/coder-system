@@ -24,7 +24,7 @@ exposes:
   - protocol: http
     port: 8080
     path: /v1/projects/{id}/knowledge/{path}
-implements_designs: [system-overview, worker-roles, "0051"]
+implements_designs: [system-overview, worker-roles, coder-core-modular-monolith]
 decided_by: ["0005", "0006", "0010", "0011"]
 last_verified_at: 2026-04-26
 ---
@@ -72,7 +72,7 @@ acts across projects without an explicit fan-out.
   Admin JWT (Google OAuth) for admin panel operations (spec 0012).
   MCP OAuth (spec 0050) for agent-to-MCP authentication.
 - Tests: **1369 passing** (route-level + service-level).
-- Architecture: **modular monolith** per [design 0051](../designs/active/0051-coder-core-modular-monolith.md).
+- Architecture: **modular monolith** per [coder-core-modular-monolith](../designs/active/coder-core-modular-monolith.md).
   Routers are thin adapters; workflow logic lives in feature-package
   service modules (`coder_core/tasks`, `pipelines`, `metrics`,
   `impersonation`, `projects`, `knowledge`). The dependency graph is
@@ -175,10 +175,10 @@ flowchart LR
 - **Worker launch:** in-process modules inside coder-core. The
   dispatcher leases tasks with `SELECT ... FOR UPDATE SKIP LOCKED` and
   shells out to `claude`. Services kick the dispatcher through the
-  `WorkerDispatcher` protocol (per design 0051) so a future extraction
+  `WorkerDispatcher` protocol (per the coder-core-modular-monolith design) so a future extraction
   to per-role Cloud Run jobs is an implementation swap rather than a
   rewrite. The decision to keep workers in-process is recorded in
-  the *Extraction decision* section of design 0051.
+  the *Extraction decision* section of the coder-core-modular-monolith design.
 - **Orphan recovery:** a background reaper runs inside every instance
   and re-queues tasks stuck at `status='running'` past the worker
   timeout (default: 1500 s threshold, 60 s scan interval, 3-reap cap).

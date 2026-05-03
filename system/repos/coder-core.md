@@ -29,7 +29,7 @@ they split into their own repos.
 
 ## Layout
 
-Modular monolith per design 0051. Routers in `api/` and `mcp/` are
+Modular monolith per the coder-core-modular-monolith design. Routers in `api/` and `mcp/` are
 thin adapters; workflow code lives in feature-package service
 modules. The dependency graph is enforced in CI via `import-linter`
 (see `docs/module-boundaries.md` in the repo).
@@ -94,6 +94,6 @@ tests/               route-level + service-level coverage
 
 - Replaces the old `coder-agent`. Built clean from the new design.
 - Worker fleet stays in-process for now. The `WorkerDispatcher`
-  protocol from design 0051 is the seam an extraction would bind to;
+  protocol from the coder-core-modular-monolith design is the seam an extraction would bind to;
   the bar for extracting is recorded in the design's *Extraction
   decision* section.

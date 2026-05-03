@@ -49,7 +49,7 @@ observability, and recovery.
   prevents the "Cloud Run eviction kills the orchestrate_task task"
   failure mode.
 - **Module boundaries**: the dispatcher seam is the
-  ``WorkerDispatcher`` protocol per [0051-coder-core-modular-monolith](./0051-coder-core-modular-monolith.md).
+  ``WorkerDispatcher`` protocol per [coder-core-modular-monolith](./coder-core-modular-monolith.md).
 
 ## Links
 

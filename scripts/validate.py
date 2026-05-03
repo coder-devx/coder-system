@@ -9,6 +9,14 @@ Checks:
   3. Every file in an artifact folder is listed in that folder's
      registry.yaml, and every registry entry points at a real file.
   4. Cross-link fields reference IDs that exist.
+  5. AGENTS.md rule 6: designs/active and product-specs/active filenames
+     are subject-slugs, not numbered.
+  6. Duplicate-draft detector: two wip/ files with the same normalized
+     title are almost certainly the same problem in fragments — pick
+     one canonical and deprecate the rest.
+  7. REGISTRY.md drift detector: designs/REGISTRY.md and
+     product-specs/REGISTRY.md must match what scripts/render_registry.py
+     would produce from registry.yaml.
 
 Run from repo root:
     python3 scripts/validate.py
@@ -277,9 +285,93 @@ def validate_section(section_root: Path, section_label: str) -> None:
                 err(f"{md}: not listed in {folder/'registry.yaml'}")
 
 
+def check_active_not_numbered(section_root: Path) -> None:
+    """AGENTS.md rule 6: active designs and specs are subject-named.
+    A filename like ``active/0051-foo.md`` is a lifecycle violation —
+    it should be ``active/foo.md``.
+    """
+    for folder_name in ("designs", "product-specs"):
+        active = section_root / folder_name / "active"
+        if not active.is_dir():
+            continue
+        for md in active.glob("*.md"):
+            if md.name in SKIP_FILENAMES:
+                continue
+            stem = md.stem
+            if len(stem) >= 5 and stem[:4].isdigit() and stem[4] == "-":
+                err(f"{md}: numbered filename in active/ violates AGENTS.md rule 6 — rename to subject-slug")
+
+
+def check_wip_duplicate_titles(section_root: Path) -> None:
+    """Catch the 'multiple drafts of the same problem' failure mode.
+
+    Two wip/ files whose titles normalize to the same string are
+    almost certainly the same problem written twice. Deprecate one
+    and link from the other.
+    """
+    import re
+
+    def normalize(t: str) -> str:
+        return re.sub(r"[\W_]+", " ", t.lower()).strip()
+
+    for folder_name in ("designs", "product-specs"):
+        wip = section_root / folder_name / "wip"
+        if not wip.is_dir():
+            continue
+        seen: dict[str, Path] = {}
+        for md in sorted(wip.glob("*.md")):
+            if md.name in SKIP_FILENAMES:
+                continue
+            parsed = parse_frontmatter(md)
+            if parsed is None:
+                continue
+            data, _body = parsed
+            title = data.get("title")
+            if not isinstance(title, str):
+                continue
+            norm = normalize(title)
+            if not norm:
+                continue
+            if norm in seen:
+                err(
+                    f"{md}: duplicate title matches {seen[norm].name} — "
+                    "deprecate one draft and link from the other"
+                )
+            else:
+                seen[norm] = md
+
+
+def check_registry_md_synced() -> None:
+    """REGISTRY.md must match what scripts/render_registry.py produces.
+    Catches drift between the YAML source of truth and the human view.
+    """
+    import subprocess
+
+    renderer = REPO_ROOT / "scripts" / "render_registry.py"
+    if not renderer.exists():
+        return  # renderer is optional infrastructure
+    result = subprocess.run(
+        [sys.executable, str(renderer), "--check"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0:
+        return
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if line.startswith("drift:"):
+            target = line[len("drift:"):].strip()
+            err(f"{target}: out of sync with registry.yaml — run scripts/render_registry.py")
+
+
 def main() -> int:
     validate_section(REPO_ROOT / "system",   "system")
     validate_section(REPO_ROOT / "template", "template")
+    for root in (REPO_ROOT / "system", REPO_ROOT / "template"):
+        if root.is_dir():
+            check_active_not_numbered(root)
+            check_wip_duplicate_titles(root)
+    check_registry_md_synced()
 
     if errors:
         sys.stderr.write(f"\n{len(errors)} validation error(s):\n")

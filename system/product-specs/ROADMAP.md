@@ -370,7 +370,7 @@ extraction is an implementation swap, not a service rewrite.
   All 11 in-scope ACs done; 1 deferred (freshness-test calendar drift,
   pre-existing concern).
 - **Spec:** folded into [delivery-and-infra](./active/delivery-and-infra.md) (PR #54, 2026-05-03) ·
-  **Design:** [0051](../designs/active/0051-coder-core-modular-monolith.md)
+  **Design:** [coder-core-modular-monolith](../designs/active/coder-core-modular-monolith.md)
 - **Extends:** `task-orchestration`, `knowledge-api`, `multi-tenancy`,
   `audit-log`, `observability`, role-worker components
 

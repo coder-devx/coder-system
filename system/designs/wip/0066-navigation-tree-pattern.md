@@ -142,7 +142,7 @@ working as before.
 | `worker-roles.md` (new spec; design with same slug exists) | architect-worker, pm-worker, developer-worker, reviewer-worker, team-manager-worker |
 | `tenancy-and-access.md` | multi-tenancy, impersonation, service-accounts, audit-log |
 | `knowledge-and-admin.md` | knowledge-api, knowledge-freshness, admin-panel, onboarding |
-| `delivery-and-infra.md` | continuous-deployment, tenant-isolation, 0051-coder-core-modular-monolith |
+| `delivery-and-infra.md` | continuous-deployment, tenant-isolation, coder-core-modular-monolith |
 
 ### designs (17 active designs)
 
@@ -153,7 +153,7 @@ working as before.
 | `pipeline-operations.md` (new) | escalations, self-healing, branch-cleanup, observability-and-cost-tracking, worker-communication |
 | `tenancy-and-access.md` (new) | impersonation, audit-log, tenant-isolation |
 | `knowledge-stack.md` (new) | knowledge-repo-model, knowledge-freshness, knowledge-write-api |
-| `coder-core-architecture.md` (new) | 0051-coder-core-modular-monolith, system-overview cross-cutting |
+| `coder-core-architecture.md` (new) | coder-core-modular-monolith, system-overview cross-cutting |
 
 ## Out of scope
 

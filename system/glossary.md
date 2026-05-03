@@ -8,7 +8,7 @@ Shared vocabulary. Use these terms exactly. Agents and humans both read this.
   managing software products with autonomous agent teams.
 - **Coder Core** — the central API that owns project lifecycle,
   dispatches work to workers, and serves knowledge. Modular monolith
-  (design 0051): one FastAPI service, one Postgres schema, with
+  (per the coder-core-modular-monolith design): one FastAPI service, one Postgres schema, with
   explicit application-service boundaries between routers and workflow
   code; boundary graph enforced in CI via `import-linter`.
 - **Admin Panel** — the user-facing UI for status, debug, and override.
