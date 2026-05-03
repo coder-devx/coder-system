@@ -10,7 +10,8 @@
 ## Notes
 
 - The previous `coder-agent` and `coder-agent-admin` services have been
-  removed. The clean rebuild is tracked in
-  [`../designs/wip/0001-generalize-coder-from-vibetrade.md`](../designs/wip/0001-generalize-coder-from-vibetrade.md).
+  removed. The clean rebuild shipped as `coder-core` + `coder-admin`
+  (see entries above) — current architecture in
+  [`../designs/active/system-overview.md`](../designs/active/system-overview.md).
 - Worker fleet (per-role services) is intentionally not listed yet — see
   the WIP design for the planned split.
