@@ -146,6 +146,28 @@ The shape (shown unfenced — your output must look exactly like this):
   evidence — they're Reviewer concerns, and a verdict that depends
   on them is a verdict on the wrong axis.
 - `all_pass` is `true` only when every verdict is `pass`.
+
+## Evidence string format (schema-enforced)
+
+Each verdict's `evidence` field is **schema-validated**:
+
+- **Minimum length 30 chars.** Terse evidence like *"Done."*,
+  *"yes"*, or *"OK."* fails the gate. Cite the artifact that
+  settles the verdict.
+- **Pattern: must mention a concrete observable.** The schema
+  requires the evidence to mention at least one of: `PR #` /
+  `pull/` (e.g. `PR #234`), a test path (`tests/...` or
+  `test_<name>`), a metric / gauge / histogram, a screenshot, a
+  test env, a `gh pr` / review reference, or — for legitimate
+  no-signal cases — the explicit phrasing *"no PR / no test / no
+  metric / no observable"*. Source-code paths are accepted only
+  when paired with that no-observable acknowledgement (per the
+  evidence-priority rule above).
+
+Both rules exist to prevent the "I grepped the source and it
+looks right" failure mode that the evidence-priority list calls
+out as last-resort. Cite the artifact, not the implementation.
+
 - Your ENTIRE response is the bare JSON object — no fence, nothing
   else. Per ADR 0012 the compliance gate strict-parses your stdout
   and rejects prose preface; runs whose output trips it land
