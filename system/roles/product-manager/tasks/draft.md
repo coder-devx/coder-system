@@ -90,6 +90,16 @@ and emit the JSON below.
 These are the principles your role doc names, restated as a checklist
 for *this* run.
 
+- [ ] **Grounded in current state.** Before drafting, run **at least
+      one** of: `gh pr list --state merged --search "merged:>${date_7d_ago}"`
+      against each source repo, or `gh api search/code?q={keyword}+repo:{org}/{repo}`
+      for the surface this spec touches. If a recent PR shipped what
+      the problem statement asks for (or part of it), the spec must
+      either reframe around the remaining gap or surface the overlap
+      in Open Questions. **A spec born stale costs more than the
+      30 seconds of grounding here** — observed today: spec 0063
+      shipped Tuesday, audit returned `needs_rewrite` Tuesday
+      because PR #81 had already moved the system underneath.
 - [ ] Body 30–80 lines. Past 100 → split or trim.
 - [ ] **Real problem statement.** Name the user, the pain, the
       current state, the success picture. *"Add foo support"* fails.
@@ -152,8 +162,14 @@ The `pm_draft.json` schema strict-rejects drafts that fail any of:
   criteria checkbox (regex `- \[ \]`). A spec with no ACs is
   rejected at the gate.
 
-## Common mistakes that fail the gate
+## Common mistakes that fail the gate (or fail the spec)
 
+- **Skipping the source-state grounding step** and drafting a spec
+  for a problem that recent PRs already solved. The schema accepts
+  the output, but the audit pipeline returns `needs_rewrite` within
+  hours and the rewrite cycle costs a full pipeline. Always run the
+  `gh pr list` / `gh api search/code` commands from the principles
+  checklist *first*.
 - **Re-emitting an ID the registry already has.** Even if you think
   an existing spec is "just a stub" you could flesh out, your job
   is to draft a *new* spec — use the `Next free spec ID` from run
