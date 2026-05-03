@@ -608,3 +608,10 @@ specs:
   folder: wip
   file: wip/0064-schema-gate-recovery-persist-and-replay-exhausted-worker-output.md
   parent: pipeline-operations
+- id: '0065'
+  title: Per-role daily cache hit rate trend in metrics
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0065-per-role-daily-cache-hit-rate-trend-in-metrics.md
+  parent: pipeline-operations
