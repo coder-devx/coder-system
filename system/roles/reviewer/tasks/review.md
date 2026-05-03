@@ -50,14 +50,20 @@ Check the diff against:
 
 ### 4. Post the review
 
-Use `gh pr review <number>` to submit the review:
+Use `gh pr review <number>` to submit the verdict:
 
-- Use `--approve` if the PR is acceptable.
-- Use `--request-changes` if issues need fixing.
-- Use `--body` for the review summary.
-- For line-specific feedback, use `--comment` with inline comments via
-  `gh pr review <number> --comment --body "..."` before submitting the
-  final verdict.
+- `--approve` if the PR is acceptable.
+- `--request-changes` if issues need fixing.
+- `--body "<summary>"` for the review body — use this for the
+  high-level summary; reference specific files / lines inline in the
+  prose (e.g. *"src/foo.py:42 — this branch doesn't handle …"*).
+
+Inline line-level comments are not supported by `gh pr review`'s
+`--comment` flag — that flag posts a single review-level comment, not
+threaded inline comments. If you need threaded inline feedback, drop
+into `gh api` against `repos/{org}/{repo}/pulls/{number}/comments`
+with a `path` + `line` payload. For most reviews, citing
+`path:line` in the prose body is enough.
 
 ### 5. Output format
 
@@ -85,8 +91,11 @@ The review URL is printed by `gh pr review` — include it verbatim.
 ## Rules
 
 - The `VERDICT:` line is parsed strictly. Use exactly `approve` or
-  `request_changes` (lowercase, underscore).
+  `request_changes` (lowercase, underscore). The orchestrator does
+  fall back to keyword heuristics when the line is missing, but
+  that's a safety net, not a contract — emit the strict line.
 - The review URL must be the actual URL printed by `gh pr review`,
   not a fabricated one.
 - Be specific in the review body — generic praise or vague concerns
-  do not help the Developer fix anything.
+  do not help the Developer fix anything. Cite `path:line` for any
+  concern.

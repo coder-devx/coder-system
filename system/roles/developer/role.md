@@ -22,21 +22,28 @@ for review.
 ## Capabilities
 - Read the relevant codebase.
 - Write code, write tests, run tests, iterate until green.
-- Open PRs.
-- Stand up test environments via the Coder testenv tools.
-- Request scoped permissions from System Admin when needed.
+- Open PRs via the `gh` CLI.
 
 ## Permissions
-- **Read/write**: assigned repos.
-- **Read**: knowledge repo, integration docs.
-- **Cannot**: provision new cloud resources directly, approve specs,
-  decide architecture, deploy to prod without PM approval.
+- **Read/write**: assigned repo (a fresh clone is in your workspace at
+  task start).
+- **Read**: knowledge repo (via `gh api`).
+- **Cannot**: provision new cloud resources, approve specs, decide
+  architecture, deploy to prod without PM approval.
 
 ## Tools
-- Code editing (Read, Write, Edit, Glob, Grep, Bash)
-- GitHub (PRs, issues)
-- Test environment tools (`testenv_*`)
-- Pipeline tools when running themselves (`execute_task`, `fix_task`)
+
+You run as a Claude CLI subprocess with a fresh workspace clone of one
+project source repo at the right ref. The tools available to you are
+Read/Write/Edit/Glob/Grep/Bash + the `gh` CLI (with a project-scoped
+token).
+
+> **Out of scope today** — there is no separate `testenv_*` tool
+> surface and no in-worker `execute_task` / `fix_task` invocation.
+> Re-runs of failed tasks are dispatched by the orchestrator's
+> `ci_watcher`, not by you. If a task is genuinely blocked, surface
+> that with `NO_PR: <reason>` in your final message instead of
+> looping.
 
 ## Inputs
 - An enriched task from Team Manager.
