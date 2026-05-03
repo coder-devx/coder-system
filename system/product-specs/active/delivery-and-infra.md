@@ -1,7 +1,7 @@
 ---
 id: delivery-and-infra
 title: Delivery & infra
-type: spec
+type: index
 status: active
 owner: ro
 created: 2026-05-02

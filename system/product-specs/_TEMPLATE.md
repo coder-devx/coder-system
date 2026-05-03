@@ -1,6 +1,14 @@
 # Product spec templates
 
-Two templates — use the one matching the folder you're writing into.
+Three templates — use the one matching the file you're writing.
+
+- **`wip/`** specs are roadmap-aligned, numbered, temporal.
+- **`active/`** subject-named files describing one logical component
+  use the spec template.
+- **`active/`** subject-named *category rollup* files (the top-level
+  groupings — `delivery-and-infra`, `pipeline-operations`, etc.) use
+  the index template. See [ADR 0025](../adrs/0025-type-index-for-category-rollup-artifacts.md).
+
 See [`README.md`](./README.md) for the two-lifecycle model.
 
 ---
@@ -53,6 +61,56 @@ How we'll know it worked.
 ## Links
 - Designs: …
 - Related specs: …
+```
+
+---
+
+## Template for `active/` (category rollup — `type: index`)
+
+Copy this when a file's job is grouping components, not describing
+one. Filename: `category-slug.md`. Required sections:
+`What this category covers`, `Components`, `Cross-cutting concerns`,
+`Links`. See [ADR 0025](../adrs/0025-type-index-for-category-rollup-artifacts.md).
+
+```markdown
+---
+id: category-slug             # matches filename, stable identifier
+title: Category Name
+type: index
+status: active
+owner: ro
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+last_verified_at: YYYY-MM-DD
+served_by_designs: []         # design slugs, if any, framing this group
+related_specs: []             # peer category-rollup ids, if any
+parent: ~                     # category rollups sit at the root; ~ is correct
+---
+
+# {Category Name}
+
+One-sentence framing: what this category groups and why.
+
+## What this category covers
+
+One short paragraph naming the boundary — what falls inside, what
+does not.
+
+## Components
+
+- [component-slug](./component-slug.md) — one-line role.
+- …
+
+## Cross-cutting concerns
+
+Bullet the system-wide invariants this category leans on or enforces
+(audit, isolation, observability, …) with cross-links.
+
+## Links
+
+- Designs: …
+- Repos: … (when relevant)
+- Related categories: …
 ```
 
 ---

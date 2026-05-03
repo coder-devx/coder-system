@@ -170,3 +170,10 @@ adrs:
     date: 2026-04-28
     file: 0024-share-patterns-column-as-enforcement-boundary.md
     relates_to_designs: ["0048"]
+
+  - id: "0025"
+    title: "`type: index` for category-rollup artifacts"
+    status: accepted
+    date: 2026-05-03
+    file: 0025-type-index-for-category-rollup-artifacts.md
+    relates_to_designs: []
