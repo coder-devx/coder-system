@@ -105,7 +105,7 @@ shape). See [registry.yaml](./registry.yaml) for the full list.
 
 ## Layout
 
-Per [design 0062](../designs/wip/0062-navigation-tree-pattern.md),
+Per [design 0066](../designs/wip/0066-navigation-tree-pattern.md),
 each spec carries a `parent:` field pointing at its category. The
 inverse view (children of a category) is derived; don't hand-maintain
 both. Re-parenting a spec is a 1-line frontmatter change plus a

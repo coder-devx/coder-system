@@ -77,7 +77,7 @@ them. Reviewers and the audit pipeline both check against this shape.
    describes the success path is half a design.
 8. **Cross-link.** Reference the parent category design, adjacent
    active designs, and any ADRs that constrain this one. `parent:` is
-   schema-required (per design 0062 navigation tree).
+   schema-required (per design 0066 navigation tree).
 
 ## Anti-examples
 

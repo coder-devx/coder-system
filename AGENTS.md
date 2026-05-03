@@ -62,9 +62,13 @@ See [`README.md`](./README.md) for the layout.
 6. **Numbering vs. subject-naming.**
    - **ADRs** use zero-padded 4-digit IDs (`00NN-kebab-title.md`) and
      are append-only (rule 4).
-   - **WIP** specs and designs use zero-padded 4-digit IDs aligned with
-     the roadmap. Look at the highest existing WIP + deprecated ID
-     before assigning a new one. Numeric IDs are never reused.
+   - **WIP** specs and designs use zero-padded 4-digit IDs aligned
+     with the roadmap. Specs and designs share **one** numeric pool,
+     not two — a single ID names one roadmap item, which may have
+     a spec, a design, or both (same number on both files). Look at
+     the highest existing ID across both folders plus both
+     `deprecated/` folders before assigning a new one. Numeric IDs
+     are never reused. See [ADR 0026](system/adrs/0026-shared-numeric-id-pool-for-wip-specs-and-designs.md).
    - **Active** specs and designs are **not** numbered. Filename is a
      subject-kebab slug naming the logical component
      (`task-orchestration.md`, not `0010-task-orchestration-v1.md`).
