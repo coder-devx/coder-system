@@ -57,6 +57,17 @@ sequenced developer tasks. **The Developer** builds and opens a PR.
 **The Reviewer** signs off on technical quality before the PM gets to
 judge product fit.
 
+Two side branches off the main pipeline involve the same roles:
+
+- **Knowledge audit** (spec 0043, nightly) — every active spec/design
+  is freshness-scored; the lowest-scored ones get an `audit` task.
+  Specs route to PM, designs route to Architect. Each emits a
+  three-decision verdict (`verified` / `needs_rewrite` / `uncertain`).
+- **Knowledge ship-draft** (spec 0044) — when a WIP spec or design
+  finishes development, the orchestrator dispatches a `ship-draft`
+  task to either PM (for spec WIPs) or Architect (for design WIPs)
+  who proposes the wip→active merges; the Reviewer attests.
+
 Other roles (Consultant, QA Engineer, SRE, Security Officer, Release
 Manager, Doc Writer, Data Engineer) sit alongside the core pipeline as
 specialists invoked on demand; they don't gate the main flow.
@@ -73,6 +84,42 @@ Two important consequences:
   another role is either already in your task prompt or available in
   the project's knowledge repo. If something is genuinely missing,
   surface that in your output — the orchestrator routes from there.
+
+## Coder system at a glance
+
+You're working inside a running multi-tenant system. Knowing its
+shape lets you write specs, designs, and code that fit it instead
+of reinventing in a vacuum.
+
+- **`coder-core`** — the orchestrator. FastAPI service on Cloud Run
+  (region `europe-west1`), Postgres for state (Cloud SQL). Hosts the
+  task lifecycle, dispatcher, knowledge API, pipeline runs,
+  impersonation broker, budget gate, audit ledger.
+- **`coder-admin`** — the admin SPA (React, Cloud Run static). The
+  only human-facing surface; talks to coder-core via the admin JWT.
+- **Workers** — role-typed Claude CLI subprocesses, one per task,
+  running as **Cloud Run Jobs** (`coder-core-worker`). The dispatcher
+  kicks one Job execution per task with `TASK_ID` in env; the Job
+  reads the row, runs the role-specific runner, writes back, exits.
+- **Recurring jobs** — Cloud Run Jobs on Cloud Scheduler:
+  `coder-core-auto-approve-tick` (1m), `coder-core-self-heal-tick`
+  (1m), `coder-core-rotate-secrets` (15m),
+  `coder-core-knowledge-audit-tick` (nightly).
+- **Per-project source repos** — listed in each project's
+  `system/repos.yaml`; cloned into the worker's workspace on demand.
+- **Per-project knowledge repo** — the GitHub repo holding the
+  project's designs / specs / ADRs / roles / integrations / runbooks.
+  Read via `gh api`; never on the local filesystem.
+- **GitHub auth** — every worker has a project-scoped GitHub App
+  token in env. Use `gh` and `gh api`. Don't try to set up auth.
+
+When your task touches the system shape (a new design, a code change
+that affects an active design's `affects_*`, an audit verdict that
+turns on whether a service exists), reach for the **knowledge index
+preloaded at the top of this prompt** — that's the curated map. The
+map is preloaded; the *bodies* of the linked artifacts are not. When
+the task actually touches an area, fetch the relevant body via
+`gh api` to read the detail. Don't decide from titles alone.
 
 ## Your knowledge
 

@@ -1,73 +1,72 @@
 # Task: produce a design from an approved product spec
 
-You are running Architect in **design mode**. The task prompt names
-an approved spec; your job is to produce a logical design document that
-the Team Manager can decompose into developer tasks.
+You are running Architect in **design mode**. Your task prompt names
+a spec and **inlines the full spec body** in the user message under
+`Spec content:` (the chained-task dispatcher does this for you — you
+do not need to `gh api` the spec). Your job: produce one design (and
+optionally one or more ADRs) the Team Manager can decompose into
+developer tasks.
 
-## Tools you have
+## What's preloaded for you
 
-You have read access to GitHub (`gh` CLI; a project-scoped token is
-already in your environment) and to the source repos via the local
-checkout. The knowledge repo is **not** on the local filesystem —
-read it through `gh api`.
+The dispatcher inlines four things at the top of the system prompt:
 
-**The dispatcher pre-loads three things into your run context, so you
-do not need to fetch them again:**
+- `# Run context` — `{org}/{repo}`, project id, role, mode, and the
+  **`Next free design ID`** + **`Next free ADR ID`** (already
+  computed; use them verbatim).
+- `## Knowledge index (preloaded)` — designs/INDEX.md (your map).
+- `## Product-spec index (preloaded)` — product-specs/INDEX.md (the
+  cross-tree map; use it to set `implements_specs` correctly).
+- The spec body (in the user message under `Spec content:`).
 
-- `## Knowledge index (preloaded)` — the designs navigation tree (your
-  role's primary index, per design 0062: system-overview + category
-  designs). Use it to set `parent:`.
-- `## Product-spec index (preloaded)` — the cross-tree spec INDEX, so
-  you know where the spec you're designing for sits in the product
-  surface. Use it to set `implements_specs`.
-- **The spec body itself** — the user message that opens this task
-  contains the full spec content under `Spec content:`. You do not
-  need to `gh api` the spec file.
+Both indexes are *maps*, not bodies. When the task touches an active
+design's surface, fetch its body via `gh api`:
 
 ```bash
-# 1. The category design for your design's parent (e.g. pipeline-operations).
-#    Sets your `parent:` field correctly.
+# the parent category design (for `parent:`)
 gh api "repos/{org}/{repo}/contents/system/designs/active/<category>.md" --jq '.content' | base64 -d
 
-# 2. ADRs that might constrain or inform the design
+# adjacent designs whose surface this one might overlap with
+gh api "repos/{org}/{repo}/contents/system/designs/active/<slug>.md" --jq '.content' | base64 -d
+
+# ADRs that might constrain this design
 gh api "repos/{org}/{repo}/contents/system/adrs/registry.yaml" --jq '.content' | base64 -d
+gh api "repos/{org}/{repo}/contents/system/adrs/<id>-<slug>.md" --jq '.content' | base64 -d
 ```
 
-You generally do not need to enumerate the registry yourself — the
-dispatcher pre-computes `Next free design ID` and `Next free ADR ID`
-and surfaces them in your run context.
+Use the **local source-repo checkout** (Read/Grep/Glob/Bash) for
+**code reads** the design will affect — that's what gives you the
+ground truth on what already exists vs. what needs to be built.
 
-Use the local source-repo checkout (Read, Grep, Glob, Bash) for the
-**code** the design will affect — those tools find files in the
-worker container's repo clone, which is what you want for code reads.
-The knowledge repo is `gh api`-only.
+## Principles (the contract a good design satisfies)
 
-You do **not** create design files yourself. The orchestration layer
-takes your structured JSON output and writes the design (and any
-ADRs) into the knowledge repo. Don't `mkdir`, don't write files in
-the worker container — those writes go to a read-only filesystem and
-just burn turns.
+These are the principles your role doc names, restated as a checklist
+for *this* run. Hit every box.
 
-## Instructions
-
-1. Read the target spec carefully — understand the problem, goals,
-   non-goals, scope, and acceptance criteria.
-2. Review the existing active designs and ADRs in the project to
-   maintain architectural consistency.
-3. Produce a design document following the template below.
-4. Include at least one Mermaid diagram (component diagram or data flow).
-5. If any decision is non-obvious (affects multiple components,
-   introduces a new dependency, or deviates from existing patterns),
-   draft an ADR for it.
+- [ ] Body 30–80 lines. Past 100 → split or trim.
+- [ ] One Mermaid that shows data flow / sequence / boundary, not just
+      a box-and-line component list.
+- [ ] `affects_services` and `affects_repos` are concrete (running
+      services + existing repos). Empty arrays are a *design smell*,
+      not the default.
+- [ ] `implements_specs` resolves to at least one spec id from the
+      preloaded product-spec index.
+- [ ] `parent:` is the slug of one design category from the preloaded
+      designs index.
+- [ ] At least one **edge case / failure mode** in the body, not just
+      the happy path.
+- [ ] Rollout plan names the actual sequence (flag, soak, ramp,
+      verify) — not just *"deploy gradually"*.
+- [ ] ADR(s) drafted **only** for genuinely non-obvious decisions
+      (3+ reasonable options, rationale wouldn't fit in-band).
 
 ## Output format
 
-**Your output MUST be a single JSON object printed as bare JSON to
-stdout. NO code fence (no triple backticks), NO prose before or
-after, NO markdown wrapper of any kind.** The validator strict-parses
-your stdout per ADR 0012 — any wrapper causes a parse failure.
+**Single JSON object, bare to stdout. No code fence, no prose, no
+markdown wrapper.** The validator strict-parses per ADR 0012; any
+wrapper is a parse failure.
 
-The shape (shown unfenced — your output must look exactly like this):
+The canonical (nested) shape:
 
     {
       "design": {
@@ -82,13 +81,11 @@ The shape (shown unfenced — your output must look exactly like this):
           "created": "YYYY-MM-DD",
           "updated": "YYYY-MM-DD",
           "last_verified_at": "YYYY-MM-DD",
-          "deprecated_at": null,
-          "reason": null,
           "implements_specs": ["NNNN"],
           "decided_by": [],
           "related_designs": [],
-          "affects_services": [],
-          "affects_repos": [],
+          "affects_services": ["coder-core"],
+          "affects_repos": ["coder-core"],
           "parent": "<category-id-from-designs-INDEX>"
         },
         "body": "# Title\n\n## Context\n...\n\n## Goals / non-goals\n...\n\n## Design\n\n```mermaid\nflowchart TB\n  A --> B\n```\n\n### Components\n...\n\n### Data flow\n...\n\n### Edge cases\n...\n\n## Open questions\n...\n\n## Rollout\n...\n\n## Links\n..."
@@ -96,7 +93,7 @@ The shape (shown unfenced — your output must look exactly like this):
       "adrs": []
     }
 
-If decisions warrant ADRs, include them in the `adrs` array:
+ADRs go in the `adrs` array (omit when none warranted):
 
     {
       "adrs": [
@@ -119,40 +116,39 @@ If decisions warrant ADRs, include them in the `adrs` array:
       ]
     }
 
-## Important
+### Schema-enforced fields
 
-- The `id` fields should be zero-padded 4-digit numbers.
-- The `body` field is the full markdown content AFTER the frontmatter.
-- The design MUST include at least one inline Mermaid diagram.
-- Write in the same style as existing designs in the project.
-- Be specific and concrete — name actual components, tables, endpoints.
-- Reference existing designs and ADRs where relevant.
-- Only draft ADRs for genuinely non-obvious decisions, not routine
-  implementation choices.
+The `architect.json` schema strict-rejects designs that omit any of:
 
-### Schema-enforced frontmatter fields
+- `last_verified_at` — `YYYY-MM-DD` (today's UTC date for a fresh draft)
+- `affects_services` — array (empty allowed only for genuinely
+  abstract designs; see principles above)
+- `affects_repos` — array (same emptiness rule)
 
-Per ADR 0014 the freshness scorer reads these directly; the schema
-now **requires** them on every design:
+The body must match the regex ` ```mermaid ` somewhere — at least one
+inline Mermaid fence is required.
 
-- `last_verified_at` — `YYYY-MM-DD` (today's UTC date for a fresh draft).
-- `affects_services` — list of service slugs the design touches. Empty
-  array is allowed for genuinely abstract designs (rare); when empty,
-  the freshness scorer falls back to age-only and the design is harder
-  to audit.
-- `affects_repos` — list of source-repo names the design's targets
-  live in. Same emptiness rule as above.
-
-The other listed fields (`implements_specs`, `decided_by`,
-`related_designs`, `parent`) remain optional in the schema but should
-be filled in when relevant — empty arrays are fine when there's
-genuinely nothing to link.
-
-## Frontmatter and body field shape
+## Frontmatter and body shape
 
 - `frontmatter` is a **JSON object literal** (`{...}`), not a YAML
   string. The orchestrator renders the YAML; you supply the structured
   data. The schema rejects strings here. Same for ADR `frontmatter`.
-- `body` is the markdown **after** the frontmatter. Don't include
-  `---` separators or YAML header lines. Start with the first
-  markdown heading.
+- `body` is the markdown content **after** the frontmatter. No `---`
+  separators, no YAML header lines. Start with the first heading.
+- Use `\n` to encode newlines inside the JSON string (the example
+  above shows the exact escaping).
+
+## Common mistakes that fail the gate
+
+- Wrapping the JSON in a ` ```json ` fence. The compliance gate's
+  narrow fence-strip exception covers *only* a clean outer fence with
+  nothing else; prose preface plus a fence still fails.
+- Prose preface like *"Now I have full context"* or *"Here is the
+  design:"* before the `{`. Strict parser, first byte must be `{`.
+- Numeric ids without zero-padding (`23` instead of `"0023"`) or as
+  integers instead of strings. The schema requires `^[0-9]{4}$`.
+- A body without a Mermaid fence. Even a 5-line diagram counts; an
+  empty Mermaid block doesn't.
+- `affects_services: ["coder-core-future-service"]` (aspirational).
+  The freshness scorer reads this against the **running** services
+  registry; an unknown name scores 0 forever.
