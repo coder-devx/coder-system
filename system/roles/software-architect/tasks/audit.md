@@ -25,22 +25,27 @@ place.
 
 ## Tools at hand
 
-You have the source-repo checkout (Read/Grep/Glob/Bash) and the `gh`
-CLI for commit history + PR signals on the `affects_*` targets.
+You have the `gh` CLI for both source reads and commit/PR signals
+against the design's declared `affects_*` targets. Architect tasks do
+**not** get a local source-repo workspace — read source via the
+GitHub API:
 
 ```bash
 # recent commits on each declared affects_* target
-gh api "repos/{org}/{repo}/commits?path={service-or-repo-path}&since={last_verified_at}" \
+gh api "repos/{org}/{source-repo}/commits?path={service-or-repo-path}&since={last_verified_at}" \
   --jq '.[] | {sha, msg: .commit.message, date: .commit.author.date}'
 
-# merged PRs that mention the design or its surface
+# merged PRs that touched the area
 gh pr list --repo {org}/{source-repo} --state merged \
   --search "merged:>={last_verified_at}" \
   --json number,title,url,mergedAt --limit 50
-```
 
-Use the source checkout to spot-check whether files / endpoints /
-flags the design names still exist.
+# read a specific file the design names
+gh api "repos/{org}/{source-repo}/contents/{path}" --jq '.content' | base64 -d
+
+# grep the source repo for a symbol
+gh api "search/code?q={symbol}+repo:{org}/{source-repo}" --jq '.items[].path'
+```
 
 ## What counts as a divergence
 

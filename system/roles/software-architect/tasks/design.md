@@ -34,9 +34,24 @@ gh api "repos/{org}/{repo}/contents/system/adrs/registry.yaml" --jq '.content' |
 gh api "repos/{org}/{repo}/contents/system/adrs/<id>-<slug>.md" --jq '.content' | base64 -d
 ```
 
-Use the **local source-repo checkout** (Read/Grep/Glob/Bash) for
-**code reads** the design will affect — that's what gives you the
-ground truth on what already exists vs. what needs to be built.
+For **code reads** that ground the design in what already exists,
+use `gh api` against the project's source repos. Architect tasks do
+**not** get a local source-repo workspace clone — that's a Developer/
+Reviewer privilege. You read source over the GitHub API:
+
+```bash
+# read a specific file
+gh api "repos/{org}/{source-repo}/contents/{path}" --jq '.content' | base64 -d
+
+# search across the source repo
+gh api "search/code?q={query}+repo:{org}/{source-repo}" --jq '.items[].path'
+
+# list a directory
+gh api "repos/{org}/{source-repo}/contents/{dir}" --jq '.[].name'
+```
+
+Knowing what's already in the running system before designing is the
+difference between a design that fits and a design that reinvents.
 
 ## Principles (the contract a good design satisfies)
 
