@@ -38,10 +38,23 @@ gating step: the consumer
 (`coder_core.ops.knowledge_audit_consumer`) routes follow-up work
 based on your decision.
 
+## Why this is asymmetric with PM audit
+
+Architect audits **designs** for *engineering correctness* — does the
+design still describe the running system? PM audits **specs** for
+*product fit* — does the spec still describe the user-observable
+product? The two roles intentionally read different evidence:
+Architect reads source code (the design's declared `affects_*`
+targets); PM does not. If you find yourself reaching for the source
+checkout, you're in the right place.
+
 ## Instructions
 
-1. Read the artifact identified in the task prompt (format:
-   `Artifact: {type}/{id}`).
+1. Read the artifact identified in the task prompt. The line is the
+   plural-typed `Artifact: {type}/{id}` form, e.g. `Artifact:
+   designs/0023` or `Artifact: designs/knowledge-freshness`. Its body
+   is preloaded under `## Audit target` in your run context — you do
+   not need to refetch it.
 2. Read the artifact's `affects_services` / `affects_repos` /
    `affects_surfaces` / `affects_interfaces` frontmatter fields and
    skim commits against those targets since the artifact's

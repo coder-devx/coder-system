@@ -10,13 +10,23 @@ decision.
 The task prompt always begins with `# Knowledge audit` followed by
 the target artifact identifier and its freshness signals.
 
-## Why this is PM, not Architect
+## Why this is PM, not Architect (and why the evidence is different)
 
 PM owns `product-specs/` (per the role doc and ADR 0007). When a
 spec is suspected stale, the right person to judge whether the
 *product* still matches the spec is the same person who maintains
 the product surface. The Architect runs the parallel audit mode for
 `designs/`. ADRs are append-only and not audited.
+
+The two audits are deliberately asymmetric:
+
+- **PM audit (this contract)** reads the spec, the merged PRs, the
+  reviewer verdicts, the metrics — *not the source code*. Spec
+  staleness is a product-fit axis.
+- **Architect audit** reads the design and the source under its
+  declared `affects_*` targets. Design staleness is an engineering
+  axis. If you find yourself wanting to grep the source, you're in
+  the wrong contract.
 
 ## What "stale" means for a spec
 

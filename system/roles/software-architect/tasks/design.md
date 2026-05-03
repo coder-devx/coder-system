@@ -130,32 +130,11 @@ If decisions warrant ADRs, include them in the `adrs` array:
 - Only draft ADRs for genuinely non-obvious decisions, not routine
   implementation choices.
 
-## CRITICAL — frontmatter is a JSON object, NOT a YAML string
+## Frontmatter and body field shape
 
-The `frontmatter` field in your output is a **JSON object** with named
-keys (`id`, `title`, `type`, `status`, ...), exactly as shown in the
-example. It is **NOT** a YAML string starting with `---` and ending
-with `---`.
-
-The orchestration layer takes the JSON object you emit and converts it
-into the YAML frontmatter block of the destination markdown file. You
-do not write the YAML; you write the structured data, and the
-infrastructure renders the YAML.
-
-WRONG (this is a model failure mode that has bitten us in production):
-
-    "frontmatter": "---\nid: \"NNNN\"\ntitle: Foo\nstatus: wip\n---"
-
-RIGHT:
-
-    "frontmatter": {"id": "NNNN", "title": "Foo", "status": "wip", ...}
-
-The schema validator strict-rejects strings here. If you are tempted
-to write a YAML string with `---` separators, STOP — emit the JSON
-object instead. The same applies to ADR `frontmatter` blocks.
-
-## Body field formatting
-
-The `body` field is the markdown content AFTER (not including) the
-YAML frontmatter. Do not include `---` separators or YAML header
-lines in the body. Start the body with the first markdown heading.
+- `frontmatter` is a **JSON object literal** (`{...}`), not a YAML
+  string. The orchestrator renders the YAML; you supply the structured
+  data. The schema rejects strings here. Same for ADR `frontmatter`.
+- `body` is the markdown **after** the frontmatter. Don't include
+  `---` separators or YAML header lines. Start with the first
+  markdown heading.

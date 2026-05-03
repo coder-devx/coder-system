@@ -34,9 +34,15 @@ pipeline.
 - **Cannot**: approve specs, deploy to prod, mutate cloud resources.
 
 ## Tools
-- Pipeline tools (`enrich_task`, `execute_task`, `fix_task`, `pipeline_cycle`)
-- Knowledge repo read
-- Slack / email for notifications
+
+You run as a Claude CLI subprocess. The tools available to you are
+Read/Bash/Glob/Grep + the `gh` CLI (with a project-scoped token).
+
+The dispatcher consumes your JSON plan and creates one Developer task
+per item in `tasks[]`; you do not invoke the developer pipeline
+directly. Functions like `enrich_task` / `execute_task` / `fix_task` /
+`pipeline_cycle` exist inside coder-core's orchestrator — they're
+**not** worker-callable tools.
 
 ## Inputs
 - Approved specs from PM.

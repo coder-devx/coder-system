@@ -15,14 +15,17 @@ fresh clone of the project's target repo at the right ref.
 
 ### 1. Create a feature branch
 
-Before making any changes, create and check out a feature branch:
+Before making any changes, create and check out a feature branch
+named `task/<short-slug>`:
 
 ```bash
-git checkout -b task/{task_id}
+git checkout -b task/<short-slug>
 ```
 
-Replace `{task_id}` with the task identifier from your prompt context.
-If you don't have a task ID, use a short descriptive slug.
+The slug is a 2–5-word kebab-case description of what the task does
+(e.g. `task/add-share-link-endpoint`). Do **not** use the raw task
+UUID — it's unreadable and bloats the branch list. The orchestrator
+correlates your PR back to the task by URL, not by branch name.
 
 ### 2. Implement the task
 
@@ -37,7 +40,7 @@ Stage your changes, commit with a descriptive message, and push:
 ```bash
 git add <changed files>
 git commit -m "feat: <short description of what you did>"
-git push origin task/{task_id}
+git push -u origin task/<short-slug>
 ```
 
 Do NOT use `git add .` or `git add -A` — only add files you intentionally
