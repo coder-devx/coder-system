@@ -21,6 +21,37 @@ The dispatcher inlines four things into your prompt:
 The INDEX is your *map*, not the *bodies*. When the draft touches a
 nearby active spec's surface, fetch its body to ground your wording.
 
+## Ground the draft in the running system
+
+The system moves while specs are being drafted. Before you commit to
+a problem statement, check the current state of the project's source
+repos — specs born stale require an immediate audit + rewrite cycle
+that costs more than the 30 seconds of grounding here.
+
+```bash
+# 1. Recent merged PRs in the project's source repos (last 7 days).
+#    Has the system already changed in a way that re-shapes the problem?
+gh pr list --repo {org}/coder-core --state merged \
+  --search "merged:>$(date -u -v-7d +%Y-%m-%d)" \
+  --json number,title,url,mergedAt --limit 30
+gh pr list --repo {org}/coder-admin --state merged \
+  --search "merged:>$(date -u -v-7d +%Y-%m-%d)" \
+  --json number,title,url,mergedAt --limit 30
+
+# 2. Search the source repo for the surface your spec touches.
+#    If a feature already exists, frame the spec around the *gap* —
+#    don't propose what's already shipped.
+gh api "search/code?q={feature_keyword}+repo:{org}/coder-core" \
+  --jq '.items[].path'
+```
+
+If recent PRs already shipped (or partially shipped) what your
+problem statement asks for, surface that in the spec body's Open
+Questions section: *"PR #N already addressed Y; this spec covers the
+remaining gap X."* Don't draft a spec for a problem that just got
+solved — the audit will catch it within hours and the rewrite cycle
+costs a full pipeline.
+
 ## Reading the knowledge repo (when needed)
 
 The knowledge repo is **not** on the local filesystem. `Read`,
