@@ -11,7 +11,9 @@
 ## Notes
 
 - `coder-agent` and `coder-agent-admin` have been removed in favor of a
-  clean rebuild as `coder-core` and `coder-admin`. See
-  [`../designs/wip/0001-generalize-coder-from-vibetrade.md`](../designs/wip/0001-generalize-coder-from-vibetrade.md).
+  clean rebuild as `coder-core` and `coder-admin`. The rebuild
+  shipped — see those repos' entries above and
+  [`../designs/active/system-overview.md`](../designs/active/system-overview.md)
+  for the current architecture.
 - Worker fleet repos (per-role) are not listed yet — likely live inside
   `coder-core` until the fleet split lands.
