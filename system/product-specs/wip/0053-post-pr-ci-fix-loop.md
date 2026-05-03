@@ -14,6 +14,7 @@ related_specs:
   - task-orchestration
   - audit-log
   - admin-panel
+parent: pipeline-operations
 ---
 
 # 0053 — Post-PR CI fix loop

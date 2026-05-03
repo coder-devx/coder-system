@@ -18,6 +18,7 @@ affects_services:
 affects_repos:
   - coder-core
   - coder-system
+parent: knowledge-and-admin
 ---
 
 # 0052 — Managed-repo GitHub Action distribution

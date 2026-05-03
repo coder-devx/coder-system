@@ -77,7 +77,10 @@ maintainable.
 
 - [continuous-deployment](./active/continuous-deployment.md) — push-to-main CD with health-checks
 - [tenant-isolation](./active/tenant-isolation.md) — test-suite harness for the multi-tenancy contract
-- [0051-coder-core-modular-monolith](./active/0051-coder-core-modular-monolith.md) — module-boundary contracts
+
+The `delivery-and-infra` rollup also covers `coder-core`'s
+modular-monolith hardening (module-boundary contracts enforced by
+import-linter); see the spec body for the full architectural section.
 
 ## WIP — roadmap-aligned specs in flight
 

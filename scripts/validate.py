@@ -44,13 +44,13 @@ SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "INDEX.md", "_TEMPLA
 REQUIRED_FIELDS: dict[str, set[str]] = {
     "service":     {"id", "name", "type", "status", "owner", "last_verified_at"},
     "repo":        {"id", "name", "type", "status", "owner", "github", "last_verified_at"},
-    "design":      {"id", "title", "type", "status", "owner", "created", "last_verified_at"},
+    "design":      {"id", "title", "type", "status", "owner", "created", "last_verified_at", "parent"},
     "adr":         {"id", "title", "type", "status", "date", "deciders"},
-    "spec":        {"id", "title", "type", "status", "owner", "created", "last_verified_at"},
+    "spec":        {"id", "title", "type", "status", "owner", "created", "last_verified_at", "parent"},
     # ADR 0025: category-rollup artifacts use ``type: index``. Same
     # frontmatter shape as a spec; the body has different required
     # sections enforced below.
-    "index":       {"id", "title", "type", "status", "owner", "created", "last_verified_at"},
+    "index":       {"id", "title", "type", "status", "owner", "created", "last_verified_at", "parent"},
     "role":        {"id", "name", "type", "status", "owner", "last_verified_at"},
     "integration": {"id", "name", "type", "status", "owner", "auth", "last_verified_at"},
     "runbook":     {"id", "title", "type", "status", "owner", "created", "last_verified_at"},

@@ -13,6 +13,7 @@ related_specs:
   - onboarding
   - audit-log
   - admin-panel
+parent: knowledge-and-admin
 ---
 
 # 0052 — Managed-repo GitHub Action distribution

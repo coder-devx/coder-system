@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [worker-roles, worker-communication, observability-and-cost-tracking, pm-worker, architect-worker, team-manager-worker, knowledge-repo-model]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin]
+parent: pipeline-operations
 ---
 
 # Prompt caching & shared context reuse

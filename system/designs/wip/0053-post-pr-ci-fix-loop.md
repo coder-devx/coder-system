@@ -21,6 +21,7 @@ affects_services:
 affects_repos:
   - coder-core
   - coder-system
+parent: pipeline-operations
 ---
 
 # 0053 — Post-PR CI fix loop

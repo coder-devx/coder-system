@@ -15,6 +15,7 @@ related_specs:
   - reviewer-worker
   - team-manager-worker
   - pm-worker
+parent: knowledge-and-admin
 ---
 
 # 0046 — Graph-aware knowledge retrieval

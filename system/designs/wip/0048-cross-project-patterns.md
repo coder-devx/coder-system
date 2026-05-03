@@ -26,6 +26,7 @@ related_designs:
 affects_services:
   - coder-core
   - coder-admin
+parent: knowledge-and-admin
 ---
 
 # 0048 — Cross-project pattern surfacing

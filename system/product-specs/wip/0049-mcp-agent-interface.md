@@ -17,6 +17,7 @@ related_specs:
   - task-orchestration
   - knowledge-api
   - escalations
+parent: knowledge-and-admin
 ---
 
 # 0049 — MCP agent interface

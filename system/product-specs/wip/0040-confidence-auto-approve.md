@@ -16,6 +16,7 @@ related_specs:
   - audit-log
   - observability
   - admin-panel
+parent: pipeline-operations
 ---
 
 # 0040 — Confidence-scored auto-approval

@@ -327,7 +327,7 @@ The system today, by logical component. Each links to its active spec
 | [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | shipped 2026-04-28 (PR #37); flag `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED=true` flipped on revision `coder-core-00161-ln6` — live in prod |
 | 0055 | Non-developer-role workers need GitHub write access | shipped 2026-04-28 ([coder-core#41](https://github.com/coder-devx/coder-core/pull/41)); WIP folded into `architect-worker` / `team-manager-worker` / `pm-worker` / `reviewer-worker` / `developer-worker` / `task-orchestration` and `worker-roles` design — recovery dispatch of architect `62e0c95e` opens PRs cleanly |
 | [0056](./wip/0056-worker-dispatch-durability.md) | Worker dispatch durability — workers as Cloud Run Jobs | drafting 2026-04-28 — surfaced by wave-2 dispatch session where ~100% of workers zombied due to Cloud Run service-instance eviction killing the asyncio orchestrate_task before Phase 3b writeback. Three workarounds shipped today (PR #45 + reaper apply mode + threshold 25→45min) cover the symptom; this is the architectural fix |
-| [0051](./active/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | shipped to prod 2026-04-26; graduated wip → active |
+| 0051 | coder-core modular monolith hardening | shipped to prod 2026-04-26; folded into [delivery-and-infra](./active/delivery-and-infra.md) on 2026-05-03 (PR #54) |
 
 ---
 
@@ -614,7 +614,7 @@ extraction is an implementation swap, not a service rewrite.
   [coder-core#31](https://github.com/coder-devx/coder-core/pull/31)).
   All 11 in-scope ACs done; 1 deferred (freshness-test calendar drift,
   pre-existing concern).
-- **Spec:** [0051](./active/0051-coder-core-modular-monolith.md) ·
+- **Spec:** folded into [delivery-and-infra](./active/delivery-and-infra.md) (PR #54, 2026-05-03) ·
   **Design:** [0051](../designs/active/0051-coder-core-modular-monolith.md)
 - **Extends:** `task-orchestration`, `knowledge-api`, `multi-tenancy`,
   `audit-log`, `observability`, role-worker components

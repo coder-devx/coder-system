@@ -17,6 +17,7 @@ related_designs:
 affects_services:
   - coder-core
   - coder-admin
+parent: knowledge-and-admin
 ---
 
 # 0045 — Cold-start knowledge ingestion

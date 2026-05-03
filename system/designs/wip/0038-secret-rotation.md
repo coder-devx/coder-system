@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [system-overview, impersonation, observability-and-cost-tracking, audit-log]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin]
+parent: tenancy-and-access
 ---
 
 # Automated secret rotation

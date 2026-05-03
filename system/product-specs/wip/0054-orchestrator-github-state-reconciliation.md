@@ -12,6 +12,7 @@ related_specs:
   - developer-worker
   - task-orchestration
   - audit-log
+parent: pipeline-operations
 ---
 
 # 0054 — Orchestrator GitHub-state reconciliation

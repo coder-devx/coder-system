@@ -46,6 +46,15 @@ See [`README.md`](./README.md) for the layout.
      creating a new component file for a genuinely new logical unit,
      or both. The numbered WIP file is then **deleted**. History lives
      in git, not in filenames.
+   - **Shipped-but-soaking.** A WIP whose code is live in production
+     stays in `wip/` until the team's chosen soak window closes
+     (typically ≥ 30 days for behaviour-changing flags, longer for
+     auth / audit / billing surfaces). The `status:` field stays
+     `wip`; the roadmap entry annotates `shipped, soaking through
+     <date>`. On fold, the file is deleted and content merges into
+     `active/` per the previous bullet. The soak-then-fold cadence is
+     a project convention to absorb post-ship calibration without
+     rewriting `active/` mid-flight.
    - An active component that's removed from the system moves to
      `deprecated/` with `status: deprecated`, `deprecated_at:`, and
      `reason:`. Do not delete.

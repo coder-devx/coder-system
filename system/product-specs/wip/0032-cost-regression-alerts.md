@@ -9,6 +9,7 @@ updated: 2026-04-29
 last_verified_at: 2026-04-29
 served_by_designs: ["0032"]
 related_specs: [observability, task-orchestration, continuous-deployment]
+parent: pipeline-operations
 ---
 
 # Prompt & cost regression alerts

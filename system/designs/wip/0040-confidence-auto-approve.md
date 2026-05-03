@@ -19,6 +19,7 @@ related_designs:
 affects_services:
   - coder-core
   - coder-admin
+parent: pipeline-operations
 ---
 
 # 0040 — Confidence-scored auto-approval (design)

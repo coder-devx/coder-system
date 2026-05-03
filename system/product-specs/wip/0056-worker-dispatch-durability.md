@@ -17,6 +17,7 @@ related_specs:
   - pm-worker
   - continuous-deployment
   - observability
+parent: pipeline-operations
 ---
 
 # 0056 — Worker dispatch durability

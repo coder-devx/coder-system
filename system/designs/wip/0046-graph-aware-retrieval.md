@@ -19,6 +19,7 @@ related_designs:
 affects_services:
   - coder-core
   - coder-admin
+parent: knowledge-and-admin
 ---
 
 # 0046 — Graph-aware knowledge retrieval

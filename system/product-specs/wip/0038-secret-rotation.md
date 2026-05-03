@@ -9,6 +9,7 @@ updated: 2026-04-27
 last_verified_at: 2026-04-27
 served_by_designs: ["0038"]
 related_specs: [service-accounts, continuous-deployment, multi-tenancy, admin-panel, impersonation, audit-log]
+parent: tenancy-and-access
 ---
 
 # Automated secret rotation
