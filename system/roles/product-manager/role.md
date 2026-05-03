@@ -85,7 +85,7 @@ audit pipeline all read against this shape.
    preloaded INDEX to pick parents and cross-links — the audit
    pipeline checks these.
 6. **`parent:` is a real category** from the preloaded
-   product-specs INDEX. Per design 0062 every spec sits in a
+   product-specs INDEX. Per design 0066 every spec sits in a
    navigation tree.
 7. **Concrete, not aspirational.** Name the running surfaces (admin
    panel pages, API endpoints, Slack channels, Cloud Run services).

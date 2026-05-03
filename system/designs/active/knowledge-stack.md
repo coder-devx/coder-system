@@ -58,7 +58,7 @@ coder-core to GitHub and back to workers.
 ## Navigation
 
 This design itself is a category entry point — drill into the
-component designs above for deeper detail. See [design 0062](../wip/0062-navigation-tree-pattern.md)
+component designs above for deeper detail. See [design 0066](../wip/0066-navigation-tree-pattern.md)
 for the tree pattern this organisation follows.
 
 ## Links

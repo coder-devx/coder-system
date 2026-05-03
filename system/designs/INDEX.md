@@ -71,7 +71,7 @@ AGENTS.md rule 5). See [registry.yaml](./registry.yaml) for the full
 list. Recent and high-leverage:
 
 - [0057](./wip/0057-role-prompt-knowledge-layout.md) — per-role/per-mode prompt layout (shipped)
-- [0062](./wip/0062-navigation-tree-pattern.md) — this navigation pattern
+- [0062](./wip/0066-navigation-tree-pattern.md) — this navigation pattern
 
 ## How to use this index
 
@@ -87,7 +87,7 @@ list. Recent and high-leverage:
 
 ## Layout
 
-Per [design 0062](./wip/0062-navigation-tree-pattern.md), each
+Per [design 0066](./wip/0066-navigation-tree-pattern.md), each
 design carries a `parent:` field pointing at its category. The
 inverse (children of a category) is derived. Re-parenting a design
 is a 1-line frontmatter change plus a registry update.

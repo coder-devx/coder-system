@@ -1,5 +1,5 @@
 ---
-id: "0062"
+id: "0066"
 title: Navigation tree pattern for specs, designs, and ADRs
 type: design
 status: wip

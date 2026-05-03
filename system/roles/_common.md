@@ -32,7 +32,7 @@ so you don't have to discover them by tool call:
 - `# Run context` — the project's `org`/`repo`, your role, task mode,
   and the next free artifact id (when relevant)
 - `## Knowledge index (preloaded)` — the curated `INDEX.md` for your
-  role's artifact tree (the navigation map per design 0062)
+  role's artifact tree (the navigation map per design 0066)
 - `## Product-spec index (preloaded)` — for Architect design mode, the
   cross-tree spec map (so you can set `implements_specs` correctly)
 - `## Audit target: {type}/{id} (preloaded)` — for audit tasks, the

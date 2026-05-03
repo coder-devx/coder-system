@@ -541,12 +541,12 @@ designs:
   affects_repos:
   - coder-core
   - coder-system
-- id: '0062'
+- id: '0066'
   title: Navigation tree pattern for specs, designs, and ADRs
   status: wip
   owner: ro
   folder: wip
-  file: wip/0062-navigation-tree-pattern.md
+  file: wip/0066-navigation-tree-pattern.md
   related_designs:
   - knowledge-repo-model
   - knowledge-write-api
@@ -629,10 +629,10 @@ designs:
   - coder-core
   - coder-admin
   parent: system-overview
-- id: '0063'
+- id: '0067'
   title: Enable stuck-pipeline Slack paging at 15-minute threshold
   status: wip
   owner: ro
   folder: wip
-  file: wip/0063-enable-stuck-pipeline-slack-paging-at-15-minute-threshold.md
+  file: wip/0067-enable-stuck-pipeline-slack-paging-at-15-minute-threshold.md
   parent: pipeline-operations

@@ -177,3 +177,10 @@ adrs:
     date: 2026-05-03
     file: 0025-type-index-for-category-rollup-artifacts.md
     relates_to_designs: []
+
+  - id: "0026"
+    title: Shared numeric ID pool for WIP specs and designs
+    status: accepted
+    date: 2026-05-03
+    file: 0026-shared-numeric-id-pool-for-wip-specs-and-designs.md
+    relates_to_designs: []

@@ -29,3 +29,4 @@
 | 0023 | Admin API + consult endpoint as the pattern surfaces | proposed | 2026-04-28 | [0023-admin-api-and-consult-endpoint-as-pattern-surfaces.md](./0023-admin-api-and-consult-endpoint-as-pattern-surfaces.md) |
 | 0024 | `share_patterns` column as the cross-project read enforcement boundary | proposed | 2026-04-28 | [0024-share-patterns-column-as-enforcement-boundary.md](./0024-share-patterns-column-as-enforcement-boundary.md) |
 | 0025 | `type: index` for category-rollup artifacts | accepted | 2026-05-03 | [0025-type-index-for-category-rollup-artifacts.md](./0025-type-index-for-category-rollup-artifacts.md) |
+| 0026 | Shared numeric ID pool for WIP specs and designs | accepted | 2026-05-03 | [0026-shared-numeric-id-pool-for-wip-specs-and-designs.md](./0026-shared-numeric-id-pool-for-wip-specs-and-designs.md) |
