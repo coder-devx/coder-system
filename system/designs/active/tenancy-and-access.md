@@ -1,12 +1,12 @@
 ---
 id: tenancy-and-access
 title: Tenancy & access
-type: design
+type: index
 status: active
 owner: ro
 created: 2026-05-02
-updated: 2026-05-02
-last_verified_at: 2026-05-02
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 implements_specs: [tenancy-and-access]
 related_designs: [system-overview, impersonation, audit-log, tenant-isolation]
 affects_services: [coder-core, coder-admin]
