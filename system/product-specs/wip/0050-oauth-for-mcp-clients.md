@@ -14,6 +14,7 @@ related_specs:
   - audit-log
   - admin-panel
   - multi-tenancy
+parent: tenancy-and-access
 ---
 
 # 0050 — OAuth 2.1 for MCP clients

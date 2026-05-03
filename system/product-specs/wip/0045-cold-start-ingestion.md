@@ -13,6 +13,7 @@ related_specs:
   - knowledge-api
   - architect-worker
   - knowledge-freshness
+parent: knowledge-and-admin
 ---
 
 # 0045 — Cold-start knowledge ingestion

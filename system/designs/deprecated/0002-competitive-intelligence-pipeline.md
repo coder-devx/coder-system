@@ -23,6 +23,7 @@ decided_by: []
 related_designs: [system-overview, worker-roles]
 affects_services: [coder-core]
 affects_repos: [coder-core]
+parent: ~
 ---
 
 # Competitive Intelligence Pipeline

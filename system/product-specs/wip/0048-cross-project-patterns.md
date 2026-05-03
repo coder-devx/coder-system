@@ -18,6 +18,7 @@ related_specs:
   - developer-worker
   - multi-tenancy
   - knowledge-freshness
+parent: knowledge-and-admin
 ---
 
 # 0048 — Cross-project pattern surfacing

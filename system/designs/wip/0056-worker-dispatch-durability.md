@@ -21,6 +21,7 @@ affects_services:
   - coder-core
 affects_repos:
   - coder-core
+parent: pipeline-operations
 ---
 
 # 0056 — Worker dispatch durability

@@ -13,6 +13,7 @@ related_specs:
   - onboarding
   - admin-panel
   - audit-log
+parent: knowledge-and-admin
 ---
 
 # 0047 — Template schema migration

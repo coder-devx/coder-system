@@ -21,6 +21,7 @@ affects_services:
 affects_repos:
   - coder-core
   - coder-system
+parent: worker-roles
 ---
 
 # 0057 — Role prompt knowledge layout

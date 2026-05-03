@@ -12,6 +12,7 @@ decided_by: []
 related_designs: [observability-and-cost-tracking, worker-communication]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin]
+parent: pipeline-operations
 ---
 
 # Per-project token budgets & cost gates

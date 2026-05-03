@@ -9,6 +9,7 @@ updated: 2026-04-27
 last_verified_at: 2026-04-27
 served_by_designs: ["0029"]
 related_specs: [task-orchestration, observability, knowledge-api, pm-worker, architect-worker, team-manager-worker, developer-worker, reviewer-worker]
+parent: pipeline-operations
 ---
 
 # Prompt caching & shared context reuse

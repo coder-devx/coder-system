@@ -9,6 +9,7 @@ updated: 2026-04-27
 last_verified_at: 2026-04-27
 served_by_designs: ["0031"]
 related_specs: [observability, task-orchestration, multi-tenancy, admin-panel]
+parent: pipeline-operations
 ---
 
 # Per-project token budgets & cost gates

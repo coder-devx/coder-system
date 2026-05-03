@@ -22,6 +22,7 @@ affects_services:
 affects_repos:
   - coder-core
   - coder-system
+parent: knowledge-and-admin
 ---
 
 # 0047 — Template schema migration

@@ -13,6 +13,7 @@ decided_by: []
 related_designs: [worker-roles, worker-communication, observability-and-cost-tracking, pm-worker, architect-worker, team-manager-worker]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin, coder-system]
+parent: pipeline-operations
 ---
 
 # Model tier routing

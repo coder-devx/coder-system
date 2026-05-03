@@ -18,6 +18,7 @@ affects_services:
   - coder-core
 affects_repos:
   - coder-core
+parent: pipeline-operations
 ---
 
 # 0054 — Orchestrator GitHub-state reconciliation

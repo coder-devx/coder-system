@@ -17,6 +17,7 @@ affects_services:
 affects_repos:
   - coder-core
   - coder-system
+parent: tenancy-and-access
 ---
 
 # 0050 — OAuth 2.1 for MCP clients (design)
