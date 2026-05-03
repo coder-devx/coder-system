@@ -6,7 +6,8 @@ status: wip
 owner: ro
 created: '2026-05-03'
 updated: '2026-05-03'
-last_verified_at: '2026-05-03'
+last_verified_at: 2026-05-03
+verified_by: knowledge-audit
 implements_specs:
 - '0060'
 decided_by: []
