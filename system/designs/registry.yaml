@@ -564,7 +564,7 @@ designs:
   folder: active
   file: active/0051-coder-core-modular-monolith.md
   implements_specs:
-  - '0051'
+  - delivery-and-infra
   related_designs:
   - system-overview
   - worker-communication

@@ -104,5 +104,10 @@ planner gets a concrete architecture to decompose.
 
 ## Links
 
-- Designs:
-- Related components:
+- Designs: [architect-worker](../../designs/active/architect-worker.md),
+  [worker-roles](../../designs/active/worker-roles.md)
+- Related components: [pm-worker](./pm-worker.md),
+  [team-manager-worker](./team-manager-worker.md),
+  [knowledge-api](./knowledge-api.md),
+  [task-orchestration](./task-orchestration.md),
+  [service-accounts](./service-accounts.md)

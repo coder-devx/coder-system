@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-15
-last_verified_at: 2026-04-15
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 served_by_designs: [system-overview]
 related_specs: []
 parent: tenancy-and-access
@@ -66,5 +66,10 @@ the API boundary, not bolted on later.
 
 ## Links
 
-- Designs: (none yet)
-- Related components: knowledge-api, admin-panel
+- Designs: [system-overview](../../designs/active/system-overview.md),
+  [tenancy-and-access](../../designs/active/tenancy-and-access.md)
+- Related components: [knowledge-api](./knowledge-api.md),
+  [admin-panel](./admin-panel.md), [audit-log](./audit-log.md),
+  [impersonation](./impersonation.md),
+  [service-accounts](./service-accounts.md),
+  [tenant-isolation](./tenant-isolation.md)

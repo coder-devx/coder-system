@@ -105,5 +105,11 @@ dependency order.
 
 ## Links
 
-- Designs:
-- Related components:
+- Designs: [team-manager-worker](../../designs/active/team-manager-worker.md),
+  [worker-roles](../../designs/active/worker-roles.md)
+- Related components: [pm-worker](./pm-worker.md),
+  [architect-worker](./architect-worker.md),
+  [developer-worker](./developer-worker.md),
+  [task-orchestration](./task-orchestration.md),
+  [knowledge-api](./knowledge-api.md),
+  [service-accounts](./service-accounts.md)

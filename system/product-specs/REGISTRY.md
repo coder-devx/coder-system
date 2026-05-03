@@ -29,7 +29,6 @@ in each component's `## Evolution` section and in git.
 | [task-orchestration](./active/task-orchestration.md) | Task Orchestration | ro | [worker-communication](../designs/active/worker-communication.md) |
 | [team-manager-worker](./active/team-manager-worker.md) | Team Manager Worker | ro | [team-manager-worker](../designs/active/team-manager-worker.md) |
 | [tenant-isolation](./active/tenant-isolation.md) | Tenant isolation test harness | ro | [tenant-isolation](../designs/active/tenant-isolation.md) |
-| [0051-coder-core-modular-monolith](./active/0051-coder-core-modular-monolith.md) | coder-core modular monolith hardening | ro | [0051](../designs/active/0051-coder-core-modular-monolith.md) |
 
 ## WIP — numbered, roadmap-aligned
 

@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-15
-last_verified_at: 2026-04-15
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 served_by_designs: [worker-roles]
 related_specs: []
 parent: tenancy-and-access
@@ -93,5 +93,9 @@ into every token) and in IAM (per-secret bindings on
 
 ## Links
 
-- Designs: …
-- Related components: …
+- Designs: [worker-roles](../../designs/active/worker-roles.md),
+  [tenancy-and-access](../../designs/active/tenancy-and-access.md)
+- Related components: [impersonation](./impersonation.md),
+  [multi-tenancy](./multi-tenancy.md),
+  [tenant-isolation](./tenant-isolation.md),
+  [audit-log](./audit-log.md), [admin-panel](./admin-panel.md)

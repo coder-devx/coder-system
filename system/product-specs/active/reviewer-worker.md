@@ -93,5 +93,8 @@ developer-produced PR and a human-facing merge decision.
 
 ## Links
 
-- Designs:
-- Related components:
+- Designs: [worker-roles](../../designs/active/worker-roles.md)
+- Related components: [developer-worker](./developer-worker.md),
+  [pm-worker](./pm-worker.md), [knowledge-api](./knowledge-api.md),
+  [task-orchestration](./task-orchestration.md),
+  [service-accounts](./service-accounts.md)

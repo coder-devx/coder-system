@@ -370,5 +370,13 @@ and `/pipeline-runs` endpoints in `coder-core`.
 
 ## Links
 
-- Designs: —
-- Related components: —
+- Designs: [worker-communication](../../designs/active/worker-communication.md),
+  [pipeline-operations](../../designs/active/pipeline-operations.md)
+- Related components: [audit-log](./audit-log.md),
+  [observability](./observability.md), [escalations](./escalations.md),
+  [self-healing](./self-healing.md),
+  [developer-worker](./developer-worker.md),
+  [reviewer-worker](./reviewer-worker.md), [pm-worker](./pm-worker.md),
+  [architect-worker](./architect-worker.md),
+  [team-manager-worker](./team-manager-worker.md),
+  [knowledge-api](./knowledge-api.md), [admin-panel](./admin-panel.md)

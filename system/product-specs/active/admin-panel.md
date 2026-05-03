@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 served_by_designs: [system-overview]
 related_specs: [audit-log]
 parent: knowledge-and-admin
@@ -102,16 +102,101 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   page shows an "Audit logging disabled" banner above historical rows
   when `CODER_AUDIT_LOG_ENABLED` is off so a log gap is a visible
   operator decision.
+- **Metrics dashboard.** `/projects/:projectId/metrics` renders cost
+  and pipeline-health views: daily-cost sparkline, per-spec cost
+  breakdown, average stage durations, per-role prompt-cache stats
+  (spec 0029), per-tier model usage (spec 0030). Period selector
+  (24h / 7d / 30d). Powers operator triage of cost spikes without a
+  console query.
+- **Freshness audit view.** `/freshness` (fleet) and
+  `/projects/:projectId/freshness` show the knowledge-freshness
+  dashboard (spec 0043): score histogram of the latest audit run,
+  stale-count tile, "Needs attention" table of the lowest-scored
+  artifacts, one-click `Verify` button that POSTs to
+  `/knowledge/{type}/{id}/verify`. Operators can also trigger an
+  on-demand audit pass via `triggerKnowledgeAudit()`.
+- **Regression dashboard.** `/metrics/regressions` lists fleet-wide
+  per-role cost regressions (spec 0032) with commit-suspect
+  attribution and Slack-sent flag; `Acknowledge` action suppresses
+  repeat fires for `(role, metric, day)`.
+- **Plan review surface.** `/projects/:projectId/plans` lists draft
+  Team-Manager plans; `/plans/:planId` opens the inline plan editor
+  with per-task prompt / role / complexity / order edits before
+  approve / reject (spec 0013).
+- **Pipeline-run detail with live timeline + inline gate card.**
+  `/projects/:projectId/runs/:runId` renders the `RunTimeline`
+  swim-lane view (one lane per pipeline step, bars from
+  `task_stage_runs`, live sub-second tick on running bars), an
+  inline `GateCard` for spec/design/plan approvals, and the
+  ship-gate panel when `wips_pending_merge` is stamped (spec 0044).
+  The Runs list (`/projects/:projectId/runs`) sorts
+  blocked-longest-first.
+- **Auto-approval cards.** `ProjectDetail` renders `AutoApprovalCard`
+  rows when `VITE_AUTO_APPROVE_ENABLED` is on (spec 0040): worker
+  score, risk flags, justification, undo within window, force-finalize.
+- **Per-project budget cards.** `ProjectDetail` carries
+  `BudgetCard` / `BudgetStateCard` / `BudgetReadSourceCard` (spec
+  0031 phase 2): hard/soft limits, daily-spend sparkline, 7-day
+  cost, override grant/revoke (24h), forecast, rollup-reads toggle.
+  `Projects.tsx` shows a per-project `BudgetCell` summary on the
+  fleet overview.
+- **Worker concurrency strip.** Live per-project worker-slot
+  availability + queue depth poll (spec 0028); the fleet variant
+  rides on the admin home.
+- **Auth-mode toggle.** `ProjectDetail`'s `AuthModeCard` switches a
+  project between API key, Claude OAuth, and inherit-fleet-default
+  (spec service-accounts Evolution); `PATCH
+  /v1/_admin/projects/{id}/auth-mode` writes the column and a
+  `project.set_auth_mode` audit row.
+- **Tenant-isolation coverage dashboard.** `/admin/isolation` (admin
+  JWT, behind `VITE_ISOLATION_VIEW_ENABLED`) renders the parsed
+  isolation manifest as three tables — endpoints / tables / tokens
+  — with a covered/skipped/missing chip per row (spec 0039).
+- **Secret-rotation registry.** `/admin/secrets` (admin JWT, behind
+  `VITE_SECRET_ROTATION_ENABLED`) lists managed secrets with rotator
+  state and last-rotated timestamp.
+- **Escalations.** `/admin/escalations` (fleet) and
+  `/projects/:projectId/escalations` (per-project) render open /
+  acknowledged / resolved escalations with age, current rung,
+  project, run/task target, and on-call identity. `Ack` and
+  `Resolve` actions POST to the project endpoints; behind
+  `VITE_ESCALATIONS_ENABLED`.
 
 ## Interfaces
 
-- Routes: `/`, `/projects/:id`, `/projects/:id/:type`,
-  `/projects/:id/:type/:artifactId`, `/projects/:id/pipeline`,
-  `/projects/:id/pipeline/:taskId`.
+- **Routes (defined in `src/main.tsx`):**
+  - Fleet: `/`, `/freshness`, `/metrics/regressions`, `/admin/audit`,
+    `/admin/secrets` (flagged), `/admin/isolation` (flagged),
+    `/admin/escalations` (flagged).
+  - Per-project: `/projects/:projectId`,
+    `/projects/:projectId/freshness`,
+    `/projects/:projectId/pipeline`,
+    `/projects/:projectId/pipeline/:taskId`,
+    `/projects/:projectId/metrics`,
+    `/projects/:projectId/runs`, `/projects/:projectId/runs/:runId`,
+    `/projects/:projectId/ship/:wipId`,
+    `/projects/:projectId/audit`,
+    `/projects/:projectId/escalations` (flagged),
+    `/projects/:projectId/plans`,
+    `/projects/:projectId/plans/:planId`,
+    `/projects/:projectId/:type`,
+    `/projects/:projectId/:type/:artifactId`.
+- **Project sub-nav** (`ProjectNav.tsx`): Overview, Pipeline, Runs,
+  Plans, Metrics, Freshness, Audit (flagged), Escalations (flagged).
 - Consumes `coder-core` REST (projects, knowledge, tasks, overrides,
-  merge, knowledge PUT) and SSE event stream for pipeline + messages.
-- Typed API client shared across views; reusable `StatusChip` and
-  status/timestamp components.
+  merge, knowledge PUT, ship, escalations, audit, freshness, budget,
+  isolation, regressions, secrets) and the SSE event stream for
+  pipeline / message / `pipeline_run.changed` /
+  `pipeline_run.gate_blocked` events.
+- Typed API client (`src/api/client.ts`) shared across views — every
+  endpoint has a single typed function. Reusable `StatusChip`,
+  `RunTimeline`, `PrViewer`, `MarkdownBody`, `CommandPalette`, plus
+  per-feature card components on `ProjectDetail`.
+- **Frontend feature flags** (`VITE_*_ENABLED`): `VITE_AUDIT_LOG_ENABLED`,
+  `VITE_SECRET_ROTATION_ENABLED`, `VITE_ISOLATION_VIEW_ENABLED`,
+  `VITE_ESCALATIONS_ENABLED`, `VITE_AUTO_APPROVE_ENABLED`,
+  `VITE_RUN_TIMELINE_ENABLED`, `VITE_PR_VIEWER_ENABLED`,
+  `VITE_KNOWLEDGE_EDITOR_ENABLED`, `VITE_COMMAND_PALETTE_ENABLED`.
 
 ## Dependencies
 
@@ -198,14 +283,25 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `CODER_AUDIT_LOG_ENABLED=false` state. Full component lives in
   `pages/AuditLog.tsx`; no new runtime deps. Behind
   `VITE_AUDIT_LOG_ENABLED` (default on).
-- 0041 Escalations admin pages (shipped 2026-04-22) — new
-  `/admin/escalations` fleet view + `/projects/:projectId/escalations`
-  per-project tab listing open / acknowledged / resolved escalations
-  with age, current rung, project, run link, and on-call identity.
-  Backed by `GET /v1/_admin/escalations` and
-  `GET /v1/projects/{id}/escalations`. Ack / resolve actions POST to
-  the same ack/resolve endpoints. Behind `VITE_ESCALATIONS_ENABLED`.
-  See [escalations](./escalations.md).
+- 0041 Escalations admin pages (shipped 2026-05-03) — backend
+  shipped 2026-04-22 alongside the watcher; the admin UI half landed
+  today. New `/admin/escalations` fleet view +
+  `/projects/:projectId/escalations` per-project tab list open /
+  acknowledged / resolved / expired escalations with age, current
+  rung, trigger kind, target run/task deep-link, and on-call ack/
+  resolve identity. Status filter on both views; trigger filter on
+  the fleet view. `Ack` and `Resolve` buttons POST to the existing
+  project endpoints; the table updates the affected row in place.
+  Backed by `listProjectEscalations` / `listFleetEscalations` /
+  `acknowledgeEscalation` / `resolveEscalation` client bindings on
+  the existing backend (`GET /v1/projects/{id}/escalations`,
+  `GET /v1/_admin/escalations`,
+  `POST /v1/projects/{id}/escalations/{id}/acknowledge`,
+  `POST /v1/projects/{id}/escalations/{id}/resolve`). Behind
+  `VITE_ESCALATIONS_ENABLED` (default on); the project sub-nav grows
+  an Escalations tab when the flag is on. Page +
+  6 vitest cases land in `pages/Escalations.tsx`. See
+  [escalations](./escalations.md).
 - Claude OAuth auth-mode toggle (shipped 2026-04-22) — `ProjectDetail`
   gains a per-project auth-mode selector (`api_key` default /
   `oauth`) backed by `PATCH /v1/_admin/projects/{id}/auth-mode`.
@@ -215,5 +311,8 @@ email allowlist; sessions carry an admin JWT with cross-project access.
 
 ## Links
 
-- Designs: (none yet)
-- Related components: multi-tenancy, knowledge-api, escalations
+- Designs: [system-overview](../../designs/active/system-overview.md)
+- Related components: [multi-tenancy](./multi-tenancy.md),
+  [knowledge-api](./knowledge-api.md), [audit-log](./audit-log.md),
+  [escalations](./escalations.md), [observability](./observability.md),
+  [task-orchestration](./task-orchestration.md)

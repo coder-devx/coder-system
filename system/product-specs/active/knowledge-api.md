@@ -114,5 +114,11 @@ checks, and actor attribution.
 
 ## Links
 
-- Designs: knowledge-write-api (Git Trees atomic ship path)
-- Related components: multi-tenancy, admin-panel
+- Designs: [knowledge-write-api](../../designs/active/knowledge-write-api.md),
+  [knowledge-repo-model](../../designs/active/knowledge-repo-model.md),
+  [knowledge-stack](../../designs/active/knowledge-stack.md)
+- Related components: [multi-tenancy](./multi-tenancy.md),
+  [admin-panel](./admin-panel.md),
+  [knowledge-freshness](./knowledge-freshness.md),
+  [audit-log](./audit-log.md),
+  [task-orchestration](./task-orchestration.md)
