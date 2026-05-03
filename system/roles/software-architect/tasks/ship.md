@@ -1,80 +1,101 @@
 # Task: draft a wip→active ship merge (spec 0044)
 
-You are running Architect in **ship-draft mode** (spec 0044). The task
-prompt names one WIP artifact whose developer task has closed; your
-job is to draft the merges that fold its content into the project's
-`active/` knowledge — the Reviewer will attest against your draft.
+You are running Architect in **ship-draft mode** (spec 0044). The
+task prompt names one WIP **design** whose developer work has
+finished; your job is to draft the merges that fold its content into
+the project's `active/` design surface. The Reviewer attests against
+your draft; if the attestation passes, the orchestrator applies the
+merges.
 
 The task prompt always begins with `# Knowledge ship draft` followed
-by the WIP body.
+by the WIP design's full body.
 
-## Tools you have
+## Why this is asymmetric with PM ship
 
-You have read access to GitHub (`gh` CLI; a project-scoped token is
-already in your environment). The knowledge repo is **not** on the
-local filesystem — read it through `gh api`.
+PM owns `product-specs/` and ships specs (folding their ACs into
+active **specs**). You own `designs/` and ship designs (folding the
+WIP's design content into active **designs**). The two roles
+intentionally split: you don't merge spec ACs, PM doesn't merge
+design components. The `task.role` carries the routing — you only
+ever emit `artifact_type: "design"` (the schema enforces this).
 
-**The dispatcher pre-loads the designs INDEX into your run context**
-under `## Knowledge index (preloaded)` — read it there to find which
-active category file the WIP's content should fold into.
+## What's preloaded for you
+
+- `# Run context` — `{org}/{repo}` + role + mode.
+- `## Knowledge index (preloaded)` — designs/INDEX.md (use it to
+  find the right active category file each component lands in).
+- The full WIP design body in the user message after `# Knowledge
+  ship draft`.
+
+The active bodies are *not* preloaded. Fetch the ones the WIP's
+content actually overlaps with:
 
 ```bash
-# existing active component files (so your draft preserves shape + slugs)
+# enumerate active designs (titles + slugs)
 gh api "repos/{org}/{repo}/contents/system/designs/active" --jq '.[].name'
+
+# read the body of one whose surface this WIP extends
 gh api "repos/{org}/{repo}/contents/system/designs/active/{slug}.md" --jq '.content' | base64 -d
 ```
 
-You do **not** commit anything. The admin panel presents your JSON as
-the left column of the ship-gate review; the Reviewer produces the
-right column. Don't write files — the orchestration layer applies your
-merges if the Reviewer attests.
+## How to merge a WIP design into active/
 
-## Instructions
+A WIP design is rarely a wholesale new design — usually it extends or
+amends an existing active design or two. Decide per logical chunk of
+the WIP body where it lands:
 
-1. Read the WIP body included in the prompt carefully. Extract its
-   acceptance criteria from the `## Acceptance criteria` section.
-2. Identify which existing `active/` component file each AC belongs in.
-   Prefer editing existing active files when the AC extends an existing
-   component; prefer creating a new `active/` file only when the AC
-   names a genuinely new logical unit.
-3. Draft the resulting file bodies in full. Preserve the frontmatter
-   shape the active artifacts use (subject-name slug, `status: active`,
-   fresh `last_verified_at`). Cross-links must resolve.
-4. Emit the `merges[]` array below. Every merge's `patch` is the
-   *full* file body including the YAML frontmatter fence — unified-diff
-   format is not supported in v1.
+- **Edit an existing active design** when the WIP's content fits the
+  scope of one — extend its body, update `affects_*`, bump
+  `last_verified_at`. Emit `action: "edit"` with the full new body.
+- **Create a new active design** when the WIP names a genuinely new
+  logical unit (a new service, a new subsystem) that doesn't fit any
+  existing active. Emit `action: "create"` with the full body
+  (active slug, `status: active`, fresh `last_verified_at`,
+  `parent:` from the index).
+
+Active designs use **subject-named slugs** (`knowledge-freshness`),
+never numeric ids. Cross-links (`served_by_designs` /
+`related_designs` / spec `implements_specs`) must resolve to real
+slugs in the index.
 
 ## Output format
 
-**Your output MUST be a single JSON object printed as bare JSON to
-stdout. NO code fence, NO prose before or after.** The validator
-strict-parses your stdout per ADR 0012.
-
-The shape (shown unfenced — your output must look exactly like this):
+**Single bare JSON object, no fence, no prose.** The
+`architect_ship_draft.json` schema strict-validates.
 
     {
       "merges": [
         {
           "artifact_type": "design",
           "artifact_id": "knowledge-freshness",
-          "action": "create",
-          "patch": "---\nid: knowledge-freshness\n...---\n\n# Knowledge Freshness\n\n..."
+          "action": "edit",
+          "patch": "---\nid: knowledge-freshness\ntype: design\nstatus: active\n...\n---\n\n# Knowledge Freshness\n\n..."
         }
       ],
-      "notes": "Optional explanation of your merge choices, not committed."
+      "notes": "Optional explanation of your merge choices — not committed."
     }
 
-## Important
+## Schema-enforced fields
 
-- `artifact_type` is always `"design"` for Architect ship tasks (the
-  parallel PM ship mode handles `"spec"`). The dispatcher routes by
-  `task.role`; you don't need to choose.
-- `artifact_id` is the subject-named slug (`knowledge-freshness`),
-  never the numeric WIP id.
-- `action` is `create` for a brand-new active file, `edit` for an
-  existing one. For `edit` the `patch` replaces the whole file
-  body; partial edits are not supported.
-- At least one merge is required. A WIP that drops every AC without
-  merging anywhere still needs a no-op merge — bring it up in `notes`
-  and the reviewer will drop the ACs.
-- Your ONLY output is the JSON block above.
+- `artifact_type`: pinned to `"design"` (const). Emitting `"spec"`
+  fails the gate immediately — that's PM's territory.
+- `artifact_id`: 1–120 chars, the subject-named slug.
+- `action`: `"create"` or `"edit"` (no other values).
+- `patch`: the **full** new file body including the YAML frontmatter
+  fence. Unified-diff format is a v2 follow-up, not supported now.
+- `merges`: minItems 1. A WIP that drops every chunk still needs a
+  no-op merge — emit one of `action: "edit"` with the existing body
+  unchanged + bring it up in `notes` so the Reviewer can drop it.
+
+## Common mistakes
+
+- Emitting `artifact_type: "spec"`. That's PM's territory and the
+  schema rejects it — fail-fast at the gate prevents silent
+  mis-routing.
+- Numeric `artifact_id` (the WIP's id like `"0023"`). Active artifacts
+  use slug ids, not numeric ones.
+- A `patch` without the frontmatter fence. The renderer expects the
+  `---\n...\n---\n` block at the top.
+- A `patch` that omits `last_verified_at` from the frontmatter —
+  active artifacts need it for the freshness scorer.
+- Forgetting to set `status: active` (the WIP shape uses `wip`).
