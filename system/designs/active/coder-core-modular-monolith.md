@@ -1,12 +1,12 @@
 ---
-id: '0051'
+id: coder-core-modular-monolith
 title: coder-core modular monolith hardening
 type: design
 status: active
 owner: ro
 created: 2026-04-25
-updated: 2026-04-26
-last_verified_at: 2026-04-26
+updated: 2026-05-03
+last_verified_at: 2026-05-03
 implements_specs: [delivery-and-infra]
 related_designs:
   - system-overview
@@ -24,7 +24,7 @@ affects_repos:
 parent: system-overview
 ---
 
-# 0051 — coder-core modular monolith hardening (design)
+# coder-core modular monolith hardening (design)
 
 ## Context
 
@@ -439,7 +439,7 @@ waiting.
 
 ## Links
 
-- Spec: [0051](../../product-specs/active/0051-coder-core-modular-monolith.md)
+- Spec: folded into [delivery-and-infra](../../product-specs/active/delivery-and-infra.md) (PR #54, 2026-05-03)
 - Related designs: system-overview, worker-communication,
   knowledge-write-api, audit-log, tenant-isolation, worker-roles,
   observability-and-cost-tracking

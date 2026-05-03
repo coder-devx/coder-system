@@ -12,7 +12,7 @@ specs:
   folder: active
   file: active/admin-panel.md
   served_by_designs:
-  - system-overview
+  - admin-panel
   related_specs:
   - audit-log
   parent: knowledge-and-admin
@@ -60,7 +60,7 @@ specs:
   folder: active
   file: active/continuous-deployment.md
   served_by_designs:
-  - system-overview
+  - continuous-deployment
   parent: delivery-and-infra
 - id: developer-worker
   title: Developer Worker
@@ -69,7 +69,7 @@ specs:
   folder: active
   file: active/developer-worker.md
   served_by_designs:
-  - worker-roles
+  - developer-worker
   parent: worker-roles
 - id: escalations
   title: Escalations & on-call routing
@@ -131,7 +131,7 @@ specs:
   folder: active
   file: active/multi-tenancy.md
   served_by_designs:
-  - system-overview
+  - multi-tenancy
   parent: tenancy-and-access
 - id: observability
   title: Observability
@@ -151,7 +151,7 @@ specs:
   folder: active
   file: active/onboarding.md
   served_by_designs:
-  - system-overview
+  - onboarding
   parent: knowledge-and-admin
 - id: pm-worker
   title: PM Worker
@@ -169,7 +169,7 @@ specs:
   folder: active
   file: active/reviewer-worker.md
   served_by_designs:
-  - worker-roles
+  - reviewer-worker
   parent: worker-roles
 - id: self-healing
   title: Self-healing stuck pipelines
@@ -193,7 +193,7 @@ specs:
   folder: active
   file: active/service-accounts.md
   served_by_designs:
-  - worker-roles
+  - service-accounts
   parent: tenancy-and-access
 - id: task-orchestration
   title: Task Orchestration
@@ -558,6 +558,8 @@ specs:
   owner: ro
   folder: wip
   file: wip/0063-compliance-gate-retry-visibility.md
+  served_by_designs:
+  - '0063'
   parent: pipeline-operations
 - id: '0064'
   title: 'Schema-gate recovery: persist and replay exhausted worker output'
@@ -565,6 +567,8 @@ specs:
   owner: ro
   folder: wip
   file: wip/0064-schema-gate-recovery-persist-and-replay-exhausted-worker-output.md
+  served_by_designs:
+  - '0064'
   parent: pipeline-operations
 - id: '0065'
   title: Per-role daily cache hit rate trend in metrics
@@ -572,4 +576,22 @@ specs:
   owner: ro
   folder: wip
   file: wip/0065-per-role-daily-cache-hit-rate-trend-in-metrics.md
+  served_by_designs:
+  - '0065'
+  parent: pipeline-operations
+- id: '0068'
+  title: 'Spec-lifecycle coordinator: auto-chain PM → Architect → TM transitions'
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0068-spec-lifecycle-coordinator.md
+  served_by_designs:
+  - '0068'
+  related_specs:
+  - task-orchestration
+  - observability
+  - escalations
+  - multi-tenancy
+  - admin-panel
+  - audit-log
   parent: pipeline-operations

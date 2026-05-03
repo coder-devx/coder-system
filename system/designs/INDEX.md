@@ -61,7 +61,7 @@ How each project's knowledge repo is served, written, and kept fresh.
 
 The shape of the orchestrator service itself.
 
-- [0051-coder-core-modular-monolith](./active/0051-coder-core-modular-monolith.md) — module boundaries, import-linter contracts
+- [coder-core-modular-monolith](./active/coder-core-modular-monolith.md) — module boundaries, import-linter contracts
 
 ## WIP — roadmap-aligned designs in flight
 

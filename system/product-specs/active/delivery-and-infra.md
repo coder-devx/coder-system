@@ -9,7 +9,7 @@ updated: 2026-05-03
 last_verified_at: 2026-05-03
 served_by_designs:
   - system-overview
-  - '0051'
+  - coder-core-modular-monolith
 related_specs:
   - pipeline-operations
   - knowledge-and-admin
@@ -114,7 +114,7 @@ fails the build on contract drift.
 
 ## Evolution
 
-- `0051` — coder-core modular monolith hardening (shipped 2026-04-26).
+- coder-core-modular-monolith — coder-core modular monolith hardening (shipped 2026-04-26 as WIP 0051; promoted to active subject-slug on 2026-05-03).
   Module-boundary doc, four import-linter contracts (zero ignored
   exceptions at ship), seven thin-adapter routers (`tasks`,
   `task_plans`, `pipeline_runs`, `metrics`, `task_messages`,
@@ -127,7 +127,7 @@ fails the build on contract drift.
 ## Links
 
 - Designs: [system-overview](../../designs/active/system-overview.md),
-  [0051 — coder-core modular monolith](../../designs/active/0051-coder-core-modular-monolith.md)
+  [coder-core-modular-monolith](../../designs/active/coder-core-modular-monolith.md)
 - Repos: [coder-core](../../repos/coder-core.md),
   [coder-admin](../../repos/coder-admin.md),
   [coder-system](../../repos/coder-system.md)

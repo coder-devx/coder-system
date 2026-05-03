@@ -557,12 +557,12 @@ designs:
   affects_repos:
   - coder-core
   - coder-system
-- id: '0051'
+- id: coder-core-modular-monolith
   title: coder-core modular monolith hardening
   status: active
   owner: ro
   folder: active
-  file: active/0051-coder-core-modular-monolith.md
+  file: active/coder-core-modular-monolith.md
   implements_specs:
   - delivery-and-infra
   related_designs:
@@ -635,4 +635,217 @@ designs:
   owner: ro
   folder: wip
   file: wip/0067-enable-stuck-pipeline-slack-paging-at-15-minute-threshold.md
+  parent: pipeline-operations
+- id: admin-panel
+  title: Admin Panel
+  status: active
+  owner: ro
+  folder: active
+  file: active/admin-panel.md
+  implements_specs:
+  - admin-panel
+  related_designs:
+  - system-overview
+  - audit-log
+  - escalations
+  - tenant-isolation
+  - knowledge-write-api
+  - observability-and-cost-tracking
+  - worker-communication
+  affects_services:
+  - coder-admin
+  - coder-core
+  parent: knowledge-and-admin
+- id: multi-tenancy
+  title: Multi-tenancy
+  status: active
+  owner: ro
+  folder: active
+  file: active/multi-tenancy.md
+  implements_specs:
+  - multi-tenancy
+  decided_by:
+  - '0005'
+  related_designs:
+  - system-overview
+  - tenancy-and-access
+  - impersonation
+  - tenant-isolation
+  - audit-log
+  - coder-core-modular-monolith
+  affects_services:
+  - coder-core
+  parent: tenancy-and-access
+- id: service-accounts
+  title: Service Accounts
+  status: active
+  owner: ro
+  folder: active
+  file: active/service-accounts.md
+  implements_specs:
+  - service-accounts
+  decided_by:
+  - '0006'
+  related_designs:
+  - tenancy-and-access
+  - impersonation
+  - multi-tenancy
+  - audit-log
+  - worker-roles
+  affects_services:
+  - coder-core
+  parent: tenancy-and-access
+- id: continuous-deployment
+  title: Continuous Deployment
+  status: active
+  owner: ro
+  folder: active
+  file: active/continuous-deployment.md
+  implements_specs:
+  - continuous-deployment
+  related_designs:
+  - system-overview
+  - observability-and-cost-tracking
+  - audit-log
+  affects_services:
+  - coder-core
+  - coder-admin
+  parent: delivery-and-infra
+- id: onboarding
+  title: Project Onboarding
+  status: active
+  owner: ro
+  folder: active
+  file: active/onboarding.md
+  implements_specs:
+  - onboarding
+  related_designs:
+  - system-overview
+  - multi-tenancy
+  - service-accounts
+  - knowledge-repo-model
+  - knowledge-write-api
+  affects_services:
+  - coder-core
+  parent: knowledge-and-admin
+- id: developer-worker
+  title: Developer Worker
+  status: active
+  owner: ro
+  folder: active
+  file: active/developer-worker.md
+  implements_specs:
+  - developer-worker
+  related_designs:
+  - worker-roles
+  - worker-communication
+  - branch-cleanup
+  - pm-worker
+  - architect-worker
+  - team-manager-worker
+  affects_services:
+  - coder-core
+  parent: worker-roles
+- id: reviewer-worker
+  title: Reviewer Worker
+  status: active
+  owner: ro
+  folder: active
+  file: active/reviewer-worker.md
+  implements_specs:
+  - reviewer-worker
+  related_designs:
+  - worker-roles
+  - worker-communication
+  - developer-worker
+  - knowledge-write-api
+  affects_services:
+  - coder-core
+  parent: worker-roles
+- id: '0063'
+  title: Compliance Gate Retry Visibility
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0063-compliance-gate-retry-visibility.md
+  implements_specs:
+  - '0063'
+  related_designs:
+  - observability-and-cost-tracking
+  - worker-roles
+  - admin-panel
+  affects_services:
+  - coder-core
+  - coder-admin
+  affects_repos:
+  - coder-core
+  - coder-admin
+  parent: pipeline-operations
+- id: '0064'
+  title: 'Schema-gate recovery: persist and replay exhausted worker output'
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0064-schema-gate-recovery.md
+  implements_specs:
+  - '0064'
+  related_designs:
+  - worker-roles
+  - pm-worker
+  - architect-worker
+  - team-manager-worker
+  - admin-panel
+  - worker-communication
+  - audit-log
+  affects_services:
+  - coder-core
+  - coder-admin
+  affects_repos:
+  - coder-core
+  - coder-admin
+  parent: pipeline-operations
+- id: '0065'
+  title: Per-role daily cache hit rate trend in metrics
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0065-per-role-daily-cache-hit-rate-trend.md
+  implements_specs:
+  - '0065'
+  related_designs:
+  - observability-and-cost-tracking
+  - admin-panel
+  - worker-roles
+  affects_services:
+  - coder-core
+  - coder-admin
+  affects_repos:
+  - coder-core
+  - coder-admin
+  parent: pipeline-operations
+- id: '0068'
+  title: 'Spec-lifecycle coordinator: auto-chain PM → Architect → TM transitions'
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0068-spec-lifecycle-coordinator.md
+  implements_specs:
+  - '0068'
+  decided_by:
+  - '0015'
+  related_designs:
+  - pipeline-operations
+  - worker-communication
+  - worker-roles
+  - escalations
+  - self-healing
+  - audit-log
+  - admin-panel
+  - observability-and-cost-tracking
+  affects_services:
+  - coder-core
+  - coder-admin
+  affects_repos:
+  - coder-core
+  - coder-admin
   parent: pipeline-operations
