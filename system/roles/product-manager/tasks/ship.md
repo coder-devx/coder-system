@@ -67,6 +67,25 @@ Active specs use **subject-named slugs** (`share-links`), never
 numeric ids. Cross-links (`served_by_designs`, `related_specs`)
 must resolve to real slugs/ids in the registry.
 
+## Output verbosity (avoid multi-turn wrap)
+
+Sonnet 4.6's per-message output cap is ~32K tokens, including
+extended-thinking blocks. When you're folding 3+ active files (each
+with their full body in the patch), you can easily exceed the cap —
+which causes Claude CLI to split your response across multiple
+turns, doubling latency and storing only the last fragment as
+``result`` until the gate re-prompts and recovers. **Aim for total
+output under 25K tokens.** Concretely:
+
+- Patches contain the *full new body*, not the unchanged adjacent
+  sections of the active file padded out. Edit the section that
+  changes; preserve the rest verbatim.
+- If the WIP body has 8+ ACs spanning 4+ active files, consider
+  whether it should ship in two passes (the schema accepts up to 8
+  merges per call but operationally 3-5 is the sweet spot).
+- ``notes`` is plain English, not a re-derivation of the spec — keep
+  it tight.
+
 ## Principles (the contract a good ship-draft satisfies)
 
 - [ ] **Every WIP AC has a home** — either merged into an active

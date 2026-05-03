@@ -53,6 +53,26 @@ gh api "repos/{org}/{source-repo}/contents/{dir}" --jq '.[].name'
 Knowing what's already in the running system before designing is the
 difference between a design that fits and a design that reinvents.
 
+## Output verbosity (avoid multi-turn wrap)
+
+Sonnet 4.6's per-message output cap is ~32K tokens, including
+extended-thinking blocks. When your total output (thinking + text)
+exceeds it, Claude CLI splits the response into multiple assistant
+turns — task latency doubles and the dispatched ``result`` field
+captures only the last fragment. **Aim for total output under 25K
+tokens.** Concretely:
+
+- Body 30–80 lines, not 200. Long bodies are usually two designs
+  fused or one design padded with restated context.
+- One Mermaid that *adds information* (data flow, sequence,
+  boundary). Three sprawling diagrams of boxes and arrows are not
+  three times better.
+- Each section is paragraph-length, not page-length. If a section is
+  getting long, summarize and link to the relevant active design or
+  ADR.
+- ADRs only when the rationale doesn't fit in one in-band sentence.
+  If you're drafting an ADR per design, recalibrate.
+
 ## Principles (the contract a good design satisfies)
 
 These are the principles your role doc names, restated as a checklist
