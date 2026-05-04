@@ -56,7 +56,6 @@ in each component's `## Evolution` section and in git.
 | [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | ro | [0054](../designs/wip/0054-orchestrator-github-state-reconciliation.md) |
 | [0056](./wip/0056-worker-dispatch-durability.md) | Worker dispatch durability — move worker subprocesses out of the HTTP service | ro | [0056](../designs/wip/0056-worker-dispatch-durability.md) |
 | [0062](./wip/0062-actionable-pipeline-stuck-slack-notifications.md) | Actionable pipeline-stuck Slack notifications | ro | [0067](../designs/wip/0067-enable-stuck-pipeline-slack-paging-at-15-minute-threshold.md) |
-| [0064](./wip/0064-schema-gate-recovery-persist-and-replay-exhausted-worker-output.md) | Schema-gate recovery: persist and replay exhausted worker output | ro | [0064](../designs/wip/0064-schema-gate-recovery.md) |
 
 ## Deprecated
 

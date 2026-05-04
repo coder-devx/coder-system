@@ -762,26 +762,3 @@ designs:
   affects_services:
   - coder-core
   parent: worker-roles
-- id: '0064'
-  title: 'Schema-gate recovery: persist and replay exhausted worker output'
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0064-schema-gate-recovery.md
-  implements_specs:
-  - '0064'
-  related_designs:
-  - worker-roles
-  - pm-worker
-  - architect-worker
-  - team-manager-worker
-  - admin-panel
-  - worker-communication
-  - audit-log
-  affects_services:
-  - coder-core
-  - coder-admin
-  affects_repos:
-  - coder-core
-  - coder-admin
-  parent: pipeline-operations

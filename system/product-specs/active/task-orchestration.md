@@ -433,6 +433,29 @@ and `/pipeline-runs` endpoints in `coder-core`.
   circuit breakers (cost cap, per-stage retry cap, stuck-stage)
   are follow-up; the Cloud Run Job `coder-core-spec-coord-tick`
   schedule lands as part of that follow-up too.
+- `0064` — schema-gate recovery (shipped 2026-05-04): the dispatcher
+  now persists the full untruncated last-attempt raw output on
+  ``tasks.raw_output_held`` (TEXT, migration 0059) when the
+  compliance gate exhausts its retry budget. New endpoint
+  ``POST /v1/projects/{id}/tasks/{task_id}/gate-replay`` accepts
+  ``{"raw_output": "..."}``: re-runs the task's role-specific schema
+  validator in a single pass (no re-prompting — operator path), and on
+  pass stores the parsed payload as ``tasks.result``, transitions the
+  row to ``status='succeeded'`` (clearing failure_kind / failure_detail
+  / error and flipping ``stage`` from ``stuck`` back to ``accepted``),
+  and emits ``schema_replay.{attempted,passed}`` audit rows; on fail
+  returns ``422 {errors: [...]}`` with the validator messages and emits
+  ``schema_replay.{attempted,failed}``. Admin TaskDetail renders the
+  held output read-only and exposes a "Replay gate" button that opens
+  an editable textarea pre-populated with it; submit posts back to the
+  endpoint and the panel unmounts on pass via parent re-fetch. Phase 4
+  side-effects (knowledge-repo writes, registry updates) on a passed
+  replay are *not* invoked from the replay seam — operators trigger
+  them via task retry (which sees the validated ``tasks.result``) or
+  by manually performing the side-effect; called out as deferred
+  follow-up in the replay service docstring. Three new audit actions —
+  ``schema_replay.attempted``, ``schema_replay.passed``,
+  ``schema_replay.failed`` — give operators the full replay history.
 
 ## Links
 
