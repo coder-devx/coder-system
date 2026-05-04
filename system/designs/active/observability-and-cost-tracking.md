@@ -103,7 +103,14 @@ flowchart TB
 ## Interfaces
 
 - `GET /v1/projects/{id}/metrics?period=<1d|7d|30d>` →
-  `{daily_cost, success_rate, per_spec_cost, stage_durations_avg}`.
+  `{daily_cost, success_rate, per_spec_cost, stage_durations_avg,
+  cache_stats, daily_cache_stats, …}`. The `daily_cache_stats` field
+  (one entry per (date × role) over the requested window, with
+  `cache_read_tokens`, `cache_creation_tokens`, `total_input_tokens`,
+  `cache_hit_rate`, `task_count`) backs the admin "Daily Cache Trend"
+  grid; computed at request time from the `tasks` table on the
+  existing `(project_id, finished_at)` index. `cache_hit_rate` is
+  null when `total_input_tokens = 0`.
 - Slack: outbound webhook on threshold breach.
 - Admin panel route: `/metrics`.
 - Env vars: `SLACK_COST_ALERT_THRESHOLD`,
@@ -125,6 +132,13 @@ flowchart TB
   structured-log feed but write to separate tables
   (`task_stage_durations`, `regression_events`, `gc_events` here;
   `audit_events` there). See [audit-log](./audit-log.md).
+- `0065` — per-role daily cache hit rate trend (shipped
+  2026-05-04): `daily_cache_stats` field on the metrics endpoint
+  exposes a (date × role) breakdown so operators can spot the day
+  a cache-hit-rate regression landed instead of seeing only the
+  period aggregate. Backed by an at-request-time SQL groupby; no
+  new table. The admin panel renders a colour-coded grid with a
+  ▼ marker on day-over-day drops ≥ 30pp.
 
 ## Links
 

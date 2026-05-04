@@ -804,25 +804,6 @@ designs:
   - coder-core
   - coder-admin
   parent: pipeline-operations
-- id: '0065'
-  title: Per-role daily cache hit rate trend in metrics
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0065-per-role-daily-cache-hit-rate-trend.md
-  implements_specs:
-  - '0065'
-  related_designs:
-  - observability-and-cost-tracking
-  - admin-panel
-  - worker-roles
-  affects_services:
-  - coder-core
-  - coder-admin
-  affects_repos:
-  - coder-core
-  - coder-admin
-  parent: pipeline-operations
 - id: '0068'
   title: 'Spec-lifecycle coordinator: auto-chain PM → Architect → TM transitions'
   status: wip

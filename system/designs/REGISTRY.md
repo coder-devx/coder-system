@@ -59,7 +59,6 @@ Logical components of the Coder system as it exists today.
 | [0057](./wip/0057-role-prompt-knowledge-layout.md) | Role prompt knowledge layout — move per-role and per-mode worker prompts into the knowledge repo | ro | — | — |
 | [0063](./wip/0063-compliance-gate-retry-visibility.md) | Compliance Gate Retry Visibility | ro | [0063](../product-specs/wip/0063-compliance-gate-retry-visibility.md) | — |
 | [0064](./wip/0064-schema-gate-recovery.md) | Schema-gate recovery: persist and replay exhausted worker output | ro | [0064](../product-specs/wip/0064-schema-gate-recovery-persist-and-replay-exhausted-worker-output.md) | — |
-| [0065](./wip/0065-per-role-daily-cache-hit-rate-trend.md) | Per-role daily cache hit rate trend in metrics | ro | [0065](../product-specs/wip/0065-per-role-daily-cache-hit-rate-trend-in-metrics.md) | — |
 | [0066](./wip/0066-navigation-tree-pattern.md) | Navigation tree pattern for specs, designs, and ADRs | ro | — | — |
 | [0067](./wip/0067-enable-stuck-pipeline-slack-paging-at-15-minute-threshold.md) | Enable stuck-pipeline Slack paging at 15-minute threshold | ro | — | — |
 | [0068](./wip/0068-spec-lifecycle-coordinator.md) | Spec-lifecycle coordinator: auto-chain PM → Architect → TM transitions | ro | [0068](../product-specs/wip/0068-spec-lifecycle-coordinator.md) | [0015](../adrs/0015-ship-gate-in-coder-pipeline.md) |

@@ -572,15 +572,6 @@ specs:
   served_by_designs:
   - '0064'
   parent: pipeline-operations
-- id: '0065'
-  title: Per-role daily cache hit rate trend in metrics
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0065-per-role-daily-cache-hit-rate-trend-in-metrics.md
-  served_by_designs:
-  - '0065'
-  parent: pipeline-operations
 - id: '0068'
   title: 'Spec-lifecycle coordinator: auto-chain PM → Architect → TM transitions'
   status: wip

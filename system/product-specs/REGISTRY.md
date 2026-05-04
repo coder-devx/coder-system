@@ -58,7 +58,6 @@ in each component's `## Evolution` section and in git.
 | [0062](./wip/0062-actionable-pipeline-stuck-slack-notifications.md) | Actionable pipeline-stuck Slack notifications | ro | [0067](../designs/wip/0067-enable-stuck-pipeline-slack-paging-at-15-minute-threshold.md) |
 | [0063](./wip/0063-compliance-gate-retry-visibility.md) | Compliance Gate Retry Visibility | ro | [0063](../designs/wip/0063-compliance-gate-retry-visibility.md) |
 | [0064](./wip/0064-schema-gate-recovery-persist-and-replay-exhausted-worker-output.md) | Schema-gate recovery: persist and replay exhausted worker output | ro | [0064](../designs/wip/0064-schema-gate-recovery.md) |
-| [0065](./wip/0065-per-role-daily-cache-hit-rate-trend-in-metrics.md) | Per-role daily cache hit rate trend in metrics | ro | [0065](../designs/wip/0065-per-role-daily-cache-hit-rate-trend.md) |
 | [0068](./wip/0068-spec-lifecycle-coordinator.md) | Spec-lifecycle coordinator: auto-chain PM → Architect → TM transitions | ro | [0068](../designs/wip/0068-spec-lifecycle-coordinator.md) |
 
 ## Deprecated
