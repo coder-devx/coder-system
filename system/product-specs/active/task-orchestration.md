@@ -180,6 +180,40 @@ and `/pipeline-runs` endpoints in `coder-core`.
   is set — operators approve, request-changes, or reject a pending
   spec/design without leaving the run view. Runbook:
   [`pipeline-run-blocked`](../../runbooks/pipeline-run-blocked.md).
+- **Spec-lifecycle coordinator.** A per-spec lifecycle state machine
+  generalises ADR 0015's close-cycle backstop one level up. The
+  `spec_runs` table (migration 0061) tracks each WIP spec as it moves
+  `accepted → designing → design_landed → planning → plan_pending →
+  implementing → ship_pending → shipped` (plus `deprecated` and
+  `paused`). PM-accept Phase 4 calls `spec_run_service.start_run` to
+  insert the row in `accepted`. A new Cloud Run Job
+  `coder-core-spec-coord-tick` runs `coder_core.spec_runs.coordinator.tick`
+  every 60 s, claims active runs with `FOR UPDATE SKIP LOCKED`, and
+  for each one probes the next transition: `accepted → designing` via
+  `dispatch_architect` (creates a `role=architect` task with
+  `prompt: design: <wip>`), `designing → planning` via
+  `dispatch_team_manager` (creates a `role=team-manager` decompose task)
+  when the architect's task lands `succeeded`. Both dispatchers are
+  idempotent — an existing non-terminal task for the WIP causes the
+  coordinator to reattach with `trigger="manual_override"` rather than
+  duplicate-dispatch. Service module `coder_core.spec_runs.service`
+  is the only writer of `spec_runs.state`; concurrent ticks observe
+  the already-advanced row via `SELECT FOR UPDATE` and become no-ops.
+  Operators read state via `GET /v1/projects/{id}/spec-runs[?state=]`
+  (list + filter) and `/spec-runs/{wip_spec_id}` (detail with full
+  `spec_run.transitioned` audit history); pause/resume via
+  `POST .../{wip_spec_id}/{pause,resume}`. The admin Specs page
+  (`/projects/:id/specs`, behind `VITE_SPEC_COORDINATOR_ENABLED`)
+  renders the fleet view with per-row pause/resume buttons. Three
+  audit actions — `spec_run.transitioned`, `spec_run.paused`,
+  `spec_run.resumed` — let operators reconstruct any spec's lifecycle
+  from the audit log alone. Later-state probes (`planning →
+  plan_pending`, `plan_pending → implementing`, `implementing →
+  ship_pending`) and circuit breakers (cost cap, retry cap,
+  stuck-stage) are follow-up. ADR 0015 still constrains
+  scope: human approval gates remain at PM-accept, plan-approve, and
+  ship-merge; the coordinator only auto-dispatches at the spawn
+  points between them.
 
 ## Interfaces
 
@@ -367,6 +401,38 @@ and `/pipeline-runs` endpoints in `coder-core`.
   warning and leave the env untouched (graceful for local-dev
   paths without a GitHub App). Realised pain: architect task
   `62e0c95e` (2026-04-27).
+- `0068` — spec-lifecycle coordinator (shipped 2026-05-04): generalises
+  ADR 0015's close-cycle backstop into a per-spec state machine.
+  Migration 0061 adds `spec_runs(id, project_id, wip_spec_id, state,
+  current_task_id, paused_reason, cost_*_tokens, stage_retry_counts,
+  created_at, updated_at)` with unique `(project_id, wip_spec_id)`.
+  Service module `coder_core.spec_runs.service` owns all state
+  mutations (`start_run`, `advance`, `pause`, `resume`, `record_cost`,
+  `bump_retry`); audit constants `spec_run.{transitioned,paused,resumed}`
+  let operators reconstruct any run's full lifecycle. Coordinator
+  module `coder_core.spec_runs.coordinator.tick` claims active runs
+  with `FOR UPDATE SKIP LOCKED` and dispatches the next role's task
+  at each transition: `dispatch_architect` on `accepted → designing`,
+  `dispatch_team_manager` on `designing → planning` (gated on the
+  architect task having reached `succeeded`). Both dispatchers are
+  idempotent on the existing-non-terminal-task check, so a manual
+  spawn before the coordinator runs is reattached with
+  `trigger="manual_override"` rather than duplicated. PM-accept
+  Phase 4 in `workers/dispatcher.py` now calls `start_run` on the
+  `all_pass=True` branch (fail-open on DB hiccups so accept never
+  blocks). REST API `coder_core/api/spec_runs.py` exposes
+  `GET /v1/projects/{id}/spec-runs[?state=]`,
+  `GET .../spec-runs/{wip_spec_id}` (detail with transition history),
+  `POST .../{wip_spec_id}/{pause,resume}`. Admin
+  `coder-admin/src/pages/Specs.tsx` (behind
+  `VITE_SPEC_COORDINATOR_ENABLED`) renders the fleet view with
+  per-row pause/resume actions gated to admin scope. Later-state
+  probes (`planning → plan_pending` via task_plans existence,
+  `plan_pending → implementing` via plan-approve audit,
+  `implementing → ship_pending` via close-cycle backstop) and
+  circuit breakers (cost cap, per-stage retry cap, stuck-stage)
+  are follow-up; the Cloud Run Job `coder-core-spec-coord-tick`
+  schedule lands as part of that follow-up too.
 
 ## Links
 
