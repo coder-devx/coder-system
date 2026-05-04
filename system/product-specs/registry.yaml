@@ -551,6 +551,8 @@ specs:
   owner: ro
   folder: wip
   file: wip/0062-actionable-pipeline-stuck-slack-notifications.md
+  served_by_designs:
+  - '0067'
   parent: pipeline-operations
 - id: '0063'
   title: Compliance Gate Retry Visibility
