@@ -9,7 +9,8 @@ updated: '2026-05-02'
 last_verified_at: '2026-05-02'
 deprecated_at: null
 reason: null
-served_by_designs: []
+served_by_designs:
+- '0067'
 related_specs:
 - escalations
 - admin-panel
