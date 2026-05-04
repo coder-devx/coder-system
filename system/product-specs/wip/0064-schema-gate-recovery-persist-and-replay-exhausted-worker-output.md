@@ -19,7 +19,7 @@ parent: pipeline-operations
 # Schema-gate recovery: persist and replay exhausted worker output
 
 **Phase:** wip
-**Progress:** 0 / 5 acceptance criteria
+**Progress:** 1 / 5 acceptance criteria — AC1 shipped (raw_output_held column + dispatcher write); AC2-5 (admin render + replay endpoint + UI) still in flight
 
 ## Problem
 
