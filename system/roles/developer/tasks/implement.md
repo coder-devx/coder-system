@@ -79,6 +79,15 @@ would have caught (an import the formatter dropped, a test you didn't
 realise touched a flag, a snapshot you didn't refresh). The local
 run costs you minutes; a CI failure costs you a full pipeline cycle.
 
+**Run the project's formatter before commit.** CI runs
+`ruff format --check` (or the JS equivalent) and rejects unformatted
+diffs with a 10-second `check` failure — it then *skips* every
+downstream job (`build`, `deploy`), so a single missing
+`uv run ruff format .` (or `pnpm prettier --write .`) wastes a full
+pipeline cycle and shows up as a `check fail` on the PR. Read the
+project's `AGENTS.md` / `CLAUDE.md` for the exact command — `make
+fmt` is a common alias. Never push without it.
+
 ### 4. Stage, commit, push
 
 ```bash
@@ -164,6 +173,11 @@ and the operator picks it up.
   sends back to split; burns a cycle.
 - **Skipping the local test run.** Push fails CI on the first attempt;
   `ci_watcher` re-dispatches; the loop costs ~2× a clean run.
+- **Skipping `ruff format` / `prettier`.** CI's first job is the
+  formatter check — push without it and `check` fails in 10 s while
+  every downstream job (`build`, `deploy`) is skipped. The Reviewer
+  sees a red `check` and `request_changes` immediately. `make fmt`
+  before commit is non-negotiable.
 - **Forging a `PR:` URL.** The Reviewer's first action is `gh pr view`
   on the URL — a forged or stale URL is immediately visible and the
   task fails harder than a `NO_PR:` would have.
