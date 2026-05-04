@@ -563,19 +563,3 @@ specs:
   served_by_designs:
   - '0064'
   parent: pipeline-operations
-- id: '0068'
-  title: 'Spec-lifecycle coordinator: auto-chain PM → Architect → TM transitions'
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0068-spec-lifecycle-coordinator.md
-  served_by_designs:
-  - '0068'
-  related_specs:
-  - task-orchestration
-  - observability
-  - escalations
-  - multi-tenancy
-  - admin-panel
-  - audit-log
-  parent: pipeline-operations
