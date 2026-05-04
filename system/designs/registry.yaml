@@ -762,25 +762,6 @@ designs:
   affects_services:
   - coder-core
   parent: worker-roles
-- id: '0063'
-  title: Compliance Gate Retry Visibility
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0063-compliance-gate-retry-visibility.md
-  implements_specs:
-  - '0063'
-  related_designs:
-  - observability-and-cost-tracking
-  - worker-roles
-  - admin-panel
-  affects_services:
-  - coder-core
-  - coder-admin
-  affects_repos:
-  - coder-core
-  - coder-admin
-  parent: pipeline-operations
 - id: '0064'
   title: 'Schema-gate recovery: persist and replay exhausted worker output'
   status: wip
