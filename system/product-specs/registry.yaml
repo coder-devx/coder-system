@@ -554,12 +554,3 @@ specs:
   served_by_designs:
   - '0067'
   parent: pipeline-operations
-- id: '0064'
-  title: 'Schema-gate recovery: persist and replay exhausted worker output'
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0064-schema-gate-recovery-persist-and-replay-exhausted-worker-output.md
-  served_by_designs:
-  - '0064'
-  parent: pipeline-operations
