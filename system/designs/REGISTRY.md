@@ -57,7 +57,6 @@ Logical components of the Coder system as it exists today.
 | [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | ro | [0054](../product-specs/wip/0054-orchestrator-github-state-reconciliation.md) | — |
 | [0056](./wip/0056-worker-dispatch-durability.md) | Worker dispatch durability — move worker subprocesses out of the HTTP service | ro | [0056](../product-specs/wip/0056-worker-dispatch-durability.md) | — |
 | [0057](./wip/0057-role-prompt-knowledge-layout.md) | Role prompt knowledge layout — move per-role and per-mode worker prompts into the knowledge repo | ro | — | — |
-| [0063](./wip/0063-compliance-gate-retry-visibility.md) | Compliance Gate Retry Visibility | ro | [0063](../product-specs/wip/0063-compliance-gate-retry-visibility.md) | — |
 | [0064](./wip/0064-schema-gate-recovery.md) | Schema-gate recovery: persist and replay exhausted worker output | ro | [0064](../product-specs/wip/0064-schema-gate-recovery-persist-and-replay-exhausted-worker-output.md) | — |
 | [0066](./wip/0066-navigation-tree-pattern.md) | Navigation tree pattern for specs, designs, and ADRs | ro | — | — |
 | [0067](./wip/0067-enable-stuck-pipeline-slack-paging-at-15-minute-threshold.md) | Enable stuck-pipeline Slack paging at 15-minute threshold | ro | — | — |

@@ -139,6 +139,15 @@ flowchart TB
   period aggregate. Backed by an at-request-time SQL groupby; no
   new table. The admin panel renders a colour-coded grid with a
   ▼ marker on day-over-day drops ≥ 30pp.
+- `0063` — compliance-gate retry visibility (shipped 2026-05-04):
+  new `compliance_retry_events` table (migration 0060) records
+  one row per gate invocation (gate_role, attempt_count, outcome,
+  failure_kind). New `GET /v1/projects/{id}/compliance-metrics?period`
+  returns a rolling-window rollup keyed by gate_role. Admin panel
+  adds a ComplianceMetrics page (per-role gate-retry rate + recent
+  failures table) so operators can spot a sudden surge in compliance
+  retries — typically a worker-prompt regression that's burning
+  budget on schema fixes. Behind `VITE_COMPLIANCE_METRICS_ENABLED`.
 
 ## Links
 

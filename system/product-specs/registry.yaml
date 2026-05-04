@@ -554,15 +554,6 @@ specs:
   served_by_designs:
   - '0067'
   parent: pipeline-operations
-- id: '0063'
-  title: Compliance Gate Retry Visibility
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0063-compliance-gate-retry-visibility.md
-  served_by_designs:
-  - '0063'
-  parent: pipeline-operations
 - id: '0064'
   title: 'Schema-gate recovery: persist and replay exhausted worker output'
   status: wip
