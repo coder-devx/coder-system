@@ -1,0 +1,8 @@
+# Typical fixture repo for coder migrate test runs.
+# Has enough shape for the baseline migration and additive migrations
+# to produce real FileChange output.
+template_version: 0
+
+repos:
+  - name: example-service
+    default_branch: main

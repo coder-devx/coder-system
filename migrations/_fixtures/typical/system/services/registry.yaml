@@ -1,0 +1,8 @@
+# Source of truth for the services registry in this fixture repo.
+
+services:
+  - id: example-service
+    name: Example Service
+    status: active
+    owner: fixture
+    file: example-service.md

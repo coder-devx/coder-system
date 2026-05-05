@@ -97,6 +97,11 @@ runbooks:
   status: active
   owner: ro
   file: ship-wip-into-active.md
+- id: template-migration
+  title: Template schema migration — author, test, roll out, and recover
+  status: active
+  owner: ro
+  file: template-migration.md
 - id: update-agent-context
   title: Update Coder Agent context without redeploy
   status: active

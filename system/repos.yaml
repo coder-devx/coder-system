@@ -1,3 +1,5 @@
+template_version: 1
+
 # Workspace contract for coder-core's role workers.
 #
 # This file is read by the coder-core dispatcher every time a developer

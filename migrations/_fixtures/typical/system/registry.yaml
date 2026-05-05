@@ -1,0 +1,6 @@
+# Top-level artifact registry for the typical fixture repo.
+# Points to the per-artifact-type sub-registries.
+
+registries:
+  services: system/services/registry.yaml
+  designs: system/designs/registry.yaml

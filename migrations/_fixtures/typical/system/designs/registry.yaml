@@ -1,0 +1,11 @@
+# Source of truth for the designs registry in this fixture repo.
+
+designs:
+  wip:
+    - id: '0001'
+      title: Example feature
+      status: wip
+      owner: fixture
+      file: wip/0001-example-feature.md
+  active: []
+  deprecated: []

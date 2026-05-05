@@ -1,0 +1,101 @@
+# migrations/knowledge/_TEMPLATE.yaml
+#
+# Annotated example YAML declarative migration.
+# Copy to 00NN-your-slug.yaml for simple, structural schema changes.
+# Use a .py migration instead when you need conditional logic,
+# per-artifact value inspection, or anything the five operations below
+# cannot express.
+#
+# The YAML interpreter executes operations in the order they are listed.
+# All five kinds are shown here; include only those you need.
+
+# number: integer, unique across all migration files.
+# Same pool as .py migrations — check both when picking the next number.
+number: 1
+
+# slug: kebab-case, 2–5 words.  Used in branch names and PR titles.
+slug: "example-yaml-migration"
+
+# description: one sentence summarising the schema change.
+description: "Example: rename a frontmatter key and add a new key with a default."
+
+# target_version: integer, usually == number.
+target_version: 1
+
+# allow_batching: bool, default false.
+# Set to true only for additive-only changes safe to apply in partial batches.
+allow_batching: false
+
+# expected_nonempty_at_least_one_project: bool, default false.
+# Set to true if this migration must produce output on at least one project.
+expected_nonempty_at_least_one_project: false
+
+# validator_aliases: map of old_key -> new_key.
+# Required for rename_frontmatter_key operations so CI accepts both names
+# during the migration window (ADR 0019).  Omit for additive/remove ops.
+validator_aliases:
+  old_field_name: new_field_name
+
+# operations: list of migration steps executed in order.
+operations:
+
+  # -------------------------------------------------------------------------
+  # rename_frontmatter_key
+  # Renames a frontmatter key in every matching artifact.
+  # If the `from` key is absent the artifact is left unchanged (idempotent).
+  # Always pair with a validator_aliases entry so the CI validator accepts
+  # both names during the migration window.
+  # -------------------------------------------------------------------------
+  - kind: rename_frontmatter_key
+    # in_types: list of artifact types to target.
+    # Valid values mirror the `type:` field in frontmatter:
+    #   service, design, spec, adr, role, runbook, integration, repo
+    in_types: [service]
+    from: old_field_name   # key to rename
+    to: new_field_name     # replacement key; value is preserved verbatim
+
+  # -------------------------------------------------------------------------
+  # add_frontmatter_key_with_default
+  # Adds a new key with a default value to every matching artifact.
+  # If the key already exists the artifact is left unchanged (idempotent).
+  # Use for purely additive schema changes (new optional fields).
+  # -------------------------------------------------------------------------
+  - kind: add_frontmatter_key_with_default
+    in_types: [service, design]
+    key: criticality       # new frontmatter key to insert
+    default: standard      # default value written when key is absent
+    # position: after      # optional: where to insert relative to a neighbour
+    # after_key: owner     # neighbour key (requires position: after)
+
+  # -------------------------------------------------------------------------
+  # remove_frontmatter_key
+  # Removes a key from every matching artifact.
+  # If the key is absent the artifact is left unchanged (idempotent).
+  # Per ADR 0021, removal must be preceded by a deprecation migration
+  # (DEPRECATED = ["key_name"] in a lower-numbered .py migration) that
+  # makes the key emit a CI warning before this removal migration lands.
+  # -------------------------------------------------------------------------
+  - kind: remove_frontmatter_key
+    in_types: [service]
+    key: deprecated_field  # key to remove; value is discarded
+
+  # -------------------------------------------------------------------------
+  # move_folder
+  # Moves every file from `from` to `to` and updates `registry.yaml`
+  # entries (`file` and `folder` fields) in the target folder.
+  # The cross-link checker re-runs after the move.
+  # The SDK rejects moves that target active/, wip/, or deprecated/ paths.
+  # -------------------------------------------------------------------------
+  - kind: move_folder
+    from: system/old-folder/     # source folder (trailing slash optional)
+    to: system/new-folder/       # destination folder
+
+  # -------------------------------------------------------------------------
+  # rename_folder
+  # Shortcut for move_folder when only the leaf name changes.
+  # Equivalent to: move every file from `from/` to `to/`.
+  # Keeps parent path identical; only the final path segment differs.
+  # -------------------------------------------------------------------------
+  - kind: rename_folder
+    from: system/services/       # original folder name
+    to: system/components/       # new folder name
