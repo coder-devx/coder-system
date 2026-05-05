@@ -1,0 +1,8 @@
+# Design registry for the typical fixture repo.
+
+designs:
+  - id: "0001"
+    title: Example Design
+    status: wip
+    owner: ro
+    file: wip/0001-example-design.md

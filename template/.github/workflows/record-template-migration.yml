@@ -1,0 +1,33 @@
+name: Record template migration merge
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  record:
+    if: >
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'template-migration/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse migration ref
+        id: parse
+        run: |
+          # branch: template-migration/00NN-slug-bK or template-migration/00NN-slug
+          ref="${{ github.event.pull_request.head.ref }}"
+          number=$(echo "$ref" | grep -oP '(?<=template-migration/)\d+')
+          batch=$(echo "$ref" | grep -oP '(?<=-b)\d+$' || echo "1")
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "batch=$batch"   >> "$GITHUB_OUTPUT"
+      - name: POST merge callback
+        run: |
+          curl -fsSL -X POST \
+            -H "Authorization: Bearer ${{ secrets.CODER_ADMIN_TOKEN }}" \
+            -H "X-GitHub-Delivery: ${{ github.sha }}" \
+            -H "Content-Type: application/json" \
+            -d '{"merged_at":"${{ github.event.pull_request.merged_at }}",
+                 "merge_commit_sha":"${{ github.event.pull_request.merge_commit_sha }}"}' \
+            "${{ vars.CODER_CORE_URL }}/v1/_admin/template/migrations\
+/${{ github.repository_owner }}-${{ github.event.repository.name }}\
+/${{ steps.parse.outputs.number }}/${{ steps.parse.outputs.batch }}/merged"

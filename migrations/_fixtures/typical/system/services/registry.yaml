@@ -1,0 +1,8 @@
+# Service registry for the typical fixture repo.
+
+services:
+  - id: example-service
+    name: Example Service
+    status: active
+    owner: ro
+    file: example-service.md
