@@ -762,3 +762,10 @@ designs:
   affects_services:
   - coder-core
   parent: worker-roles
+- id: 0068
+  title: Template Schema Migration
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0068-template-schema-migration.md
+  parent: knowledge-stack
