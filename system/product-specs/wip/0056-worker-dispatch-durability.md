@@ -5,8 +5,8 @@ type: spec
 status: wip
 owner: ro
 created: 2026-04-28
-updated: 2026-04-28
-last_verified_at: 2026-04-28
+updated: 2026-05-05
+last_verified_at: 2026-05-05
 served_by_designs: ["0056"]
 related_specs:
   - task-orchestration
@@ -217,6 +217,11 @@ The design (spec 0056-design) refines:
 - **AC7** — Cloud Run cost per worker-minute is within ±20 % of the
   pre-change cost (back-of-envelope; observability spec 0032's cost
   alerts cover the actual measurement).
+- **AC8** *(2026-05-05 addition — gates Phase 3)* — Reviewer
+  `orchestrator_died` rate over a 7-day window on a Job-mode-enabled
+  project drops to ≤ 5%. Currently 50% on the Coder project despite
+  `worker_via_job_enabled=TRUE`. Phase 3 fleet-default flip cannot
+  proceed until this AC is met. Investigation owner: TBD.
 
 ## Rollout
 
@@ -271,6 +276,71 @@ the legacy path inherited from the FastAPI app. Worth recording so the
 next system that inherits a "shared internal API runs in two
 container types" pattern remembers to look for app-startup-time side
 effects.
+
+### 2026-05-05 — Phase 2 has NOT eliminated orphan deaths
+
+Production data over the 7-day window ending 2026-05-05 shows the
+durability gap is **wider than the pre-Phase-2 model suggested**:
+
+| Role | Tasks | `orchestrator_died` | Death rate |
+|---|---|---|---|
+| reviewer | 18 | 9 | **50%** |
+| developer | 27 | 3 | 11% |
+
+**Every one of the 12 deaths is on the `coder` project — which has
+`worker_via_job_enabled=TRUE`.** The other four projects (Broker
+Test, Smoke, Archive smoke, VibeTrade) had no dispatches in the
+window. So Phase 2 is in effect for every observed death; the Job
+path is **not** preventing them.
+
+Cost impact: ~$50/day in lost compute (turn-level, from `task_turns`
+× Sonnet 4.x pricing). That's ~30% of total daily LLM spend across
+all roles. The biggest single waste source in the system today,
+ahead of the audit-dup bug ($1.50-6/day) and TM-rerun bug
+(~$1.50/week).
+
+#### Hypotheses (need investigation, none confirmed)
+
+1. **Cloud Run Jobs themselves are not survivor-of-instance-churn.**
+   Job executions can be evicted on the underlying compute the same
+   way services can. If a Job execution is killed mid-run, the worker
+   subprocess inside it dies with the same lost-progress signature
+   as the legacy path. Worth measuring: do `failure_kind=orchestrator_died`
+   rows for the Coder project correlate with Cloud Run Job execution
+   failures (`gcloud run jobs executions list --filter='status.state!=Succeeded'`)?
+
+2. **The kick fell back to the legacy path.** [tasks/service.py:251-266](https://github.com/coder-devx/coder-core/blob/main/src/coder_core/tasks/service.py#L251)
+   has a graceful fallback to `_schedule_in_process_dispatch` when
+   `gcp_project_id` is unset or `kick_worker_job` errors. If a
+   transient error causes silent fallback, the row is still created
+   but routes through the broken legacy path. Verify by joining
+   `tasks.failure_kind='orchestrator_died'` rows against logs for
+   `dispatch_via_job.no_gcp_project` / `kick_worker_job` errors.
+
+3. **Reviewer/dev loops exceed the Job task-timeout.** Settings says
+   `coder_worker_job_task_timeout` (separate from the developer
+   subprocess timeout). If a Cloud Run Job execution hits its
+   `--task-timeout` ceiling, GCP terminates the container and the
+   worker exits without a terminal status writeback — looks
+   identical to orphan death from the DB's POV. Reviewer p95 latency
+   was 12 min on observed reviews; if the Job task-timeout is below
+   that, this is the primary cause.
+
+4. **Long agentic loops trigger Job memory limits.** A 700-turn
+   reviewer accumulates 17M cache_read tokens in working memory.
+   If the Job container's memory ceiling is hit, GKE/Cloud Run kills
+   it. Same DB-side signature.
+
+#### Phase 3 cannot proceed until the death rate drops
+
+The original Phase 3 plan was "flip fleet default" once Phase 2 soak
+showed zombie rate dropping to ~0. Phase 2 soak instead shows the
+zombie rate is **higher than expected** for the long-loop roles. The
+fleet-flip is therefore **blocked** until the hypotheses above are
+investigated and the actual mechanism is fixed.
+
+This update treats spec 0056 as not-yet-shipped despite Phase 2
+opt-in. Phase 3 is gated on a new acceptance criterion (AC8 below).
 
 ## Open questions
 
