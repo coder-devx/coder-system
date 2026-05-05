@@ -47,6 +47,11 @@ runbooks:
   status: active
   owner: ro
   file: escalations-firing.md
+- id: fleet-patterns
+  title: Fleet pattern index — operate and interpret
+  status: active
+  owner: ro
+  file: fleet-patterns.md
 - id: knowledge-freshness-audit
   title: Knowledge freshness audit — setup + weekly triage
   status: active
