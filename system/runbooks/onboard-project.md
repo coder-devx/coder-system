@@ -5,7 +5,7 @@ type: runbook
 status: active
 owner: ro
 created: 2026-04-10
-updated: 2026-04-10
+updated: 2026-05-05
 last_verified_at: 2026-04-11
 applies_to_services: [coder-core]
 applies_to_integrations: [gcp, github]
@@ -215,6 +215,24 @@ git push
 - `coder impersonate developer --project={project}` mints a token.
 - `coder project doctor {project}` passes all checks.
 
+## Step 11: Cold-start ingestion
+
+Run the cold-start ingester to populate the new knowledge repo from the project's code:
+
+```sh
+coder project ingest {project} --from https://github.com/{org}/{repo} --ref main --wait
+```
+
+This typically takes 30–90 minutes for a repo under 50 kLoC. When it completes, the command prints the PR URL. Review the PR per the [cold-start review checklist](./cold-start-review.md) before merging.
+
+The PR is titled `cold-start: {project}` and is opened against the project's knowledge repo. It will **not** merge automatically — a human merge is required.
+
+If the command exits before the PR opens, check the run status:
+
+```sh
+coder project ingest {project} --status
+```
+
 ## If something goes wrong
 
 | Symptom | Cause | Fix |
@@ -225,6 +243,7 @@ git push
 | Task fails with `SecretReadError` | Anthropic key version not uploaded | `gcloud secrets versions list coder-{project}-developer-anthropic-api-key --project=vibedevx` — if 0 versions, upload one per step 2 |
 | 500 on task endpoints | Missing DB migration | Run `alembic upgrade head` per [`run-migration-coder-core.md`](./run-migration-coder-core.md) |
 | Impersonation returns 422 "unknown_role" | Role not in dispatcher's `_RUNNERS` | Only `developer` is supported in v1 |
+| `coder project ingest` returns 503 | Fleet flag off or project not opted in | Set `projects.cold_start_enabled=true` for the project in the DB, or flip `CODER_COLD_START_ENABLED=true` fleet-wide |
 
 ## Notes
 
