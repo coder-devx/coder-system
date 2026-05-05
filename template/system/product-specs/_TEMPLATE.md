@@ -10,6 +10,8 @@ deprecated_at:
 reason:
 served_by_designs: []
 related_specs: []
+# optional — list pattern_ids from /v1/_admin/patterns that informed this artifact
+informed_by_patterns: []
 ---
 
 # {Title}

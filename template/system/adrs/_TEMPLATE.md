@@ -8,6 +8,8 @@ deciders: []
 supersedes:
 superseded_by:
 relates_to_designs: []
+# optional — list pattern_ids from /v1/_admin/patterns that informed this artifact
+informed_by_patterns: []
 ---
 
 # ADR 0000 — {Title}

@@ -42,6 +42,11 @@ runbooks:
   status: active
   owner: ro
   file: dispatching-developer-tasks.md
+- id: fleet-patterns
+  title: Fleet patterns — operate and interpret the cross-project pattern index
+  status: active
+  owner: ro
+  file: fleet-patterns.md
 - id: escalations-firing
   title: Escalations — operator guide
   status: active

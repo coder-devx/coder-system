@@ -13,6 +13,8 @@ decided_by: []
 related_designs: []
 affects_services: []
 affects_repos: []
+# optional — list pattern_ids from /v1/_admin/patterns that informed this artifact
+informed_by_patterns: []
 ---
 
 # {Title}
