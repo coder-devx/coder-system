@@ -44,19 +44,30 @@ against it. Knowledge fetches always go through `gh api`.
 ### 1. Create a feature branch
 
 Before touching any file, create and check out a feature branch named
-`task/<short-slug>`:
+`task/<task-id-first-8>-<short-slug>`:
 
 ```bash
-git checkout -b task/<short-slug>
+# task id is in your run context as "Task ID: <uuid>"; use the first
+# 8 hex chars as the deterministic prefix.
+git checkout -b task/abc12345-add-share-link-endpoint
 ```
 
-The slug is a 2–5-word kebab-case description of *what the task does*
-(`task/add-share-link-endpoint`, `task/fix-zombie-recovery-races`).
-Never the raw task UUID — unreadable, bloats the branch list, and
-breaks the convention every other Developer in this project follows.
+The slug is a 2–5-word kebab-case description of *what the task does*.
+The 8-char task-id prefix is **mandatory** and **deterministic** —
+two parallel executions of the same task (e.g. an orphan + an
+operator retry) MUST produce identical branch names so GitHub
+deduplicates the PR rather than letting both pushes succeed and
+opening twin PRs the operator has to clean up.
+
+Never the raw full UUID alone — unreadable, bloats the branch list.
+Never the slug alone — non-deterministic across retries, breaks dedup
+(the slug depends on your phrasing of the task). The 8-char prefix +
+slug shape gives both: deterministic uniqueness *plus* readability.
+
 The orchestrator correlates your PR back to the task by URL, not by
-branch name, so the slug exists for human readers (you, the Reviewer,
-the operator scanning `git branch -a`).
+branch name, so neither the prefix nor the slug is load-bearing for
+correlation — they exist for human readers and for orphan-dispatch
+dedup, respectively.
 
 ### 2. Implement the task
 
