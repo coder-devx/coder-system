@@ -1,0 +1,140 @@
+# Managed workflow — spec 0045
+# Installed and kept in sync by `coder managed-workflows sync` (spec 0052).
+# DO NOT hand-edit. Changes here are overwritten by the next sync.
+#
+# After a PR merges into the default branch, inspects each changed file.
+# For any cold-started artifact (ingestion_provenance.human_edited: false)
+# whose body was modified by the merge commit, rewrites human_edited to true
+# and commits the result back to the default branch.
+#
+# This is the safety latch for cold-start re-runs: once a human edits an
+# artifact body, future cold-start re-runs will never overwrite it again.
+# (spec 0045 AC5, AC6)
+#
+# No secrets required beyond the default GITHUB_TOKEN. The job needs
+# contents: write to push the follow-up commit.
+
+name: flip-cold-start-provenance
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  flip-provenance:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Detect and stage cold-started artifacts edited by this merge
+        id: flip
+        run: |
+          python3 - << 'PYEOF'
+          import re
+          import subprocess
+          import sys
+
+          # ── pure helpers (canonical copy in scripts/cold_start_provenance.py) ──
+
+          def parse_frontmatter(text):
+              if not text.startswith("---\n"):
+                  return None
+              end = text.find("\n---\n", 4)
+              if end == -1:
+                  return None
+              return text[4:end], text[end + 5:]
+
+          def has_ingestion_provenance(frontmatter):
+              return bool(re.search(r"^ingestion_provenance:", frontmatter, re.MULTILINE))
+
+          def human_edited_is_false(frontmatter):
+              return bool(re.search(r"^\s+human_edited:\s*false\s*$", frontmatter, re.MULTILINE))
+
+          def body_changed(before_text, after_text):
+              before_fm = parse_frontmatter(before_text)
+              after_fm  = parse_frontmatter(after_text)
+              before_body = before_fm[1] if before_fm else before_text
+              after_body  = after_fm[1]  if after_fm  else after_text
+              return before_body != after_body
+
+          def should_flip(before_text, after_text):
+              parsed = parse_frontmatter(after_text)
+              if parsed is None:
+                  return False
+              frontmatter, _ = parsed
+              if not has_ingestion_provenance(frontmatter):
+                  return False
+              if not human_edited_is_false(frontmatter):
+                  return False
+              if before_text is None:
+                  return False  # new file — not yet human-edited
+              return body_changed(before_text, after_text)
+
+          def flip_human_edited(text):
+              parsed = parse_frontmatter(text)
+              if parsed is None:
+                  return text
+              frontmatter, body = parsed
+              new_fm = re.sub(
+                  r"^(\s+human_edited:)\s*false\s*$",
+                  r"\1 true",
+                  frontmatter,
+                  flags=re.MULTILINE,
+              )
+              return f"---\n{new_fm}\n---\n{body}"
+
+          # ── main ─────────────────────────────────────────────────────────────
+
+          try:
+              changed = subprocess.check_output(
+                  ["git", "diff", "--name-only", "HEAD~1", "HEAD"],
+                  text=True,
+              ).strip().splitlines()
+          except subprocess.CalledProcessError as exc:
+              print(f"error: git diff failed: {exc}", file=sys.stderr)
+              sys.exit(1)
+
+          flipped = []
+          for path in changed:
+              try:
+                  after = open(path, encoding="utf-8").read()
+              except OSError:
+                  continue  # deleted file — skip
+
+              try:
+                  before = subprocess.check_output(
+                      ["git", "show", f"HEAD~1:{path}"],
+                      text=True,
+                  )
+              except subprocess.CalledProcessError:
+                  before = None  # file is new in this PR — skip
+
+              if should_flip(before, after):
+                  open(path, "w", encoding="utf-8").write(flip_human_edited(after))
+                  flipped.append(path)
+                  print(f"  flipped: {path}")
+
+          if not flipped:
+              print("no cold-started artifacts needed flipping — done")
+              sys.exit(0)
+
+          subprocess.check_call(["git", "add"] + flipped)
+          print(f"staged {len(flipped)} file(s) for follow-up commit")
+          PYEOF
+
+      - name: Commit and push flipped files
+        run: |
+          git config user.name  "coder-system-bot"
+          git config user.email "coder-system-bot@users.noreply.github.com"
+          if git diff --staged --quiet; then
+            echo "nothing staged — no follow-up commit needed"
+            exit 0
+          fi
+          git commit -m "chore(provenance): flip human_edited on cold-started artifacts [skip ci]"
+          git push
