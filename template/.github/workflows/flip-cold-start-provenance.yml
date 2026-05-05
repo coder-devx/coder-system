@@ -1,0 +1,149 @@
+# Managed workflow — spec 0045 / spec 0052
+# Installed and kept in sync by `coder managed-workflows sync` (spec 0052).
+# DO NOT hand-edit. Changes here are overwritten by the next sync.
+#
+# Fires after every PR merges into the default branch. For each Markdown
+# file in the merged diff that carries an ingestion_provenance block with
+# human_edited: false, the job checks whether the file's body (the text
+# after the closing --- delimiter) changed. If it did, the job rewrites
+# human_edited: false → human_edited: true and pushes a follow-up commit
+# attributed to coder-system-bot.
+#
+# Idempotent: files already at human_edited: true are skipped.
+# Safe no-op: exits 0 immediately when the PR contains no cold-started
+# artifacts that need flipping.
+#
+# Required permissions: contents: write (granted via job-level setting).
+# No additional secrets are needed beyond the default GITHUB_TOKEN.
+
+name: flip-cold-start-provenance
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  flip:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Check out the base branch (main) at the post-merge tip so that
+          # HEAD is the merge commit and HEAD~1 is the pre-merge tip.
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 2
+
+      - name: Flip human_edited on body-edited cold-start artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PYEOF'
+          import os
+          import re
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          # ── helpers ────────────────────────────────────────────────────────
+
+          def parse_frontmatter(text):
+              """Return (frontmatter_str, body_str) or None if no FM block."""
+              if not text.startswith('---\n'):
+                  return None
+              end = text.find('\n---\n', 4)
+              if end == -1:
+                  return None
+              return text[4:end], text[end + 5:]
+
+          def has_provenance_to_flip(frontmatter):
+              """True when ingestion_provenance: block has human_edited: false."""
+              if not re.search(r'^ingestion_provenance:', frontmatter, re.MULTILINE):
+                  return False
+              return bool(re.search(r'^\s+human_edited:\s*false\s*$', frontmatter, re.MULTILINE))
+
+          def needs_flip(before_text, after_text):
+              """True when after_text should have human_edited flipped to true.
+
+              Conditions:
+              - after_text has frontmatter with ingestion_provenance.human_edited: false
+              - the file body (text after the closing ---) changed vs before_text
+              """
+              after_parsed = parse_frontmatter(after_text)
+              if after_parsed is None:
+                  return False
+              after_fm, after_body = after_parsed
+              if not has_provenance_to_flip(after_fm):
+                  return False
+              before_parsed = parse_frontmatter(before_text)
+              if before_parsed is None:
+                  return False
+              _, before_body = before_parsed
+              return before_body != after_body
+
+          def flip_human_edited(text):
+              """Rewrite human_edited: false → human_edited: true in frontmatter."""
+              end = text.find('\n---\n', 4)
+              if end == -1:
+                  return text
+              fm = text[4:end]
+              new_fm = re.sub(
+                  r'^(\s+human_edited:)\s*false\s*$',
+                  r'\1 true',
+                  fm,
+                  flags=re.MULTILINE,
+                  count=1,
+              )
+              return '---\n' + new_fm + text[end:]
+
+          # ── main ───────────────────────────────────────────────────────────
+
+          result = subprocess.run(
+              ['git', 'diff', '--name-only', 'HEAD~1', 'HEAD'],
+              capture_output=True, text=True, check=True,
+          )
+          changed = [f for f in result.stdout.splitlines() if f.endswith('.md')]
+
+          modified = []
+          for path_str in changed:
+              path = Path(path_str)
+              if not path.exists():
+                  continue  # deleted in the PR
+
+              after_text = path.read_text(encoding='utf-8')
+
+              before_result = subprocess.run(
+                  ['git', 'show', f'HEAD~1:{path_str}'],
+                  capture_output=True, text=True,
+              )
+              if before_result.returncode != 0:
+                  continue  # new file — no before-state to diff against
+
+              if not needs_flip(before_result.stdout, after_text):
+                  continue
+
+              path.write_text(flip_human_edited(after_text), encoding='utf-8')
+              modified.append(path_str)
+              print(f'flipped: {path_str}')
+
+          if not modified:
+              print('no cold-started artifacts needed flipping')
+              sys.exit(0)
+
+          subprocess.run(['git', 'config', 'user.name', 'coder-system-bot'], check=True)
+          subprocess.run(
+              ['git', 'config', 'user.email', 'coder-system-bot@users.noreply.github.com'],
+              check=True,
+          )
+          for f in modified:
+              subprocess.run(['git', 'add', f], check=True)
+          subprocess.run(
+              ['git', 'commit', '-m',
+               'chore: flip human_edited=true on body-edited cold-start artifacts [skip ci]'],
+              check=True,
+          )
+          subprocess.run(['git', 'push'], check=True)
+          print(f'committed and pushed {len(modified)} flip(s)')
+          PYEOF

@@ -13,6 +13,12 @@
 #   - introduced: YYYY-MM-DD the workflow first shipped
 
 workflows:
+  - id: flip-cold-start-provenance
+    template_path: template/.github/workflows/flip-cold-start-provenance.yml
+    receiver_endpoint: /v1/projects/{project_id}/cold-start/provenance-flipped
+    consuming_spec: "0045"
+    introduced: 2026-05-05
+
   - id: check-run-ci-fixup
     template_path: template/.github/workflows/check-run-ci-fixup.yml
     receiver_endpoint: /v1/managed-workflows/callbacks/check-run-ci-fixup
