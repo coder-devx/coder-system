@@ -217,11 +217,15 @@ The design (spec 0056-design) refines:
 - **AC7** — Cloud Run cost per worker-minute is within ±20 % of the
   pre-change cost (back-of-envelope; observability spec 0032's cost
   alerts cover the actual measurement).
-- **AC8** *(2026-05-05 addition — gates Phase 3)* — Reviewer
-  `orchestrator_died` rate over a 7-day window on a Job-mode-enabled
-  project drops to ≤ 5%. Currently 50% on the Coder project despite
-  `worker_via_job_enabled=TRUE`. Phase 3 fleet-default flip cannot
-  proceed until this AC is met. Investigation owner: TBD.
+- **AC8** *(2026-05-05 addition — gates Phase 3)* — Reviewer **and**
+  developer real-orphan rate (post-reaper-fix in
+  [coder-core#157](https://github.com/coder-devx/coder-core/pull/157))
+  ≤ 5% over a 7-day window on a Job-mode-enabled project. The original
+  measurement (50% / 11%) was a TOCTOU race in the reaper, not a true
+  Phase 2 failure; corrected real rate is 0% / 4% on the same window.
+  Phase 3 fleet-default flip is unblocked **after** one full week of
+  post-merge data (target: 2026-05-12) confirms the real rate stays
+  below the threshold.
 
 ## Rollout
 
@@ -277,70 +281,104 @@ next system that inherits a "shared internal API runs in two
 container types" pattern remembers to look for app-startup-time side
 effects.
 
-### 2026-05-05 — Phase 2 has NOT eliminated orphan deaths
+### 2026-05-05 — Phase 2 IS working; the apparent death rate was a measurement artifact
 
-Production data over the 7-day window ending 2026-05-05 shows the
-durability gap is **wider than the pre-Phase-2 model suggested**:
+Initial 7-day audit showed `failure_kind='orchestrator_died'` on
+50% of reviewer tasks (9/18) and 11% of developer tasks (3/27) — all
+on the `coder` project, which had `worker_via_job_enabled=TRUE`.
+Cost-modeled at ~$50/day, this looked like Phase 2 had failed.
 
-| Role | Tasks | `orchestrator_died` | Death rate |
+A drill-down on the 12 rows found something else entirely: **11 of
+the 12 had `status=succeeded`, `stage=accepted`, and a populated
+`pr_url`.** They had completed their work and opened PRs. The
+Cloud Run Job logs corroborated: `Container called exit(0)`,
+`final_status: succeeded`, `elapsed_seconds: 750`. Only one of the
+twelve (a developer at `stage=rejected` with no PR) was a real
+orphan-death.
+
+The mis-tagging is a TOCTOU race in the zombie reaper, not a Phase 2
+failure. The watch-loop tick holds **one** session for the entire
+pass: detect() loads the row into the session's identity map while
+it is still `status=running`, then between detect() and remediate()
+the worker's writeback (separate pod, separate transaction) flips
+the row to `status=succeeded`. Pre-fix, `session.get()` in remediate()
+returned the cached snapshot — the safety check passed, an ORM
+UPDATE without a status WHERE clobbered `failure_kind` /
+`failure_detail` / `error` onto a row that had legitimately succeeded.
+
+Fix shipped in [coder-core#157](https://github.com/coder-devx/coder-core/pull/157):
+the reaper now issues an atomic
+`UPDATE … WHERE id=? AND status='running'` and reports
+`action=already_moved` on `rowcount=0`. Regression test reuses the
+same session for detect+remediate (mirroring production); the
+pre-existing `already_moved` test used fresh sessions per call,
+which inadvertently dodged the bug.
+
+#### Real orphan-death rate (post-correction)
+
+| Role | Tasks (7d) | True orphan deaths | True death rate |
 |---|---|---|---|
-| reviewer | 18 | 9 | **50%** |
-| developer | 27 | 3 | 11% |
+| reviewer | 18 | 0 | 0% |
+| developer | 27 | 1 | ~4% |
 
-**Every one of the 12 deaths is on the `coder` project — which has
-`worker_via_job_enabled=TRUE`.** The other four projects (Broker
-Test, Smoke, Archive smoke, VibeTrade) had no dispatches in the
-window. So Phase 2 is in effect for every observed death; the Job
-path is **not** preventing them.
+This is **far below the original 50% / 11% figures** and below the
+pre-Phase-2 baseline (which the spec opens by describing). Phase 2
+is, in fact, doing what the spec promised. The cost impact narrative
+(~$50/day in lost compute) was wrong — the work wasn't lost, only
+the metadata was wrong.
 
-Cost impact: ~$50/day in lost compute (turn-level, from `task_turns`
-× Sonnet 4.x pricing). That's ~30% of total daily LLM spend across
-all roles. The biggest single waste source in the system today,
-ahead of the audit-dup bug ($1.50-6/day) and TM-rerun bug
-(~$1.50/week).
+#### Phase 3 readiness
 
-#### Hypotheses (need investigation, none confirmed)
+With the reaper fix in, Phase 2 soak telemetry should finally be
+trustworthy. Wait one full week of post-merge data (target:
+2026-05-12) before flipping the fleet default. Phase 3 unblocked
+**conditionally** on:
+
+- `failure_kind='orchestrator_died'` rate (post-fix, real deaths
+  only) staying ≤ 5% for both reviewer and developer roles.
+- No new failure-kind buckets appearing that the corrected reaper
+  introduces.
+
+The four hypotheses below are kept as a watchlist in case Phase 3
+surfaces a different orphan mechanism. None of them is currently
+load-bearing.
+
+#### Watchlist hypotheses
 
 1. **Cloud Run Jobs themselves are not survivor-of-instance-churn.**
    Job executions can be evicted on the underlying compute the same
-   way services can. If a Job execution is killed mid-run, the worker
-   subprocess inside it dies with the same lost-progress signature
-   as the legacy path. Worth measuring: do `failure_kind=orchestrator_died`
-   rows for the Coder project correlate with Cloud Run Job execution
-   failures (`gcloud run jobs executions list --filter='status.state!=Succeeded'`)?
+   way services can. Worth measuring across a longer post-Phase-2
+   window: do real `failure_kind='orchestrator_died'` rows for the
+   Coder project correlate with Cloud Run Job execution failures
+   (`gcloud run jobs executions list --filter='status.state!=Succeeded'`)?
 
 2. **The kick fell back to the legacy path.** [tasks/service.py:251-266](https://github.com/coder-devx/coder-core/blob/main/src/coder_core/tasks/service.py#L251)
    has a graceful fallback to `_schedule_in_process_dispatch` when
-   `gcp_project_id` is unset or `kick_worker_job` errors. If a
-   transient error causes silent fallback, the row is still created
-   but routes through the broken legacy path. Verify by joining
-   `tasks.failure_kind='orchestrator_died'` rows against logs for
+   `gcp_project_id` is unset or `kick_worker_job` errors. Verify by
+   joining real-orphan rows against logs for
    `dispatch_via_job.no_gcp_project` / `kick_worker_job` errors.
 
-3. **Reviewer/dev loops exceed the Job task-timeout.** Settings says
+3. **Reviewer/dev loops exceed the Job task-timeout.** Settings has
    `coder_worker_job_task_timeout` (separate from the developer
    subprocess timeout). If a Cloud Run Job execution hits its
    `--task-timeout` ceiling, GCP terminates the container and the
-   worker exits without a terminal status writeback — looks
-   identical to orphan death from the DB's POV. Reviewer p95 latency
-   was 12 min on observed reviews; if the Job task-timeout is below
-   that, this is the primary cause.
+   worker exits without a terminal status writeback — same DB-side
+   signature as a true orphan death. Reviewer p95 latency was 12 min
+   on observed reviews.
 
 4. **Long agentic loops trigger Job memory limits.** A 700-turn
-   reviewer accumulates 17M cache_read tokens in working memory.
-   If the Job container's memory ceiling is hit, GKE/Cloud Run kills
-   it. Same DB-side signature.
+   reviewer accumulates 17M cache_read tokens in working memory. If
+   the Job container's memory ceiling is hit, the runtime kills it.
 
-#### Phase 3 cannot proceed until the death rate drops
+#### Cleanup
 
-The original Phase 3 plan was "flip fleet default" once Phase 2 soak
-showed zombie rate dropping to ~0. Phase 2 soak instead shows the
-zombie rate is **higher than expected** for the long-loop roles. The
-fleet-flip is therefore **blocked** until the hypotheses above are
-investigated and the actual mechanism is fixed.
-
-This update treats spec 0056 as not-yet-shipped despite Phase 2
-opt-in. Phase 3 is gated on a new acceptance criterion (AC8 below).
+The 11 historical mis-tagged rows have correct `status` /
+`pr_url` / `result` but stale `failure_kind` / `failure_detail`. A
+one-off backfill is optional; the dashboards that drove the original
+"$50/day" figure read `failure_kind` and will keep mis-reporting
+until backfilled. SQL: `UPDATE tasks SET failure_kind = NULL,
+failure_detail = NULL WHERE status = 'succeeded' AND failure_kind =
+'orchestrator_died'`. Not load-bearing — defer until convenient.
 
 ## Open questions
 
