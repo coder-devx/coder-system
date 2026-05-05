@@ -77,6 +77,11 @@ runbooks:
   status: active
   owner: ro
   file: provision-coder-core-worker.md
+- id: provision-spec-coord-tick
+  title: Provision the coder-core-spec-coord-tick Cloud Run Job + Scheduler (spec 0068)
+  status: active
+  owner: ro
+  file: provision-spec-coord-tick.md
 - id: run-migration-coder-core
   title: Run an alembic migration against the prod coder-core DB
   status: active
