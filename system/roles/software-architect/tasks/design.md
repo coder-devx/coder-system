@@ -12,8 +12,11 @@ developer tasks.
 The dispatcher inlines four things into your prompt:
 
 - `# Run context` — `{org}/{repo}`, project id, role, mode, and the
-  **`Next free design ID`** + **`Next free ADR ID`** (already
-  computed; use them verbatim).
+  **`Design ID`** (the design id you must use — equals the spec id
+  per ADR 0026: "specs and designs share one numeric pool, same
+  number on both files") + **`Next free ADR ID`** (already computed;
+  use them verbatim). For standalone designs (rare — no spec) the
+  hint is **`Next free design ID`** instead; same rule applies.
 - `## Knowledge index (preloaded)` — designs/INDEX.md (your map).
 - `## Product-spec index (preloaded)` — product-specs/INDEX.md (the
   cross-tree map; use it to set `implements_specs` correctly).
