@@ -482,15 +482,6 @@ specs:
   - tenant-isolation
   - continuous-deployment
   parent: null
-- id: '0062'
-  title: Actionable pipeline-stuck Slack notifications
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0062-actionable-pipeline-stuck-slack-notifications.md
-  served_by_designs:
-  - '0067'
-  parent: pipeline-operations
 - id: '0065'
   title: Reviewer scope cut + turn cap
   status: wip

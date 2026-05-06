@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-23
-updated: 2026-05-03
-last_verified_at: 2026-05-03
+updated: 2026-05-06
+last_verified_at: 2026-05-06
 served_by_designs: [escalations]
 related_specs: [task-orchestration, observability, audit-log, admin-panel, multi-tenancy]
 parent: pipeline-operations
@@ -55,7 +55,9 @@ a stall no longer waits for someone to open the admin panel.
   Calls take `SELECT FOR UPDATE` so a concurrent watcher rung-advance
   serialises with the operator click; a repeat ack/resolve on a
   non-`open` row returns 409 `already_<status>` rather than silent
-  re-application.
+  re-application. On ack the Slack message is updated in-place (via
+  `chat.update`) within 3 seconds to show the acknowledging user's
+  display name.
 - **DB-enforced dedupe.** Partial unique indexes on
   `(project_id, trigger_kind, pipeline_run_id)` and
   `(project_id, trigger_kind, task_id)` `WHERE status='open'`. A
@@ -84,6 +86,24 @@ a stall no longer waits for someone to open the admin panel.
   `.../resolve` with `resolved_by_id='self_healing'` when it
   remediates before a human acks, so capture rate is measurable
   on the escalation log.
+- **Enriched Slack message format.** L0 channel posts and L1 on-call
+  DMs use a Slack Block Kit template that carries: project name, task
+  ID, current pipeline stage, trigger kind label (`stall` /
+  `failure_streak` / `sla_breach`), human-readable blocked duration
+  (e.g. "stalled for 1 h 23 m"), an interactive `Ack` button wired
+  to `POST /v1/_hooks/slack/escalation_ack`, and a `View in admin`
+  button that deep-links to
+  `{CODER_ADMIN_BASE_URL}/projects/:projectId/pipeline/:taskId`. For
+  `failure_streak` triggers the message also includes the streak
+  count and the stage at which the most-recent task failed. L1 DMs
+  carry the same fields and buttons as L0 — no information is
+  dropped when the watcher advances rungs. When `CODER_ADMIN_BASE_URL`
+  is absent (e.g. local-dev), the dispatcher omits the `View in
+  admin` button and logs a config warning; the text fields still
+  send so the message remains useful. The `View in admin` button
+  links to the task detail page (not the escalations list); a
+  secondary plain-text "See escalation" URL points to the escalation
+  detail page for operators who need rung history.
 
 ## Interfaces
 
@@ -112,7 +132,9 @@ a stall no longer waits for someone to open the admin panel.
   the 0032 regression detector and 0038 rotator.
 - **Env flags:** `CODER_ESCALATIONS_ENABLED` (default false),
   `VITE_ESCALATIONS_ENABLED`, `SLACK_SIGNING_SECRET` (reused),
-  `PAGERDUTY_EVENTS_API_URL` (defaults to standard endpoint).
+  `PAGERDUTY_EVENTS_API_URL` (defaults to standard endpoint),
+  `CODER_ADMIN_BASE_URL` (used by the Slack dispatcher to construct
+  per-task deep-link URLs; omit button gracefully when absent).
 - **Runbook:** [escalations-firing](../../runbooks/escalations-firing.md).
 
 ## Dependencies
@@ -125,7 +147,9 @@ a stall no longer waits for someone to open the admin panel.
   false-positive rate, by-trigger counts).
 - [audit-log](./audit-log.md) — the five `escalation.*` actions
   are registered there; every state transition lands a row.
-- [admin-panel](./admin-panel.md) — hosts the two admin pages.
+- [admin-panel](./admin-panel.md) — hosts the two admin pages;
+  the task detail route `/projects/:projectId/pipeline/:taskId` is
+  the deep-link target for `View in admin`.
 - [multi-tenancy](./multi-tenancy.md) — the per-project tri-state
   flags + Slack/PD configuration sit on the `projects` row.
 
@@ -151,6 +175,16 @@ a stall no longer waits for someone to open the admin panel.
   Escalations tab. 6 vitest cases. Behind `VITE_ESCALATIONS_ENABLED`
   (default on). No backend changes — the UI rides the contract that
   shipped on 2026-04-22.
+- **0062 Enriched Slack message format (shipped 2026-05-06).** The
+  Slack dispatcher now uses a Block Kit template that includes project
+  name, task ID, pipeline stage, trigger kind, blocked duration, `Ack`
+  interactive button, and `View in admin` deep-link button on both L0
+  and L1 messages. `failure_streak` messages additionally carry the
+  streak count and the failed stage. Introduces `CODER_ADMIN_BASE_URL`
+  env var; the button is omitted gracefully when absent. Ack via Slack
+  calls `chat.update` within 3 s to display the acknowledging user.
+  End-to-end QA verified: synthetic stall alert → `View in admin` →
+  task detail → Slack ack in under 2 minutes.
 
 ## Links
 
