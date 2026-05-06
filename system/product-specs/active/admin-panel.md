@@ -116,9 +116,11 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `/knowledge/{type}/{id}/verify`. Operators can also trigger an
   on-demand audit pass via `triggerKnowledgeAudit()`.
 - **Regression dashboard.** `/metrics/regressions` lists fleet-wide
-  per-role cost regressions (spec 0032) with commit-suspect
-  attribution and Slack-sent flag; `Acknowledge` action suppresses
-  repeat fires for `(role, metric, day)`.
+  per-`(role, task_kind, model_id)` cost regressions (spec 0032) with
+  commit-suspect SHAs and Slack-sent flag; `Acknowledge` action
+  suppresses repeat fires for `(role, task_kind, model_id, metric, day)`.
+  A 14-day baseline trendline (median + p95 sparkline sourced from
+  `stage_cost_baseline`) renders per role in the same tab.
 - **Plan review surface.** `/projects/:projectId/plans` lists draft
   Team-Manager plans; `/plans/:planId` opens the inline plan editor
   with per-task prompt / role / complexity / order edits before
@@ -308,6 +310,14 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Selects which credential the dispatcher hands to a worker's
   `claude` process. See [service-accounts](./service-accounts.md)
   Evolution for the server-side wiring.
+- 0032 phase 2 regression UI (shipped 2026-05-06) — `/metrics/regressions`
+  updated to reflect phase-2 granularity: per-`(role, task_kind,
+  model_id)` dedupe key shown on each row, commit-suspect SHA list per
+  alert, and a 14-day median + p95 sparkline per role sourced from
+  `stage_cost_baseline`. Backed by
+  `GET /v1/_admin/regression/baseline?days=14` and the widened
+  `GET /v1/_admin/regression/events` response (`task_kind` /
+  `model_id` columns added in migration 0059). No new frontend flag.
 
 ## Links
 

@@ -53,9 +53,14 @@ without SSH.
   thresholds are breached, with per-alert-type rate limiting (1/hour)
   so a bad day doesn't page twelve times. A separate nightly
   regression alert (spec 0032, `REGRESSION_ALERTS_ENABLED=true` as of
-  2026-04-19) fires on per-role cost regressions > +25% versus the
-  7-day baseline, deduped per (role, metric, day) via the
-  `regression_events` table. The cache-hit-floor alert
+  2026-04-19) fires on per-`(role, task_kind, model_id)` cost
+  regressions exceeding a configurable threshold (default +25%;
+  `architect` defaults to +35% via `regression_thresholds_per_role_kind`)
+  versus the 7-day baseline, deduped per `(role, task_kind, model_id,
+  metric, day_utc)` via `regression_events`. Suspect commit SHAs from
+  both `coder-core` and `coder-system` are stamped on every alert
+  (`coder_core.ops.regression_attribution`; degrades to NULL when
+  credentials are absent). The cache-hit-floor alert
   (`SLACK_CACHE_HIT_FLOOR`, default 0 = disabled) resolves each
   project's `prompt_caching_enabled` override before firing so a
   canary carve-out and a fleet-enabled project don't silence each
@@ -75,22 +80,27 @@ without SSH.
 ## Interfaces
 
 - `GET /v1/projects/{id}/metrics?period=` — returns daily cost, success
-  rate, per-spec cost breakdown, average stage durations, per-role
-  `cache_stats` with hit rate, and `by_tier` rollup
-  (task_count, succeeded, success_rate, total_cost_tokens,
-  avg_cost_tokens classified by model-name prefix
-  haiku/sonnet/opus/unknown) for the requested window.
+  rate, per-spec cost breakdown, average stage durations, and per-role
+  `cache_stats` with hit rate for the requested window.
 - `/metrics` route in `coder-admin` — dashboard view.
 - Slack webhook — cost, success-rate, and cache-hit-floor alerts.
 - Postgres `task_stage_durations` table — raw timing data for ad-hoc
   analysis.
+- `GET /v1/_admin/regression/baseline?days=14` — per-`(role, model_id,
+  day_utc)` daily medians + p95s from `stage_cost_baseline`; powers
+  the admin baseline trendline.
+- `GET /v1/_admin/regression/events?open_only=&limit=` — list regression
+  events, open-first.
+- `POST /v1/_admin/regression/events/{id}/acknowledge` — record actor +
+  optional note; suppresses repeat Slack fires for the event's dedupe
+  key.
 
 ## Dependencies
 
 - Task orchestration — the stage transitions and task completions that
   feed every metric.
 - Continuous deployment — deploy metadata used to correlate regressions
-  with releases.
+  with releases via commit-range attribution.
 - Anthropic API `usage` field — source of token counts.
 - Slack incoming webhook — alert delivery.
 
@@ -126,19 +136,27 @@ without SSH.
   `resolve_tier_model` in the dispatcher routes reviewer tasks to
   Haiku when `tier_routing_enabled=True` OR the project has
   `pin_top_tier=false`. `/metrics` `by_tier` rolls usage up by
-  model-name prefix (haiku/sonnet/opus/unknown), returning
-  task_count, succeeded, success_rate, total_cost_tokens,
-  avg_cost_tokens per tier. Admin Metrics page renders the per-tier
-  strip. `coder` project canary routes reviewer tasks to
-  `claude-haiku-4-5-20251001` with `pin_top_tier=false`; fleet
-  `tier_routing_enabled` defaults `False`.
-- `0032` — cost regression alerts: migration 0038 adds
-  `regression_events`. The nightly detector persists findings with
-  dedupe on `(role, metric, day_utc)`. Acknowledge flow
+  Haiku/Sonnet/Opus classification. `coder` project runs as the
+  first canary with `pin_top_tier=false`.
+- `0032` phase 1 — cost regression alerts: migration 0038 adds
+  `regression_events` with dedupe on `(role, metric, day_utc)`.
+  Nightly detector persists findings; acknowledge flow
   (`POST /v1/_admin/regression/events/{id}/acknowledge`) suppresses
-  repeat Slack fires. `REGRESSION_ALERTS_ENABLED=true` as of
-  2026-04-19 un-gates the Slack post. `stage_cost_baseline`
-  pre-aggregation + commit-range attribution deferred to phase 2.
+  repeat Slack fires. `REGRESSION_ALERTS_ENABLED=true` as of 2026-04-19.
+- `0032` phase 2 — granularity + attribution: migration 0059 widens
+  `regression_events` with `task_kind`, `model_id`,
+  `suspect_commit_range`; dedupe index widened to
+  `(role, task_kind, model_id, metric, day_utc)`. `stage_cost_baseline`
+  (migration 0040) pre-aggregates per-`(role, model_id, day_utc)` daily
+  medians/p95s; `GET /v1/_admin/regression/baseline?days=14` exposes
+  the trendline. Threshold granularity is per-`(role, task_kind)`:
+  `regression_default_threshold` (fleet) +
+  `regression_thresholds_per_role_kind` map, resolved cell → role →
+  fleet; `architect` defaults to 0.35. Commit attribution
+  (`coder_core.ops.regression_attribution`) queries both repos in one
+  nightly pass; degrades to NULL when GitHub credentials are absent.
+  Phase-1 rows coexist (null `task_kind`/`model_id` are distinct dedupe
+  values).
 
 ## Links
 

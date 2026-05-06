@@ -226,18 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: '0032'
-  title: Prompt & cost regression alerts
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0032-cost-regression-alerts.md
-  served_by_designs:
-  - '0032'
-  related_specs:
-  - observability
-  - task-orchestration
-  - continuous-deployment
 - id: 0038
   title: Automated secret rotation
   status: wip
