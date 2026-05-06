@@ -554,3 +554,13 @@ specs:
   served_by_designs:
   - '0067'
   parent: pipeline-operations
+- id: '0065'
+  title: Reviewer scope cut + turn cap
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0065-reviewer-scope-and-turn-cap.md
+  related_specs:
+  - reviewer-worker
+  - observability
+  parent: worker-roles
