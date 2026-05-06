@@ -23,8 +23,9 @@ Every Coder project has its own *knowledge repo* — a Git repository
 with the same shape as `coder-system` itself: services, repos,
 designs, ADRs, product-specs, roles, integrations, runbooks. This
 category groups the specs that define how that repo is served to
-workers, how workers write back to it, how it's kept fresh, and how
-the human operator (the user) interacts with the running system.
+workers, how workers write back to it, how it's kept fresh, how the
+human operator interacts with the running system, and how the fleet
+of knowledge repos is kept in sync with expected workflow primitives.
 
 ## Components
 
@@ -39,10 +40,9 @@ the human operator (the user) interacts with the running system.
   override.
 - [onboarding](./onboarding.md) — how a new project gets wired into
   Coder for the first time.
-- [fleet-patterns](./fleet-patterns.md) — read-only cross-project
-  pattern index: similar ADRs, recurring failure kinds, role-prompt
-  impact deltas, and template-drift candidates, browseable by
-  operators and consultable by workers.
+- [managed-workflows](./managed-workflows.md) — shared primitive for
+  installing, verifying, and receiving callbacks from GitHub Action
+  workflows across the fleet of managed knowledge repos.
 
 ## Cross-cutting concerns
 

@@ -161,26 +161,23 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   project, run/task target, and on-call identity. `Ack` and
   `Resolve` actions POST to the project endpoints; behind
   `VITE_ESCALATIONS_ENABLED`.
-- **OAuth client management.** `/admin/oauth-clients` (admin JWT,
-  behind `VITE_OAUTH_CLIENTS_ENABLED`) lists registered OAuth 2.1
-  clients with `client_name`, `client_id`, registered
-  `redirect_uris`, registering admin email, and registration
-  timestamp. "Register OAuth client" form submits `POST
-  /v1/admin/oauth/clients`; the returned `client_id` is surfaced
-  inline so the operator can paste it into the MCP client's
-  connector form. Per-client "Revoke client" cascades
-  `revoked_at` to all active sessions for that client. The
-  active-sessions table (filtered by `client_id`) exposes
-  per-session "Revoke session". Wired to the
-  `oauth.client_registered` audit trail. See
-  [oauth-mcp](../tenancy-and-access/oauth-mcp.md).
+- **Managed-workflows matrix.** `/admin/managed-workflows` (fleet,
+  admin JWT, behind `VITE_MANAGED_WORKFLOWS_ENABLED`) renders the
+  fleet × workflow grid from the managed-workflows manifest: one row
+  per project, one column per expected workflow. Cell status pill:
+  `✓ installed` / `⚠ drift` / `✗ missing` / `… installing`
+  (PR open). Click cell → PR URL (if installing), drift diff (if
+  drift), or workflow source (if installed). Backed by
+  `GET /v1/_admin/managed-workflows` (verify_workflow per cell,
+  cached 5 min). See [managed-workflows](./managed-workflows.md).
 
 ## Interfaces
 
 - **Routes (defined in `src/main.tsx`):**
   - Fleet: `/`, `/freshness`, `/metrics/regressions`, `/admin/audit`,
     `/admin/secrets` (flagged), `/admin/isolation` (flagged),
-    `/admin/escalations` (flagged), `/admin/oauth-clients` (flagged).
+    `/admin/escalations` (flagged),
+    `/admin/managed-workflows` (flagged).
   - Per-project: `/projects/:projectId`,
     `/projects/:projectId/freshness`,
     `/projects/:projectId/pipeline`,
@@ -198,8 +195,8 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Plans, Metrics, Freshness, Audit (flagged), Escalations (flagged).
 - Consumes `coder-core` REST (projects, knowledge, tasks, overrides,
   merge, knowledge PUT, ship, escalations, audit, freshness, budget,
-  isolation, regressions, secrets, oauth-clients) and the SSE event
-  stream for pipeline / message / `pipeline_run.changed` /
+  isolation, regressions, secrets, managed-workflows) and the SSE
+  event stream for pipeline / message / `pipeline_run.changed` /
   `pipeline_run.gate_blocked` events.
 - Typed API client (`src/api/client.ts`) shared across views — every
   endpoint has a single typed function. Reusable `StatusChip`,
@@ -210,7 +207,7 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `VITE_ESCALATIONS_ENABLED`, `VITE_AUTO_APPROVE_ENABLED`,
   `VITE_RUN_TIMELINE_ENABLED`, `VITE_PR_VIEWER_ENABLED`,
   `VITE_KNOWLEDGE_EDITOR_ENABLED`, `VITE_COMMAND_PALETTE_ENABLED`,
-  `VITE_OAUTH_CLIENTS_ENABLED`.
+  `VITE_MANAGED_WORKFLOWS_ENABLED`.
 
 ## Dependencies
 
@@ -322,16 +319,13 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Selects which credential the dispatcher hands to a worker's
   `claude` process. See [service-accounts](./service-accounts.md)
   Evolution for the server-side wiring.
-- 0050 OAuth client management panel (shipped 2026-04-25) — new
-  `/admin/oauth-clients` fleet route (`OAuthClients.tsx`) listing
-  registered OAuth 2.1 clients with inline "Register" form (POSTs
-  to `POST /v1/admin/oauth/clients`; surfaces `client_id` for
-  operator copy-paste into connector form) and per-client "Revoke"
-  action. Active-sessions sub-table with per-session revoke.
-  `listOAuthClients` / `registerOAuthClient` / `revokeOAuthClient` /
-  `listOAuthSessions` / `revokeOAuthSession` client bindings. Behind
-  `VITE_OAUTH_CLIENTS_ENABLED` (default on). See
-  [oauth-mcp](../tenancy-and-access/oauth-mcp.md).
+- 0052 Managed-workflows matrix (shipped 2026-05-06) — new
+  `/admin/managed-workflows` fleet page renders the project × workflow
+  install-status grid from the fleet manifest. Cell click shows PR
+  URL, drift diff, or workflow source depending on verify status.
+  Backed by `GET /v1/_admin/managed-workflows` (5-min cache). Behind
+  `VITE_MANAGED_WORKFLOWS_ENABLED` (default off). See
+  [managed-workflows](./managed-workflows.md).
 
 ## Links
 
@@ -339,4 +333,5 @@ email allowlist; sessions carry an admin JWT with cross-project access.
 - Related components: [multi-tenancy](./multi-tenancy.md),
   [knowledge-api](./knowledge-api.md), [audit-log](./audit-log.md),
   [escalations](./escalations.md), [observability](./observability.md),
-  [task-orchestration](./task-orchestration.md)
+  [task-orchestration](./task-orchestration.md),
+  [managed-workflows](./managed-workflows.md)
