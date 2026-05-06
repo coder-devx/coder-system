@@ -1,20 +1,25 @@
 ---
-id: "0032"
+id: cost-regression-alerts
 title: Prompt & cost regression alerts
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-18
-updated: 2026-04-29
-last_verified_at: 2026-04-29
-implements_specs: ["0032"]
+created: '2026-04-18'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
 decided_by: []
-related_designs: [observability-and-cost-tracking, worker-communication]
-affects_services: [coder-core, coder-admin]
-affects_repos: [coder-core, coder-admin]
+related_designs:
+- observability-and-cost-tracking
+- worker-communication
+affects_services:
+- coder-core
+- coder-admin
+affects_repos:
+- coder-core
+- coder-admin
 parent: pipeline-operations
 ---
-
 # Prompt & cost regression alerts
 
 ## Context

@@ -216,20 +216,6 @@ designs:
   affects_services:
   - coder-core
   parent: system-overview
-- id: '0032'
-  title: Prompt & cost regression alerts
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0032-cost-regression-alerts.md
-  implements_specs:
-  - '0032'
-  related_designs:
-  - observability-and-cost-tracking
-  - worker-communication
-  affects_services:
-  - coder-core
-  - coder-admin
 - id: 0038
   title: Automated secret rotation
   status: wip
@@ -700,3 +686,9 @@ designs:
   owner: ro
   folder: active
   file: active/token-budgets-and-cost-gates.md
+- id: cost-regression-alerts
+  title: Prompt & cost regression alerts
+  status: active
+  owner: ro
+  folder: active
+  file: active/cost-regression-alerts.md
