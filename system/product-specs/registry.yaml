@@ -226,23 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: 0049
-  title: MCP agent interface
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0049-mcp-agent-interface.md
-  served_by_designs:
-  - 0049
-  related_specs:
-  - impersonation
-  - service-accounts
-  - audit-log
-  - admin-panel
-  - multi-tenancy
-  - task-orchestration
-  - knowledge-api
-  - escalations
 - id: '0050'
   title: OAuth 2.1 for MCP clients
   status: wip
@@ -452,3 +435,17 @@ specs:
   - reviewer-worker
   - multi-tenancy
   - knowledge-freshness
+- id: mcp-agent-interface
+  title: MCP agent interface
+  status: active
+  owner: ro
+  folder: active
+  file: active/mcp-agent-interface.md
+  related_specs:
+  - impersonation
+  - service-accounts
+  - audit-log
+  - admin-panel
+  - multi-tenancy
+  - task-orchestration
+  - knowledge-api

@@ -15,15 +15,16 @@ parent: ~
 # Tenancy & access
 
 How one Coder system serves many projects in parallel without
-crossing wires, and how every action is attributed to a real actor.
+crossing wires, how every action is attributed to a real actor, and
+how external agents authenticate and act against the platform.
 
 ## What this category covers
 
 A single Coder deployment manages multiple projects concurrently.
 Every API call, log line, audit row, secret, and pipeline event is
 project-scoped — the multi-tenancy invariant. This category groups
-the specs that make that boundary real and the specs that record who
-did what.
+the specs that make that boundary real, the specs that record who
+did what, and the protocol by which external agents connect.
 
 ## Components
 
@@ -39,10 +40,9 @@ did what.
 - [audit-log](./audit-log.md) — every mutation is recorded with
   actor, method, action, before/after, project_id, correlation_id;
   retained for compliance review.
-- [secret-rotation](./secret-rotation.md) — automated scheduled
-  rotation of long-lived credentials (API keys, JWT signing secrets,
-  GitHub App private key) with zero-downtime dual-value windows and
-  a break-glass override for suspected leaks.
+- [mcp-agent-interface](./mcp-agent-interface.md) — MCP server on
+  `coder-core` that lets any MCP-speaking external agent authenticate
+  with existing tokens, call tools, and subscribe to pipeline events.
 
 ## Cross-cutting concerns
 
@@ -54,7 +54,8 @@ did what.
   is `coder_core.access.load_in_project`.
 - **Test harness**: [tenant-isolation](./tenant-isolation.md) (in
   [delivery-and-infra](./delivery-and-infra.md)) is the regression
-  guard.
+  guard. MCP-path routes extend the same isolation matrix
+  (see [mcp-agent-interface](./mcp-agent-interface.md) AC9).
 
 ## Links
 
