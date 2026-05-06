@@ -1,27 +1,26 @@
 ---
-id: '0049'
+id: mcp-agent-interface-design
 title: MCP agent interface — let external agents connect, impersonate, and drive Coder
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-23
-updated: 2026-04-23
-last_verified_at: 2026-04-23
-implements_specs: ['0049']
+created: '2026-04-23'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
 related_designs:
-  - system-overview
-  - impersonation
-  - worker-communication
-  - audit-log
-  - knowledge-write-api
+- system-overview
+- impersonation
+- worker-communication
+- audit-log
+- knowledge-write-api
 affects_services:
-  - coder-core
+- coder-core
 affects_repos:
-  - coder-core
-  - coder-system
+- coder-core
+- coder-system
 parent: knowledge-and-admin
 ---
-
 # 0049 — MCP agent interface (design)
 
 ## Context

@@ -245,22 +245,6 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
-- id: 0049
-  title: MCP agent interface
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0049-mcp-agent-interface.md
-  implements_specs:
-  - 0049
-  related_designs:
-  - system-overview
-  - impersonation
-  - worker-communication
-  - audit-log
-  - knowledge-write-api
-  affects_services:
-  - coder-core
 - id: '0050'
   title: OAuth 2.1 for MCP clients
   status: wip
@@ -630,3 +614,10 @@ designs:
   - 0019
   - '0020'
   - '0021'
+- id: mcp-agent-interface-design
+  title: "MCP agent interface \u2014 let external agents connect, impersonate, and\
+    \ drive Coder"
+  status: active
+  owner: ro
+  folder: active
+  file: active/mcp-agent-interface-design.md
