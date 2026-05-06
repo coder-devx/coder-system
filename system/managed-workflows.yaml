@@ -19,6 +19,12 @@ workflows:
     consuming_spec: "0053"
     introduced: 2026-04-28
 
+  - id: flip-cold-start-provenance
+    template_path: template/.github/workflows/flip-cold-start-provenance.yml
+    receiver_endpoint: ""
+    consuming_spec: "0045"
+    introduced: 2026-05-05
+
   - id: record-template-migration
     template_path: template/.github/workflows/record-template-migration.yml
     receiver_endpoint: /v1/_admin/template/migrations/{project_id}/{migration_number}/{batch_index}/merged
