@@ -8,7 +8,7 @@ created: 2026-04-11
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [architect-worker]
-related_specs: [fleet-patterns]
+related_specs: []
 parent: worker-roles
 ---
 
@@ -48,7 +48,7 @@ planner gets a concrete architecture to decompose.
 - **Transient-failure retry.** The claude spawn is wrapped in
   `run_with_transient_retry` (spec 0027). Composes with 0025 —
   transient wraps the spawn, schema wraps a successful spawn's
-  output. Architect's 900 s task deadline is distinct from transient:
+  output. Architect's task deadline is distinct from transient:
   a deadline hit surfaces as `TaskStatus.TIMED_OUT`, not retried.
 - **Knowledge-ship-draft mode.** When a task's prompt begins with the
   `# Knowledge ship draft` header, the architect worker swaps its
@@ -60,21 +60,6 @@ planner gets a concrete architecture to decompose.
   `settings.ship_draft_dispatch_enabled`), seeding the left column of
   the admin ship-gate panel so operators don't hand-craft the
   `merges[]` payload.
-- **Cross-project pattern consultation.** Before spawning `claude`,
-  the architect worker optionally calls
-  `GET /v1/projects/{id}/patterns/consult?kinds=adr&topic=<derived>`
-  when the target spec signals an ADR-warranting decision (presence of
-  a `decided_by` request or a `## Open questions` section asking for
-  one). Returned pattern groups are injected as a
-  `# Cross-project precedent` block in the prompt context. Any groups
-  the worker cites are written to the output design's optional
-  `informed_by_patterns: [pattern_id, ...]` frontmatter field, making
-  the consultation trail readable in the artifact. Gated on
-  `settings.architect_pattern_consult_enabled` (default false) and the
-  fleet/project `CODER_FLEET_PATTERNS_ENABLED` /
-  `projects.fleet_patterns_enabled` flags. v1 ships `kinds=adr` only;
-  `failure_taxonomy` and `spec_problem` kinds are deferred pending
-  adoption data. See [fleet-patterns](./fleet-patterns.md).
 
 ## Interfaces
 
@@ -91,7 +76,6 @@ planner gets a concrete architecture to decompose.
 - Pipeline chaining (spec approved → architect task; design approved
   → TM task).
 - Architect-role service account + Anthropic key broker.
-- Fleet patterns consult endpoint (optional; see above).
 
 ## Evolution
 
@@ -117,16 +101,19 @@ planner gets a concrete architecture to decompose.
   manual-dispatch failure mode where architect tasks ran
   productively but exited with `gh is unauthenticated`. Realised
   pain: task `62e0c95e` (2026-04-27).
-- 0048 — cross-project pattern consultation step in pre-claude
-  assembly. When `settings.architect_pattern_consult_enabled` is on
-  and the target spec signals an ADR-warranting decision, the worker
-  calls `/patterns/consult?kinds=adr&topic=<derived>` and injects
-  returned groups as `# Cross-project precedent` in the prompt
-  context. Output design gains the optional `informed_by_patterns`
-  frontmatter field. Gated on fleet/project
-  `CODER_FLEET_PATTERNS_ENABLED` flag. v1 ships `kinds=adr` only;
-  failure-taxonomy and spec-problem kinds deferred pending adoption
-  data. See [fleet-patterns](./fleet-patterns.md).
+- [coder-core#51](https://github.com/coder-devx/coder-core/pull/51)
+  (2026-04-29, surfaced by spec 0056 Phase 2 soak) — architect task
+  deadline aligned with all other role workers. The hardcoded
+  `architect_timeout = 900` (15 min) was never exercised before
+  spec 0056 Phase 2 because Cloud Run service eviction killed worker
+  subprocesses first. With Job-mode workers durable, real architect
+  runs exploring the codebase for sealed-spec design refinements ran
+  25–46 min empirically and hit the 900 s ceiling cleanly. Fix:
+  reads `settings.coder_developer_task_timeout_seconds` (2400 s =
+  40 min in prod), matching `pm.py` / `team_manager.py` /
+  `reviewer.py` / `developer.py`. The hardcoded constant is removed;
+  the setting name is shared across all roles as a fleet-wide
+  default.
 
 ## Links
 
@@ -136,5 +123,4 @@ planner gets a concrete architecture to decompose.
   [team-manager-worker](./team-manager-worker.md),
   [knowledge-api](./knowledge-api.md),
   [task-orchestration](./task-orchestration.md),
-  [service-accounts](./service-accounts.md),
-  [fleet-patterns](./fleet-patterns.md)
+  [service-accounts](./service-accounts.md)

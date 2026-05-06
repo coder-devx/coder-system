@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-23
-updated: 2026-04-23
-last_verified_at: 2026-04-23
+updated: 2026-05-06
+last_verified_at: 2026-05-06
 served_by_designs: [self-healing]
 related_specs: [task-orchestration, observability, audit-log, escalations, admin-panel]
 parent: pipeline-operations
@@ -139,6 +139,44 @@ each remediator's worst case is no change — never a wrong change.
   `self_healing_enabled` flag was effectively a no-op. Same deploy
   flipped `SELF_HEALING_ENABLED=true` and
   `SELF_HEAL_PATTERN_ZOMBIE_EXECUTING_MODE=dry_run` — soak begins.
+- **`zombie_executing` threshold and mode alignment (2026-04-28).**
+  Two operational fixes shipped alongside spec 0056 Phase 1: (1) the
+  `coder-core-self-heal-tick` Cloud Run Job had
+  `SELF_HEAL_PATTERN_ZOMBIE_EXECUTING_MODE=dry_run` while the service
+  had `apply` — the Job's reaper detected zombies but wrote `dry_run`
+  attempt rows that filled the daily cap without mutating task rows;
+  fixed by flipping the Job env var to `apply`. (2)
+  `zombie_executing_min_minutes` bumped 25 → 45 to exceed the worker
+  subprocess timeout (`coder_developer_task_timeout_seconds=2400 s =
+  40 min`) plus a 5-min grace, preventing premature eviction of live
+  workers that were still running within their budget.
+- **`zombie_executing` TOCTOU race fix (2026-05-05,
+  [coder-core#157](https://github.com/coder-devx/coder-core/pull/157)).**
+  The watch-loop tick held one ORM session for the full pass:
+  `detect()` loaded the row into the session identity map while
+  `status=running`; between `detect()` and `remediate()` the
+  worker's writeback (separate pod, separate transaction) flipped
+  the row to `status=succeeded`. `session.get()` in `remediate()`
+  returned the cached snapshot — the safety-check passed, an ORM
+  UPDATE without a status `WHERE` clobbered `failure_kind` /
+  `failure_detail` / `error` onto a legitimately-succeeded row.
+  Fix: `remediate()` now issues an atomic
+  `UPDATE … WHERE id=? AND status='running'` and reports
+  `action=already_moved` on `rowcount=0`. Regression test updated
+  to reuse the same session for detect + remediate, mirroring
+  production (the pre-existing `already_moved` test used fresh
+  sessions per call, which inadvertently dodged the bug). Post-fix
+  real orphan-death rate on `coder` project (7-day window): 0%
+  reviewer, ~4% developer — far below the pre-fix apparent figures
+  of 50% / 11% which were measurement artifacts from the race.
+- **Role clarification: `zombie_executing` is a guardrail, not a
+  recovery path.** Post-spec-0056 Phase 2, the canonical terminal
+  writeback is performed by the Cloud Run Job itself before exiting.
+  The `zombie_executing` remediator fires only when the Job is
+  abnormally terminated before its writeback (genuine OOM, GCP
+  eviction, container crash). Per-day-cap + `apply` mode ensure it
+  does not loop on healthy runs. Self-heal remains a safety net;
+  routine task completion must not depend on it.
 - The `orphan_chain_hook` (replay pipeline chain after hook failure)
   pattern is **not yet shipped** — needs
   `/v1/_admin/pipeline-runs/{id}/replay-chain` first.

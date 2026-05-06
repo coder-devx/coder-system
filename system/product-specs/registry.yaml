@@ -226,24 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: '0056'
-  title: "Worker dispatch durability \u2014 move worker subprocesses out of the HTTP\
-    \ service"
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0056-worker-dispatch-durability.md
-  served_by_designs:
-  - '0056'
-  related_specs:
-  - task-orchestration
-  - developer-worker
-  - architect-worker
-  - team-manager-worker
-  - reviewer-worker
-  - pm-worker
-  - continuous-deployment
-  - observability
 - id: pipeline-operations
   title: Pipeline operations
   status: active

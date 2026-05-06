@@ -8,7 +8,7 @@ created: 2026-04-11
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [worker-communication]
-related_specs: [audit-log, developer-worker]
+related_specs: [audit-log]
 parent: pipeline-operations
 ---
 
@@ -214,6 +214,23 @@ and `/pipeline-runs` endpoints in `coder-core`.
   scope: human approval gates remain at PM-accept, plan-approve, and
   ship-merge; the coordinator only auto-dispatches at the spawn
   points between them.
+- **Worker dispatch via Cloud Run Job.** Behind a per-project
+  `worker_via_job_enabled` flag, `POST /v1/projects/{p}/tasks` creates
+  the task row and kicks a `coder-core-worker-tick` Cloud Run Job
+  execution (one per task) instead of spawning an in-process asyncio
+  subprocess. The Job entry (`coder_core.workers.entry`) reads `TASK_ID`
+  from env, installs runtime singletons mirroring the FastAPI lifespan
+  (`_install_runtime_singletons` / `_teardown_runtime_singletons`), runs
+  the role-specific worker, and writes terminal status before the Job
+  exits — making worker completion durable against Cloud Run service
+  scaling and revision rollouts. In-process fallback remains when
+  `gcp_project_id` is unset or the job-kick call errors. Per-project
+  fairness (`DispatcherQueue` round-robin) is preserved in Phase 1 via
+  the existing in-process admission path; Job-layer queue management is
+  an open design item. Phase 3 fleet-default flip and in-process
+  decommission gated on `failure_kind='orchestrator_died'` real-death
+  rate ≤ 5% for reviewer and developer over a 7-day
+  post-coder-core#157 window.
 
 ## Interfaces
 
@@ -386,24 +403,6 @@ and `/pipeline-runs` endpoints in `coder-core`.
   new writes to orchestration tables; the watchdog's side effects
   land in `self_heal_attempts` and `audit_events`. See
   [self-healing](./self-healing.md).
-- `0054` — Orchestrator GitHub-state reconciliation (shipped
-  2026-04-28): before transitioning `succeeded|executing|no pr_url`
-  to STUCK, the orchestrator calls `_reconcile_pr_url_from_github`
-  — a fail-soft async helper that queries GitHub for open PRs on
-  the task's `branch_name`. Filters to worker-authored PRs only
-  (`pr.user.type == 'Bot'`, per ADR 0016); on a match sets
-  `task_row.pr_url`, writes a stage log with
-  `outcome='pr_url_reconciled_from_github'`, and returns the current
-  stage so the next tick handles `executing → testing` naturally.
-  Any exception → `task.pr_url_reconcile_failed` audit row + return
-  None (fail-soft to the existing STUCK path). Gated on
-  `coder_orchestrator_pr_url_reconcile_enabled: bool = False` in
-  `coder_core/config.py`; flag off → no GitHub call, behaviour
-  identical to pre-0054. Two new `Actions` entries:
-  `task.pr_url_reconciled_from_github` and
-  `task.pr_url_reconcile_failed`. Realised pain: task `22089ec6`
-  ([coder-core#36](https://github.com/coder-devx/coder-core/pull/36),
-  2026-04-27). See [developer-worker](./developer-worker.md) Evolution.
 - `0055` — `GH_TOKEN` resolved at dispatch for all roles
   (shipped 2026-04-28, [coder-core#41](https://github.com/coder-devx/coder-core/pull/41)).
   Workspace-bearing roles (developer, reviewer) keep using
@@ -445,12 +444,11 @@ and `/pipeline-runs` endpoints in `coder-core`.
   `coder-admin/src/pages/Specs.tsx` (behind
   `VITE_SPEC_COORDINATOR_ENABLED`) renders the fleet view with
   per-row pause/resume actions gated to admin scope. Later-state
-  probes (`planning → plan_pending` via task_plans existence,
-  `plan_pending → implementing` via plan-approve audit,
-  `implementing → ship_pending` via close-cycle backstop) and
-  circuit breakers (cost cap, per-stage retry cap, stuck-stage)
-  are follow-up; the Cloud Run Job `coder-core-spec-coord-tick`
-  schedule lands as part of that follow-up too.
+  probes (`planning → plan_pending`, `plan_pending → implementing`,
+  `implementing → ship_pending`) and circuit breakers (cost cap,
+  per-stage retry cap, stuck-stage) are follow-up; the Cloud Run Job
+  `coder-core-spec-coord-tick` schedule lands as part of that
+  follow-up too.
 - `0064` — schema-gate recovery (shipped 2026-05-04): the dispatcher
   now persists the full untruncated last-attempt raw output on
   ``tasks.raw_output_held`` (TEXT, migration 0059) when the
@@ -474,6 +472,25 @@ and `/pipeline-runs` endpoints in `coder-core`.
   follow-up in the replay service docstring. Three new audit actions —
   ``schema_replay.attempted``, ``schema_replay.passed``,
   ``schema_replay.failed`` — give operators the full replay history.
+- `0056` — worker dispatch durability (Phase 1 shipped 2026-04-28,
+  PRs coder-core #45–#50, coder-system #28–#34; Phase 2 soak `coder`
+  project started 2026-04-29): introduces `coder-core-worker-tick`
+  Cloud Run Job as a durable dispatch path behind per-project
+  `worker_via_job_enabled`. In Job mode `POST /v1/projects/{p}/tasks`
+  kicks the Job via the Cloud Run Admin API (one execution per task)
+  and returns without waiting for the worker; the Job reads `TASK_ID`
+  from env, bootstraps runtime singletons (`_install_runtime_singletons`
+  / `_teardown_runtime_singletons` — the FastAPI lifespan dependency
+  the legacy in-process path carried implicitly, coder-core PR #52),
+  runs the role-specific worker, and writes terminal status before
+  exiting. Graceful fallback to in-process dispatch on missing
+  `gcp_project_id` or job-kick error (local dev). Per-project fairness
+  (`DispatcherQueue` round-robin) preserved in Phase 1 via the
+  in-process admission path; Job-layer queue management is an open item
+  in design 0056. Phase 3 fleet-default flip and in-process
+  decommission gated on AC8: `failure_kind='orchestrator_died'`
+  real-death rate ≤ 5% for reviewer and developer roles over the 7-day
+  post-coder-core#157 reaper-fix window (target gate: 2026-05-12).
 
 ## Links
 
