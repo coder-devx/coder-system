@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-05-06
+last_verified_at: 2026-05-06
 served_by_designs: [knowledge-write-api, knowledge-repo-model]
 related_specs: [knowledge-freshness]
 parent: knowledge-and-admin
@@ -63,6 +63,31 @@ checks, and actor attribution.
   returns the WIPs whose correlated developer task is `closed` + PR
   `merged` but whose file still sits in `wip/`. Used by Team Manager's
   close-cycle backstop and the admin ship-gate "needs attention" list.
+- **Graph retrieval.** `GET /v1/projects/{id}/knowledge/graph` returns
+  the artifact subgraph reachable from a start node in a single
+  round-trip, replacing the N+1 serial-fetch pattern in worker context
+  assembly. Parameters: `start=<type/id>` (required), `depth` (default
+  2, max 3), `edge_types` (comma-list restricting which cross-link
+  fields to follow; workers always pass an explicit value via named
+  presets in `coder_core/knowledge/graph_client.py`), `min_freshness`
+  (below-floor nodes returned as stubs with no body and no outgoing
+  traversal), `max_nodes` (default 200, hard cap 500). Traversal is BFS
+  ordered `(type, id)` lex; bounded by `max_nodes`, `depth`, and a
+  per-node fan-out cap of 50 edges. Truncated responses set
+  `truncated: true` and populate `truncated_at[]` with
+  `{parent_id, edge_type, target_id, reason}` per dropped edge
+  (`reason ∈ {"max_nodes", "fan_out_cap"}`). Cache coherence: the
+  handler pins a commit SHA at request start and uses it for every node
+  in the response — no node in one response can disagree with another.
+  Every node carries the same Pydantic-typed envelope as the
+  single-artifact `GET` (frontmatter, body, freshness, edges[]).
+  Metrics: `knowledge_graph_fetch_seconds_bucket{project,depth_bucket}`
+  histogram and `knowledge_graph_nodes_returned{project}` gauge on the
+  `_metrics` endpoint; p95 target ≤ 2 s at depth=2. Behind
+  `CODER_KNOWLEDGE_GRAPH_ENABLED` (default off on first deploy) with a
+  per-project escape hatch column `projects.knowledge_graph_enabled`
+  (NULL = inherit fleet default). When off, the endpoint returns 503
+  and worker conversions fall back to the prior serial walk.
 
 ## Interfaces
 
@@ -73,7 +98,8 @@ checks, and actor attribution.
 - `PUT /v1/projects/{id}/knowledge/{type}/{artifact_id}` — update.
 - `POST /v1/projects/{id}/knowledge/ship` — atomic WIP→active merge.
 - `GET /v1/projects/{id}/knowledge/wips?shipped=true` — orphan WIP list.
-- `GET /v1/projects/{id}/knowledge/_metrics` — cache metrics.
+- `GET /v1/projects/{id}/knowledge/graph` — artifact subgraph fetch.
+- `GET /v1/projects/{id}/knowledge/_metrics` — cache + graph metrics.
 - `GET /v1/projects/{id}/knowledge/_files/{path}` — bytes passthrough
   escape hatch.
 
@@ -111,6 +137,17 @@ checks, and actor attribution.
   conflicts bubble as 502 `github_upstream` for the editor's
   "reload" branch; 422 `invalid_frontmatter` / broken cross-links
   render inline.
+- 0046 Graph-aware knowledge retrieval (shipped 2026-05-06) — new
+  `GET /v1/projects/{id}/knowledge/graph` endpoint returns the BFS
+  artifact subgraph in one round-trip, replacing the N+1 serial-fetch
+  pattern in all authoring workers. Bounded by `max_nodes` (default
+  200, hard cap 500), `depth` (max 3), and per-node fan-out cap (50);
+  truncated responses surface `truncated_at[]`. Below-floor nodes
+  returned as stubs when `min_freshness` is set. SHA-pinned
+  cache-coherence invariant. Per-worker call presets in
+  `coder_core/knowledge/graph_client.py`. New graph metrics on
+  `_metrics`. Behind `CODER_KNOWLEDGE_GRAPH_ENABLED` (default off)
+  with per-project `projects.knowledge_graph_enabled` escape hatch.
 
 ## Links
 

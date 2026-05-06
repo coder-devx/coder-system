@@ -25,9 +25,15 @@ planner gets a concrete architecture to decompose.
 
 ## Capabilities
 
-- Loads the target spec and all currently-active designs and ADRs
-  before generating, so the new design is consistent with existing
-  architectural decisions.
+- Assembles pre-claude context via a single graph fetch rooted at the
+  target spec (`depth=2,
+  edge_types=served_by_designs,related_designs,decided_by`), so the
+  new design is consistent with existing architectural decisions.
+  Prior to 0046 this was a serial N+1 walk (~30–50 round-trips for a
+  full-sized project); the graph endpoint collapses it to one.
+  Falls back to serial walk when `CODER_KNOWLEDGE_GRAPH_ENABLED` is
+  off. Initial conversion ships with `min_freshness` omitted; the
+  freshness-floor default flip is a decoupled follow-up.
 - Runs `claude` with a built-in architect prompt that emits structured
   JSON: frontmatter, body (with at least one inline Mermaid diagram —
   component or data-flow), and an optional ADR list.
@@ -60,17 +66,6 @@ planner gets a concrete architecture to decompose.
   `settings.ship_draft_dispatch_enabled`), seeding the left column of
   the admin ship-gate panel so operators don't hand-craft the
   `merges[]` payload.
-- **Cold-start mode.** When a task's prompt begins with
-  `# Knowledge cold start`, the architect worker swaps its output
-  schema for `architect_cold_start.json` and emits an `artifacts[]`
-  array (one entry per knowledge file proposed) instead of a design
-  envelope. Each entry carries `artifact_type` ∈ {`service`, `design`,
-  `adr`, `glossary_entry`}, `artifact_id`, `body`,
-  `ingestion_provenance`, and `confidence ∈ [0, 100]`. Schema
-  failures re-prompt via `validate_and_retry`; exhaustion lands
-  `failure_kind="schema"` with per-batch detail. Dispatched exclusively
-  by the `coder-core-cold-start-ingest` Cloud Run Job; see
-  [cold-start-ingestion](./cold-start-ingestion.md).
 
 ## Interfaces
 
@@ -81,7 +76,8 @@ planner gets a concrete architecture to decompose.
 
 ## Dependencies
 
-- Knowledge read API (target spec + active designs/ADRs).
+- Knowledge read API (target spec + active designs/ADRs; via graph
+  endpoint when `CODER_KNOWLEDGE_GRAPH_ENABLED`, serial walk otherwise).
 - Knowledge write API (design + ADR creation).
 - Spec/design approval gates for the human handoff.
 - Pipeline chaining (spec approved → architect task; design approved
@@ -112,12 +108,13 @@ planner gets a concrete architecture to decompose.
   manual-dispatch failure mode where architect tasks ran
   productively but exited with `gh is unauthenticated`. Realised
   pain: task `62e0c95e` (2026-04-27).
-- 0045 — cold-start mode: the worker detects the
-  `# Knowledge cold start` prompt header, swaps in
-  `architect_cold_start.json`, and emits `artifacts[]` (one entry per
-  inferred knowledge file with `ingestion_provenance` and
-  `confidence`) instead of a design envelope. Dispatched exclusively
-  by the `coder-core-cold-start-ingest` Cloud Run Job.
+- 0046 — pre-claude context assembly converted from serial N+1 walk
+  to a single graph fetch: `depth=2,
+  edge_types=served_by_designs,related_designs,decided_by`;
+  `min_freshness` omitted on initial conversion (freshness-floor
+  default flip is a decoupled follow-up). p50 pre-claude latency
+  target ≤ 1.5 s (from ~6 s baseline). Falls back to serial walk
+  when `CODER_KNOWLEDGE_GRAPH_ENABLED` is off.
 
 ## Links
 

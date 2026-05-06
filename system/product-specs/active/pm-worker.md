@@ -31,10 +31,12 @@ spec is promoted.
   spec following `_TEMPLATE.md` (required frontmatter, Problem / Users
   / Goals / Scope / ACs / Metrics sections), and writes it to `wip/`
   via the knowledge write API with a structured commit.
-- **Accept mode:** loads the target spec and the delivery context
-  (task results by `spec_id` in the prompt), evaluates each AC, and
-  emits a per-AC verdict — `pass | fail | partial` — with cited
-  evidence.
+- **Accept mode:** loads the target spec's subgraph via a single graph
+  fetch (`depth=1, edge_types=related_specs`) to gather the spec and
+  its related specs in one call, evaluates each AC, and emits a per-AC
+  verdict — `pass | fail | partial` — with cited evidence. Falls back
+  to direct spec fetch when `CODER_KNOWLEDGE_GRAPH_ENABLED` is off.
+  Initial conversion ships with `min_freshness` omitted.
 - Acceptance reports are stored as knowledge artifacts linked to the
   spec and posted as verdict messages via worker-to-worker messaging.
 - Mode is selected by the task prompt prefix (`draft:` vs `accept:`)
@@ -44,12 +46,7 @@ spec is promoted.
   the start.
 - **Output compliance gate.** Draft and accept outputs are validated
   against the per-mode JSON schemas (`pm_draft`, `pm_accept`) before
-  any Phase 4 side effect. The `pm_draft` schema requires a
-  `self_confidence` block — `{score: integer 0–100, justification:
-  string ≤500 chars, risk_flags: array of enum strings}` — whose
-  presence is enforced by `validate_and_retry` before the
-  auto-approval evaluator runs. Schema version bump on `pm_draft`
-  lands alongside 0040. On schema failure the worker re-prompts
+  any Phase 4 side effect. On schema failure the worker re-prompts
   Claude with the validator errors and last raw output, up to the
   configured retry budget; on exhaustion the task exits with
   `failure_kind="schema"` and `failure_detail` holding the errors and
@@ -75,6 +72,9 @@ spec is promoted.
 
 - Knowledge write API for spec creation, acceptance reports, and
   status-change file moves.
+- Knowledge read API (accept mode: spec + related_specs; via graph
+  endpoint when `CODER_KNOWLEDGE_GRAPH_ENABLED`, direct fetch
+  otherwise).
 - Worker-to-worker messaging for verdict delivery.
 - Spec/design approval gates for the human-approval handoff.
 - Pipeline chaining for `draft:` → architect auto-creation.
@@ -97,11 +97,10 @@ spec is promoted.
   the dispatcher-resolved `WorkerInput.github_token` so `gh`
   commands inside the `claude` subprocess authenticate without a
   workspace clone.
-- 0040 — `pm_draft` schema extended with a required `self_confidence`
-  block (`score`, `justification`, `risk_flags`). Schema version bump;
-  `validate_and_retry` enforces presence so the auto-approval
-  evaluator (task-orchestration 0040) always has a score to evaluate.
-  No change to `pm_accept` schema.
+- 0046 — accept-mode context load converted from direct spec fetch to
+  a single graph fetch: `depth=1, edge_types=related_specs`;
+  `min_freshness` omitted on initial conversion. Falls back to direct
+  fetch when `CODER_KNOWLEDGE_GRAPH_ENABLED` is off.
 
 ## Links
 

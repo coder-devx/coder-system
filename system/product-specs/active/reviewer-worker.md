@@ -29,6 +29,11 @@ developer-produced PR and a human-facing merge decision.
   pattern, with a built-in system prompt that instructs it to
   `gh pr diff <url>`, load conventions/ADRs/designs, analyze the diff
   against them, and submit via `gh pr review <url>`.
+- When the developer task references a spec, loads the spec's subgraph
+  via a single graph fetch (`depth=1, edge_types=served_by_designs`)
+  to ground the review in the designs the spec is served by. Falls
+  back to direct spec fetch when `CODER_KNOWLEDGE_GRAPH_ENABLED` is
+  off. Initial conversion ships with `min_freshness` omitted.
 - Review is grounded: comments cite specific conventions or ADR
   decisions rather than generic style notes.
 - Posts structured inline comments on the PR and submits a formal
@@ -65,7 +70,8 @@ developer-produced PR and a human-facing merge decision.
 ## Dependencies
 
 - Developer worker (source of the PR URL).
-- Knowledge read API (conventions, ADRs, designs).
+- Knowledge read API (conventions, ADRs, designs; via graph endpoint
+  when `CODER_KNOWLEDGE_GRAPH_ENABLED`, direct fetch otherwise).
 - GitHub App token for `gh pr diff` / `gh pr review`.
 - Reviewer-role service account + Anthropic key broker.
 - Orchestrator for stage routing and fix-loop triggering.
@@ -78,14 +84,6 @@ developer-produced PR and a human-facing merge decision.
   `coder-devx/coder-core#2`.
 - 0027 — transient-failure retry around the claude spawn via the
   shared classifier + retry wrapper.
-- 0029 — prompt-cache prefix: the system-prompt assembler calls
-  `apply_cache_prefix` to prepend the project context block
-  (`WorkerInput.project_context_block`) before writing the
-  system-prompt tempfile, gated on the effective
-  `prompt_caching_enabled` flag. The static prefix drives the
-  claude CLI's internal `cache_control` markers, producing
-  `cache_read_input_tokens` / `cache_creation_input_tokens`
-  telemetry in the task row.
 - 0044 — ship-mode reviewer schema (`reviewer_ship.json`) with
   required `ship_attestation`; the worker loads the ship schema when
   the task carries the ship-mode flag and enforces AC coverage via
@@ -98,6 +96,11 @@ developer-produced PR and a human-facing merge decision.
   `WorkerInput.github_token` otherwise — `gh pr diff` /
   `gh pr review` keep working when reviewer tasks dispatch without
   a workspace.
+- 0046 — spec-context load converted from direct spec fetch to a
+  single graph fetch when a developer task references a spec:
+  `depth=1, edge_types=served_by_designs`; `min_freshness` omitted
+  on initial conversion. Falls back to direct fetch when
+  `CODER_KNOWLEDGE_GRAPH_ENABLED` is off.
 
 ## Links
 

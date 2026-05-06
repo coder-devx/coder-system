@@ -133,12 +133,7 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   blocked-longest-first.
 - **Auto-approval cards.** `ProjectDetail` renders `AutoApprovalCard`
   rows when `VITE_AUTO_APPROVE_ENABLED` is on (spec 0040): worker
-  score, risk flags, justification, live countdown, Undo and
-  Accept-now buttons. SSE `auto_approval_pending` event triggers
-  real-time card appearance without polling. Per-project tri-state
-  opt-in (spec/design/plan gates individually) is editable from the
-  project settings card. `PATCH /v1/projects/{id}` with
-  `auto_approve_{spec,design,plan}_enabled` persists the choice.
+  score, risk flags, justification, undo within window, force-finalize.
 - **Per-project budget cards.** `ProjectDetail` carries
   `BudgetCard` / `BudgetStateCard` / `BudgetReadSourceCard` (spec
   0031 phase 2): hard/soft limits, daily-spend sparkline, 7-day
@@ -166,6 +161,13 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   project, run/task target, and on-call identity. `Ack` and
   `Resolve` actions POST to the project endpoints; behind
   `VITE_ESCALATIONS_ENABLED`.
+- **Knowledge graph view.** The per-artifact view gains a "Graph" tab
+  (behind `VITE_KNOWLEDGE_GRAPH_ENABLED`) that calls
+  `GET /v1/projects/{id}/knowledge/graph` with `depth=2` and all edge
+  types and renders a Mermaid diagram of the returned subgraph.
+  Clicking a node navigates to its artifact detail page, replacing the
+  existing flat "related artifacts" list that required N browser HTTP
+  calls to assemble.
 
 ## Interfaces
 
@@ -190,9 +192,9 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Plans, Metrics, Freshness, Audit (flagged), Escalations (flagged).
 - Consumes `coder-core` REST (projects, knowledge, tasks, overrides,
   merge, knowledge PUT, ship, escalations, audit, freshness, budget,
-  isolation, regressions, secrets, auto-approvals) and the SSE event
-  stream for pipeline / message / `pipeline_run.changed` /
-  `pipeline_run.gate_blocked` / `auto_approval_pending` events.
+  isolation, regressions, secrets, graph) and the SSE event stream for
+  pipeline / message / `pipeline_run.changed` /
+  `pipeline_run.gate_blocked` events.
 - Typed API client (`src/api/client.ts`) shared across views — every
   endpoint has a single typed function. Reusable `StatusChip`,
   `RunTimeline`, `PrViewer`, `MarkdownBody`, `CommandPalette`, plus
@@ -201,12 +203,13 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `VITE_SECRET_ROTATION_ENABLED`, `VITE_ISOLATION_VIEW_ENABLED`,
   `VITE_ESCALATIONS_ENABLED`, `VITE_AUTO_APPROVE_ENABLED`,
   `VITE_RUN_TIMELINE_ENABLED`, `VITE_PR_VIEWER_ENABLED`,
-  `VITE_KNOWLEDGE_EDITOR_ENABLED`, `VITE_COMMAND_PALETTE_ENABLED`.
+  `VITE_KNOWLEDGE_EDITOR_ENABLED`, `VITE_COMMAND_PALETTE_ENABLED`,
+  `VITE_KNOWLEDGE_GRAPH_ENABLED`.
 
 ## Dependencies
 
 - multi-tenancy — project listing and scoping.
-- knowledge-api — all artifact reads and checkbox edits.
+- knowledge-api — all artifact reads, checkbox edits, and graph fetch.
 - `coder-core` task + pipeline endpoints, override endpoint, merge
   endpoint, SSE event bus.
 - GitHub (via `coder-core`) for merge action.
@@ -313,20 +316,14 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Selects which credential the dispatcher hands to a worker's
   `claude` process. See [service-accounts](./service-accounts.md)
   Evolution for the server-side wiring.
-- 0040 Auto-approval surface (shipped 2026-05-06, behind
-  `VITE_AUTO_APPROVE_ENABLED`) — `AutoApprovalCard` component on
-  `ProjectDetail` renders each `pending` auto-approval row: worker
-  score, justification, risk flags (none by precondition), live
-  countdown to `window_expires_at`, Undo button (POST
-  `.../auto-approvals/{id}/undo`), and Accept-now button (POST
-  `.../auto-approvals/{id}/accept-now`). SSE `auto_approval_pending`
-  event triggers card appearance in real-time. Per-project tri-state
-  opt-in for spec / design / plan gates is editable from the project
-  settings section via `PATCH /v1/projects/{id}` fields
-  `auto_approve_{spec,design,plan}_enabled`. Client bindings:
-  `listPendingAutoApprovals`, `undoAutoApproval`,
-  `acceptNowAutoApproval`. No new routes — cards live inside the
-  existing `ProjectDetail` page.
+- 0046 Knowledge graph view (shipped 2026-05-06) — new "Graph" tab on
+  the per-artifact view calls `GET /knowledge/graph` with `depth=2`
+  and all edge types and renders the returned subgraph as a Mermaid
+  diagram. Clicking a node navigates to its artifact detail page.
+  Replaces the prior flat "related artifacts" list that required N
+  separate browser HTTP calls. Behind `VITE_KNOWLEDGE_GRAPH_ENABLED`
+  (default off on first deploy, matching the server-side
+  `CODER_KNOWLEDGE_GRAPH_ENABLED` default).
 
 ## Links
 

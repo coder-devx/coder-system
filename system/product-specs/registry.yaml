@@ -226,21 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: '0046'
-  title: Graph-aware knowledge retrieval
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0046-graph-aware-retrieval.md
-  served_by_designs:
-  - '0046'
-  related_specs:
-  - knowledge-api
-  - knowledge-freshness
-  - architect-worker
-  - reviewer-worker
-  - team-manager-worker
-  - pm-worker
 - id: '0047'
   title: Template schema migration
   status: wip
