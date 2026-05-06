@@ -216,35 +216,6 @@ designs:
   affects_services:
   - coder-core
   parent: system-overview
-- id: 0048
-  title: Cross-project pattern surfacing
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0048-cross-project-patterns.md
-  implements_specs:
-  - 0048
-  related_designs:
-  - knowledge-write-api
-  - knowledge-repo-model
-  - knowledge-freshness
-  - system-overview
-  - impersonation
-  - audit-log
-  - architect-worker
-  - pm-worker
-  - team-manager-worker
-  - worker-roles
-  - observability-and-cost-tracking
-  - '0046'
-  - 0049
-  decided_by:
-  - '0022'
-  - '0023'
-  - '0024'
-  affects_services:
-  - coder-core
-  - coder-admin
 - id: '0052'
   title: Managed-repo GitHub Action distribution
   status: wip
@@ -580,3 +551,13 @@ designs:
   owner: ro
   folder: active
   file: active/stuck-pipeline-slack-paging.md
+- id: cross-project-patterns
+  title: Cross-project pattern surfacing
+  status: active
+  owner: ro
+  folder: active
+  file: active/cross-project-patterns.md
+  decided_by:
+  - '0022'
+  - '0023'
+  - '0024'

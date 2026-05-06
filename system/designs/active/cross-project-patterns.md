@@ -1,34 +1,36 @@
 ---
-id: '0048'
+id: cross-project-patterns
 title: Cross-project pattern surfacing
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-19
-updated: 2026-04-29
-last_verified_at: '2026-04-29'
-implements_specs: ['0048']
-decided_by: ['0022', '0023', '0024']
+created: '2026-04-19'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
+decided_by:
+- '0022'
+- '0023'
+- '0024'
 related_designs:
-  - knowledge-write-api
-  - knowledge-repo-model
-  - knowledge-freshness
-  - system-overview
-  - impersonation
-  - audit-log
-  - architect-worker
-  - pm-worker
-  - team-manager-worker
-  - worker-roles
-  - observability-and-cost-tracking
-  - '0046'
-  - '0049'
+- knowledge-write-api
+- knowledge-repo-model
+- knowledge-freshness
+- system-overview
+- impersonation
+- audit-log
+- architect-worker
+- pm-worker
+- team-manager-worker
+- worker-roles
+- observability-and-cost-tracking
+- graph-aware-retrieval
+- mcp-agent-interface-design
 affects_services:
-  - coder-core
-  - coder-admin
+- coder-core
+- coder-admin
 parent: knowledge-and-admin
 ---
-
 # 0048 — Cross-project pattern surfacing
 
 ## Context
