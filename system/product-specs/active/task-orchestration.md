@@ -162,18 +162,8 @@ and `/pipeline-runs` endpoints in `coder-core`.
   /v1/projects/{id}` with the project's API key sets the overrides;
   `GET /v1/projects/{id}/budget` returns the current-period rollup.
   Soft-breach Slack alert deduplicates per calendar month via the
-  yyyymm suffix on `alert_type`. Soft breach also stamps
-  `projects.budget_downshift_at = now()` (migration 0039);
-  `resolve_tier_model` checks this stamp before policy resolution and
-  forces the low-tier route while the stamp is non-NULL —
-  `pin_top_tier=True` still wins so audit projects never silently
-  downshift. A Cloud Scheduler cron (`POST
-  /v1/_admin/budget/monthly-reset`, 00:05 UTC on the 1st) clears every
-  project's `budget_downshift_at` so the new calendar month starts
-  fresh. Operator override via `POST/DELETE
-  /v1/_admin/projects/{id}/budget/override` grants a 1–168 h exemption
-  window. No project currently sets a cap; machinery is latent until
-  ops configures them. Design
+  yyyymm suffix on `alert_type`. No project currently sets a cap;
+  machinery is latent until ops configures them. Design
   [0031](../../designs/wip/0031-token-budgets.md).
 - **Pipeline-run dashboard signals.** Every `pipeline_runs` row
   carries two timing columns (migration 0028): `step_started_at`
@@ -335,7 +325,8 @@ and `/pipeline-runs` endpoints in `coder-core`.
   The dispatcher's block-load path emits an audit log with
   `block_hash` so sibling byte-identity is grep-able.
   `PROMPT_CACHING_ENABLED=true` on revision `coder-core-00115-vhp`
-  (2026-04-19).
+  (2026-04-19). Fleet running 17+ days with no regressions; 48h
+  canary window long closed.
 - `0030` — model tier routing: migrations 0036/0037 add
   `projects.pin_top_tier` + `tasks.model_override`.
   `resolve_tier_model` in the dispatcher stamps
@@ -343,24 +334,10 @@ and `/pipeline-runs` endpoints in `coder-core`.
   without changing their own code path. `/metrics` gains `by_tier`.
   `coder` canary runs with `pin_top_tier=false`; fleet
   `tier_routing_enabled` still off.
-- `0031` — per-project token budgets: migrations 0035 + 0039 add
-  `projects.budget_{soft,hard}_tokens` (nullable tri-state: NULL =
-  fleet default, positive = override, 0 = disabled) and
-  `projects.budget_downshift_at`. Dispatcher hard-gate fails tasks with
-  `failure_kind="budget"`; soft breach stamps `budget_downshift_at` and
-  forces `resolve_tier_model` to low-tier routing for the remainder of
-  the month (`pin_top_tier=True` wins, so audit projects never
-  silently downshift). `resolve_budget_limits` is the single resolution
-  point (per-project → fleet default → 0 disabled). Soft-breach Slack
-  alerts deduplicate per calendar month via the yyyymm suffix on
-  `alert_type`. Monthly-reset cron (`POST /v1/_admin/budget/monthly-reset`,
-  Cloud Scheduler 00:05 UTC 1st) clears every project's
-  `budget_downshift_at`. Operator override via
-  `POST/DELETE /v1/_admin/projects/{id}/budget/override` grants a
-  1–168 h exemption. `GET /v1/projects/{id}/budget` returns
-  current-period rollup; `PATCH /v1/projects/{id}` accepts
-  `budget_soft/hard_tokens`. No project configured yet; machinery
-  latent until ops sets caps.
+- `0031` — per-project token budgets: migration 0035 adds
+  `projects.budget_{soft,hard}_tokens`. Dispatcher hard-gate +
+  soft-breach Slack alert + PATCH API all via
+  `resolve_budget_limits`. No project configured yet.
 - `0032` — cost regression alerts: migration 0038 adds
   `regression_events`. Nightly cron detects, persists, dedups on
   `(role, metric, day_utc)`. Acknowledge flow

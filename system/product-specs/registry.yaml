@@ -226,23 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: 0029
-  title: Prompt caching & shared context reuse
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0029-prompt-caching.md
-  served_by_designs:
-  - 0029
-  related_specs:
-  - task-orchestration
-  - observability
-  - knowledge-api
-  - pm-worker
-  - architect-worker
-  - team-manager-worker
-  - developer-worker
-  - reviewer-worker
 - id: '0030'
   title: Model tier routing
   status: wip

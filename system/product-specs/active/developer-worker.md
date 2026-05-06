@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-04-29
-last_verified_at: 2026-04-29
+updated: 2026-05-06
+last_verified_at: 2026-05-06
 served_by_designs: [worker-roles]
 related_specs: []
 parent: worker-roles
@@ -95,6 +95,14 @@ produces.
   adds `tasks.transient_retry_history`. ADR 0013 documents why the
   retry loop lives inside the worker and not at the dispatcher; the
   pre-0027 dispatcher-level wrapper was removed on ship.
+- 0029 — prompt-cache prefix: the system-prompt assembler calls
+  `apply_cache_prefix` to prepend the project context block
+  (`WorkerInput.project_context_block`) before writing the
+  system-prompt tempfile, gated on the effective
+  `prompt_caching_enabled` flag. The static prefix drives the
+  claude CLI's internal `cache_control` markers, producing
+  `cache_read_input_tokens` / `cache_creation_input_tokens`
+  telemetry in the task row.
 - 2026-04-28 — Orchestrator now reconciles `pr_url` from GitHub when a developer task succeeds but the worker stdout didn't include the URL (spec 0054). Eliminates the 'PR exists but task is stuck' failure class. Flag-gated via `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED`; live in prod as of revision `coder-core-00161-ln6`. See [ADR 0016](../../adrs/0016-bot-identity-via-user-type.md) for the bot-identity-detection design call (uses `pr.user.type == 'Bot'`, not login-match).
 - 0055 — `GH_TOKEN` injection refactored through the shared
   `_github_env.apply_github_token_env` helper (no behaviour change).

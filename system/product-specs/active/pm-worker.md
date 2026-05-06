@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-29
-last_verified_at: 2026-04-29
+updated: 2026-05-06
+last_verified_at: 2026-05-06
 served_by_designs: [pm-worker]
 related_specs: []
 parent: worker-roles
@@ -87,6 +87,14 @@ spec is promoted.
   leaves no side effect; ADR 0012 explains the re-prompt-only choice.
 - 0027 — transient-failure retry around the claude spawn; composes
   with 0025's schema loop. ADR 0013.
+- 0029 — prompt-cache prefix: the system-prompt assembler calls
+  `apply_cache_prefix` to prepend the project context block
+  (`WorkerInput.project_context_block`) before writing the
+  system-prompt tempfile, gated on the effective
+  `prompt_caching_enabled` flag. The static prefix drives the
+  claude CLI's internal `cache_control` markers, producing
+  `cache_read_input_tokens` / `cache_creation_input_tokens`
+  telemetry in the task row.
 - 0055 — `GH_TOKEN` injection for non-workspace roles. PM worker
   calls the shared `_github_env.apply_github_token_env` helper from
   the dispatcher-resolved `WorkerInput.github_token` so `gh`
