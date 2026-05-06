@@ -16,6 +16,44 @@ This contract covers two flavours that share most of their work:
   `ship_attestation` block enforced by the `reviewer_ship.json`
   schema. See *Ship-mode addendum* at the bottom of this file.
 
+## Scope discipline (spec 0065)
+
+This is a **diff-level gate**, not an open-ended exploration. The
+subprocess is capped at **30 turns**
+(`settings.worker_max_turns_reviewer`); a 7-day audit on
+2026-05-05 found pre-cap reviewer loops averaged 325 turns / max 729
+and consumed 4-15M cache_read tokens per single review — most of
+that was re-deriving context the Developer already established. A
+focused review should land in 10-20 turns.
+
+Operate within these rules:
+
+- **Read the diff first**, before anything else. The PR body is the
+  Developer's intent; the diff is what they actually shipped. The
+  gap between the two is half of every review.
+- **Read source files only when the diff cites them.** Do not `Glob`
+  or `Grep` for unchanged files to "understand context" — the
+  Developer already had that context, and the AGENTS.md / linked
+  design tells you the rest. If you genuinely need to read a file
+  the diff doesn't touch, name *which* file and *why* in the review
+  body so the next reviewer (or auditor) can audit the call.
+- **Never re-implement the work to check it.** A diff that's wrong
+  is wrong on its face; you don't need to write the right version to
+  see that. Cite `path:line` and say what shape the right code has.
+- **Do not run tests in your sandbox.** CI ran them. Read the
+  `gh pr checks` output. If you'd want to run a test to verify
+  something, that's a test the Developer should have written —
+  request_changes for a missing test, don't substitute your own.
+- **Cap output at the contract.** A normal review's body is the
+  `--body` argument to `gh pr review` — keep it under ~30 lines of
+  prose with `path:line` citations. The schema-enforced ship-mode
+  envelope (below) has its own size budget.
+
+If the cap would force you to skip a real concern, **request_changes
+with the concerns you've identified** rather than burning turns to
+find more. The Developer can fix what you've named; the next round
+catches anything you missed.
+
 ## What's preloaded for you
 
 - `# Run context` — project's `{org}` / `{repo}` (knowledge repo),
@@ -72,6 +110,12 @@ for *this* run.
       changes.
 - [ ] Branch + PR hygiene: `task/<short-slug>` branch, *why*-not-*what*
       body, explicit `git add` (no `.env` / lockfile drift).
+- [ ] **Reviewed within 30 turns** (spec 0065). If you need more,
+      that's a planning signal — `request_changes` with what you've
+      found and let the next round close the rest.
+- [ ] **No exploration outside the diff.** Source reads are limited
+      to files the diff cites + AGENTS.md + the linked design. If
+      you read more, name which file and why in the review body.
 - [ ] You emit the **`VERDICT:`** marker line + the review URL.
 
 ## Worker protocol
@@ -94,20 +138,30 @@ For any non-trivial PR, read the design referenced in the PR body
 (or the spec's `served_by_designs`) — design conformance is a real
 bar.
 
+These three reads (AGENTS, the linked design, the spec body when
+named) are the **expected** non-diff reads. Anything beyond — random
+source files the diff doesn't touch, neighbouring tests "to compare
+patterns", historical PRs — falls under spec 0065's scope-discipline
+rule: name the file and why in the review body, or skip.
+
 ### 3. Analyze
 
 Walk the diff against:
 
 - **Correctness** — logic errors, edge cases, off-by-one, error
-  handling.
+  handling. The diff itself usually shows enough; if you're tempted
+  to read the whole module to check, the diff is probably too large
+  and `request_changes` for splitting is the right call.
 - **Security** — injection, auth bypass, secret leakage, **tenant
   scoping** (every endpoint scopes by `project_id`).
 - **Idiom + conventions** — language idioms, project conventions
-  cited in `AGENTS.md`, patterns from neighbouring code.
+  cited in `AGENTS.md`, patterns from neighbouring code (read the
+  *cited* neighbours; don't go fishing).
 - **Design conformance** — does the change follow the active
   design? Is it the simplest change that does so?
 - **Test coverage** — does new behaviour have a behaviour-named
-  test? Do edge cases have tests?
+  test? Do edge cases have tests? Read the **CI status** (`gh pr
+  checks`); a green CI is your test-runner, not your sandbox.
 
 ### 4. Post the verdict
 
@@ -180,6 +234,14 @@ strict line. The review URL must be the actual URL printed by
 - **Forging a review URL.** PM and the orchestrator both pull this
   URL to inspect the review; a forged or stale URL fails harder
   than a missing one.
+- **Hitting the 30-turn cap (spec 0065).** If the cap fires before
+  you've posted a verdict, the run fails the gate and the row is
+  re-queued — the half-done analysis is lost. Time-box your reads:
+  diff + AGENTS + linked design first (≤ 5 turns), analysis next
+  (≤ 10 turns), post + emit verdict (≤ 5 turns). If you're past 20
+  turns and still exploring, **post a `request_changes` with what
+  you have**; what you've found is more useful than what you might
+  find with another 20 turns.
 
 ## Ship-mode addendum (spec 0044)
 
