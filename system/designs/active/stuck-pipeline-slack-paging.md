@@ -1,15 +1,14 @@
 ---
-id: '0067'
+id: stuck-pipeline-slack-paging
 title: Enable stuck-pipeline Slack paging at 15-minute threshold
 type: design
-status: wip
+status: active
 owner: ro
 created: '2026-05-03'
-updated: '2026-05-03'
-last_verified_at: 2026-05-03
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
 verified_by: knowledge-audit
-implements_specs:
-- '0062'
+implements_specs: []
 decided_by: []
 related_designs:
 - escalations
@@ -22,7 +21,6 @@ affects_repos:
 - coder-core
 parent: pipeline-operations
 ---
-
 # Enable stuck-pipeline Slack paging at 15-minute threshold
 
 ## Context

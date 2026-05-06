@@ -334,13 +334,6 @@ designs:
   - coder-core
   - coder-admin
   parent: system-overview
-- id: '0067'
-  title: Enable stuck-pipeline Slack paging at 15-minute threshold
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0067-enable-stuck-pipeline-slack-paging-at-15-minute-threshold.md
-  parent: pipeline-operations
 - id: admin-panel
   title: Admin Panel
   status: active
@@ -581,3 +574,9 @@ designs:
   owner: ro
   folder: active
   file: active/worker-dispatch-durability.md
+- id: stuck-pipeline-slack-paging
+  title: Enable stuck-pipeline Slack paging at 15-minute threshold
+  status: active
+  owner: ro
+  folder: active
+  file: active/stuck-pipeline-slack-paging.md
