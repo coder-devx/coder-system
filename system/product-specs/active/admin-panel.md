@@ -8,7 +8,7 @@ created: 2026-04-09
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [system-overview]
-related_specs: [audit-log]
+related_specs: [audit-log, secret-rotation]
 parent: knowledge-and-admin
 ---
 
@@ -116,11 +116,9 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `/knowledge/{type}/{id}/verify`. Operators can also trigger an
   on-demand audit pass via `triggerKnowledgeAudit()`.
 - **Regression dashboard.** `/metrics/regressions` lists fleet-wide
-  per-`(role, task_kind, model_id)` cost regressions (spec 0032) with
-  commit-suspect SHAs and Slack-sent flag; `Acknowledge` action
-  suppresses repeat fires for `(role, task_kind, model_id, metric, day)`.
-  A 14-day baseline trendline (median + p95 sparkline sourced from
-  `stage_cost_baseline`) renders per role in the same tab.
+  per-role cost regressions (spec 0032) with commit-suspect
+  attribution and Slack-sent flag; `Acknowledge` action suppresses
+  repeat fires for `(role, metric, day)`.
 - **Plan review surface.** `/projects/:projectId/plans` lists draft
   Team-Manager plans; `/plans/:planId` opens the inline plan editor
   with per-task prompt / role / complexity / order edits before
@@ -154,9 +152,17 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   JWT, behind `VITE_ISOLATION_VIEW_ENABLED`) renders the parsed
   isolation manifest as three tables — endpoints / tables / tokens
   — with a covered/skipped/missing chip per row (spec 0039).
-- **Secret-rotation registry.** `/admin/secrets` (admin JWT, behind
-  `VITE_SECRET_ROTATION_ENABLED`) lists managed secrets with rotator
-  state and last-rotated timestamp.
+- **Secret-rotation registry.** `/admin/secrets` (admin JWT, fleet
+  only, behind `VITE_SECRET_ROTATION_ENABLED`) lists every managed
+  secret with `canonical_name`, `kind`, project (per-project kinds),
+  `cadence_days`, `last_rotated_at`, `next_due_at`,
+  `dual_value_window_expires_at` (when in window), and `last_error`
+  (when set). A red chip marks any row whose `next_due_at` has
+  passed without a successful rotation. A "Rotate now" button per
+  row calls `POST /v1/_admin/secrets/{name}/rotate-now` (break-glass
+  endpoint) and schedules rotation on the next tick (≤ 15 min).
+  Empty, loading, and error states all render. Bundle delta < 8 kB
+  gzipped. See [secret-rotation](./secret-rotation.md).
 - **Escalations.** `/admin/escalations` (fleet) and
   `/projects/:projectId/escalations` (per-project) render open /
   acknowledged / resolved escalations with age, current rung,
@@ -310,14 +316,17 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Selects which credential the dispatcher hands to a worker's
   `claude` process. See [service-accounts](./service-accounts.md)
   Evolution for the server-side wiring.
-- 0032 phase 2 regression UI (shipped 2026-05-06) — `/metrics/regressions`
-  updated to reflect phase-2 granularity: per-`(role, task_kind,
-  model_id)` dedupe key shown on each row, commit-suspect SHA list per
-  alert, and a 14-day median + p95 sparkline per role sourced from
-  `stage_cost_baseline`. Backed by
-  `GET /v1/_admin/regression/baseline?days=14` and the widened
-  `GET /v1/_admin/regression/events` response (`task_kind` /
-  `model_id` columns added in migration 0059). No new frontend flag.
+- 0038 Secret-rotation registry page (shipped 2026-05-06) — new
+  `/admin/secrets` route (admin JWT, fleet only, behind
+  `VITE_SECRET_ROTATION_ENABLED`). Table lists every
+  `secret_rotations` row with canonical name, kind, project, cadence,
+  last-rotated, next-due, dual-value window expiry, and last error.
+  Red chip on past-due rows; "Rotate now" per row POSTs to
+  `POST /v1/_admin/secrets/{name}/rotate-now` (202) and surfaces the
+  ≤ 15-min completion window. Backed by `listSecretRotations` +
+  `rotateSecretNow` client bindings. Empty, loading, and error states
+  all render; bundle delta < 8 kB gzipped. See
+  [secret-rotation](./secret-rotation.md).
 
 ## Links
 
@@ -325,4 +334,5 @@ email allowlist; sessions carry an admin JWT with cross-project access.
 - Related components: [multi-tenancy](./multi-tenancy.md),
   [knowledge-api](./knowledge-api.md), [audit-log](./audit-log.md),
   [escalations](./escalations.md), [observability](./observability.md),
-  [task-orchestration](./task-orchestration.md)
+  [task-orchestration](./task-orchestration.md),
+  [secret-rotation](./secret-rotation.md)

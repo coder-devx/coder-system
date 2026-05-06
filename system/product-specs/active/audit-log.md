@@ -5,10 +5,10 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-19
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-05-06
+last_verified_at: 2026-05-06
 served_by_designs: [audit-log]
-related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api]
+related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api, secret-rotation]
 parent: tenancy-and-access
 ---
 
@@ -132,9 +132,21 @@ an incident timeline, review a peer's actions, or answer a customer's
   `project.set_auth_mode` action registered with `Actions` and
   emitted from the admin `PATCH /v1/_admin/projects/{id}/auth-mode`
   handler. Captures the prior + new mode for the trail.
+- 0038 Secret rotation audit actions (shipped 2026-05-06) — two new
+  actions registered with `Actions`: `secret.rotate` and
+  `secret.rotate.window_closed`. The `coder-core-rotate-secrets`
+  scheduler job writes a row per completed rotation with
+  `target_type='secret'`, `target_id=<canonical_name>`,
+  `actor_method='system'`, and `after={'trigger': 'scheduled'}` (or
+  `'break_glass'` for operator-initiated rotations). Window-close
+  rows use `action='secret.rotate.window_closed'`. Both actions
+  carry `correlation_id=<rotator_run_id>` so the full rotation
+  round-trip clusters in the audit view. See
+  [secret-rotation](./secret-rotation.md).
 
 ## Links
 
 - Designs: [audit-log](../../designs/active/audit-log.md)
 - Related components: admin-panel, impersonation, service-accounts,
-  task-orchestration, knowledge-api, escalations, self-healing
+  task-orchestration, knowledge-api, escalations, self-healing,
+  secret-rotation

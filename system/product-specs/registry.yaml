@@ -226,21 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: 0038
-  title: Automated secret rotation
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0038-secret-rotation.md
-  served_by_designs:
-  - 0038
-  related_specs:
-  - service-accounts
-  - continuous-deployment
-  - multi-tenancy
-  - admin-panel
-  - impersonation
-  - audit-log
 - id: '0040'
   title: Confidence-scored auto-approval
   status: wip
@@ -492,3 +477,16 @@ specs:
   - reviewer-worker
   - observability
   parent: worker-roles
+- id: secret-rotation
+  title: Automated secret rotation
+  status: active
+  owner: ro
+  folder: active
+  file: active/secret-rotation.md
+  related_specs:
+  - service-accounts
+  - audit-log
+  - admin-panel
+  - multi-tenancy
+  - impersonation
+  - continuous-deployment

@@ -5,8 +5,8 @@ type: index
 status: active
 owner: ro
 created: 2026-05-02
-updated: 2026-05-03
-last_verified_at: 2026-05-03
+updated: 2026-05-06
+last_verified_at: 2026-05-06
 served_by_designs: [impersonation, audit-log, tenant-isolation]
 related_specs: [pipeline-operations, worker-roles, knowledge-and-admin]
 parent: ~
@@ -39,6 +39,10 @@ did what.
 - [audit-log](./audit-log.md) — every mutation is recorded with
   actor, method, action, before/after, project_id, correlation_id;
   retained for compliance review.
+- [secret-rotation](./secret-rotation.md) — automated scheduled
+  rotation of long-lived credentials (API keys, JWT signing secrets,
+  GitHub App private key) with zero-downtime dual-value windows and
+  a break-glass override for suspected leaks.
 
 ## Cross-cutting concerns
 
