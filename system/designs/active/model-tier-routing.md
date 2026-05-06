@@ -1,21 +1,31 @@
 ---
-id: "0030"
+id: model-tier-routing
 title: Model tier routing
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-18
-updated: 2026-04-18
-last_verified_at: 2026-05-03
+created: '2026-04-18'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
 verified_by: coder@vibedevx.com
-implements_specs: ["0030"]
+implements_specs: []
 decided_by: []
-related_designs: [worker-roles, worker-communication, observability-and-cost-tracking, pm-worker, architect-worker, team-manager-worker]
-affects_services: [coder-core, coder-admin]
-affects_repos: [coder-core, coder-admin, coder-system]
+related_designs:
+- worker-roles
+- worker-communication
+- observability-and-cost-tracking
+- pm-worker
+- architect-worker
+- team-manager-worker
+affects_services:
+- coder-core
+- coder-admin
+affects_repos:
+- coder-core
+- coder-admin
+- coder-system
 parent: pipeline-operations
 ---
-
 # Model tier routing
 
 ## Context

@@ -216,24 +216,6 @@ designs:
   affects_services:
   - coder-core
   parent: system-overview
-- id: '0030'
-  title: Model tier routing
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0030-model-tier-routing.md
-  implements_specs:
-  - '0030'
-  related_designs:
-  - worker-roles
-  - worker-communication
-  - observability-and-cost-tracking
-  - pm-worker
-  - architect-worker
-  - team-manager-worker
-  affects_services:
-  - coder-core
-  - coder-admin
 - id: '0031'
   title: Per-project token budgets & cost gates
   status: wip
@@ -720,3 +702,9 @@ designs:
   owner: ro
   folder: active
   file: active/prompt-caching-architecture.md
+- id: model-tier-routing
+  title: Model tier routing
+  status: active
+  owner: ro
+  folder: active
+  file: active/model-tier-routing.md
