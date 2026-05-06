@@ -7,7 +7,7 @@ date: 2026-04-28
 deciders: [ro]
 supersedes: null
 superseded_by: null
-relates_to_designs: ['0048']
+relates_to_designs: ['cross-project-patterns']
 ---
 
 # ADR 0024 — `share_patterns` column as the cross-project read enforcement boundary

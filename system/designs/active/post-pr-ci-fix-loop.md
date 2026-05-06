@@ -13,7 +13,7 @@ implements_specs: []
 decided_by:
 - '0017'
 related_designs:
-- '0052'
+- managed-repo-action-distribution
 - worker-roles
 - worker-communication
 - escalations

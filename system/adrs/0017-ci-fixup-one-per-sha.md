@@ -7,7 +7,7 @@ date: 2026-04-28
 deciders: [ro]
 supersedes: null
 superseded_by: null
-relates_to_designs: ["0053"]
+relates_to_designs: ["post-pr-ci-fix-loop"]
 ---
 
 # ADR 0017 — One CI fix-up dispatch per failing SHA, not one per failing check

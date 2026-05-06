@@ -7,7 +7,7 @@ date: 2026-04-28
 deciders: [ro]
 supersedes: null
 superseded_by: null
-relates_to_designs: ['0048']
+relates_to_designs: ['cross-project-patterns']
 ---
 
 # ADR 0022 — Structural Jaccard similarity as the v1 pattern-discovery mechanism

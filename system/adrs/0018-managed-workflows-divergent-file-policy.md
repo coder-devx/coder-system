@@ -7,7 +7,7 @@ date: 2026-04-28
 deciders: [ro]
 supersedes: null
 superseded_by: null
-relates_to_designs: ["0052"]
+relates_to_designs: ["managed-repo-action-distribution"]
 ---
 
 # ADR 0018 — Skip divergent managed-workflow files by default; require --force to overwrite

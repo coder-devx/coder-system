@@ -18,7 +18,7 @@ related_designs:
 - audit-log
 - system-overview
 - worker-communication
-- '0052'
+- managed-repo-action-distribution
 affects_services:
 - coder-core
 - coder-admin
