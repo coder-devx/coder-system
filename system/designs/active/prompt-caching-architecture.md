@@ -1,20 +1,30 @@
 ---
-id: "0029"
+id: prompt-caching-architecture
 title: Prompt caching & shared context reuse
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-18
-updated: 2026-04-19
-last_verified_at: 2026-04-19
-implements_specs: ["0029"]
+created: '2026-04-18'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
 decided_by: []
-related_designs: [worker-roles, worker-communication, observability-and-cost-tracking, pm-worker, architect-worker, team-manager-worker, knowledge-repo-model]
-affects_services: [coder-core, coder-admin]
-affects_repos: [coder-core, coder-admin]
+related_designs:
+- worker-roles
+- worker-communication
+- observability-and-cost-tracking
+- pm-worker
+- architect-worker
+- team-manager-worker
+- knowledge-repo-model
+affects_services:
+- coder-core
+- coder-admin
+affects_repos:
+- coder-core
+- coder-admin
 parent: pipeline-operations
 ---
-
 # Prompt caching & shared context reuse
 
 ## Context

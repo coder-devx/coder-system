@@ -216,25 +216,6 @@ designs:
   affects_services:
   - coder-core
   parent: system-overview
-- id: 0029
-  title: Prompt caching & shared context reuse
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0029-prompt-caching.md
-  implements_specs:
-  - 0029
-  related_designs:
-  - worker-roles
-  - worker-communication
-  - observability-and-cost-tracking
-  - pm-worker
-  - architect-worker
-  - team-manager-worker
-  - knowledge-repo-model
-  affects_services:
-  - coder-core
-  - coder-admin
 - id: '0030'
   title: Model tier routing
   status: wip
@@ -733,3 +714,9 @@ designs:
   owner: ro
   folder: active
   file: active/role-prompt-knowledge-layout.md
+- id: prompt-caching-architecture
+  title: Prompt caching & shared context reuse
+  status: active
+  owner: ro
+  folder: active
+  file: active/prompt-caching-architecture.md
