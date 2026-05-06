@@ -8,7 +8,7 @@ created: 2026-04-11
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [worker-communication]
-related_specs: [audit-log]
+related_specs: [audit-log, developer-worker]
 parent: pipeline-operations
 ---
 
@@ -214,27 +214,6 @@ and `/pipeline-runs` endpoints in `coder-core`.
   scope: human approval gates remain at PM-accept, plan-approve, and
   ship-merge; the coordinator only auto-dispatches at the spawn
   points between them.
-- **Post-PR CI fix-loop watcher.** `coder_core.integrations.ci_watcher`
-  subscribes to GitHub `check_run` webhook events at
-  `POST /v1/_internal/github/check-run-webhook` (HMAC-verified). On
-  every `check_run.completed` event, the watcher: (1) filters to
-  managed-worker PRs (branch pattern `task/*`, author is the worker
-  service account); (2) aggregates check_runs for the HEAD SHA — any
-  `failure` conclusion marks the PR CI-red; (3) pulls the failed
-  check's log tail (`ci_fix_log_tail_lines`, default 200) as
-  `fix_context`; (4) dispatches a new developer task on the same
-  branch with prompt header `# CI fix-up` and `original_task_id`
-  linked to the originating task (no new PR — fix-up pushes to the
-  same branch). Concurrency: one fix-up task per `(project, pr_url)`
-  at a time via `pr_to_task_map` (migration 0057); concurrent CI
-  failures during an active fix-up are coalesced. Bounded retries:
-  `ci_fix_attempts` counter caps at `MAX_CI_FIX_ATTEMPTS` (default 3);
-  exhaustion writes `audit_events.action = ci_fix_loop.escalated` and
-  surfaces the PR in the [escalations](./escalations.md) queue as
-  trigger kind `ci_fix_exhausted`. Config: `CODER_CI_FIX_LOOP_ENABLED`
-  (fleet flag, default off — endpoint returns 204 No Content when off);
-  `projects.ci_fix_loop_enabled` NULL/true/false tri-state per project.
-  The developer worker pre-flight (AC1) runs independently of this flag.
 
 ## Interfaces
 
@@ -266,13 +245,6 @@ and `/pipeline-runs` endpoints in `coder-core`.
   `review_body`. Returns `{pr_url: null}` when the task hasn't pushed
   a PR yet; tenant isolation mirrors `GET /tasks/{id}`. Powers the
   admin panel's inline `PrViewer`.
-- `POST /v1/_internal/github/check-run-webhook` — GitHub Actions
-  `check_run` event receiver; HMAC-verified; 204 No Content when the
-  fleet flag is off or the PR is not a managed-worker PR; dispatches
-  a developer fix-up task on CI failure.
-- `PATCH /v1/projects/{id}` — existing endpoint; gains
-  `ci_fix_loop_enabled` (null/true/false tri-state) for per-project
-  CI fix-loop control.
 
 ## Dependencies
 
@@ -284,10 +256,6 @@ and `/pipeline-runs` endpoints in `coder-core`.
 - Knowledge write API — file moves and registry updates for approvals.
 - SSE event bus — real-time admin updates for message and gate events.
 - GitHub Contents API — backs the approve flow's file move.
-- `pr_to_task_map` (migration 0057) — `(pr_url PRIMARY KEY,
-  original_task_id, current_fix_task_id, ci_fix_attempts,
-  last_failure_kind, last_failure_excerpt, escalated_at,
-  created_at, updated_at)`; CI fix-loop concurrency + retry ledger.
 
 ## Evolution
 
@@ -418,6 +386,24 @@ and `/pipeline-runs` endpoints in `coder-core`.
   new writes to orchestration tables; the watchdog's side effects
   land in `self_heal_attempts` and `audit_events`. See
   [self-healing](./self-healing.md).
+- `0054` — Orchestrator GitHub-state reconciliation (shipped
+  2026-04-28): before transitioning `succeeded|executing|no pr_url`
+  to STUCK, the orchestrator calls `_reconcile_pr_url_from_github`
+  — a fail-soft async helper that queries GitHub for open PRs on
+  the task's `branch_name`. Filters to worker-authored PRs only
+  (`pr.user.type == 'Bot'`, per ADR 0016); on a match sets
+  `task_row.pr_url`, writes a stage log with
+  `outcome='pr_url_reconciled_from_github'`, and returns the current
+  stage so the next tick handles `executing → testing` naturally.
+  Any exception → `task.pr_url_reconcile_failed` audit row + return
+  None (fail-soft to the existing STUCK path). Gated on
+  `coder_orchestrator_pr_url_reconcile_enabled: bool = False` in
+  `coder_core/config.py`; flag off → no GitHub call, behaviour
+  identical to pre-0054. Two new `Actions` entries:
+  `task.pr_url_reconciled_from_github` and
+  `task.pr_url_reconcile_failed`. Realised pain: task `22089ec6`
+  ([coder-core#36](https://github.com/coder-devx/coder-core/pull/36),
+  2026-04-27). See [developer-worker](./developer-worker.md) Evolution.
 - `0055` — `GH_TOKEN` resolved at dispatch for all roles
   (shipped 2026-04-28, [coder-core#41](https://github.com/coder-devx/coder-core/pull/41)).
   Workspace-bearing roles (developer, reviewer) keep using
@@ -467,37 +453,27 @@ and `/pipeline-runs` endpoints in `coder-core`.
   schedule lands as part of that follow-up too.
 - `0064` — schema-gate recovery (shipped 2026-05-04): the dispatcher
   now persists the full untruncated last-attempt raw output on
-  `tasks.raw_output_held` (TEXT, migration 0059) when the
+  ``tasks.raw_output_held`` (TEXT, migration 0059) when the
   compliance gate exhausts its retry budget. New endpoint
-  `POST /v1/projects/{id}/tasks/{task_id}/gate-replay` accepts
-  `{"raw_output": "..."}`: re-runs the task's role-specific schema
+  ``POST /v1/projects/{id}/tasks/{task_id}/gate-replay`` accepts
+  ``{"raw_output": "..."}``: re-runs the task's role-specific schema
   validator in a single pass (no re-prompting — operator path), and on
-  pass stores the parsed payload as `tasks.result`, transitions the
-  row to `status='succeeded'` (clearing failure_kind / failure_detail
-  / error and flipping `stage` from `stuck` back to `accepted`),
-  and emits `schema_replay.{attempted,passed}` audit rows; on fail
-  returns `422 {errors: [...]}` with the validator messages and emits
-  `schema_replay.{attempted,failed}`. Admin TaskDetail renders the
+  pass stores the parsed payload as ``tasks.result``, transitions the
+  row to ``status='succeeded'`` (clearing failure_kind / failure_detail
+  / error and flipping ``stage`` from ``stuck`` back to ``accepted``),
+  and emits ``schema_replay.{attempted,passed}`` audit rows; on fail
+  returns ``422 {errors: [...]}`` with the validator messages and emits
+  ``schema_replay.{attempted,failed}``. Admin TaskDetail renders the
   held output read-only and exposes a "Replay gate" button that opens
   an editable textarea pre-populated with it; submit posts back to the
   endpoint and the panel unmounts on pass via parent re-fetch. Phase 4
   side-effects (knowledge-repo writes, registry updates) on a passed
   replay are *not* invoked from the replay seam — operators trigger
-  them via task retry (which sees the validated `tasks.result`) or
+  them via task retry (which sees the validated ``tasks.result``) or
   by manually performing the side-effect; called out as deferred
   follow-up in the replay service docstring. Three new audit actions —
-  `schema_replay.attempted`, `schema_replay.passed`,
-  `schema_replay.failed` — give operators the full replay history.
-- `0053` — post-PR CI fix-loop watcher: `ci_watcher` module +
-  `POST /v1/_internal/github/check-run-webhook` (HMAC-verified);
-  filters to managed-worker PRs; dispatches developer fix-up tasks
-  on `check_run.completed` with `conclusion=failure`; one-per-PR
-  concurrency via `pr_to_task_map` (migration 0057); bounded retry
-  at `MAX_CI_FIX_ATTEMPTS=3`; exhaustion routes to 0041 escalation
-  queue as `ci_fix_exhausted`. Config: `CODER_CI_FIX_LOOP_ENABLED`
-  (fleet, default off), `projects.ci_fix_loop_enabled` (tri-state),
-  `ci_fix_max_attempts=3`, `ci_fix_log_tail_lines=200`. Pre-flight
-  on developer worker (AC1) ships independently of this flag.
+  ``schema_replay.attempted``, ``schema_replay.passed``,
+  ``schema_replay.failed`` — give operators the full replay history.
 
 ## Links
 

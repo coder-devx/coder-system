@@ -58,17 +58,6 @@ produces.
   admin panel renders a "recovered after N transient retries" chip.
   The per-task deadline is distinct: a deadline hit surfaces as
   `TaskStatus.TIMED_OUT`, not retried.
-- **Pre-flight lint/format pass.** Before `git push` + `gh pr create`,
-  the worker runs `uv run ruff format` and `uv run ruff check --fix`
-  against the working copy. If either exits non-zero after auto-fix,
-  the worker re-prompts itself once with the failure context; if the
-  error survives the re-prompt, the PR is opened anyway with a body
-  note so the failure is visible in the review thread. Pre-flight
-  output is captured into the task transcript for diagnostic
-  visibility. Per-repo additional commands (`preflight_commands:` list
-  in `system/repos/<repo>.md`) run after the defaults (e.g. `mypy`,
-  `prettier --write`). The pre-flight always runs regardless of the
-  post-PR CI fix-loop fleet flag.
 
 ## Interfaces
 
@@ -106,7 +95,17 @@ produces.
   adds `tasks.transient_retry_history`. ADR 0013 documents why the
   retry loop lives inside the worker and not at the dispatcher; the
   pre-0027 dispatcher-level wrapper was removed on ship.
-- 2026-04-28 — Orchestrator now reconciles `pr_url` from GitHub when a developer task succeeds but the worker stdout didn't include the URL (spec 0054). Eliminates the 'PR exists but task is stuck' failure class. Flag-gated via `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED`; live in prod as of revision `coder-core-00161-ln6`. See [ADR 0016](../../adrs/0016-bot-identity-via-user-type.md) for the bot-identity-detection design call (uses `pr.user.type == 'Bot'`, not login-match).
+- `0054` — Orchestrator GitHub-state reconciliation (shipped
+  2026-04-28, revision `coder-core-00161-ln6`): when a developer task
+  succeeds but the worker stdout didn't include the PR URL, the
+  orchestrator now queries GitHub for an open PR on the task's
+  `branch_name` before marking the task STUCK — eliminating the
+  "PR exists but task is stuck" false-positive class. Worker-authored
+  PRs only (`pr.user.type == 'Bot'`, per ADR 0016); fail-soft to the
+  existing STUCK path on any GitHub API error. Flag-gated via
+  `coder_orchestrator_pr_url_reconcile_enabled`. See
+  [task-orchestration](./task-orchestration.md) Evolution for the
+  full implementation detail.
 - 0055 — `GH_TOKEN` injection refactored through the shared
   `_github_env.apply_github_token_env` helper (no behaviour change).
   The inline `env["GH_TOKEN"] = task.workspace.github_token` access
@@ -114,12 +113,6 @@ produces.
   back to the dispatcher-resolved `WorkerInput.github_token`. Lifts
   the credential out of workspace-prep so the same helper serves
   every role worker.
-- 0053 — pre-flight lint/format pass before `git push`: `uv run ruff
-  format` + `uv run ruff check --fix`; re-prompts once on surviving
-  failures; opens PR with body note if error persists. Per-repo
-  `preflight_commands:` extension point in `system/repos/<repo>.md`.
-  Pre-flight output captured into the task transcript. Always-on
-  regardless of the post-PR CI fix-loop fleet flag.
 
 ## Links
 

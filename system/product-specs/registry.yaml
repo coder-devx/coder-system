@@ -226,18 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: '0054'
-  title: Orchestrator GitHub-state reconciliation
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0054-orchestrator-github-state-reconciliation.md
-  served_by_designs:
-  - '0054'
-  related_specs:
-  - developer-worker
-  - task-orchestration
-  - audit-log
 - id: '0056'
   title: "Worker dispatch durability \u2014 move worker subprocesses out of the HTTP\
     \ service"

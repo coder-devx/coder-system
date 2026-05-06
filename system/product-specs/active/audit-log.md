@@ -55,10 +55,7 @@ an incident timeline, review a peer's actions, or answer a customer's
   `pipeline_runs.override`,
   `projects.archive` / `rotate_api_key`,
   `impersonate.issue_token`,
-  `regression.acknowledge`, `sessions.revoke`, and
-  `ci_fix_loop.dispatched` / `ci_fix_loop.succeeded` /
-  `ci_fix_loop.failed` / `ci_fix_loop.escalated`
-  (watcher-driven, `actor_type='system'`, `actor_id='ci-fix-watcher'`).
+  `regression.acknowledge`, and `sessions.revoke`.
 - **Per-project + fleet read.**
   `GET /v1/projects/{id}/audit-events` returns rows for the calling
   project only (existing `require_project_auth` gate).
@@ -135,13 +132,19 @@ an incident timeline, review a peer's actions, or answer a customer's
   `project.set_auth_mode` action registered with `Actions` and
   emitted from the admin `PATCH /v1/_admin/projects/{id}/auth-mode`
   handler. Captures the prior + new mode for the trail.
-- 0053 CI fix-loop action namespace — four new actions registered
-  with `Actions`: `ci_fix_loop.dispatched`, `ci_fix_loop.succeeded`,
-  `ci_fix_loop.failed`, `ci_fix_loop.escalated`. Every watcher state
-  change writes an `audit_events` row with `actor_type='system'`,
-  `actor_id='ci-fix-watcher'`. `ci_fix_loop.escalated` captures the
-  PR URL and surviving failure excerpt in the `after` JSONB column
-  for operator triage.
+- `0054` Orchestrator reconciliation action namespace (shipped
+  2026-04-28) — two new actions registered in `Actions`:
+  `task.pr_url_reconciled_from_github` (successful reconciliation of
+  a missing PR URL from GitHub) and `task.pr_url_reconcile_failed`
+  (GitHub call errored or returned unexpected shape). Both write
+  `target_type='task'`, `target_id=<task_id>`, `project_id=<project>`;
+  success `details` carry `{pr_url, branch_name, commit_sha}`;
+  failure `details` carry `{error_class, error_message}`. Written
+  inside `_reconcile_pr_url_from_github` (fail-soft: exception →
+  audit row + return None, never blocks the STUCK path). Observable
+  via `/audit-events` filtered to these action strings; headline KPIs:
+  reconciliation hit rate and failure rate per week. See
+  [task-orchestration](./task-orchestration.md).
 
 ## Links
 
