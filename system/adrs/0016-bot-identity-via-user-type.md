@@ -5,7 +5,7 @@ type: adr
 status: accepted
 date: 2026-04-27
 deciders: [ro]
-relates_to_designs: ["0054"]
+relates_to_designs: ["orchestrator-github-state-reconciliation"]
 ---
 
 # ADR 0016 — Worker-authored PR detection via `user.type == "Bot"`

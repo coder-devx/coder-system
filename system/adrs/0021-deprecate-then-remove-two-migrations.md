@@ -7,7 +7,7 @@ date: 2026-04-28
 deciders: [ro]
 supersedes: null
 superseded_by: null
-relates_to_designs: ["0047"]
+relates_to_designs: ["template-schema-migration"]
 ---
 
 # ADR 0021 — Field removal requires two migrations — deprecate then remove

@@ -7,7 +7,7 @@ owner: ro
 created: 2026-04-23
 updated: 2026-05-06
 last_verified_at: 2026-05-06
-served_by_designs: ['0050']
+served_by_designs: ['oauth-mcp-clients']
 related_specs: [impersonation, audit-log, admin-panel]
 parent: tenancy-and-access
 ---

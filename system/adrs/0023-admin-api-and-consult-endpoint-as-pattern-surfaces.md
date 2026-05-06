@@ -7,7 +7,7 @@ date: 2026-04-28
 deciders: [ro]
 supersedes: null
 superseded_by: null
-relates_to_designs: ['0048', '0049']
+relates_to_designs: ['cross-project-patterns', 'mcp-agent-interface-design']
 ---
 
 # ADR 0023 — Admin API + dedicated worker consult endpoint as v1 pattern surfaces; MCP resource deferred
