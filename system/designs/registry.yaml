@@ -216,14 +216,6 @@ designs:
   affects_services:
   - coder-core
   parent: system-overview
-- id: '0002'
-  title: Competitive Intelligence Pipeline
-  status: deprecated
-  owner: ro
-  folder: deprecated
-  file: deprecated/0002-competitive-intelligence-pipeline.md
-  affects_services:
-  - coder-core
 - id: 0029
   title: Prompt caching & shared context reuse
   status: wip
@@ -747,3 +739,9 @@ designs:
   owner: ro
   folder: active
   file: active/navigation-tree-pattern.md
+- id: competitive-intelligence-pipeline
+  title: Competitive Intelligence Pipeline
+  status: active
+  owner: ro
+  folder: active
+  file: active/competitive-intelligence-pipeline.md
