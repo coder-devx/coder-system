@@ -40,11 +40,14 @@ planner gets a concrete architecture to decompose.
   spec up for planning.
 - **Output compliance gate.** Architect output is validated against
   the `architect` JSON schema (frontmatter shape + at least one
-  Mermaid fence in the body) before any Phase 4 write. Schema
-  failures re-prompt Claude with the validator errors up to the
-  configured budget; on exhaustion the task lands in `failed` with
-  `failure_kind="schema"` — no partial design files, no half-written
-  ADRs.
+  Mermaid fence in the body + required `self_confidence` block:
+  `{score: integer 0–100, justification: string ≤500 chars,
+  risk_flags: array of enum strings}`) before any Phase 4 write.
+  Schema version bump on `architect` lands alongside 0040.
+  Schema failures re-prompt Claude with the validator errors up to
+  the configured budget; on exhaustion the task lands in `failed`
+  with `failure_kind="schema"` — no partial design files, no
+  half-written ADRs.
 - **Transient-failure retry.** The claude spawn is wrapped in
   `run_with_transient_retry` (spec 0027). Composes with 0025 —
   transient wraps the spawn, schema wraps a successful spawn's
@@ -88,14 +91,6 @@ planner gets a concrete architecture to decompose.
   raw snippet in `failure_detail`; ADR 0012 for the re-prompt-only
   rationale.
 - 0027 — transient-failure retry around the claude spawn. ADR 0013.
-- 0029 — prompt-cache prefix: the system-prompt assembler calls
-  `apply_cache_prefix` to prepend the project context block
-  (`WorkerInput.project_context_block`) before writing the
-  system-prompt tempfile, gated on the effective
-  `prompt_caching_enabled` flag. The static prefix drives the
-  claude CLI's internal `cache_control` markers, producing
-  `cache_read_input_tokens` / `cache_creation_input_tokens`
-  telemetry in the task row.
 - 0044 — knowledge-ship-draft mode: the worker detects the
   `# Knowledge ship draft` prompt header, swaps in
   `architect_ship_draft.json`, and emits `merges[]` instead of a
@@ -109,6 +104,12 @@ planner gets a concrete architecture to decompose.
   manual-dispatch failure mode where architect tasks ran
   productively but exited with `gh is unauthenticated`. Realised
   pain: task `62e0c95e` (2026-04-27).
+- 0040 — `architect` schema extended with a required `self_confidence`
+  block (`score`, `justification`, `risk_flags`). Schema version bump;
+  `validate_and_retry` enforces presence so the auto-approval
+  evaluator (task-orchestration 0040) always has a score to evaluate.
+  The `architect_ship_draft.json` schema is unchanged — ship-draft
+  mode does not emit a self_confidence block.
 
 ## Links
 

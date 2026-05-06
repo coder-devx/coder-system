@@ -226,22 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: '0040'
-  title: Confidence-scored auto-approval
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0040-confidence-auto-approve.md
-  served_by_designs:
-  - '0040'
-  related_specs:
-  - task-orchestration
-  - pm-worker
-  - architect-worker
-  - team-manager-worker
-  - audit-log
-  - observability
-  - admin-panel
 - id: '0045'
   title: Cold-start knowledge ingestion
   status: wip

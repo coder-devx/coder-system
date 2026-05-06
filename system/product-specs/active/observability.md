@@ -53,14 +53,9 @@ without SSH.
   thresholds are breached, with per-alert-type rate limiting (1/hour)
   so a bad day doesn't page twelve times. A separate nightly
   regression alert (spec 0032, `REGRESSION_ALERTS_ENABLED=true` as of
-  2026-04-19) fires on per-`(role, task_kind, model_id)` cost
-  regressions exceeding a configurable threshold (default +25%;
-  `architect` defaults to +35% via `regression_thresholds_per_role_kind`)
-  versus the 7-day baseline, deduped per `(role, task_kind, model_id,
-  metric, day_utc)` via `regression_events`. Suspect commit SHAs from
-  both `coder-core` and `coder-system` are stamped on every alert
-  (`coder_core.ops.regression_attribution`; degrades to NULL when
-  credentials are absent). The cache-hit-floor alert
+  2026-04-19) fires on per-role cost regressions > +25% versus the
+  7-day baseline, deduped per (role, metric, day) via the
+  `regression_events` table. The cache-hit-floor alert
   (`SLACK_CACHE_HIT_FLOOR`, default 0 = disabled) resolves each
   project's `prompt_caching_enabled` override before firing so a
   canary carve-out and a fleet-enabled project don't silence each
@@ -76,31 +71,40 @@ without SSH.
   `dry_run_deleted_total`, `false_delete_total` — the counter surface
   used by the [branch-cleanup](./branch-cleanup.md) runbook for
   dashboards and the `false_delete_total > 0` SEV-2 alert.
+- **Auto-approval metrics.** `GET /metrics` exposes auto-approval
+  telemetry per gate kind (spec / design / plan): auto-approve rate
+  (% of artifacts that reached `applied` without manual intervention,
+  fleet + per-project), undo rate (% of auto-approved artifacts undone
+  before the window closed; fleet target < 5% in the first 30 days;
+  a sustained > 10% is a signal the threshold is too low), mean
+  wall-clock gate time split into manual vs. auto buckets (target auto
+  bucket ≤ 11 minutes — 10-minute window + tick latency), and
+  deferral-reason distribution (`score_below_threshold`,
+  `risk_flag_present`, `historical_rate_below_95`,
+  `insufficient_history`, `project_opted_out`). Downstream-impact
+  comparison (developer-task success rate on chains seeded by
+  auto-approved vs. manually-approved artifacts) derives from existing
+  task-outcome rows joined via `auto_approvals.artifact_id`; a > 3pp
+  drop in the auto-approved cohort is a rollback signal surfaced on
+  the admin Metrics dashboard.
 
 ## Interfaces
 
 - `GET /v1/projects/{id}/metrics?period=` — returns daily cost, success
-  rate, per-spec cost breakdown, average stage durations, and per-role
-  `cache_stats` with hit rate for the requested window.
+  rate, per-spec cost breakdown, average stage durations, per-role
+  `cache_stats` with hit rate, and (when `AUTO_APPROVE_ENABLED`)
+  auto-approval telemetry for the requested window.
 - `/metrics` route in `coder-admin` — dashboard view.
 - Slack webhook — cost, success-rate, and cache-hit-floor alerts.
 - Postgres `task_stage_durations` table — raw timing data for ad-hoc
   analysis.
-- `GET /v1/_admin/regression/baseline?days=14` — per-`(role, model_id,
-  day_utc)` daily medians + p95s from `stage_cost_baseline`; powers
-  the admin baseline trendline.
-- `GET /v1/_admin/regression/events?open_only=&limit=` — list regression
-  events, open-first.
-- `POST /v1/_admin/regression/events/{id}/acknowledge` — record actor +
-  optional note; suppresses repeat Slack fires for the event's dedupe
-  key.
 
 ## Dependencies
 
 - Task orchestration — the stage transitions and task completions that
   feed every metric.
 - Continuous deployment — deploy metadata used to correlate regressions
-  with releases via commit-range attribution.
+  with releases.
 - Anthropic API `usage` field — source of token counts.
 - Slack incoming webhook — alert delivery.
 
@@ -138,25 +142,23 @@ without SSH.
   `pin_top_tier=false`. `/metrics` `by_tier` rolls usage up by
   Haiku/Sonnet/Opus classification. `coder` project runs as the
   first canary with `pin_top_tier=false`.
-- `0032` phase 1 — cost regression alerts: migration 0038 adds
-  `regression_events` with dedupe on `(role, metric, day_utc)`.
-  Nightly detector persists findings; acknowledge flow
+- `0032` — cost regression alerts: migration 0038 adds
+  `regression_events`. The nightly detector persists findings with
+  dedupe on `(role, metric, day_utc)`. Acknowledge flow
   (`POST /v1/_admin/regression/events/{id}/acknowledge`) suppresses
-  repeat Slack fires. `REGRESSION_ALERTS_ENABLED=true` as of 2026-04-19.
-- `0032` phase 2 — granularity + attribution: migration 0059 widens
-  `regression_events` with `task_kind`, `model_id`,
-  `suspect_commit_range`; dedupe index widened to
-  `(role, task_kind, model_id, metric, day_utc)`. `stage_cost_baseline`
-  (migration 0040) pre-aggregates per-`(role, model_id, day_utc)` daily
-  medians/p95s; `GET /v1/_admin/regression/baseline?days=14` exposes
-  the trendline. Threshold granularity is per-`(role, task_kind)`:
-  `regression_default_threshold` (fleet) +
-  `regression_thresholds_per_role_kind` map, resolved cell → role →
-  fleet; `architect` defaults to 0.35. Commit attribution
-  (`coder_core.ops.regression_attribution`) queries both repos in one
-  nightly pass; degrades to NULL when GitHub credentials are absent.
-  Phase-1 rows coexist (null `task_kind`/`model_id` are distinct dedupe
-  values).
+  repeat Slack fires. `REGRESSION_ALERTS_ENABLED=true` as of
+  2026-04-19 un-gates the Slack post. `stage_cost_baseline`
+  pre-aggregation + commit-range attribution deferred to phase 2.
+- `0040` — auto-approval metrics (shipped 2026-05-06): `/metrics`
+  extended with per-gate-kind auto-approval telemetry — auto-approve
+  rate, undo rate, mean wall-clock gate time (manual vs. auto buckets),
+  deferral-reason distribution, and downstream developer-task success
+  rate comparison between auto-approved and manually-approved chains.
+  All derived from `auto_approvals` joined to existing task and
+  audit-event rows; no new tables. Surfaced on the admin Metrics
+  dashboard. `self_confidence` token-cost comparison (Stage 2 shadow
+  data vs. the 0029 pre-0040 baseline) feeds the
+  cost-regression-alert feed (0032) before Stage 3 flag flip.
 
 ## Links
 

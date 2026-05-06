@@ -148,11 +148,11 @@ and `/pipeline-runs` endpoints in `coder-core`.
   regardless of the fleet flag; NULL falls through to
   `settings.tier_routing_enabled`. The dispatcher stamps the resolved
   model on `WorkerInput.model_override`; runners use their existing
-  fallback. `tasks.model` records what actually ran. `coder` project
-  canary routes reviewer tasks to `claude-haiku-4-5-20251001` with
-  `pin_top_tier=false`; fleet `tier_routing_enabled` defaults `False`
-  (operator opt-in to enable fleet-wide routing). Migrations 0036 +
-  0037. Design [0030](../../designs/wip/0030-model-tier-routing.md).
+  fallback. `tasks.model` records what actually ran. As of 2026-04-19
+  the fleet flag is still False; `coder` runs as the first canary
+  with `pin_top_tier=false`, routing reviewer tasks to
+  `claude-haiku-4-5-20251001`. Migrations 0036 + 0037. Design
+  [0030](../../designs/wip/0030-model-tier-routing.md).
 - **Per-project token budgets.** Dispatcher pre-dispatch gate fails
   tasks with `failure_kind="budget"` when the project's calendar-month
   spend exceeds the resolved hard cap.
@@ -214,6 +214,48 @@ and `/pipeline-runs` endpoints in `coder-core`.
   scope: human approval gates remain at PM-accept, plan-approve, and
   ship-merge; the coordinator only auto-dispatches at the spawn
   points between them.
+- **Confidence-scored auto-approval.** On Phase 4 write for PM-draft,
+  Architect, and Team Manager artifacts,
+  `evaluate_auto_approval(artifact, gate_kind, project_id)` checks four
+  predicates before deciding whether to bypass the human-approval gate:
+  (1) project opt-in for the gate kind is `true`
+  (`projects.auto_approve_{spec,design,plan}_enabled`); (2) worker
+  `self_confidence.score` ≥ the fleet threshold for this gate kind
+  (defaults: spec 85, design 90, plan 80 via
+  `settings.auto_approve_threshold_{spec,design,plan}` env vars);
+  (3) project's historical approval rate on this gate kind ≥ 95% over
+  the last N=20 `audit_events.action='knowledge.approve'` rows for the
+  project + gate kind (strictly < 5 prior approvals = not-yet-eligible);
+  (4) `risk_flags` array is empty — both worker-reported and
+  statically-computed from the artifact body (`migration_required`
+  triggered by migration filename presence, `external_dependency_added`
+  by dependency-manifest delta, `large_blast_radius` by plan task count
+  > 5 or > 3 services touched). All four must hold; any failure returns
+  `Manual(reason)` and the existing human-approval flow runs unchanged.
+  `EligibleForAuto` writes an `auto_approvals` row with
+  `status='pending'` (migration 0062), publishes `auto_approval_pending`
+  SSE, and withholds `knowledge_approved`. A 1-minute Cloud Scheduler
+  Job (`coder-core-auto-approve-tick`) finds expired `pending` rows,
+  transitions them to `applied`, publishes `knowledge_approved`, and
+  runs the same chain hook as a manual approval — idempotent on
+  already-`applied` rows. Two break-glass endpoints on the
+  `auto_approvals` row: `POST .../auto-approvals/{id}/undo` (during
+  `pending`) transitions to `undone`, publishes `knowledge_rejected`
+  with `reason="auto_approval_undone"`, and spawns a revision task
+  seeded with the operator's optional `undone_reason` enum
+  (`score_below_threshold`, `risk_flag_present`,
+  `historical_rate_below_95`, `insufficient_history`) plus free-text;
+  undo after `applied` returns 409. `POST
+  .../auto-approvals/{id}/accept-now` finalises immediately (same shape
+  as tick). Both endpoints and the tick acquire `SELECT FOR UPDATE` on
+  the row to prevent a concurrent-finalise race. Per-project tri-state
+  opt-in columns `auto_approve_{spec,design,plan}_enabled` (migration
+  0062) default `NULL` (inherit fleet flag `AUTO_APPROVE_ENABLED`,
+  default `false`). Staged rollout: Stage 1 schema-only (workers emit
+  `self_confidence` block; evaluator not wired); Stage 2 shadow
+  (evaluator runs on every Phase 4 write, logs outcome, does not
+  publish SSE); Stage 3 per-gate threshold flip after shadow data
+  reviewed.
 
 ## Interfaces
 
@@ -245,12 +287,18 @@ and `/pipeline-runs` endpoints in `coder-core`.
   `review_body`. Returns `{pr_url: null}` when the task hasn't pushed
   a PR yet; tenant isolation mirrors `GET /tasks/{id}`. Powers the
   admin panel's inline `PrViewer`.
+- `POST /v1/projects/{id}/auto-approvals/{approval_id}/undo` — reverts
+  a `pending` auto-approval to `undone`; publishes `knowledge_rejected`;
+  spawns a revision task; returns 409 when already `applied`.
+- `POST /v1/projects/{id}/auto-approvals/{approval_id}/accept-now` —
+  finalises a `pending` auto-approval immediately (same shape as tick
+  finalisation); publishes `knowledge_approved` and runs chain hook.
 
 ## Dependencies
 
 - Postgres (`tasks`, `task_messages`, `task_logs`, `pipeline_runs`,
-  `knowledge_reviews`) — state of record. Migrations 0010, 0013, 0015,
-  0017 own the schema.
+  `knowledge_reviews`, `auto_approvals`) — state of record. Migrations
+  0010, 0013, 0015, 0017, 0062 own the schema.
 - Developer, Reviewer, PM, Architect, Team Manager workers — the stages
   the orchestrator drives.
 - Knowledge write API — file moves and registry updates for approvals.
@@ -330,12 +378,9 @@ and `/pipeline-runs` endpoints in `coder-core`.
   `projects.pin_top_tier` + `tasks.model_override`.
   `resolve_tier_model` in the dispatcher stamps
   `WorkerInput.model_override` so runners hit the picked model
-  without changing their own code path. `/metrics` gains `by_tier`
-  rollup (task_count, succeeded, success_rate, total_cost_tokens,
-  avg_cost_tokens) classified by model-name prefix
-  (haiku/sonnet/opus/unknown). `coder` project canary routes reviewer
-  tasks to `claude-haiku-4-5-20251001` with `pin_top_tier=false`;
-  fleet `tier_routing_enabled` defaults `False`.
+  without changing their own code path. `/metrics` gains `by_tier`.
+  `coder` canary runs with `pin_top_tier=false`; fleet
+  `tier_routing_enabled` still off.
 - `0031` — per-project token budgets: migration 0035 adds
   `projects.budget_{soft,hard}_tokens`. Dispatcher hard-gate +
   soft-breach Slack alert + PATCH API all via
@@ -438,27 +483,37 @@ and `/pipeline-runs` endpoints in `coder-core`.
   schedule lands as part of that follow-up too.
 - `0064` — schema-gate recovery (shipped 2026-05-04): the dispatcher
   now persists the full untruncated last-attempt raw output on
-  ``tasks.raw_output_held`` (TEXT, migration 0059) when the
+  `tasks.raw_output_held` (TEXT, migration 0059) when the
   compliance gate exhausts its retry budget. New endpoint
-  ``POST /v1/projects/{id}/tasks/{task_id}/gate-replay`` accepts
-  ``{"raw_output": "..."}``: re-runs the task's role-specific schema
+  `POST /v1/projects/{id}/tasks/{task_id}/gate-replay` accepts
+  `{"raw_output": "..."}`: re-runs the task's role-specific schema
   validator in a single pass (no re-prompting — operator path), and on
-  pass stores the parsed payload as ``tasks.result``, transitions the
-  row to ``status='succeeded'`` (clearing failure_kind / failure_detail
-  / error and flipping ``stage`` from ``stuck`` back to ``accepted``),
-  and emits ``schema_replay.{attempted,passed}`` audit rows; on fail
-  returns ``422 {errors: [...]}`` with the validator messages and emits
-  ``schema_replay.{attempted,failed}``. Admin TaskDetail renders the
+  pass stores the parsed payload as `tasks.result`, transitions the
+  row to `status='succeeded'` (clearing failure_kind / failure_detail
+  / error and flipping `stage` from `stuck` back to `accepted`),
+  and emits `schema_replay.{attempted,passed}` audit rows; on fail
+  returns `422 {errors: [...]}` with the validator messages and emits
+  `schema_replay.{attempted,failed}`. Admin TaskDetail renders the
   held output read-only and exposes a "Replay gate" button that opens
   an editable textarea pre-populated with it; submit posts back to the
-  endpoint and the panel unmounts on pass via parent re-fetch. Phase 4
-  side-effects (knowledge-repo writes, registry updates) on a passed
-  replay are *not* invoked from the replay seam — operators trigger
-  them via task retry (which sees the validated ``tasks.result``) or
-  by manually performing the side-effect; called out as deferred
-  follow-up in the replay service docstring. Three new audit actions —
-  ``schema_replay.attempted``, ``schema_replay.passed``,
-  ``schema_replay.failed`` — give operators the full replay history.
+  endpoint and the panel unmounts on pass via parent re-fetch.
+  Three new audit actions — `schema_replay.attempted`,
+  `schema_replay.passed`, `schema_replay.failed` — give operators the
+  full replay history.
+- `0040` — confidence-scored auto-approval (shipped 2026-05-06):
+  `auto_approvals` table + per-project opt-in columns
+  `auto_approve_{spec,design,plan}_enabled` (migration 0062).
+  `evaluate_auto_approval` runs on Phase 4 write for PM-draft,
+  Architect, and TM outputs — four-predicate check (opt-in, score ≥
+  fleet threshold, historical approval rate ≥ 95% over last N=20
+  rows, empty risk flags after static ORing with worker self-report).
+  `coder-core-auto-approve-tick` (1-minute Cloud Run Job) transitions
+  expired `pending` rows to `applied` and fires the chain hook.
+  Undo and accept-now break-glass endpoints, both guarded by
+  `SELECT FOR UPDATE`. Fleet flag `AUTO_APPROVE_ENABLED` (default
+  false); thresholds in `settings.auto_approve_threshold_{spec,design,plan}`
+  env vars. See [audit-log](./audit-log.md) for the four new
+  `knowledge.auto_approve_*` action strings.
 
 ## Links
 

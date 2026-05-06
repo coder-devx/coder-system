@@ -44,7 +44,12 @@ spec is promoted.
   the start.
 - **Output compliance gate.** Draft and accept outputs are validated
   against the per-mode JSON schemas (`pm_draft`, `pm_accept`) before
-  any Phase 4 side effect. On schema failure the worker re-prompts
+  any Phase 4 side effect. The `pm_draft` schema requires a
+  `self_confidence` block — `{score: integer 0–100, justification:
+  string ≤500 chars, risk_flags: array of enum strings}` — whose
+  presence is enforced by `validate_and_retry` before the
+  auto-approval evaluator runs. Schema version bump on `pm_draft`
+  lands alongside 0040. On schema failure the worker re-prompts
   Claude with the validator errors and last raw output, up to the
   configured retry budget; on exhaustion the task exits with
   `failure_kind="schema"` and `failure_detail` holding the errors and
@@ -87,19 +92,16 @@ spec is promoted.
   leaves no side effect; ADR 0012 explains the re-prompt-only choice.
 - 0027 — transient-failure retry around the claude spawn; composes
   with 0025's schema loop. ADR 0013.
-- 0029 — prompt-cache prefix: the system-prompt assembler calls
-  `apply_cache_prefix` to prepend the project context block
-  (`WorkerInput.project_context_block`) before writing the
-  system-prompt tempfile, gated on the effective
-  `prompt_caching_enabled` flag. The static prefix drives the
-  claude CLI's internal `cache_control` markers, producing
-  `cache_read_input_tokens` / `cache_creation_input_tokens`
-  telemetry in the task row.
 - 0055 — `GH_TOKEN` injection for non-workspace roles. PM worker
   calls the shared `_github_env.apply_github_token_env` helper from
   the dispatcher-resolved `WorkerInput.github_token` so `gh`
   commands inside the `claude` subprocess authenticate without a
   workspace clone.
+- 0040 — `pm_draft` schema extended with a required `self_confidence`
+  block (`score`, `justification`, `risk_flags`). Schema version bump;
+  `validate_and_retry` enforces presence so the auto-approval
+  evaluator (task-orchestration 0040) always has a score to evaluate.
+  No change to `pm_accept` schema.
 
 ## Links
 

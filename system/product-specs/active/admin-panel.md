@@ -8,7 +8,7 @@ created: 2026-04-09
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [system-overview]
-related_specs: [audit-log, secret-rotation]
+related_specs: [audit-log]
 parent: knowledge-and-admin
 ---
 
@@ -133,7 +133,12 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   blocked-longest-first.
 - **Auto-approval cards.** `ProjectDetail` renders `AutoApprovalCard`
   rows when `VITE_AUTO_APPROVE_ENABLED` is on (spec 0040): worker
-  score, risk flags, justification, undo within window, force-finalize.
+  score, risk flags, justification, live countdown, Undo and
+  Accept-now buttons. SSE `auto_approval_pending` event triggers
+  real-time card appearance without polling. Per-project tri-state
+  opt-in (spec/design/plan gates individually) is editable from the
+  project settings card. `PATCH /v1/projects/{id}` with
+  `auto_approve_{spec,design,plan}_enabled` persists the choice.
 - **Per-project budget cards.** `ProjectDetail` carries
   `BudgetCard` / `BudgetStateCard` / `BudgetReadSourceCard` (spec
   0031 phase 2): hard/soft limits, daily-spend sparkline, 7-day
@@ -152,17 +157,9 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   JWT, behind `VITE_ISOLATION_VIEW_ENABLED`) renders the parsed
   isolation manifest as three tables — endpoints / tables / tokens
   — with a covered/skipped/missing chip per row (spec 0039).
-- **Secret-rotation registry.** `/admin/secrets` (admin JWT, fleet
-  only, behind `VITE_SECRET_ROTATION_ENABLED`) lists every managed
-  secret with `canonical_name`, `kind`, project (per-project kinds),
-  `cadence_days`, `last_rotated_at`, `next_due_at`,
-  `dual_value_window_expires_at` (when in window), and `last_error`
-  (when set). A red chip marks any row whose `next_due_at` has
-  passed without a successful rotation. A "Rotate now" button per
-  row calls `POST /v1/_admin/secrets/{name}/rotate-now` (break-glass
-  endpoint) and schedules rotation on the next tick (≤ 15 min).
-  Empty, loading, and error states all render. Bundle delta < 8 kB
-  gzipped. See [secret-rotation](./secret-rotation.md).
+- **Secret-rotation registry.** `/admin/secrets` (admin JWT, behind
+  `VITE_SECRET_ROTATION_ENABLED`) lists managed secrets with rotator
+  state and last-rotated timestamp.
 - **Escalations.** `/admin/escalations` (fleet) and
   `/projects/:projectId/escalations` (per-project) render open /
   acknowledged / resolved escalations with age, current rung,
@@ -193,9 +190,9 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Plans, Metrics, Freshness, Audit (flagged), Escalations (flagged).
 - Consumes `coder-core` REST (projects, knowledge, tasks, overrides,
   merge, knowledge PUT, ship, escalations, audit, freshness, budget,
-  isolation, regressions, secrets) and the SSE event stream for
-  pipeline / message / `pipeline_run.changed` /
-  `pipeline_run.gate_blocked` events.
+  isolation, regressions, secrets, auto-approvals) and the SSE event
+  stream for pipeline / message / `pipeline_run.changed` /
+  `pipeline_run.gate_blocked` / `auto_approval_pending` events.
 - Typed API client (`src/api/client.ts`) shared across views — every
   endpoint has a single typed function. Reusable `StatusChip`,
   `RunTimeline`, `PrViewer`, `MarkdownBody`, `CommandPalette`, plus
@@ -316,17 +313,20 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Selects which credential the dispatcher hands to a worker's
   `claude` process. See [service-accounts](./service-accounts.md)
   Evolution for the server-side wiring.
-- 0038 Secret-rotation registry page (shipped 2026-05-06) — new
-  `/admin/secrets` route (admin JWT, fleet only, behind
-  `VITE_SECRET_ROTATION_ENABLED`). Table lists every
-  `secret_rotations` row with canonical name, kind, project, cadence,
-  last-rotated, next-due, dual-value window expiry, and last error.
-  Red chip on past-due rows; "Rotate now" per row POSTs to
-  `POST /v1/_admin/secrets/{name}/rotate-now` (202) and surfaces the
-  ≤ 15-min completion window. Backed by `listSecretRotations` +
-  `rotateSecretNow` client bindings. Empty, loading, and error states
-  all render; bundle delta < 8 kB gzipped. See
-  [secret-rotation](./secret-rotation.md).
+- 0040 Auto-approval surface (shipped 2026-05-06, behind
+  `VITE_AUTO_APPROVE_ENABLED`) — `AutoApprovalCard` component on
+  `ProjectDetail` renders each `pending` auto-approval row: worker
+  score, justification, risk flags (none by precondition), live
+  countdown to `window_expires_at`, Undo button (POST
+  `.../auto-approvals/{id}/undo`), and Accept-now button (POST
+  `.../auto-approvals/{id}/accept-now`). SSE `auto_approval_pending`
+  event triggers card appearance in real-time. Per-project tri-state
+  opt-in for spec / design / plan gates is editable from the project
+  settings section via `PATCH /v1/projects/{id}` fields
+  `auto_approve_{spec,design,plan}_enabled`. Client bindings:
+  `listPendingAutoApprovals`, `undoAutoApproval`,
+  `acceptNowAutoApproval`. No new routes — cards live inside the
+  existing `ProjectDetail` page.
 
 ## Links
 
@@ -334,5 +334,4 @@ email allowlist; sessions carry an admin JWT with cross-project access.
 - Related components: [multi-tenancy](./multi-tenancy.md),
   [knowledge-api](./knowledge-api.md), [audit-log](./audit-log.md),
   [escalations](./escalations.md), [observability](./observability.md),
-  [task-orchestration](./task-orchestration.md),
-  [secret-rotation](./secret-rotation.md)
+  [task-orchestration](./task-orchestration.md)

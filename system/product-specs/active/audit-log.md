@@ -8,7 +8,7 @@ created: 2026-04-19
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [audit-log]
-related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api, secret-rotation]
+related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api]
 parent: tenancy-and-access
 ---
 
@@ -56,6 +56,20 @@ an incident timeline, review a peer's actions, or answer a customer's
   `projects.archive` / `rotate_api_key`,
   `impersonate.issue_token`,
   `regression.acknowledge`, and `sessions.revoke`.
+- **Auto-approval lifecycle actions.** Four action strings cover every
+  state transition of the confidence-scored auto-approval flow (spec
+  0040): `knowledge.auto_approve_pending` (evaluator writes the
+  `auto_approvals` row and withholds `knowledge_approved`),
+  `knowledge.auto_approve_applied` (tick or accept-now finalises;
+  carries `worker_score`, `justification`, `window_expires_at`),
+  `knowledge.auto_approve_undone` (undo during the pending window;
+  carries `undone_reason` enum + optional free-text and
+  `spawned_revision_task_id`), `knowledge.auto_approve_accepted_now`
+  (operator fast-tracks before window closes). `actor_type='system'`
+  for tick finalisation; `actor_type='user'` for the undo and
+  accept-now endpoints. Every row is atomic with the `auto_approvals`
+  state transition — a rollback on the outer transaction rolls both
+  back.
 - **Per-project + fleet read.**
   `GET /v1/projects/{id}/audit-events` returns rows for the calling
   project only (existing `require_project_auth` gate).
@@ -132,21 +146,18 @@ an incident timeline, review a peer's actions, or answer a customer's
   `project.set_auth_mode` action registered with `Actions` and
   emitted from the admin `PATCH /v1/_admin/projects/{id}/auth-mode`
   handler. Captures the prior + new mode for the trail.
-- 0038 Secret rotation audit actions (shipped 2026-05-06) — two new
-  actions registered with `Actions`: `secret.rotate` and
-  `secret.rotate.window_closed`. The `coder-core-rotate-secrets`
-  scheduler job writes a row per completed rotation with
-  `target_type='secret'`, `target_id=<canonical_name>`,
-  `actor_method='system'`, and `after={'trigger': 'scheduled'}` (or
-  `'break_glass'` for operator-initiated rotations). Window-close
-  rows use `action='secret.rotate.window_closed'`. Both actions
-  carry `correlation_id=<rotator_run_id>` so the full rotation
-  round-trip clusters in the audit view. See
-  [secret-rotation](./secret-rotation.md).
+- 0040 Auto-approval action namespace (shipped 2026-05-06) — four new
+  actions: `knowledge.auto_approve_pending`,
+  `knowledge.auto_approve_applied`, `knowledge.auto_approve_undone`,
+  `knowledge.auto_approve_accepted_now`. Each auto-approval lifecycle
+  transition writes a row carrying `worker_score`, `justification`,
+  `window_expires_at`; undo rows additionally carry `undone_reason`
+  and `spawned_revision_task_id`. `actor_type='system'` for the
+  `coder-core-auto-approve-tick` cron; `actor_type='user'` for the
+  undo and accept-now operator endpoints.
 
 ## Links
 
 - Designs: [audit-log](../../designs/active/audit-log.md)
 - Related components: admin-panel, impersonation, service-accounts,
-  task-orchestration, knowledge-api, escalations, self-healing,
-  secret-rotation
+  task-orchestration, knowledge-api, escalations, self-healing

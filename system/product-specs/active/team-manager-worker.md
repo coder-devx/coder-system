@@ -43,10 +43,13 @@ dependency order.
   complexity, role, order) before approve/reject.
 - **Output compliance gate.** The `plan_json` envelope is validated
   against the `team_manager` JSON schema (ordered tasks, valid
-  `role`, no dependency cycles, S/M/L complexity) before the draft
-  row lands in `task_plans`. Schema failures re-prompt Claude; on
-  exhaustion the task lands `failed` with `failure_kind="schema"` —
-  no orphan plan rows.
+  `role`, no dependency cycles, S/M/L complexity, and a required
+  `self_confidence` block: `{score: integer 0–100, justification:
+  string ≤500 chars, risk_flags: array of enum strings}`) before the
+  draft row lands in `task_plans`. Schema version bump on
+  `team_manager` lands alongside 0040. Schema failures re-prompt
+  Claude; on exhaustion the task lands `failed` with
+  `failure_kind="schema"` — no orphan plan rows.
 - **Transient-failure retry.** The claude spawn is wrapped in
   `run_with_transient_retry` (spec 0027); composes with the schema
   gate above.
@@ -89,14 +92,6 @@ dependency order.
   the Phase 4 handler into the schema itself; ADR 0012 explains why
   auto-repair is out.
 - 0027 — transient-failure retry around the claude spawn. ADR 0013.
-- 0029 — prompt-cache prefix: the system-prompt assembler calls
-  `apply_cache_prefix` to prepend the project context block
-  (`WorkerInput.project_context_block`) before writing the
-  system-prompt tempfile, gated on the effective
-  `prompt_caching_enabled` flag. The static prefix drives the
-  claude CLI's internal `cache_control` markers, producing
-  `cache_read_input_tokens` / `cache_creation_input_tokens`
-  telemetry in the task row.
 - 0044 — close-cycle backstop: `on_all_dev_tasks_accepted` consults
   the orphan-WIP query, stamps `wips_pending_merge` +
   `blocked_since` on the pipeline run, publishes
@@ -110,6 +105,14 @@ dependency order.
   the dispatcher-resolved `WorkerInput.github_token` so `gh`
   commands inside the `claude` subprocess authenticate without a
   workspace clone.
+- 0040 — `team_manager` schema extended with a required
+  `self_confidence` block (`score`, `justification`, `risk_flags`).
+  Schema version bump; `validate_and_retry` enforces presence so the
+  auto-approval evaluator (task-orchestration 0040) always has a
+  score to evaluate. The static `large_blast_radius` risk-flag check
+  (> 5 tasks OR > 3 services touched) is also computed from the
+  `plan_json` task list by the gate handler and ORed with the
+  worker's self-reported flags before evaluation.
 
 ## Links
 
