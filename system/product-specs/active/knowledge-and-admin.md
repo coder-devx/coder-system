@@ -5,8 +5,8 @@ type: index
 status: active
 owner: ro
 created: 2026-05-02
-updated: 2026-05-03
-last_verified_at: 2026-05-03
+updated: 2026-05-06
+last_verified_at: 2026-05-06
 served_by_designs: [knowledge-repo-model, knowledge-write-api, knowledge-freshness]
 related_specs: [worker-roles, tenancy-and-access, pipeline-operations]
 parent: ~
@@ -39,6 +39,10 @@ the human operator (the user) interacts with the running system.
   override.
 - [onboarding](./onboarding.md) — how a new project gets wired into
   Coder for the first time.
+- [cold-start-ingestion](./cold-start-ingestion.md) — one-shot
+  ingestion of an existing codebase into a new project's knowledge
+  repo via a human-reviewed PR; populates services, designs, ADRs,
+  and glossary at onboarding time.
 
 ## Cross-cutting concerns
 
