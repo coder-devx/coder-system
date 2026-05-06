@@ -216,23 +216,6 @@ designs:
   affects_services:
   - coder-core
   parent: system-overview
-- id: '0052'
-  title: Managed-repo GitHub Action distribution
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0052-managed-repo-action-distribution.md
-  implements_specs:
-  - '0052'
-  related_designs:
-  - '0045'
-  - '0047'
-  - knowledge-write-api
-  affects_services:
-  - coder-core
-  affects_repos:
-  - coder-core
-  - coder-system
 - id: coder-core-modular-monolith
   title: coder-core modular monolith hardening
   status: active
@@ -561,3 +544,11 @@ designs:
   - '0022'
   - '0023'
   - '0024'
+- id: managed-repo-action-distribution
+  title: Managed-repo GitHub Action distribution
+  status: active
+  owner: ro
+  folder: active
+  file: active/managed-repo-action-distribution.md
+  decided_by:
+  - 0018

@@ -1,26 +1,26 @@
 ---
-id: "0052"
+id: managed-repo-action-distribution
 title: Managed-repo GitHub Action distribution
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-27
-updated: 2026-04-28
-last_verified_at: 2026-04-28
-implements_specs: ["0052"]
-decided_by: ["0018"]
+created: '2026-04-27'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
+decided_by:
+- 0018
 related_designs:
-  - "0045"
-  - "0047"
-  - knowledge-write-api
+- cold-start-ingestion
+- template-schema-migration
+- knowledge-write-api
 affects_services:
-  - coder-core
+- coder-core
 affects_repos:
-  - coder-core
-  - coder-system
+- coder-core
+- coder-system
 parent: knowledge-and-admin
 ---
-
 # 0052 — Managed-repo GitHub Action distribution
 
 ## Context
