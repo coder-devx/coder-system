@@ -1,20 +1,27 @@
 ---
-id: "0038"
+id: automated-secret-rotation
 title: Automated secret rotation
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-19
-updated: 2026-04-19
-last_verified_at: 2026-04-19
-implements_specs: ["0038"]
+created: '2026-04-19'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
 decided_by: []
-related_designs: [system-overview, impersonation, observability-and-cost-tracking, audit-log]
-affects_services: [coder-core, coder-admin]
-affects_repos: [coder-core, coder-admin]
+related_designs:
+- system-overview
+- impersonation
+- observability-and-cost-tracking
+- audit-log
+affects_services:
+- coder-core
+- coder-admin
+affects_repos:
+- coder-core
+- coder-admin
 parent: tenancy-and-access
 ---
-
 # Automated secret rotation
 
 ## Context

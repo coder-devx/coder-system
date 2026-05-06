@@ -216,22 +216,6 @@ designs:
   affects_services:
   - coder-core
   parent: system-overview
-- id: 0038
-  title: Automated secret rotation
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0038-secret-rotation.md
-  implements_specs:
-  - 0038
-  related_designs:
-  - system-overview
-  - impersonation
-  - observability-and-cost-tracking
-  - audit-log
-  affects_services:
-  - coder-core
-  - coder-admin
 - id: '0040'
   title: Confidence-scored auto-approval
   status: wip
@@ -692,3 +676,9 @@ designs:
   owner: ro
   folder: active
   file: active/cost-regression-alerts.md
+- id: automated-secret-rotation
+  title: Automated secret rotation
+  status: active
+  owner: ro
+  folder: active
+  file: active/automated-secret-rotation.md
