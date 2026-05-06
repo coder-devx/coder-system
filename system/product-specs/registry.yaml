@@ -1,9 +1,3 @@
-# Source of truth for the product specs registry.
-# REGISTRY.md is generated from this file.
-#
-# Active specs are subject-named logical components of the system as it
-# exists today. WIP specs are numbered and roadmap-aligned (see ROADMAP.md).
-
 specs:
 - id: admin-panel
   title: Admin Panel
@@ -265,19 +259,6 @@ specs:
   - team-manager-worker
   - developer-worker
   - reviewer-worker
-- id: '0031'
-  title: Per-project token budgets & cost gates
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0031-token-budgets.md
-  served_by_designs:
-  - '0031'
-  related_specs:
-  - observability
-  - task-orchestration
-  - multi-tenancy
-  - admin-panel
 - id: '0032'
   title: Prompt & cost regression alerts
   status: wip
@@ -451,7 +432,8 @@ specs:
   - task-orchestration
   - audit-log
 - id: '0056'
-  title: Worker dispatch durability — move worker subprocesses out of the HTTP service
+  title: "Worker dispatch durability \u2014 move worker subprocesses out of the HTTP\
+    \ service"
   status: wip
   owner: ro
   folder: wip

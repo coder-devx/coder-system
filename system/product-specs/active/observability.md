@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-05-06
+last_verified_at: 2026-05-06
 served_by_designs: [observability-and-cost-tracking]
 related_specs: [knowledge-freshness]
 parent: pipeline-operations
@@ -109,15 +109,25 @@ without SSH.
   3-task min sample). `PROMPT_CACHING_ENABLED=true` on revision
   `coder-core-00115-vhp` (2026-04-19) so cache_stats are driven by
   real cache_control markers, not a zero baseline.
-- `0031` — per-project token budgets: migration 0035 adds
-  `projects.budget_{soft,hard}_tokens` tri-state overrides.
-  `resolve_budget_limits` is the single resolution point (per-project
-  override → fleet default → 0 disables). Dispatcher hard-gate fails
-  budget-exhausted tasks with `failure_kind="budget"`; soft-breach
-  Slack alerts dedup per month via the yyyymm suffix on
-  `alert_type`. `PATCH /v1/projects/{id}` accepts the override
-  fields. Rollup table + admin override UI + monthly-reset cron
-  deferred to phase 2.
+- `0031` — per-project token budgets: migrations 0035 + 0039 add
+  `projects.budget_{soft,hard}_tokens` (nullable tri-state: NULL =
+  fleet default, positive = override, 0 = disabled) and
+  `projects.budget_downshift_at`. `resolve_budget_limits` is the single
+  resolution point (per-project override → fleet default → 0 disables).
+  Dispatcher hard-gate fails budget-exhausted tasks with
+  `failure_kind="budget"`; soft breach stamps `budget_downshift_at`
+  and forces tier downshift via `resolve_tier_model` for the remainder
+  of the month (`pin_top_tier=True` wins). Soft-breach Slack alerts
+  dedup per calendar month via the yyyymm suffix on `alert_type`.
+  `PATCH /v1/projects/{id}` accepts the override fields; `GET
+  /v1/projects/{id}/budget` returns the current-period rollup with
+  resolved limits. Monthly-reset cron (`POST
+  /v1/_admin/budget/monthly-reset`, Cloud Scheduler 00:05 UTC 1st)
+  clears downshift stamps for the new period. Admin panel budget cards
+  (`BudgetCard`, `BudgetStateCard`, `BudgetReadSourceCard`, `BudgetCell`
+  fleet overview) surface hard/soft limits, daily-spend sparkline, and
+  override grant/revoke — see [admin-panel](./admin-panel.md). No
+  project configured yet; machinery latent until ops sets caps.
 - `0030` — model tier routing: migrations 0036/0037 add
   `projects.pin_top_tier` tri-state + `tasks.model_override`.
   `resolve_tier_model` in the dispatcher routes reviewer tasks to
