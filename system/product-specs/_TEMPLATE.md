@@ -50,7 +50,15 @@ What this is not.
 Concretely, what's in.
 
 ## Acceptance criteria
-- [ ] Observable, testable conditions for "done".
+
+Each AC is a single bullet of the shape `- **AC<N>.** <description>` —
+the bold prefix is the stable identifier the reviewer attestation
+echoes back when the spec ships. The ship validator parses both this
+form and the older `- [ ]` checkbox shape; new specs **must** use
+`- **ACn.**` so attestations have a stable handle.
+
+- **AC1.** Observable, testable condition for "done".
+- **AC2.** Another condition. Aim for 4–7 ACs total.
 
 ## Metrics
 How we'll know it worked.

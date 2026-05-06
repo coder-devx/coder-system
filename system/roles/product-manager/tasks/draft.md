@@ -142,7 +142,7 @@ The shape:
         "related_specs": [],
         "parent": "<category-id-from-INDEX>"
       },
-      "body": "# Title\n\n**Phase:** ...\n**Progress:** 0 / N acceptance criteria\n\n## Problem\n...\n\n## Users / personas\n...\n\n## Goals\n...\n\n## Non-goals\n...\n\n## Scope\n...\n\n## Acceptance criteria\n- [ ] AC1: ...\n- [ ] AC2: ...\n\n## Open questions\n- ...\n\n## Links\n- ..."
+      "body": "# Title\n\n**Phase:** ...\n**Progress:** 0 / N acceptance criteria\n\n## Problem\n...\n\n## Users / personas\n...\n\n## Goals\n...\n\n## Non-goals\n...\n\n## Scope\n...\n\n## Acceptance criteria\n- **AC1.** ...\n- **AC2.** ...\n\n## Open questions\n- ...\n\n## Links\n- ..."
     }
 
 ## Schema-enforced fields
@@ -159,8 +159,9 @@ The `pm_draft.json` schema strict-rejects drafts that fail any of:
   fresh draft.
 - `frontmatter.parent` — minLength 1. Pick from the preloaded INDEX.
 - `body` — minLength 100, must contain at least one acceptance-
-  criteria checkbox (regex `- \[ \]`). A spec with no ACs is
-  rejected at the gate.
+  criteria bullet matching either of the two recognised shapes:
+  `- [ ]` (legacy checkbox) or `- **AC<N>.**` (canonical, what new
+  drafts should use). A spec with no ACs is rejected at the gate.
 
 ## Common mistakes that fail the gate (or fail the spec)
 

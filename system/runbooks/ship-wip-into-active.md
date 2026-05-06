@@ -52,10 +52,15 @@ Architect's draft before attestation).
 
 - Developer task for the WIP is `closed` with status `merged`.
 - The PR's diff is visible in the admin panel.
-- The WIP's `## Acceptance criteria` section is parseable (each
-  AC is a checkbox-bulleted line). If the AC list uses a different
-  format, fix the WIP's markdown before the ship gate — the ship
-  validator matches AC text exactly (normalised whitespace).
+- The WIP's `## Acceptance criteria` section is parseable. The ship
+  validator recognises two bullet shapes:
+  - `- [ ]` / `- [x]` — legacy checkbox.
+  - `- **AC<N>.** ...` — canonical (architect template + standard
+    PM drafts since 2026-05-06; preferred for new specs).
+  If the AC list uses any other format (plain `- ` bullets, numbered
+  lists, prose paragraphs), fix the WIP's markdown before the ship
+  gate. The ship validator matches AC text exactly (normalised
+  whitespace).
 
 ## The happy path
 
