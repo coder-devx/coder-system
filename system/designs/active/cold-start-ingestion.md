@@ -1,25 +1,24 @@
 ---
-id: '0045'
+id: cold-start-ingestion
 title: Cold-start knowledge ingestion
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-19
-updated: 2026-04-19
-last_verified_at: 2026-04-19
-implements_specs: ['0045']
+created: '2026-04-19'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
 related_designs:
-  - architect-worker
-  - knowledge-write-api
-  - knowledge-repo-model
-  - worker-communication
-  - system-overview
+- architect-worker
+- knowledge-write-api
+- knowledge-repo-model
+- worker-communication
+- system-overview
 affects_services:
-  - coder-core
-  - coder-admin
+- coder-core
+- coder-admin
 parent: knowledge-and-admin
 ---
-
 # 0045 — Cold-start knowledge ingestion
 
 ## Context

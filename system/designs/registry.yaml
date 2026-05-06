@@ -216,23 +216,6 @@ designs:
   affects_services:
   - coder-core
   parent: system-overview
-- id: '0045'
-  title: Cold-start knowledge ingestion
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0045-cold-start-ingestion.md
-  implements_specs:
-  - '0045'
-  related_designs:
-  - architect-worker
-  - knowledge-write-api
-  - knowledge-repo-model
-  - worker-communication
-  - system-overview
-  affects_services:
-  - coder-core
-  - coder-admin
 - id: '0046'
   title: Graph-aware knowledge retrieval
   status: wip
@@ -669,3 +652,9 @@ designs:
   owner: ro
   folder: active
   file: active/confidence-auto-approval.md
+- id: cold-start-ingestion
+  title: Cold-start knowledge ingestion
+  status: active
+  owner: ro
+  folder: active
+  file: active/cold-start-ingestion.md
