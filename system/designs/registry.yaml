@@ -245,20 +245,6 @@ designs:
   affects_services:
   - coder-core
   - coder-admin
-- id: '0050'
-  title: OAuth 2.1 for MCP clients
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0050-oauth-for-mcp-clients.md
-  implements_specs:
-  - '0050'
-  related_designs:
-  - system-overview
-  - impersonation
-  - audit-log
-  affects_services:
-  - coder-core
 - id: '0052'
   title: Managed-repo GitHub Action distribution
   status: wip
@@ -621,3 +607,10 @@ designs:
   owner: ro
   folder: active
   file: active/mcp-agent-interface-design.md
+- id: oauth-mcp-clients
+  title: "OAuth 2.1 for MCP clients \u2014 auth-code+PKCE+DCR over Google as upstream\
+    \ IdP"
+  status: active
+  owner: ro
+  folder: active
+  file: active/oauth-mcp-clients.md

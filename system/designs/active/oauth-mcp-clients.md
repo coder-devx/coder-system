@@ -1,25 +1,24 @@
 ---
-id: '0050'
+id: oauth-mcp-clients
 title: OAuth 2.1 for MCP clients — auth-code+PKCE+DCR over Google as upstream IdP
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-25
-updated: 2026-04-25
-last_verified_at: 2026-04-25
-implements_specs: ['0050']
+created: '2026-04-25'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
 related_designs:
-  - system-overview
-  - impersonation
-  - audit-log
+- system-overview
+- impersonation
+- audit-log
 affects_services:
-  - coder-core
+- coder-core
 affects_repos:
-  - coder-core
-  - coder-system
+- coder-core
+- coder-system
 parent: tenancy-and-access
 ---
-
 # 0050 — OAuth 2.1 for MCP clients (design)
 
 ## Context
