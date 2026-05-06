@@ -226,20 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: '0053'
-  title: Post-PR CI fix loop
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0053-post-pr-ci-fix-loop.md
-  served_by_designs:
-  - '0053'
-  related_specs:
-  - developer-worker
-  - reviewer-worker
-  - task-orchestration
-  - audit-log
-  - admin-panel
 - id: '0054'
   title: Orchestrator GitHub-state reconciliation
   status: wip

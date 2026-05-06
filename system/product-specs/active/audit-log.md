@@ -8,7 +8,7 @@ created: 2026-04-19
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [audit-log]
-related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api, oauth-mcp]
+related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api]
 parent: tenancy-and-access
 ---
 
@@ -55,11 +55,10 @@ an incident timeline, review a peer's actions, or answer a customer's
   `pipeline_runs.override`,
   `projects.archive` / `rotate_api_key`,
   `impersonate.issue_token`,
-  `regression.acknowledge`, `sessions.revoke`,
-  `project.set_auth_mode`,
-  and `oauth.client_registered` / `oauth.code_issued` /
-  `oauth.token_issued` (OAuth 2.1 MCP client flow — see
-  [oauth-mcp](./oauth-mcp.md)).
+  `regression.acknowledge`, `sessions.revoke`, and
+  `ci_fix_loop.dispatched` / `ci_fix_loop.succeeded` /
+  `ci_fix_loop.failed` / `ci_fix_loop.escalated`
+  (watcher-driven, `actor_type='system'`, `actor_id='ci-fix-watcher'`).
 - **Per-project + fleet read.**
   `GET /v1/projects/{id}/audit-events` returns rows for the calling
   project only (existing `require_project_auth` gate).
@@ -136,20 +135,16 @@ an incident timeline, review a peer's actions, or answer a customer's
   `project.set_auth_mode` action registered with `Actions` and
   emitted from the admin `PATCH /v1/_admin/projects/{id}/auth-mode`
   handler. Captures the prior + new mode for the trail.
-- 0050 OAuth action namespace (shipped 2026-04-25) — three new action
-  strings: `oauth.client_registered` (actor=registering admin email,
-  `actor_method=admin_token`, `target_type=oauth_client`,
-  `target_id=client_id`), `oauth.code_issued` (actor=user email,
-  `actor_method=oauth_authorize`), `oauth.token_issued` (actor=user
-  email, `actor_method=oauth_token`). `correlation_id` is propagated
-  through the code→token redemption so an operator can trace any
-  OAuth session back to its original consent moment via the
-  correlation chip in the audit log viewer. See
-  [oauth-mcp](./oauth-mcp.md).
+- 0053 CI fix-loop action namespace — four new actions registered
+  with `Actions`: `ci_fix_loop.dispatched`, `ci_fix_loop.succeeded`,
+  `ci_fix_loop.failed`, `ci_fix_loop.escalated`. Every watcher state
+  change writes an `audit_events` row with `actor_type='system'`,
+  `actor_id='ci-fix-watcher'`. `ci_fix_loop.escalated` captures the
+  PR URL and surviving failure excerpt in the `after` JSONB column
+  for operator triage.
 
 ## Links
 
 - Designs: [audit-log](../../designs/active/audit-log.md)
 - Related components: admin-panel, impersonation, service-accounts,
-  task-orchestration, knowledge-api, escalations, self-healing,
-  oauth-mcp
+  task-orchestration, knowledge-api, escalations, self-healing

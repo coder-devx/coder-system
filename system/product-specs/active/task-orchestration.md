@@ -214,48 +214,27 @@ and `/pipeline-runs` endpoints in `coder-core`.
   scope: human approval gates remain at PM-accept, plan-approve, and
   ship-merge; the coordinator only auto-dispatches at the spawn
   points between them.
-- **Confidence-scored auto-approval.** On Phase 4 write for PM-draft,
-  Architect, and Team Manager artifacts,
-  `evaluate_auto_approval(artifact, gate_kind, project_id)` checks four
-  predicates before deciding whether to bypass the human-approval gate:
-  (1) project opt-in for the gate kind is `true`
-  (`projects.auto_approve_{spec,design,plan}_enabled`); (2) worker
-  `self_confidence.score` ≥ the fleet threshold for this gate kind
-  (defaults: spec 85, design 90, plan 80 via
-  `settings.auto_approve_threshold_{spec,design,plan}` env vars);
-  (3) project's historical approval rate on this gate kind ≥ 95% over
-  the last N=20 `audit_events.action='knowledge.approve'` rows for the
-  project + gate kind (strictly < 5 prior approvals = not-yet-eligible);
-  (4) `risk_flags` array is empty — both worker-reported and
-  statically-computed from the artifact body (`migration_required`
-  triggered by migration filename presence, `external_dependency_added`
-  by dependency-manifest delta, `large_blast_radius` by plan task count
-  > 5 or > 3 services touched). All four must hold; any failure returns
-  `Manual(reason)` and the existing human-approval flow runs unchanged.
-  `EligibleForAuto` writes an `auto_approvals` row with
-  `status='pending'` (migration 0062), publishes `auto_approval_pending`
-  SSE, and withholds `knowledge_approved`. A 1-minute Cloud Scheduler
-  Job (`coder-core-auto-approve-tick`) finds expired `pending` rows,
-  transitions them to `applied`, publishes `knowledge_approved`, and
-  runs the same chain hook as a manual approval — idempotent on
-  already-`applied` rows. Two break-glass endpoints on the
-  `auto_approvals` row: `POST .../auto-approvals/{id}/undo` (during
-  `pending`) transitions to `undone`, publishes `knowledge_rejected`
-  with `reason="auto_approval_undone"`, and spawns a revision task
-  seeded with the operator's optional `undone_reason` enum
-  (`score_below_threshold`, `risk_flag_present`,
-  `historical_rate_below_95`, `insufficient_history`) plus free-text;
-  undo after `applied` returns 409. `POST
-  .../auto-approvals/{id}/accept-now` finalises immediately (same shape
-  as tick). Both endpoints and the tick acquire `SELECT FOR UPDATE` on
-  the row to prevent a concurrent-finalise race. Per-project tri-state
-  opt-in columns `auto_approve_{spec,design,plan}_enabled` (migration
-  0062) default `NULL` (inherit fleet flag `AUTO_APPROVE_ENABLED`,
-  default `false`). Staged rollout: Stage 1 schema-only (workers emit
-  `self_confidence` block; evaluator not wired); Stage 2 shadow
-  (evaluator runs on every Phase 4 write, logs outcome, does not
-  publish SSE); Stage 3 per-gate threshold flip after shadow data
-  reviewed.
+- **Post-PR CI fix-loop watcher.** `coder_core.integrations.ci_watcher`
+  subscribes to GitHub `check_run` webhook events at
+  `POST /v1/_internal/github/check-run-webhook` (HMAC-verified). On
+  every `check_run.completed` event, the watcher: (1) filters to
+  managed-worker PRs (branch pattern `task/*`, author is the worker
+  service account); (2) aggregates check_runs for the HEAD SHA — any
+  `failure` conclusion marks the PR CI-red; (3) pulls the failed
+  check's log tail (`ci_fix_log_tail_lines`, default 200) as
+  `fix_context`; (4) dispatches a new developer task on the same
+  branch with prompt header `# CI fix-up` and `original_task_id`
+  linked to the originating task (no new PR — fix-up pushes to the
+  same branch). Concurrency: one fix-up task per `(project, pr_url)`
+  at a time via `pr_to_task_map` (migration 0057); concurrent CI
+  failures during an active fix-up are coalesced. Bounded retries:
+  `ci_fix_attempts` counter caps at `MAX_CI_FIX_ATTEMPTS` (default 3);
+  exhaustion writes `audit_events.action = ci_fix_loop.escalated` and
+  surfaces the PR in the [escalations](./escalations.md) queue as
+  trigger kind `ci_fix_exhausted`. Config: `CODER_CI_FIX_LOOP_ENABLED`
+  (fleet flag, default off — endpoint returns 204 No Content when off);
+  `projects.ci_fix_loop_enabled` NULL/true/false tri-state per project.
+  The developer worker pre-flight (AC1) runs independently of this flag.
 
 ## Interfaces
 
@@ -287,23 +266,28 @@ and `/pipeline-runs` endpoints in `coder-core`.
   `review_body`. Returns `{pr_url: null}` when the task hasn't pushed
   a PR yet; tenant isolation mirrors `GET /tasks/{id}`. Powers the
   admin panel's inline `PrViewer`.
-- `POST /v1/projects/{id}/auto-approvals/{approval_id}/undo` — reverts
-  a `pending` auto-approval to `undone`; publishes `knowledge_rejected`;
-  spawns a revision task; returns 409 when already `applied`.
-- `POST /v1/projects/{id}/auto-approvals/{approval_id}/accept-now` —
-  finalises a `pending` auto-approval immediately (same shape as tick
-  finalisation); publishes `knowledge_approved` and runs chain hook.
+- `POST /v1/_internal/github/check-run-webhook` — GitHub Actions
+  `check_run` event receiver; HMAC-verified; 204 No Content when the
+  fleet flag is off or the PR is not a managed-worker PR; dispatches
+  a developer fix-up task on CI failure.
+- `PATCH /v1/projects/{id}` — existing endpoint; gains
+  `ci_fix_loop_enabled` (null/true/false tri-state) for per-project
+  CI fix-loop control.
 
 ## Dependencies
 
 - Postgres (`tasks`, `task_messages`, `task_logs`, `pipeline_runs`,
-  `knowledge_reviews`, `auto_approvals`) — state of record. Migrations
-  0010, 0013, 0015, 0017, 0062 own the schema.
+  `knowledge_reviews`) — state of record. Migrations 0010, 0013, 0015,
+  0017 own the schema.
 - Developer, Reviewer, PM, Architect, Team Manager workers — the stages
   the orchestrator drives.
 - Knowledge write API — file moves and registry updates for approvals.
 - SSE event bus — real-time admin updates for message and gate events.
 - GitHub Contents API — backs the approve flow's file move.
+- `pr_to_task_map` (migration 0057) — `(pr_url PRIMARY KEY,
+  original_task_id, current_fix_task_id, ci_fix_attempts,
+  last_failure_kind, last_failure_excerpt, escalated_at,
+  created_at, updated_at)`; CI fix-loop concurrency + retry ledger.
 
 ## Evolution
 
@@ -496,24 +480,24 @@ and `/pipeline-runs` endpoints in `coder-core`.
   `schema_replay.{attempted,failed}`. Admin TaskDetail renders the
   held output read-only and exposes a "Replay gate" button that opens
   an editable textarea pre-populated with it; submit posts back to the
-  endpoint and the panel unmounts on pass via parent re-fetch.
-  Three new audit actions — `schema_replay.attempted`,
-  `schema_replay.passed`, `schema_replay.failed` — give operators the
-  full replay history.
-- `0040` — confidence-scored auto-approval (shipped 2026-05-06):
-  `auto_approvals` table + per-project opt-in columns
-  `auto_approve_{spec,design,plan}_enabled` (migration 0062).
-  `evaluate_auto_approval` runs on Phase 4 write for PM-draft,
-  Architect, and TM outputs — four-predicate check (opt-in, score ≥
-  fleet threshold, historical approval rate ≥ 95% over last N=20
-  rows, empty risk flags after static ORing with worker self-report).
-  `coder-core-auto-approve-tick` (1-minute Cloud Run Job) transitions
-  expired `pending` rows to `applied` and fires the chain hook.
-  Undo and accept-now break-glass endpoints, both guarded by
-  `SELECT FOR UPDATE`. Fleet flag `AUTO_APPROVE_ENABLED` (default
-  false); thresholds in `settings.auto_approve_threshold_{spec,design,plan}`
-  env vars. See [audit-log](./audit-log.md) for the four new
-  `knowledge.auto_approve_*` action strings.
+  endpoint and the panel unmounts on pass via parent re-fetch. Phase 4
+  side-effects (knowledge-repo writes, registry updates) on a passed
+  replay are *not* invoked from the replay seam — operators trigger
+  them via task retry (which sees the validated `tasks.result`) or
+  by manually performing the side-effect; called out as deferred
+  follow-up in the replay service docstring. Three new audit actions —
+  `schema_replay.attempted`, `schema_replay.passed`,
+  `schema_replay.failed` — give operators the full replay history.
+- `0053` — post-PR CI fix-loop watcher: `ci_watcher` module +
+  `POST /v1/_internal/github/check-run-webhook` (HMAC-verified);
+  filters to managed-worker PRs; dispatches developer fix-up tasks
+  on `check_run.completed` with `conclusion=failure`; one-per-PR
+  concurrency via `pr_to_task_map` (migration 0057); bounded retry
+  at `MAX_CI_FIX_ATTEMPTS=3`; exhaustion routes to 0041 escalation
+  queue as `ci_fix_exhausted`. Config: `CODER_CI_FIX_LOOP_ENABLED`
+  (fleet, default off), `projects.ci_fix_loop_enabled` (tri-state),
+  `ci_fix_max_attempts=3`, `ci_fix_log_tail_lines=200`. Pre-flight
+  on developer worker (AC1) ships independently of this flag.
 
 ## Links
 
