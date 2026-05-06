@@ -1,0 +1,11 @@
+# Typical fixture repo for `coder migrate test` runs.
+# Representative shape: one service, one WIP design, registry, template_version: 0.
+# Use this fixture to verify that additive migrations produce real FileChange output.
+
+template_version: 0
+
+repos:
+  - name: example-service
+    default_branch: main
+  - name: example-admin
+    default_branch: main

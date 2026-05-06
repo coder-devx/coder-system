@@ -1,0 +1,10 @@
+# Minimal fixture repo for `coder migrate test` runs.
+# Contains only system/repos.yaml — no artifacts.
+# Exercises the no-op migration path: migrate() returns [] and the runner
+# opens a one-line PR bumping template_version with no artifact changes.
+
+template_version: 0
+
+repos:
+  - name: example-repo
+    default_branch: main

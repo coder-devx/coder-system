@@ -30,6 +30,8 @@
 #      pull-request scope on it.
 #   3. Open a PR in this repo.
 
+template_version: 1
+
 repos:
   - name: coder-core
     default_branch: main

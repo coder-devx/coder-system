@@ -1,0 +1,8 @@
+# Top-level registry for the typical fixture repo.
+# Lists all registered artifact registries present in this fixture.
+
+registries:
+  - type: service
+    file: system/services/registry.yaml
+  - type: design
+    file: system/designs/registry.yaml

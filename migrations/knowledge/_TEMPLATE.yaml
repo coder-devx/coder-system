@@ -1,0 +1,101 @@
+# migrations/knowledge/_TEMPLATE.yaml
+#
+# Annotated example of a YAML declarative migration file.
+# Copy this to `00NN-kebab-slug.yaml` and fill in every required field.
+#
+# Use YAML for simple, uniform transformations across many artifact types.
+# Use Python (.py) when you need conditional logic, content inspection, or
+# non-trivial content generation.  When in doubt, use Python — the YAML
+# interpreter is a thin layer over the same SDK.
+
+# ---------------------------------------------------------------------------
+# Required metadata (mirrors the Python format)
+# ---------------------------------------------------------------------------
+number: 0          # unique migration number, matches 00NN in filename
+slug: example-slug # short kebab-slug for branch names and PR titles
+description: >
+  Example declarative migration: renames a frontmatter key, adds a key with
+  a default, removes a deprecated key, moves a folder, and renames a folder.
+  Replace this with a description of what your migration actually does.
+target_version: 0  # template_version repos reach after this migration merges
+
+# ---------------------------------------------------------------------------
+# Optional metadata
+# ---------------------------------------------------------------------------
+
+# allow_batching: true   # set to true to allow splitting into multiple PRs
+#                        # for large change sets (>50 files); omit to default false
+
+# expected_nonempty_at_least_one_project: true
+#                        # raise suspicious_noop if every project produces []
+
+# ---------------------------------------------------------------------------
+# Operations — executed in order, top to bottom.
+# Each operation has a `kind` and kind-specific fields.
+# All operations are idempotent: re-running a migration on an already-migrated
+# repo produces an empty FileChange list.
+# ---------------------------------------------------------------------------
+ops:
+
+  # -------------------------------------------------------------------------
+  # rename_frontmatter_key
+  # Rename a frontmatter key from `from` to `to`, preserving its value.
+  # Applies only to artifact types listed in `in_types`.
+  # Skips artifacts that already use the new key name (idempotent).
+  # Pair with VALIDATOR_ALIASES (Python format) or validator_aliases (YAML
+  # format, not yet supported — use Python for rename migrations that need
+  # alias registration).
+  # -------------------------------------------------------------------------
+  - kind: rename_frontmatter_key
+    from: affects_services   # old key name present in pre-migration artifacts
+    to: relates_to_services  # new key name to use after this migration
+    in_types:                # artifact types to scope (use service ids, design, spec, …)
+      - design
+      - spec
+
+  # -------------------------------------------------------------------------
+  # add_frontmatter_key_with_default
+  # Add a new frontmatter key with a fixed default value to every artifact of
+  # the listed types, if the key is not already present.
+  # Use for additive schema changes (safe to split; ALLOW_BATCHING = True ok).
+  # -------------------------------------------------------------------------
+  - kind: add_frontmatter_key_with_default
+    key: criticality         # key to add
+    default: standard        # default value for artifacts that lack the key
+    in_types:
+      - service
+
+  # -------------------------------------------------------------------------
+  # remove_frontmatter_key
+  # Remove a key from frontmatter of every matching artifact, if present.
+  # Usually paired with a prior deprecation migration (ADR 0021 two-step):
+  #   Step 1 — set DEPRECATED = ["tier"] so the validator emits a warning.
+  #   Step 2 — this operation physically removes the key.
+  # Do not use as a first-step removal without a prior deprecation window.
+  # -------------------------------------------------------------------------
+  - kind: remove_frontmatter_key
+    key: tier                # deprecated key to remove
+    in_types:
+      - service
+
+  # -------------------------------------------------------------------------
+  # move_folder
+  # Move every file from `from` to `to`, updating all registry.yaml entries
+  # (file + folder fields) and re-running the cross-link checker.
+  # Use when a folder is restructured but files keep their names.
+  # The runner refuses moves into AGENTS.md-protected paths (active/, wip/,
+  # deprecated/) — use Python for those with explicit FileChange objects.
+  # -------------------------------------------------------------------------
+  - kind: move_folder
+    from: system/repos/        # source folder (repo-relative, trailing slash optional)
+    to: system/repositories/   # destination folder
+
+  # -------------------------------------------------------------------------
+  # rename_folder
+  # Shortcut for move_folder when `from` and `to` share the same parent.
+  # Equivalent to: move every file from `from/` to `to/`.
+  # Registry cross-links are updated identically to move_folder.
+  # -------------------------------------------------------------------------
+  - kind: rename_folder
+    from: system/integrations/  # old folder name
+    to: system/external/        # new folder name

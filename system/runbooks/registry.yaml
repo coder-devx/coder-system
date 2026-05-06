@@ -122,3 +122,8 @@ runbooks:
   status: active
   owner: ro
   file: zombie-task-recovery.md
+- id: template-migration
+  title: Template schema migration — authoring, rollout, and rollback
+  status: active
+  owner: ro
+  file: template-migration.md
