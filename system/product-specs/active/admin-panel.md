@@ -8,7 +8,7 @@ created: 2026-04-09
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [system-overview]
-related_specs: [audit-log]
+related_specs: [audit-log, knowledge-schema-migration]
 parent: knowledge-and-admin
 ---
 
@@ -64,12 +64,12 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `VITE_RUN_TIMELINE_ENABLED` (default on) for hotfix rollback.
 - **In-panel PR diff viewer.** TaskDetail carries a "PR" toggle that
   opens a lazy-loaded `PrViewer` panel rendering the unified diff +
-  PR metadata + the reviewer's existing `review_verdict` / `review_body`
-  banner. A custom Tailwind-only diff renderer (no extra deps) splits
-  on `diff --git` and colours add/remove/hunk lines. Backed by a single
-  `/tasks/{id}/pr` endpoint that fans out two concurrent GitHub calls.
-  Empty, error, and loading branches all render. `VITE_PR_VIEWER_ENABLED`
-  (default on).
+  PR metadata + the reviewer's existing `review_verdict` /
+  `review_body` banner. A custom Tailwind-only diff renderer (no extra
+  deps) splits on `diff --git` and colours add/remove/hunk lines.
+  Backed by a single `/tasks/{id}/pr` endpoint that fans out two
+  concurrent GitHub calls. Empty, error, and loading branches all
+  render. `VITE_PR_VIEWER_ENABLED` (default on).
 - **Inline knowledge editor.** The artifact page carries an Edit
   toggle next to Approve / Reject that swaps the body section for a
   `<textarea>` + live `MarkdownBody` preview. Save calls the existing
@@ -133,7 +133,8 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   blocked-longest-first.
 - **Auto-approval cards.** `ProjectDetail` renders `AutoApprovalCard`
   rows when `VITE_AUTO_APPROVE_ENABLED` is on (spec 0040): worker
-  score, risk flags, justification, undo within window, force-finalize.
+  score, risk flags, justification, undo within window,
+  force-finalize.
 - **Per-project budget cards.** `ProjectDetail` carries
   `BudgetCard` / `BudgetStateCard` / `BudgetReadSourceCard` (spec
   0031 phase 2): hard/soft limits, daily-spend sparkline, 7-day
@@ -161,20 +162,25 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   project, run/task target, and on-call identity. `Ack` and
   `Resolve` actions POST to the project endpoints; behind
   `VITE_ESCALATIONS_ENABLED`.
-- **Knowledge graph view.** The per-artifact view gains a "Graph" tab
-  (behind `VITE_KNOWLEDGE_GRAPH_ENABLED`) that calls
-  `GET /v1/projects/{id}/knowledge/graph` with `depth=2` and all edge
-  types and renders a Mermaid diagram of the returned subgraph.
-  Clicking a node navigates to its artifact detail page, replacing the
-  existing flat "related artifacts" list that required N browser HTTP
-  calls to assemble.
+- **Template-migration matrix.** `/admin/template-migrations` (fleet)
+  renders the schema-migration status across all managed projects:
+  one row per project, one column per migration number, status pills
+  (merged / PR open / failed / pending). Click a cell → migration
+  detail panel showing the PR URL (if open or merged), per-file
+  change reasons, and runner error detail (if failed). Per-project
+  tab `/projects/:id/template-migrations` shows the same view
+  filtered to one project. Backed by
+  `GET /v1/_admin/template/migrations` (fleet) and
+  `GET /v1/projects/{id}/template/version` (per-project). Behind
+  `VITE_TEMPLATE_MIGRATIONS_ENABLED` (default off).
 
 ## Interfaces
 
 - **Routes (defined in `src/main.tsx`):**
   - Fleet: `/`, `/freshness`, `/metrics/regressions`, `/admin/audit`,
     `/admin/secrets` (flagged), `/admin/isolation` (flagged),
-    `/admin/escalations` (flagged).
+    `/admin/escalations` (flagged),
+    `/admin/template-migrations` (flagged).
   - Per-project: `/projects/:projectId`,
     `/projects/:projectId/freshness`,
     `/projects/:projectId/pipeline`,
@@ -184,32 +190,35 @@ email allowlist; sessions carry an admin JWT with cross-project access.
     `/projects/:projectId/ship/:wipId`,
     `/projects/:projectId/audit`,
     `/projects/:projectId/escalations` (flagged),
+    `/projects/:projectId/template-migrations` (flagged),
     `/projects/:projectId/plans`,
     `/projects/:projectId/plans/:planId`,
     `/projects/:projectId/:type`,
     `/projects/:projectId/:type/:artifactId`.
 - **Project sub-nav** (`ProjectNav.tsx`): Overview, Pipeline, Runs,
-  Plans, Metrics, Freshness, Audit (flagged), Escalations (flagged).
+  Plans, Metrics, Freshness, Audit (flagged), Escalations (flagged),
+  Template Migrations (flagged).
 - Consumes `coder-core` REST (projects, knowledge, tasks, overrides,
   merge, knowledge PUT, ship, escalations, audit, freshness, budget,
-  isolation, regressions, secrets, graph) and the SSE event stream for
+  isolation, regressions, secrets, template/version,
+  _admin/template/migrations) and the SSE event stream for
   pipeline / message / `pipeline_run.changed` /
   `pipeline_run.gate_blocked` events.
 - Typed API client (`src/api/client.ts`) shared across views — every
   endpoint has a single typed function. Reusable `StatusChip`,
   `RunTimeline`, `PrViewer`, `MarkdownBody`, `CommandPalette`, plus
   per-feature card components on `ProjectDetail`.
-- **Frontend feature flags** (`VITE_*_ENABLED`): `VITE_AUDIT_LOG_ENABLED`,
-  `VITE_SECRET_ROTATION_ENABLED`, `VITE_ISOLATION_VIEW_ENABLED`,
-  `VITE_ESCALATIONS_ENABLED`, `VITE_AUTO_APPROVE_ENABLED`,
-  `VITE_RUN_TIMELINE_ENABLED`, `VITE_PR_VIEWER_ENABLED`,
-  `VITE_KNOWLEDGE_EDITOR_ENABLED`, `VITE_COMMAND_PALETTE_ENABLED`,
-  `VITE_KNOWLEDGE_GRAPH_ENABLED`.
+- **Frontend feature flags** (`VITE_*_ENABLED`):
+  `VITE_AUDIT_LOG_ENABLED`, `VITE_SECRET_ROTATION_ENABLED`,
+  `VITE_ISOLATION_VIEW_ENABLED`, `VITE_ESCALATIONS_ENABLED`,
+  `VITE_AUTO_APPROVE_ENABLED`, `VITE_RUN_TIMELINE_ENABLED`,
+  `VITE_PR_VIEWER_ENABLED`, `VITE_KNOWLEDGE_EDITOR_ENABLED`,
+  `VITE_COMMAND_PALETTE_ENABLED`, `VITE_TEMPLATE_MIGRATIONS_ENABLED`.
 
 ## Dependencies
 
 - multi-tenancy — project listing and scoping.
-- knowledge-api — all artifact reads, checkbox edits, and graph fetch.
+- knowledge-api — all artifact reads and checkbox edits.
 - `coder-core` task + pipeline endpoints, override endpoint, merge
   endpoint, SSE event bus.
 - GitHub (via `coder-core`) for merge action.
@@ -224,8 +233,8 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `?role=`/`?status=` filters on `GET /tasks`.
 - 0012 Admin auth and mutations (shipped 2026-04) — Google OAuth +
   email allowlist, admin JWT, task creation form, override and
-  approve-merge actions, SSE-driven real-time pipeline, checkbox editing
-  of knowledge.
+  approve-merge actions, SSE-driven real-time pipeline, checkbox
+  editing of knowledge.
 - 0026 Pipeline run dashboard (shipped 2026-04-17) — Runs list sorts
   blocked-longest-first with a red "blocked Nm" badge per row;
   RunDetail renders an inline Gate card for spec/design approvals
@@ -245,11 +254,11 @@ email allowlist; sessions carry an admin JWT with cross-project access.
 - 0033 Live pipeline-run timeline (shipped 2026-04-19) — `RunTimeline`
   component renders the per-run swim-lane view on
   `/projects/:id/runs/:runId`. Backed by the new
-  `GET /v1/projects/{id}/pipeline-runs/{run_id}/timeline` endpoint that
-  reassembles `task_stage_runs` into a lane-per-step payload with
-  `pipeline_step_stats` medians; no new storage. `useLiveTick` drives
-  sub-second tick on open bars; refetch is `pipeline_run.changed`-SSE
-  triggered (chattier events are ignored). Behind
+  `GET /v1/projects/{id}/pipeline-runs/{run_id}/timeline` endpoint
+  that reassembles `task_stage_runs` into a lane-per-step payload
+  with `pipeline_step_stats` medians; no new storage. `useLiveTick`
+  drives sub-second tick on open bars; refetch is
+  `pipeline_run.changed`-SSE triggered. Behind
   `VITE_RUN_TIMELINE_ENABLED` (default on).
 - 0034 In-panel diff & PR viewer (shipped 2026-04-19) — new
   `PrViewer` panel on TaskDetail renders unified diffs inline. Backed
@@ -257,73 +266,54 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   and fans out concurrent `fetch_pr` / `fetch_pr_diff` GitHubClient
   calls. Verdict/body come from the existing `review_verdict` /
   `review_body` columns — no new storage, no GitHub writes. Custom
-  Tailwind-only diff renderer handles +/-/@@ colouring. Empty,
-  error, and loading states all graceful. Behind
+  Tailwind-only diff renderer handles +/-/@@ colouring. Behind
   `VITE_PR_VIEWER_ENABLED` (default on).
 - 0035 Inline knowledge editor with approvals (shipped 2026-04-19,
   body-only) — new `ArtifactEditor` component on the artifact page
   with a state machine (`viewing → editing → saving → ok|conflict|error`).
   Save calls the existing `PUT /v1/projects/{pid}/knowledge/{type}/{id}`
   endpoint; no backend changes. Live preview reuses the same
-  `MarkdownBody` renderer as the read view — no render drift.
-  `beforeunload` guard on unsaved edits; approval buttons disabled
-  while dirty. `knowledge_edited` structured log event at save.
-  Frontmatter form deferred to phase 2. Behind
-  `VITE_KNOWLEDGE_EDITOR_ENABLED` (default on).
-- 0036 Command palette & keyboard-first navigation (shipped 2026-04-19)
-  — new `CommandPalette.tsx` portal-mounted at the App shell,
-  accessible from every route. `useCommandPalette()` hook binds
-  `⌘K` / `Ctrl+K` globally (inert inside focused text inputs unless
-  opted in). Entry sources are pluggable providers: `navProvider`,
-  `projectsProvider`, `projectTasksProvider`, `projectArtifactsProvider`,
+  `MarkdownBody` renderer as the read view. `beforeunload` guard on
+  unsaved edits; approval buttons disabled while dirty.
+  `knowledge_edited` structured log event at save. Frontmatter form
+  deferred to phase 2. Behind `VITE_KNOWLEDGE_EDITOR_ENABLED`
+  (default on).
+- 0036 Command palette & keyboard-first navigation (shipped
+  2026-04-19) — new `CommandPalette.tsx` portal-mounted at the App
+  shell. `useCommandPalette()` hook binds `⌘K` / `Ctrl+K` globally.
+  Entry sources: `navProvider`, `projectsProvider`,
+  `projectTasksProvider`, `projectArtifactsProvider`,
   `projectRunsProvider`, `actionsProvider`. Recent-activation history
-  (localStorage, 20 entries) boosts fuzzy-rank score; project-scoped
-  URL boosts per-project entries. Pure frontend — no backend changes.
-  Hand-rolled ranker, no new runtime dep. Behind
-  `VITE_COMMAND_PALETTE_ENABLED` (default on).
+  (localStorage, 20 entries) boosts fuzzy-rank score. Hand-rolled
+  ranker, no new runtime dep. Behind `VITE_COMMAND_PALETTE_ENABLED`
+  (default on).
 - 0037 Audit log viewer (shipped 2026-04-19) — new `AuditLog.tsx`
   page at `/projects/:projectId/audit` and `/admin/audit`, backed by
-  the new `GET /v1/projects/{id}/audit-events` (tenant-scoped) and
-  `GET /v1/admin/audit-events` (fleet). Table + filter bar + expand-
-  for-payload + correlation-chip deep link. `listProjectAuditEvents`
-  / `listFleetAuditEvents` client bindings; keyset pagination on the
-  ULID cursor. Disabled-banner surfaces the
-  `CODER_AUDIT_LOG_ENABLED=false` state. Full component lives in
-  `pages/AuditLog.tsx`; no new runtime deps. Behind
+  `GET /v1/projects/{id}/audit-events` and
+  `GET /v1/admin/audit-events`. Table + filter bar + expand-for-payload
+  + correlation-chip deep link. Keyset pagination on ULID cursor.
+  Disabled-banner surfaces `CODER_AUDIT_LOG_ENABLED=false`. Behind
   `VITE_AUDIT_LOG_ENABLED` (default on).
-- 0041 Escalations admin pages (shipped 2026-05-03) — backend
-  shipped 2026-04-22 alongside the watcher; the admin UI half landed
-  today. New `/admin/escalations` fleet view +
-  `/projects/:projectId/escalations` per-project tab list open /
-  acknowledged / resolved / expired escalations with age, current
-  rung, trigger kind, target run/task deep-link, and on-call ack/
-  resolve identity. Status filter on both views; trigger filter on
-  the fleet view. `Ack` and `Resolve` buttons POST to the existing
-  project endpoints; the table updates the affected row in place.
-  Backed by `listProjectEscalations` / `listFleetEscalations` /
-  `acknowledgeEscalation` / `resolveEscalation` client bindings on
-  the existing backend (`GET /v1/projects/{id}/escalations`,
-  `GET /v1/_admin/escalations`,
-  `POST /v1/projects/{id}/escalations/{id}/acknowledge`,
-  `POST /v1/projects/{id}/escalations/{id}/resolve`). Behind
-  `VITE_ESCALATIONS_ENABLED` (default on); the project sub-nav grows
-  an Escalations tab when the flag is on. Page +
-  6 vitest cases land in `pages/Escalations.tsx`. See
-  [escalations](./escalations.md).
-- Claude OAuth auth-mode toggle (shipped 2026-04-22) — `ProjectDetail`
-  gains a per-project auth-mode selector (`api_key` default /
-  `oauth`) backed by `PATCH /v1/_admin/projects/{id}/auth-mode`.
-  Selects which credential the dispatcher hands to a worker's
-  `claude` process. See [service-accounts](./service-accounts.md)
-  Evolution for the server-side wiring.
-- 0046 Knowledge graph view (shipped 2026-05-06) — new "Graph" tab on
-  the per-artifact view calls `GET /knowledge/graph` with `depth=2`
-  and all edge types and renders the returned subgraph as a Mermaid
-  diagram. Clicking a node navigates to its artifact detail page.
-  Replaces the prior flat "related artifacts" list that required N
-  separate browser HTTP calls. Behind `VITE_KNOWLEDGE_GRAPH_ENABLED`
-  (default off on first deploy, matching the server-side
-  `CODER_KNOWLEDGE_GRAPH_ENABLED` default).
+- 0041 Escalations admin pages (shipped 2026-05-03) — new
+  `/admin/escalations` fleet view + `/projects/:projectId/escalations`
+  per-project tab. `Ack` and `Resolve` buttons POST to the existing
+  project endpoints. Behind `VITE_ESCALATIONS_ENABLED` (default on).
+  See [escalations](./escalations.md).
+- Claude OAuth auth-mode toggle (shipped 2026-04-22) —
+  `ProjectDetail` gains a per-project auth-mode selector
+  (`api_key` default / `oauth`) backed by
+  `PATCH /v1/_admin/projects/{id}/auth-mode`.
+- 0047 Template-migration matrix (shipped 2026-05-06) — new
+  `/admin/template-migrations` fleet page + per-project
+  `/projects/:id/template-migrations` tab. Fleet matrix renders one
+  row per project, one column per migration number, status pills
+  (merged / PR open / failed / pending); click a cell for the
+  migration detail panel (PR URL, per-file change reasons, error
+  detail). Backed by `GET /v1/_admin/template/migrations` and
+  `GET /v1/projects/{id}/template/version`. Project sub-nav grows a
+  Template Migrations tab when the flag is on. Behind
+  `VITE_TEMPLATE_MIGRATIONS_ENABLED` (default off). See
+  [knowledge-schema-migration](./knowledge-schema-migration.md).
 
 ## Links
 
@@ -331,4 +321,5 @@ email allowlist; sessions carry an admin JWT with cross-project access.
 - Related components: [multi-tenancy](./multi-tenancy.md),
   [knowledge-api](./knowledge-api.md), [audit-log](./audit-log.md),
   [escalations](./escalations.md), [observability](./observability.md),
+  [knowledge-schema-migration](./knowledge-schema-migration.md),
   [task-orchestration](./task-orchestration.md)

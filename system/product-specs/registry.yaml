@@ -226,19 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: '0047'
-  title: Template schema migration
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0047-template-schema-migration.md
-  served_by_designs:
-  - '0047'
-  related_specs:
-  - knowledge-api
-  - onboarding
-  - admin-panel
-  - audit-log
 - id: 0048
   title: Cross-project pattern surfacing
   status: wip
@@ -456,4 +443,16 @@ specs:
   - onboarding
   - architect-worker
   - knowledge-api
+  - knowledge-freshness
+- id: knowledge-schema-migration
+  title: Knowledge schema migration
+  status: active
+  owner: ro
+  folder: active
+  file: active/knowledge-schema-migration.md
+  related_specs:
+  - knowledge-api
+  - onboarding
+  - admin-panel
+  - audit-log
   - knowledge-freshness

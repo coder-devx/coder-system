@@ -23,8 +23,9 @@ Every Coder project has its own *knowledge repo* — a Git repository
 with the same shape as `coder-system` itself: services, repos,
 designs, ADRs, product-specs, roles, integrations, runbooks. This
 category groups the specs that define how that repo is served to
-workers, how workers write back to it, how it's kept fresh, and how
-the human operator (the user) interacts with the running system.
+workers, how workers write back to it, how it's kept fresh, how
+the schema evolves across the fleet, and how the human operator
+(the user) interacts with the running system.
 
 ## Components
 
@@ -34,15 +35,15 @@ the human operator (the user) interacts with the running system.
 - [knowledge-freshness](./knowledge-freshness.md) — automatic
   freshness audit that flags stale artifacts and schedules
   Architect-led rewrites.
+- [knowledge-schema-migration](./knowledge-schema-migration.md) —
+  numbered migration system for propagating template schema changes
+  across all managed project knowledge repos; reviewed PRs per
+  project, fleet-wide migration matrix in the admin panel.
 - [admin-panel](./admin-panel.md) — user-facing SPA: pipeline view,
   knowledge browser, plan review, metrics dashboard, drive-mode
   override.
 - [onboarding](./onboarding.md) — how a new project gets wired into
   Coder for the first time.
-- [cold-start-ingestion](./cold-start-ingestion.md) — one-shot
-  ingestion of an existing codebase into a new project's knowledge
-  repo via a human-reviewed PR; populates services, designs, ADRs,
-  and glossary at onboarding time.
 
 ## Cross-cutting concerns
 
@@ -57,6 +58,9 @@ the human operator (the user) interacts with the running system.
 - **Pipeline integration**: PM acceptance promotes specs from `wip/`
   to `active/`; design 0057 establishes the per-role/per-mode prompt
   layout that drives this.
+- **Schema evolution**: template schema changes land as numbered
+  migrations in `coder-system/migrations/knowledge/` and propagate
+  to managed projects via reviewed PRs (see knowledge-schema-migration).
 
 ## Links
 

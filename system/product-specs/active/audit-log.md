@@ -8,7 +8,7 @@ created: 2026-04-19
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [audit-log]
-related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api]
+related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api, knowledge-schema-migration]
 parent: tenancy-and-access
 ---
 
@@ -56,20 +56,6 @@ an incident timeline, review a peer's actions, or answer a customer's
   `projects.archive` / `rotate_api_key`,
   `impersonate.issue_token`,
   `regression.acknowledge`, and `sessions.revoke`.
-- **Auto-approval lifecycle actions.** Four action strings cover every
-  state transition of the confidence-scored auto-approval flow (spec
-  0040): `knowledge.auto_approve_pending` (evaluator writes the
-  `auto_approvals` row and withholds `knowledge_approved`),
-  `knowledge.auto_approve_applied` (tick or accept-now finalises;
-  carries `worker_score`, `justification`, `window_expires_at`),
-  `knowledge.auto_approve_undone` (undo during the pending window;
-  carries `undone_reason` enum + optional free-text and
-  `spawned_revision_task_id`), `knowledge.auto_approve_accepted_now`
-  (operator fast-tracks before window closes). `actor_type='system'`
-  for tick finalisation; `actor_type='user'` for the undo and
-  accept-now endpoints. Every row is atomic with the `auto_approvals`
-  state transition — a rollback on the outer transaction rolls both
-  back.
 - **Per-project + fleet read.**
   `GET /v1/projects/{id}/audit-events` returns rows for the calling
   project only (existing `require_project_auth` gate).
@@ -146,18 +132,21 @@ an incident timeline, review a peer's actions, or answer a customer's
   `project.set_auth_mode` action registered with `Actions` and
   emitted from the admin `PATCH /v1/_admin/projects/{id}/auth-mode`
   handler. Captures the prior + new mode for the trail.
-- 0040 Auto-approval action namespace (shipped 2026-05-06) — four new
-  actions: `knowledge.auto_approve_pending`,
-  `knowledge.auto_approve_applied`, `knowledge.auto_approve_undone`,
-  `knowledge.auto_approve_accepted_now`. Each auto-approval lifecycle
-  transition writes a row carrying `worker_score`, `justification`,
-  `window_expires_at`; undo rows additionally carry `undone_reason`
-  and `spawned_revision_task_id`. `actor_type='system'` for the
-  `coder-core-auto-approve-tick` cron; `actor_type='user'` for the
-  undo and accept-now operator endpoints.
+- 0047 Template-migration action namespace (shipped 2026-05-06) —
+  four new actions: `template_migration.started`,
+  `template_migration.opened_pr`, `template_migration.merged`,
+  `template_migration.failed`. Every state change on a
+  `template_migrations` row emits an `audit_events` row in the same
+  transaction (`target_type='template_migration'`,
+  `target_id='<project_id>:<migration_number>:<batch_index>'`).
+  System-initiated runs use `actor_type='system'`,
+  `actor_id='template-migrate'`. Gated by
+  `CODER_AUDIT_LOG_ENABLED`. See
+  [knowledge-schema-migration](./knowledge-schema-migration.md).
 
 ## Links
 
 - Designs: [audit-log](../../designs/active/audit-log.md)
 - Related components: admin-panel, impersonation, service-accounts,
-  task-orchestration, knowledge-api, escalations, self-healing
+  task-orchestration, knowledge-api, escalations, self-healing,
+  knowledge-schema-migration
