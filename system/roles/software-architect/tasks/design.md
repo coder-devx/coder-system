@@ -110,6 +110,7 @@ The canonical (nested) shape:
       "design": {
         "id": "NNNN",
         "title": "Short descriptive title",
+        "target_slug": "kebab-case-from-title",
         "frontmatter": {
           "id": "NNNN",
           "title": "Short descriptive title",
@@ -130,6 +131,16 @@ The canonical (nested) shape:
       },
       "adrs": []
     }
+
+**`target_slug` is required for clean ship-time transitions.** Per
+ADR 0026 the WIP `id` is numeric and matches the spec id. When the
+matching spec ships, the design needs to ship to a meaningful active
+slug (e.g. `prompt-caching-architecture`, `oauth-mcp-clients`) — not
+`0029` or `0050`. Set `target_slug` to the kebab-case slug you'd
+choose if you were writing the active file today: 3–60 lowercase
+letters/digits/hyphens, derived from the design's title. Skipping
+this leaves orphan numeric-id designs in the registry — see the
+2026-05-06 cleanup that hand-shipped 20 such WIPs after the fact.
 
 ADRs go in the `adrs` array (omit when none warranted):
 
