@@ -1,27 +1,26 @@
 ---
-id: '0046'
+id: graph-aware-retrieval
 title: Graph-aware knowledge retrieval
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-19
-updated: 2026-04-28
-last_verified_at: 2026-04-28
-implements_specs: ['0046']
+created: '2026-04-19'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
 related_designs:
-  - knowledge-write-api
-  - knowledge-repo-model
-  - knowledge-freshness
-  - architect-worker
-  - team-manager-worker
-  - pm-worker
-  - worker-roles
+- knowledge-write-api
+- knowledge-repo-model
+- knowledge-freshness
+- architect-worker
+- team-manager-worker
+- pm-worker
+- worker-roles
 affects_services:
-  - coder-core
-  - coder-admin
+- coder-core
+- coder-admin
 parent: knowledge-and-admin
 ---
-
 # 0046 — Graph-aware knowledge retrieval
 
 ## Context

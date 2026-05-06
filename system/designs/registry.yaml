@@ -216,25 +216,6 @@ designs:
   affects_services:
   - coder-core
   parent: system-overview
-- id: '0046'
-  title: Graph-aware knowledge retrieval
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0046-graph-aware-retrieval.md
-  implements_specs:
-  - '0046'
-  related_designs:
-  - knowledge-write-api
-  - knowledge-repo-model
-  - knowledge-freshness
-  - architect-worker
-  - team-manager-worker
-  - pm-worker
-  - worker-roles
-  affects_services:
-  - coder-core
-  - coder-admin
 - id: '0047'
   title: Template schema migration
   status: wip
@@ -658,3 +639,9 @@ designs:
   owner: ro
   folder: active
   file: active/cold-start-ingestion.md
+- id: graph-aware-retrieval
+  title: Graph-aware knowledge retrieval
+  status: active
+  owner: ro
+  folder: active
+  file: active/graph-aware-retrieval.md
