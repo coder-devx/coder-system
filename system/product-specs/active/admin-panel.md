@@ -135,14 +135,11 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   rows when `VITE_AUTO_APPROVE_ENABLED` is on (spec 0040): worker
   score, risk flags, justification, undo within window, force-finalize.
 - **Per-project budget cards.** `ProjectDetail` carries
-  `BudgetCard` / `BudgetStateCard` / `BudgetReadSourceCard`: hard/soft
-  limits, daily-spend sparkline, 7-day cost, override grant/revoke
-  (1–168 h), forecast, rollup-reads toggle. `Projects.tsx` shows a
-  per-project `BudgetCell` summary (used / soft / hard with a progress
-  bar) on the fleet overview. Override calls
-  `POST/DELETE /v1/_admin/projects/{id}/budget/override`; the card
-  surfaces active override window + `granted_by`, soft-breach
-  downshift state, and grant/revoke buttons.
+  `BudgetCard` / `BudgetStateCard` / `BudgetReadSourceCard` (spec
+  0031 phase 2): hard/soft limits, daily-spend sparkline, 7-day
+  cost, override grant/revoke (24h), forecast, rollup-reads toggle.
+  `Projects.tsx` shows a per-project `BudgetCell` summary on the
+  fleet overview.
 - **Worker concurrency strip.** Live per-project worker-slot
   availability + queue depth poll (spec 0028); the fleet variant
   rides on the admin home.
@@ -286,26 +283,6 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `CODER_AUDIT_LOG_ENABLED=false` state. Full component lives in
   `pages/AuditLog.tsx`; no new runtime deps. Behind
   `VITE_AUDIT_LOG_ENABLED` (default on).
-- Claude OAuth auth-mode toggle (shipped 2026-04-22) — `ProjectDetail`
-  gains a per-project auth-mode selector (`api_key` default /
-  `oauth`) backed by `PATCH /v1/_admin/projects/{id}/auth-mode`.
-  Selects which credential the dispatcher hands to a worker's
-  `claude` process. See [service-accounts](./service-accounts.md)
-  Evolution for the server-side wiring.
-- 0031 Per-project budget UI (shipped 2026-04-22) — `ProjectDetail`
-  gains three budget components: `BudgetCard` (hard/soft cap display
-  with period-reset countdown and "set budget" affordance via `PATCH
-  /v1/projects/{id}`), `BudgetStateCard` (soft-breach downshift
-  indicator + active override window + `granted_by` attribution),
-  `BudgetReadSourceCard` (rollup-reads toggle). Grant/revoke buttons
-  call `POST/DELETE /v1/_admin/projects/{id}/budget/override`;
-  override is bounded to 1–168 h (7 days max). `Projects.tsx` grows
-  a `BudgetCell` column showing `used / soft / hard` (e.g.
-  `1.2M / 2.0M / 3.0M`) with a progress bar on the fleet overview.
-  The command palette gains `grant budget override` and
-  `revoke budget override` action entries. Backed by `GET
-  /v1/projects/{id}/budget` which returns the current-period rollup
-  with resolved per-project limits.
 - 0041 Escalations admin pages (shipped 2026-05-03) — backend
   shipped 2026-04-22 alongside the watcher; the admin UI half landed
   today. New `/admin/escalations` fleet view +
@@ -325,6 +302,12 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   an Escalations tab when the flag is on. Page +
   6 vitest cases land in `pages/Escalations.tsx`. See
   [escalations](./escalations.md).
+- Claude OAuth auth-mode toggle (shipped 2026-04-22) — `ProjectDetail`
+  gains a per-project auth-mode selector (`api_key` default /
+  `oauth`) backed by `PATCH /v1/_admin/projects/{id}/auth-mode`.
+  Selects which credential the dispatcher hands to a worker's
+  `claude` process. See [service-accounts](./service-accounts.md)
+  Evolution for the server-side wiring.
 
 ## Links
 

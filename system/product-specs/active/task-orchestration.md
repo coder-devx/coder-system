@@ -148,11 +148,11 @@ and `/pipeline-runs` endpoints in `coder-core`.
   regardless of the fleet flag; NULL falls through to
   `settings.tier_routing_enabled`. The dispatcher stamps the resolved
   model on `WorkerInput.model_override`; runners use their existing
-  fallback. `tasks.model` records what actually ran. As of 2026-04-19
-  the fleet flag is still False; `coder` runs as the first canary
-  with `pin_top_tier=false`, routing reviewer tasks to
-  `claude-haiku-4-5-20251001`. Migrations 0036 + 0037. Design
-  [0030](../../designs/wip/0030-model-tier-routing.md).
+  fallback. `tasks.model` records what actually ran. `coder` project
+  canary routes reviewer tasks to `claude-haiku-4-5-20251001` with
+  `pin_top_tier=false`; fleet `tier_routing_enabled` defaults `False`
+  (operator opt-in to enable fleet-wide routing). Migrations 0036 +
+  0037. Design [0030](../../designs/wip/0030-model-tier-routing.md).
 - **Per-project token budgets.** Dispatcher pre-dispatch gate fails
   tasks with `failure_kind="budget"` when the project's calendar-month
   spend exceeds the resolved hard cap.
@@ -325,15 +325,17 @@ and `/pipeline-runs` endpoints in `coder-core`.
   The dispatcher's block-load path emits an audit log with
   `block_hash` so sibling byte-identity is grep-able.
   `PROMPT_CACHING_ENABLED=true` on revision `coder-core-00115-vhp`
-  (2026-04-19). Fleet running 17+ days with no regressions; 48h
-  canary window long closed.
+  (2026-04-19).
 - `0030` — model tier routing: migrations 0036/0037 add
   `projects.pin_top_tier` + `tasks.model_override`.
   `resolve_tier_model` in the dispatcher stamps
   `WorkerInput.model_override` so runners hit the picked model
-  without changing their own code path. `/metrics` gains `by_tier`.
-  `coder` canary runs with `pin_top_tier=false`; fleet
-  `tier_routing_enabled` still off.
+  without changing their own code path. `/metrics` gains `by_tier`
+  rollup (task_count, succeeded, success_rate, total_cost_tokens,
+  avg_cost_tokens) classified by model-name prefix
+  (haiku/sonnet/opus/unknown). `coder` project canary routes reviewer
+  tasks to `claude-haiku-4-5-20251001` with `pin_top_tier=false`;
+  fleet `tier_routing_enabled` defaults `False`.
 - `0031` — per-project token budgets: migration 0035 adds
   `projects.budget_{soft,hard}_tokens`. Dispatcher hard-gate +
   soft-breach Slack alert + PATCH API all via

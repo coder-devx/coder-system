@@ -75,8 +75,11 @@ without SSH.
 ## Interfaces
 
 - `GET /v1/projects/{id}/metrics?period=` — returns daily cost, success
-  rate, per-spec cost breakdown, average stage durations, and per-role
-  `cache_stats` with hit rate for the requested window.
+  rate, per-spec cost breakdown, average stage durations, per-role
+  `cache_stats` with hit rate, and `by_tier` rollup
+  (task_count, succeeded, success_rate, total_cost_tokens,
+  avg_cost_tokens classified by model-name prefix
+  haiku/sonnet/opus/unknown) for the requested window.
 - `/metrics` route in `coder-admin` — dashboard view.
 - Slack webhook — cost, success-rate, and cache-hit-floor alerts.
 - Postgres `task_stage_durations` table — raw timing data for ad-hoc
@@ -108,9 +111,7 @@ without SSH.
   floor (gated on effective `prompt_caching_enabled` per project +
   3-task min sample). `PROMPT_CACHING_ENABLED=true` on revision
   `coder-core-00115-vhp` (2026-04-19) so cache_stats are driven by
-  real cache_control markers, not a zero baseline. Fleet has been
-  running with caching enabled for 17+ days with no flagged
-  regressions; the 48h canary window is long closed.
+  real cache_control markers, not a zero baseline.
 - `0031` — per-project token budgets: migration 0035 adds
   `projects.budget_{soft,hard}_tokens` tri-state overrides.
   `resolve_budget_limits` is the single resolution point (per-project
@@ -125,8 +126,12 @@ without SSH.
   `resolve_tier_model` in the dispatcher routes reviewer tasks to
   Haiku when `tier_routing_enabled=True` OR the project has
   `pin_top_tier=false`. `/metrics` `by_tier` rolls usage up by
-  Haiku/Sonnet/Opus classification. `coder` project runs as the
-  first canary with `pin_top_tier=false`.
+  model-name prefix (haiku/sonnet/opus/unknown), returning
+  task_count, succeeded, success_rate, total_cost_tokens,
+  avg_cost_tokens per tier. Admin Metrics page renders the per-tier
+  strip. `coder` project canary routes reviewer tasks to
+  `claude-haiku-4-5-20251001` with `pin_top_tier=false`; fleet
+  `tier_routing_enabled` defaults `False`.
 - `0032` — cost regression alerts: migration 0038 adds
   `regression_events`. The nightly detector persists findings with
   dedupe on `(role, metric, day_utc)`. Acknowledge flow
