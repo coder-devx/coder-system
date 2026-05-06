@@ -6,7 +6,8 @@ status: active
 owner: ro
 created: 2026-04-17
 updated: 2026-04-18
-last_verified_at: 2026-04-18
+last_verified_at: 2026-05-06
+verified_by: knowledge-audit
 implements_specs: [knowledge-freshness]
 decided_by: ["0014"]
 related_designs: [knowledge-repo-model, knowledge-write-api, architect-worker, observability-and-cost-tracking]
