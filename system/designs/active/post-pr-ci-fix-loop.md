@@ -1,29 +1,29 @@
 ---
-id: "0053"
+id: post-pr-ci-fix-loop
 title: Post-PR CI fix loop
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-27
-updated: 2026-04-29
-last_verified_at: 2026-04-29
+created: '2026-04-27'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
 deprecated_at: null
 reason: null
-implements_specs: ["0053"]
-decided_by: ["0017"]
+implements_specs: []
+decided_by:
+- '0017'
 related_designs:
-  - "0052"
-  - worker-roles
-  - worker-communication
-  - escalations
+- '0052'
+- worker-roles
+- worker-communication
+- escalations
 affects_services:
-  - coder-core
+- coder-core
 affects_repos:
-  - coder-core
-  - coder-system
+- coder-core
+- coder-system
 parent: pipeline-operations
 ---
-
 # 0053 — Post-PR CI fix loop
 
 ## Context

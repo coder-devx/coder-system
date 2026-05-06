@@ -262,26 +262,6 @@ designs:
   affects_repos:
   - coder-core
   - coder-system
-- id: '0053'
-  title: Post-PR CI fix loop
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0053-post-pr-ci-fix-loop.md
-  implements_specs:
-  - '0053'
-  decided_by:
-  - '0017'
-  related_designs:
-  - '0052'
-  - worker-roles
-  - worker-communication
-  - escalations
-  affects_services:
-  - coder-core
-  affects_repos:
-  - coder-core
-  - coder-system
 - id: '0054'
   title: Orchestrator GitHub-state reconciliation
   status: wip
@@ -614,3 +594,11 @@ designs:
   owner: ro
   folder: active
   file: active/oauth-mcp-clients.md
+- id: post-pr-ci-fix-loop
+  title: Post-PR CI fix loop
+  status: active
+  owner: ro
+  folder: active
+  file: active/post-pr-ci-fix-loop.md
+  decided_by:
+  - '0017'
