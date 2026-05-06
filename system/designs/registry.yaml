@@ -216,31 +216,6 @@ designs:
   affects_services:
   - coder-core
   parent: system-overview
-- id: '0047'
-  title: Template schema migration
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0047-template-schema-migration.md
-  implements_specs:
-  - '0047'
-  decided_by:
-  - 0019
-  - '0020'
-  - '0021'
-  related_designs:
-  - knowledge-write-api
-  - knowledge-repo-model
-  - audit-log
-  - system-overview
-  - worker-communication
-  - '0052'
-  affects_services:
-  - coder-core
-  - coder-admin
-  affects_repos:
-  - coder-core
-  - coder-system
 - id: 0048
   title: Cross-project pattern surfacing
   status: wip
@@ -645,3 +620,13 @@ designs:
   owner: ro
   folder: active
   file: active/graph-aware-retrieval.md
+- id: template-schema-migration
+  title: Template schema migration
+  status: active
+  owner: ro
+  folder: active
+  file: active/template-schema-migration.md
+  decided_by:
+  - 0019
+  - '0020'
+  - '0021'

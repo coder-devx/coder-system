@@ -1,30 +1,32 @@
 ---
-id: '0047'
+id: template-schema-migration
 title: Template schema migration
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-19
-updated: 2026-04-28
-last_verified_at: 2026-04-28
-implements_specs: ['0047']
-decided_by: ['0019', '0020', '0021']
+created: '2026-04-19'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
+decided_by:
+- 0019
+- '0020'
+- '0021'
 related_designs:
-  - knowledge-write-api
-  - knowledge-repo-model
-  - audit-log
-  - system-overview
-  - worker-communication
-  - '0052'
+- knowledge-write-api
+- knowledge-repo-model
+- audit-log
+- system-overview
+- worker-communication
+- '0052'
 affects_services:
-  - coder-core
-  - coder-admin
+- coder-core
+- coder-admin
 affects_repos:
-  - coder-core
-  - coder-system
+- coder-core
+- coder-system
 parent: knowledge-and-admin
 ---
-
 # 0047 — Template schema migration
 
 ## Context
