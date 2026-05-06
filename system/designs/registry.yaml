@@ -1,9 +1,3 @@
-# Source of truth for the designs registry.
-# REGISTRY.md is generated from this file.
-#
-# Active designs are subject-named logical components of the system as it
-# exists today. WIP designs are numbered and roadmap-aligned.
-
 designs:
 - id: architect-worker
   title: Architect Worker
@@ -503,7 +497,8 @@ designs:
   affects_repos:
   - coder-core
 - id: '0056'
-  title: Worker dispatch durability — move worker subprocesses out of the HTTP service
+  title: "Worker dispatch durability \u2014 move worker subprocesses out of the HTTP\
+    \ service"
   status: wip
   owner: ro
   folder: wip
@@ -523,8 +518,8 @@ designs:
   affects_repos:
   - coder-core
 - id: '0057'
-  title: Role prompt knowledge layout — move per-role and per-mode worker prompts
-    into the knowledge repo
+  title: "Role prompt knowledge layout \u2014 move per-role and per-mode worker prompts\
+    \ into the knowledge repo"
   status: wip
   owner: ro
   folder: wip
@@ -536,22 +531,6 @@ designs:
   - team-manager-worker
   - knowledge-repo-model
   - worker-communication
-  affects_services:
-  - coder-core
-  affects_repos:
-  - coder-core
-  - coder-system
-- id: '0066'
-  title: Navigation tree pattern for specs, designs, and ADRs
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0066-navigation-tree-pattern.md
-  related_designs:
-  - knowledge-repo-model
-  - knowledge-write-api
-  - pm-worker
-  - architect-worker
   affects_services:
   - coder-core
   affects_repos:
@@ -762,3 +741,9 @@ designs:
   affects_services:
   - coder-core
   parent: worker-roles
+- id: navigation-tree-pattern
+  title: Navigation tree pattern for specs, designs, and ADRs
+  status: active
+  owner: ro
+  folder: active
+  file: active/navigation-tree-pattern.md

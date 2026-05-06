@@ -1,27 +1,26 @@
 ---
-id: "0066"
+id: navigation-tree-pattern
 title: Navigation tree pattern for specs, designs, and ADRs
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-05-02
-updated: 2026-05-02
-last_verified_at: 2026-05-02
+created: '2026-05-02'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
 implements_specs: []
 decided_by: []
 related_designs:
-  - knowledge-repo-model
-  - knowledge-write-api
-  - pm-worker
-  - architect-worker
+- knowledge-repo-model
+- knowledge-write-api
+- pm-worker
+- architect-worker
 affects_services:
-  - coder-core
+- coder-core
 affects_repos:
-  - coder-core
-  - coder-system
+- coder-core
+- coder-system
 parent: knowledge-repo-model
 ---
-
 # 0062 — Navigation tree pattern
 
 ## Context
