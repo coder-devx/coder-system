@@ -509,25 +509,6 @@ designs:
   - coder-core
   affects_repos:
   - coder-core
-- id: '0057'
-  title: "Role prompt knowledge layout \u2014 move per-role and per-mode worker prompts\
-    \ into the knowledge repo"
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0057-role-prompt-knowledge-layout.md
-  related_designs:
-  - worker-roles
-  - pm-worker
-  - architect-worker
-  - team-manager-worker
-  - knowledge-repo-model
-  - worker-communication
-  affects_services:
-  - coder-core
-  affects_repos:
-  - coder-core
-  - coder-system
 - id: coder-core-modular-monolith
   title: coder-core modular monolith hardening
   status: active
@@ -745,3 +726,10 @@ designs:
   owner: ro
   folder: active
   file: active/competitive-intelligence-pipeline.md
+- id: role-prompt-knowledge-layout
+  title: "Role prompt knowledge layout \u2014 move per-role and per-mode worker prompts\
+    \ into the knowledge repo"
+  status: active
+  owner: ro
+  folder: active
+  file: active/role-prompt-knowledge-layout.md

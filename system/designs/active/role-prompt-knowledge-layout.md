@@ -1,29 +1,29 @@
 ---
-id: "0057"
-title: Role prompt knowledge layout — move per-role and per-mode worker prompts into the knowledge repo
+id: role-prompt-knowledge-layout
+title: Role prompt knowledge layout — move per-role and per-mode worker prompts into
+  the knowledge repo
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-05-01
-updated: 2026-05-01
-last_verified_at: 2026-05-01
+created: '2026-05-01'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
 implements_specs: []
 decided_by: []
 related_designs:
-  - worker-roles
-  - pm-worker
-  - architect-worker
-  - team-manager-worker
-  - knowledge-repo-model
-  - worker-communication
+- worker-roles
+- pm-worker
+- architect-worker
+- team-manager-worker
+- knowledge-repo-model
+- worker-communication
 affects_services:
-  - coder-core
+- coder-core
 affects_repos:
-  - coder-core
-  - coder-system
+- coder-core
+- coder-system
 parent: worker-roles
 ---
-
 # 0057 — Role prompt knowledge layout
 
 ## Context
