@@ -1,29 +1,28 @@
 ---
-id: "0056"
+id: worker-dispatch-durability
 title: Worker dispatch durability — move worker subprocesses out of the HTTP service
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-28
-updated: 2026-04-28
-last_verified_at: 2026-04-28
-implements_specs: ["0056"]
+created: '2026-04-28'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
 decided_by: []
 related_designs:
-  - worker-roles
-  - worker-communication
-  - architect-worker
-  - team-manager-worker
-  - pm-worker
-  - self-healing
-  - observability-and-cost-tracking
+- worker-roles
+- worker-communication
+- architect-worker
+- team-manager-worker
+- pm-worker
+- self-healing
+- observability-and-cost-tracking
 affects_services:
-  - coder-core
+- coder-core
 affects_repos:
-  - coder-core
+- coder-core
 parent: pipeline-operations
 ---
-
 # 0056 — Worker dispatch durability
 
 ## Context
