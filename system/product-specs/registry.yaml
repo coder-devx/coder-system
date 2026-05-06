@@ -226,24 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: 0048
-  title: Cross-project pattern surfacing
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0048-cross-project-patterns.md
-  served_by_designs:
-  - 0048
-  related_specs:
-  - knowledge-api
-  - admin-panel
-  - architect-worker
-  - pm-worker
-  - team-manager-worker
-  - reviewer-worker
-  - developer-worker
-  - multi-tenancy
-  - knowledge-freshness
 - id: 0049
   title: MCP agent interface
   status: wip
@@ -455,4 +437,18 @@ specs:
   - onboarding
   - admin-panel
   - audit-log
+  - knowledge-freshness
+- id: fleet-patterns
+  title: Fleet pattern surfacing
+  status: active
+  owner: ro
+  folder: active
+  file: active/fleet-patterns.md
+  related_specs:
+  - knowledge-api
+  - admin-panel
+  - architect-worker
+  - pm-worker
+  - reviewer-worker
+  - multi-tenancy
   - knowledge-freshness

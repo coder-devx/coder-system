@@ -8,7 +8,7 @@ created: 2026-04-11
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [architect-worker]
-related_specs: []
+related_specs: [fleet-patterns]
 parent: worker-roles
 ---
 
@@ -25,15 +25,9 @@ planner gets a concrete architecture to decompose.
 
 ## Capabilities
 
-- Assembles pre-claude context via a single graph fetch rooted at the
-  target spec (`depth=2,
-  edge_types=served_by_designs,related_designs,decided_by`), so the
-  new design is consistent with existing architectural decisions.
-  Prior to 0046 this was a serial N+1 walk (~30–50 round-trips for a
-  full-sized project); the graph endpoint collapses it to one.
-  Falls back to serial walk when `CODER_KNOWLEDGE_GRAPH_ENABLED` is
-  off. Initial conversion ships with `min_freshness` omitted; the
-  freshness-floor default flip is a decoupled follow-up.
+- Loads the target spec and all currently-active designs and ADRs
+  before generating, so the new design is consistent with existing
+  architectural decisions.
 - Runs `claude` with a built-in architect prompt that emits structured
   JSON: frontmatter, body (with at least one inline Mermaid diagram —
   component or data-flow), and an optional ADR list.
@@ -66,6 +60,21 @@ planner gets a concrete architecture to decompose.
   `settings.ship_draft_dispatch_enabled`), seeding the left column of
   the admin ship-gate panel so operators don't hand-craft the
   `merges[]` payload.
+- **Cross-project pattern consultation.** Before spawning `claude`,
+  the architect worker optionally calls
+  `GET /v1/projects/{id}/patterns/consult?kinds=adr&topic=<derived>`
+  when the target spec signals an ADR-warranting decision (presence of
+  a `decided_by` request or a `## Open questions` section asking for
+  one). Returned pattern groups are injected as a
+  `# Cross-project precedent` block in the prompt context. Any groups
+  the worker cites are written to the output design's optional
+  `informed_by_patterns: [pattern_id, ...]` frontmatter field, making
+  the consultation trail readable in the artifact. Gated on
+  `settings.architect_pattern_consult_enabled` (default false) and the
+  fleet/project `CODER_FLEET_PATTERNS_ENABLED` /
+  `projects.fleet_patterns_enabled` flags. v1 ships `kinds=adr` only;
+  `failure_taxonomy` and `spec_problem` kinds are deferred pending
+  adoption data. See [fleet-patterns](./fleet-patterns.md).
 
 ## Interfaces
 
@@ -76,13 +85,13 @@ planner gets a concrete architecture to decompose.
 
 ## Dependencies
 
-- Knowledge read API (target spec + active designs/ADRs; via graph
-  endpoint when `CODER_KNOWLEDGE_GRAPH_ENABLED`, serial walk otherwise).
+- Knowledge read API (target spec + active designs/ADRs).
 - Knowledge write API (design + ADR creation).
 - Spec/design approval gates for the human handoff.
 - Pipeline chaining (spec approved → architect task; design approved
   → TM task).
 - Architect-role service account + Anthropic key broker.
+- Fleet patterns consult endpoint (optional; see above).
 
 ## Evolution
 
@@ -108,13 +117,16 @@ planner gets a concrete architecture to decompose.
   manual-dispatch failure mode where architect tasks ran
   productively but exited with `gh is unauthenticated`. Realised
   pain: task `62e0c95e` (2026-04-27).
-- 0046 — pre-claude context assembly converted from serial N+1 walk
-  to a single graph fetch: `depth=2,
-  edge_types=served_by_designs,related_designs,decided_by`;
-  `min_freshness` omitted on initial conversion (freshness-floor
-  default flip is a decoupled follow-up). p50 pre-claude latency
-  target ≤ 1.5 s (from ~6 s baseline). Falls back to serial walk
-  when `CODER_KNOWLEDGE_GRAPH_ENABLED` is off.
+- 0048 — cross-project pattern consultation step in pre-claude
+  assembly. When `settings.architect_pattern_consult_enabled` is on
+  and the target spec signals an ADR-warranting decision, the worker
+  calls `/patterns/consult?kinds=adr&topic=<derived>` and injects
+  returned groups as `# Cross-project precedent` in the prompt
+  context. Output design gains the optional `informed_by_patterns`
+  frontmatter field. Gated on fleet/project
+  `CODER_FLEET_PATTERNS_ENABLED` flag. v1 ships `kinds=adr` only;
+  failure-taxonomy and spec-problem kinds deferred pending adoption
+  data. See [fleet-patterns](./fleet-patterns.md).
 
 ## Links
 
@@ -124,4 +136,5 @@ planner gets a concrete architecture to decompose.
   [team-manager-worker](./team-manager-worker.md),
   [knowledge-api](./knowledge-api.md),
   [task-orchestration](./task-orchestration.md),
-  [service-accounts](./service-accounts.md)
+  [service-accounts](./service-accounts.md),
+  [fleet-patterns](./fleet-patterns.md)
