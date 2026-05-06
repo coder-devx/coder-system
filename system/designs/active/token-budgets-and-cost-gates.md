@@ -1,21 +1,26 @@
 ---
-id: "0031"
+id: token-budgets-and-cost-gates
 title: Per-project token budgets & cost gates
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-18
-updated: 2026-04-18
-last_verified_at: 2026-05-04
+created: '2026-04-18'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
 verified_by: coder@vibedevx.com
-implements_specs: ["0031"]
+implements_specs: []
 decided_by: []
-related_designs: [observability-and-cost-tracking, worker-communication]
-affects_services: [coder-core, coder-admin]
-affects_repos: [coder-core, coder-admin]
+related_designs:
+- observability-and-cost-tracking
+- worker-communication
+affects_services:
+- coder-core
+- coder-admin
+affects_repos:
+- coder-core
+- coder-admin
 parent: pipeline-operations
 ---
-
 # Per-project token budgets & cost gates
 
 ## Context
