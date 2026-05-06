@@ -8,7 +8,7 @@ created: 2026-04-19
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [audit-log]
-related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api, knowledge-schema-migration]
+related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api, oauth-mcp]
 parent: tenancy-and-access
 ---
 
@@ -55,7 +55,11 @@ an incident timeline, review a peer's actions, or answer a customer's
   `pipeline_runs.override`,
   `projects.archive` / `rotate_api_key`,
   `impersonate.issue_token`,
-  `regression.acknowledge`, and `sessions.revoke`.
+  `regression.acknowledge`, `sessions.revoke`,
+  `project.set_auth_mode`,
+  and `oauth.client_registered` / `oauth.code_issued` /
+  `oauth.token_issued` (OAuth 2.1 MCP client flow — see
+  [oauth-mcp](./oauth-mcp.md)).
 - **Per-project + fleet read.**
   `GET /v1/projects/{id}/audit-events` returns rows for the calling
   project only (existing `require_project_auth` gate).
@@ -132,21 +136,20 @@ an incident timeline, review a peer's actions, or answer a customer's
   `project.set_auth_mode` action registered with `Actions` and
   emitted from the admin `PATCH /v1/_admin/projects/{id}/auth-mode`
   handler. Captures the prior + new mode for the trail.
-- 0047 Template-migration action namespace (shipped 2026-05-06) —
-  four new actions: `template_migration.started`,
-  `template_migration.opened_pr`, `template_migration.merged`,
-  `template_migration.failed`. Every state change on a
-  `template_migrations` row emits an `audit_events` row in the same
-  transaction (`target_type='template_migration'`,
-  `target_id='<project_id>:<migration_number>:<batch_index>'`).
-  System-initiated runs use `actor_type='system'`,
-  `actor_id='template-migrate'`. Gated by
-  `CODER_AUDIT_LOG_ENABLED`. See
-  [knowledge-schema-migration](./knowledge-schema-migration.md).
+- 0050 OAuth action namespace (shipped 2026-04-25) — three new action
+  strings: `oauth.client_registered` (actor=registering admin email,
+  `actor_method=admin_token`, `target_type=oauth_client`,
+  `target_id=client_id`), `oauth.code_issued` (actor=user email,
+  `actor_method=oauth_authorize`), `oauth.token_issued` (actor=user
+  email, `actor_method=oauth_token`). `correlation_id` is propagated
+  through the code→token redemption so an operator can trace any
+  OAuth session back to its original consent moment via the
+  correlation chip in the audit log viewer. See
+  [oauth-mcp](./oauth-mcp.md).
 
 ## Links
 
 - Designs: [audit-log](../../designs/active/audit-log.md)
 - Related components: admin-panel, impersonation, service-accounts,
   task-orchestration, knowledge-api, escalations, self-healing,
-  knowledge-schema-migration
+  oauth-mcp

@@ -15,16 +15,15 @@ parent: ~
 # Tenancy & access
 
 How one Coder system serves many projects in parallel without
-crossing wires, how every action is attributed to a real actor, and
-how external agents authenticate and act against the platform.
+crossing wires, and how every action is attributed to a real actor.
 
 ## What this category covers
 
 A single Coder deployment manages multiple projects concurrently.
 Every API call, log line, audit row, secret, and pipeline event is
 project-scoped — the multi-tenancy invariant. This category groups
-the specs that make that boundary real, the specs that record who
-did what, and the protocol by which external agents connect.
+the specs that make that boundary real and the specs that record who
+did what.
 
 ## Components
 
@@ -40,9 +39,10 @@ did what, and the protocol by which external agents connect.
 - [audit-log](./audit-log.md) — every mutation is recorded with
   actor, method, action, before/after, project_id, correlation_id;
   retained for compliance review.
-- [mcp-agent-interface](./mcp-agent-interface.md) — MCP server on
-  `coder-core` that lets any MCP-speaking external agent authenticate
-  with existing tokens, call tools, and subscribe to pipeline events.
+- [oauth-mcp](./oauth-mcp.md) — OAuth 2.1 + PKCE authorisation-server
+  layer that lets MCP clients (e.g. claude.ai web) authenticate as
+  admin users via a standard code flow; admin-only client registration,
+  session storage, and revocation.
 
 ## Cross-cutting concerns
 
@@ -54,8 +54,7 @@ did what, and the protocol by which external agents connect.
   is `coder_core.access.load_in_project`.
 - **Test harness**: [tenant-isolation](./tenant-isolation.md) (in
   [delivery-and-infra](./delivery-and-infra.md)) is the regression
-  guard. MCP-path routes extend the same isolation matrix
-  (see [mcp-agent-interface](./mcp-agent-interface.md) AC9).
+  guard.
 
 ## Links
 

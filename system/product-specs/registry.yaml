@@ -226,20 +226,6 @@ specs:
   - task-orchestration
   - admin-panel
   parent: delivery-and-infra
-- id: '0050'
-  title: OAuth 2.1 for MCP clients
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0050-oauth-for-mcp-clients.md
-  served_by_designs:
-  - '0050'
-  related_specs:
-  - impersonation
-  - service-accounts
-  - audit-log
-  - admin-panel
-  - multi-tenancy
 - id: '0052'
   title: Managed-repo GitHub Action distribution
   status: wip
@@ -449,3 +435,15 @@ specs:
   - multi-tenancy
   - task-orchestration
   - knowledge-api
+- id: oauth-mcp
+  title: OAuth 2.1 for MCP clients
+  status: active
+  owner: ro
+  folder: active
+  file: active/oauth-mcp.md
+  served_by_designs:
+  - '0050'
+  related_specs:
+  - impersonation
+  - audit-log
+  - admin-panel

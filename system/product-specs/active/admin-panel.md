@@ -8,7 +8,7 @@ created: 2026-04-09
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 served_by_designs: [system-overview]
-related_specs: [audit-log, fleet-patterns]
+related_specs: [audit-log]
 parent: knowledge-and-admin
 ---
 
@@ -161,29 +161,26 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   project, run/task target, and on-call identity. `Ack` and
   `Resolve` actions POST to the project endpoints; behind
   `VITE_ESCALATIONS_ENABLED`.
-- **Fleet patterns page.** `/admin/patterns` (fleet, admin JWT, behind
-  `VITE_FLEET_PATTERNS_ENABLED`) lists the latest indexer run's
-  cross-project pattern groups, filterable by kind and sortable by
-  member-project count. One row per group: title, per-project member
-  chips (click-through to the project's artifact view), a "How is
-  this scored?" link to the fleet-patterns runbook. `role_prompt_delta`
-  rows show the approval-rate delta as a signed pp value with sample
-  size; hover reveals the diff hunk. `template_drift` rows carry a
-  "Propose template promotion" button that opens a pre-filled 0047
-  migration scaffold (ALLOW_BATCHING flag, operation, affected artifact
-  types). Backed by `listPatternGroups` / `getPatternGroup` client
-  bindings on `GET /v1/_admin/patterns` and
-  `GET /v1/_admin/patterns/{id}`. Default view filters to groups active
-  in the last 90 days (toggle for all). Behind
-  `VITE_FLEET_PATTERNS_ENABLED` (default off). See
-  [fleet-patterns](./fleet-patterns.md).
+- **OAuth client management.** `/admin/oauth-clients` (admin JWT,
+  behind `VITE_OAUTH_CLIENTS_ENABLED`) lists registered OAuth 2.1
+  clients with `client_name`, `client_id`, registered
+  `redirect_uris`, registering admin email, and registration
+  timestamp. "Register OAuth client" form submits `POST
+  /v1/admin/oauth/clients`; the returned `client_id` is surfaced
+  inline so the operator can paste it into the MCP client's
+  connector form. Per-client "Revoke client" cascades
+  `revoked_at` to all active sessions for that client. The
+  active-sessions table (filtered by `client_id`) exposes
+  per-session "Revoke session". Wired to the
+  `oauth.client_registered` audit trail. See
+  [oauth-mcp](../tenancy-and-access/oauth-mcp.md).
 
 ## Interfaces
 
 - **Routes (defined in `src/main.tsx`):**
   - Fleet: `/`, `/freshness`, `/metrics/regressions`, `/admin/audit`,
     `/admin/secrets` (flagged), `/admin/isolation` (flagged),
-    `/admin/escalations` (flagged), `/admin/patterns` (flagged).
+    `/admin/escalations` (flagged), `/admin/oauth-clients` (flagged).
   - Per-project: `/projects/:projectId`,
     `/projects/:projectId/freshness`,
     `/projects/:projectId/pipeline`,
@@ -201,8 +198,8 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Plans, Metrics, Freshness, Audit (flagged), Escalations (flagged).
 - Consumes `coder-core` REST (projects, knowledge, tasks, overrides,
   merge, knowledge PUT, ship, escalations, audit, freshness, budget,
-  isolation, regressions, secrets, patterns) and the SSE event stream
-  for pipeline / message / `pipeline_run.changed` /
+  isolation, regressions, secrets, oauth-clients) and the SSE event
+  stream for pipeline / message / `pipeline_run.changed` /
   `pipeline_run.gate_blocked` events.
 - Typed API client (`src/api/client.ts`) shared across views — every
   endpoint has a single typed function. Reusable `StatusChip`,
@@ -213,7 +210,7 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `VITE_ESCALATIONS_ENABLED`, `VITE_AUTO_APPROVE_ENABLED`,
   `VITE_RUN_TIMELINE_ENABLED`, `VITE_PR_VIEWER_ENABLED`,
   `VITE_KNOWLEDGE_EDITOR_ENABLED`, `VITE_COMMAND_PALETTE_ENABLED`,
-  `VITE_FLEET_PATTERNS_ENABLED`.
+  `VITE_OAUTH_CLIENTS_ENABLED`.
 
 ## Dependencies
 
@@ -325,21 +322,16 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Selects which credential the dispatcher hands to a worker's
   `claude` process. See [service-accounts](./service-accounts.md)
   Evolution for the server-side wiring.
-- 0048 Fleet pattern surfacing (shipped 2026-05-06) — new
-  `/admin/patterns` fleet page behind `VITE_FLEET_PATTERNS_ENABLED`
-  (default off). Lists the latest indexer run's cross-project pattern
-  groups (five kinds: `adr`, `spec_problem`, `failure_taxonomy`,
-  `role_prompt_delta`, `template_drift`) filterable by kind and
-  sortable by member-project count. Row components: group title,
-  per-project member chips (click-through to artifact), runbook link;
-  `role_prompt_delta` rows surface the signed pp delta with sample
-  size (hover for diff hunk); `template_drift` rows have a "Propose
-  template promotion" scaffold button that pre-fills a 0047 migration
-  (ALLOW_BATCHING, affected type, field name). Client bindings:
-  `listPatternGroups` / `getPatternGroup` on `GET /v1/_admin/patterns`
-  and `GET /v1/_admin/patterns/{id}`. Fleet nav grows
-  `/admin/patterns`. Default view filters to groups active in the
-  last 90 days. See [fleet-patterns](./fleet-patterns.md).
+- 0050 OAuth client management panel (shipped 2026-04-25) — new
+  `/admin/oauth-clients` fleet route (`OAuthClients.tsx`) listing
+  registered OAuth 2.1 clients with inline "Register" form (POSTs
+  to `POST /v1/admin/oauth/clients`; surfaces `client_id` for
+  operator copy-paste into connector form) and per-client "Revoke"
+  action. Active-sessions sub-table with per-session revoke.
+  `listOAuthClients` / `registerOAuthClient` / `revokeOAuthClient` /
+  `listOAuthSessions` / `revokeOAuthSession` client bindings. Behind
+  `VITE_OAUTH_CLIENTS_ENABLED` (default on). See
+  [oauth-mcp](../tenancy-and-access/oauth-mcp.md).
 
 ## Links
 
@@ -347,5 +339,4 @@ email allowlist; sessions carry an admin JWT with cross-project access.
 - Related components: [multi-tenancy](./multi-tenancy.md),
   [knowledge-api](./knowledge-api.md), [audit-log](./audit-log.md),
   [escalations](./escalations.md), [observability](./observability.md),
-  [task-orchestration](./task-orchestration.md),
-  [fleet-patterns](./fleet-patterns.md)
+  [task-orchestration](./task-orchestration.md)
