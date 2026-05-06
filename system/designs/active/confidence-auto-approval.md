@@ -1,27 +1,26 @@
 ---
-id: '0040'
+id: confidence-auto-approval
 title: Confidence-scored auto-approval
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-19
-updated: 2026-04-28
-last_verified_at: 2026-04-28
-implements_specs: ['0040']
+created: '2026-04-19'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
+implements_specs: []
 related_designs:
-  - worker-communication
-  - worker-roles
-  - pm-worker
-  - architect-worker
-  - team-manager-worker
-  - audit-log
-  - observability-and-cost-tracking
+- worker-communication
+- worker-roles
+- pm-worker
+- architect-worker
+- team-manager-worker
+- audit-log
+- observability-and-cost-tracking
 affects_services:
-  - coder-core
-  - coder-admin
+- coder-core
+- coder-admin
 parent: pipeline-operations
 ---
-
 # 0040 — Confidence-scored auto-approval (design)
 
 ## Context
