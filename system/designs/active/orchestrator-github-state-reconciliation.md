@@ -1,26 +1,26 @@
 ---
-id: "0054"
+id: orchestrator-github-state-reconciliation
 title: Orchestrator GitHub-state reconciliation
 type: design
-status: wip
+status: active
 owner: ro
-created: 2026-04-27
-updated: 2026-04-29
-last_verified_at: 2026-04-29
+created: '2026-04-27'
+updated: '2026-05-06'
+last_verified_at: '2026-05-06'
 deprecated_at: null
 reason: null
-implements_specs: ["0054"]
-decided_by: ["0016"]
+implements_specs: []
+decided_by:
+- '0016'
 related_designs:
-  - worker-roles
-  - worker-communication
+- worker-roles
+- worker-communication
 affects_services:
-  - coder-core
+- coder-core
 affects_repos:
-  - coder-core
+- coder-core
 parent: pipeline-operations
 ---
-
 # 0054 — Orchestrator GitHub-state reconciliation
 
 ## Context

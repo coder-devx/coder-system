@@ -262,21 +262,6 @@ designs:
   affects_repos:
   - coder-core
   - coder-system
-- id: '0054'
-  title: Orchestrator GitHub-state reconciliation
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0054-orchestrator-github-state-reconciliation.md
-  implements_specs:
-  - '0054'
-  related_designs:
-  - worker-roles
-  - worker-communication
-  affects_services:
-  - coder-core
-  affects_repos:
-  - coder-core
 - id: '0056'
   title: "Worker dispatch durability \u2014 move worker subprocesses out of the HTTP\
     \ service"
@@ -602,3 +587,11 @@ designs:
   file: active/post-pr-ci-fix-loop.md
   decided_by:
   - '0017'
+- id: orchestrator-github-state-reconciliation
+  title: Orchestrator GitHub-state reconciliation
+  status: active
+  owner: ro
+  folder: active
+  file: active/orchestrator-github-state-reconciliation.md
+  decided_by:
+  - '0016'
