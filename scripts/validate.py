@@ -184,6 +184,11 @@ def iter_md_files(root: Path):
         # concatenated into the worker's system prompt.
         if path.parent.name == "tasks" and path.parent.parent.parent.name == "roles":
             continue
+        # ``reports/`` is the unstructured archive for time-bound
+        # analyses (see system/reports/README.md). Files there carry
+        # no frontmatter and intentionally bypass validation.
+        if "reports" in path.relative_to(root).parts:
+            continue
         yield path
 
 

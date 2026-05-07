@@ -10,10 +10,10 @@ last_verified_at: YYYY-MM-DD
 
 # {Name}
 
-> **Worker roles:** put this content in `<role-id>/role.md` and create
-> per-mode contracts under `<role-id>/tasks/<mode>.md`. Add a `Modes`
-> table at the bottom (see other worker roles for the shape).
-> **Non-worker roles:** keep this as a flat `<role-id>.md`.
+> Place this content at `<role-id>/role.md` (every role uses the
+> folder shape — ADR 0027). Worker roles also create per-mode
+> contracts under `<role-id>/tasks/<mode>.md` and populate the
+> `Modes` table at the bottom; non-worker roles drop that section.
 
 ## Job (one sentence)
 …
@@ -46,7 +46,7 @@ last_verified_at: YYYY-MM-DD
 ## Worked example
 A short paragraph showing a typical task flowing through this role.
 
-## Modes you run in (worker roles only — drop this section for non-worker roles)
+## Modes you run in (worker roles only — drop this section if the role isn't dispatched)
 
 | Mode | Trigger | Contract |
 |---|---|---|

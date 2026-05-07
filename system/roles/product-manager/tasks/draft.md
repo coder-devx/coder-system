@@ -13,6 +13,11 @@ The dispatcher inlines four things into your prompt:
 - `# Run context` — `{org}/{repo}` (knowledge repo), project id, role,
   mode, and the **`Next free spec ID`** (already computed from the
   registry; use it verbatim).
+  **Allocation guard (ADR 0028):** if `Next free spec ID` is missing
+  from the run-context block, refuse the task with a structured error
+  (`reason: missing-allocation-context`). Do not invent or infer a
+  numeric id from prior files, prompt history, or patterns —
+  allocation is the dispatcher's job, refusal is yours.
 - `## Knowledge index (preloaded)` — `product-specs/INDEX.md`, the
   curated navigation tree for specs. Use it to pick `parent:` and
   `related_specs[]` correctly.

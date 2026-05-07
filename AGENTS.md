@@ -106,6 +106,10 @@ See [`README.md`](./README.md) for the layout.
 ## How to update an existing artifact
 
 - Most fields can be edited in place.
+- When you re-verify a file against current reality, bump its
+  `last_verified_at` to today's date. Use `python3 scripts/freshness.py
+  --top 20` to see what's drifting and `--over 90` for a focused
+  staleness sweep.
 - Changing a file's **ID or slug** is a rename + registry update +
   cross-link sweep. Avoid it unless necessary.
 - For ADRs, see rule 4 above (append-only).
