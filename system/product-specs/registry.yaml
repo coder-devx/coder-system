@@ -304,16 +304,6 @@ specs:
   - tenant-isolation
   - continuous-deployment
   parent: null
-- id: '0065'
-  title: Reviewer scope cut + turn cap
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0065-reviewer-scope-and-turn-cap.md
-  related_specs:
-  - reviewer-worker
-  - observability
-  parent: worker-roles
 - id: secret-rotation
   title: Automated secret rotation
   status: active

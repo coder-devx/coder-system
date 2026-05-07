@@ -4,14 +4,14 @@ title: Reviewer worker
 type: spec
 status: active
 owner: ro
-created: 2026-04-11
-updated: 2026-05-06
-last_verified_at: 2026-05-06
-served_by_designs: [worker-roles]
+created: '2026-04-11'
+updated: '2026-05-07'
+last_verified_at: '2026-05-07'
+served_by_designs:
+- worker-roles
 related_specs: []
 parent: worker-roles
 ---
-
 # Reviewer worker
 
 ## What it is
@@ -101,6 +101,8 @@ developer-produced PR and a human-facing merge decision.
   `depth=1, edge_types=served_by_designs`; `min_freshness` omitted
   on initial conversion. Falls back to direct fetch when
   `CODER_KNOWLEDGE_GRAPH_ENABLED` is off.
+- 0065 — reviewer scope cut + turn cap. ``--max-turns 30`` enforced via ``worker_max_turns_reviewer`` (coder-core#160); ``failure_kind=turn_cap_exceeded`` written by the dispatcher and rendered as a distinct chip in the admin panel (coder-core#163, coder-admin#17). Reviewer task contract in ``system/roles/reviewer/tasks/review.md`` rewritten to constrain scope to pre-loaded diff + ACs + edge-cases + CI report (no free-form repo browsing). 7-day reviewer turn-count and cost metrics are tracked on the observability dashboard for post-soak verification.
+
 
 ## Links
 
