@@ -4,6 +4,7 @@ name: Human Readable Name
 type: integration
 status: active
 owner: TBD
+last_verified_at: YYYY-MM-DD
 auth:
 secret_storage:
 used_by_services: []

@@ -50,22 +50,62 @@ applies your merges if the attestation passes.
 
 ## How to merge a WIP spec into active/
 
-A WIP spec is rarely a wholesale new spec — usually it extends or
-amends an existing active spec or two. Decide per AC of the WIP body
-where it lands:
+The fold is **judgment, not mechanics**. A WIP spec is rarely a
+wholesale new component; it usually refines or extends an existing
+active spec or two. Decide per AC of the WIP body where it lands:
 
 - **Edit an existing active spec** when the AC fits the scope of
-  one — extend its body, update `last_verified_at`. Emit
-  `action: "edit"` with the full new body.
-- **Create a new active spec** when the AC names a genuinely new
-  logical unit (a new flow, a new product surface) that doesn't
-  fit any existing active. Emit `action: "create"` with the full
-  body (active slug, `status: active`, fresh `last_verified_at`,
-  `parent:` from the INDEX).
+  one. The active spec's `## Capabilities` or `## Interfaces`
+  section gains a new bullet (or amends an existing one); the
+  surrounding scope is unchanged. Emit `action: "edit"` with the
+  full new body. Bump `last_verified_at` to today; refresh
+  `summary:` if the AC changes the one-line framing.
+- **Create a new active spec** only when the AC names a *genuinely
+  new logical unit* — a new flow, a new product surface, a new
+  capability boundary that doesn't fit any existing active spec's
+  scope. Emit `action: "create"` with the full body (active
+  subject-slug, `status: active`, fresh `last_verified_at`,
+  `summary:` ≤140 chars, `parent:` from the INDEX, all cross-links
+  resolved against active ids).
+
+The bias is towards extending. A new active component is a long-term
+maintenance commitment — it has its own owner, its own freshness
+clock, its own cross-link surface. Don't fragment a coherent
+component into two files just because a WIP added a feature to it.
+
+### Decision rule
+
+Ask, for each AC: *"If a future PM sat down to author this from
+scratch today, would they file it under an existing active component
+or under a new one?"* If the answer is "existing", edit. If the
+answer is "new", create. Words that suggest "create" — *new
+endpoint*, *new page*, *new surface*, *new lifecycle*; words that
+suggest "edit" — *extends*, *adds*, *also*, *now also handles*.
+
+### Worked examples
+
+- WIP spec `0042-self-healing` had ACs about a stuck-task reaper.
+  Outcome: created `active/self-healing.md` (genuinely new
+  capability) *and* edited `active/task-orchestration.md` to add a
+  cross-link from the lifecycle to the reaper.
+- WIP spec `0027-transient-retry` had ACs about per-worker
+  classify-and-retry. Outcome: edited five existing active worker
+  specs (`pm-worker`, `architect-worker`, …) — the retry behaviour
+  refined an existing capability of each. No new component file.
+- WIP spec `0049-mcp-agent-interface` had ACs spanning auth surface
+  + agent connection lifecycle + impersonation. Outcome: created
+  `active/mcp-agent-interface.md` (genuinely new external surface)
+  and edited `active/impersonation.md` (the auth half refined an
+  existing component).
+
+### Mechanical rules
 
 Active specs use **subject-named slugs** (`share-links`), never
 numeric ids. Cross-links (`served_by_designs`, `related_specs`)
-must resolve to real slugs/ids in the registry.
+must resolve to real slugs/ids in the registry. The `parent:` field
+is required and must point at a real category id from
+[`system/INDEX.md`](../../../INDEX.md). Same `parent:` on the spec
+side and the design side for shared-id pairs (ADR 0029).
 
 ## Output verbosity (avoid multi-turn wrap)
 

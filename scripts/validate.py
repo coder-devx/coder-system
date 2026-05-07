@@ -44,7 +44,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # ``INDEX.md`` is the curated navigation entry point per artifact-type
 # folder (design 0062); narrative view over the registry, not a
 # knowledge artifact in its own right.
-SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "PHASES.md", "HISTORY.md", "INDEX.md", "GRAPH.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md", "_common.md"}
+SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "PHASES.md", "HISTORY.md", "INDEX.md", "GRAPH.md", "HOWTO.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md", "_common.md"}
 
 # Required frontmatter fields per artifact type. Spec 0043 adds
 # ``last_verified_at`` to every non-ADR type — ADRs are append-only
@@ -392,6 +392,84 @@ def check_index_md_synced() -> None:
             err(f"{target}: out of sync with parent: / summary: frontmatter — run scripts/render_index.py")
 
 
+def check_template_mirror() -> None:
+    """Catch ``template/`` drift from the schema declared in ``system/``.
+
+    Two structural checks:
+
+    1. Every artifact-type folder that exists in ``system/`` exists in
+       ``template/`` with the same ``_TEMPLATE.md`` / ``registry.yaml``
+       / ``README.md`` shape. Adding a new artifact type to ``system/``
+       without mirroring the shape into ``template/`` breaks the
+       blueprint a new project copies.
+
+    2. Every required frontmatter field declared in ``REQUIRED_FIELDS``
+       appears somewhere in the corresponding ``template/`` template.
+       Templates may carry multiple fenced examples; we only check
+       that the field name shows up at the start of a line under a
+       valid YAML key, anywhere in the file.
+
+    AGENTS.md rule 9: ``template/`` describes the shape of the
+    knowledge model, not project content. Schema additions must land
+    in both trees.
+    """
+    import re
+
+    sys_root = REPO_ROOT / "system"
+    tpl_root = REPO_ROOT / "template" / "system"
+    if not sys_root.is_dir() or not tpl_root.is_dir():
+        return
+
+    # Folders that ship with the blueprint. The roles flat-vs-folder
+    # rules are different on the template side (managed projects
+    # mostly inherit) — skip the per-role-folder check there.
+    expected_folders = list(REGISTRY_KEYS.keys())
+
+    for folder_name in expected_folders:
+        sys_folder = sys_root / folder_name
+        tpl_folder = tpl_root / folder_name
+        if not sys_folder.is_dir():
+            continue
+        if not tpl_folder.is_dir():
+            err(f"template/system/{folder_name}/: missing — "
+                "system/{folder_name}/ exists but the template "
+                "blueprint doesn't mirror it (AGENTS.md rule 9)")
+            continue
+        for filename in ("_TEMPLATE.md", "registry.yaml", "README.md"):
+            sys_file = sys_folder / filename
+            tpl_file = tpl_folder / filename
+            if sys_file.exists() and not tpl_file.exists():
+                err(f"template/system/{folder_name}/{filename}: missing — "
+                    f"mirrors system/{folder_name}/{filename}")
+
+    # Field-presence check on the templates we have on both sides.
+    # Map artifact type → (template path under each side, system folder).
+    type_to_folder = {
+        "service": "services",
+        "repo": "repos",
+        "design": "designs",
+        "spec": "product-specs",
+        "role": "roles",
+        "integration": "integrations",
+        "runbook": "runbooks",
+    }
+    for artifact_type, folder_name in type_to_folder.items():
+        tpl_template = tpl_root / folder_name / "_TEMPLATE.md"
+        if not tpl_template.exists():
+            continue
+        text = tpl_template.read_text(encoding="utf-8")
+        required = REQUIRED_FIELDS.get(artifact_type, set())
+        for field in sorted(required):
+            # Match `field:` on its own as a YAML key — at line start
+            # OR after the YAML indent that fenced examples carry.
+            pattern = rf"(?m)^\s*{re.escape(field)}\s*:"
+            if not re.search(pattern, text):
+                err(f"{tpl_template}: required frontmatter field "
+                    f"`{field}` (for type:{artifact_type}) is not "
+                    "declared in the template — schema mirror "
+                    "broken (AGENTS.md rule 9)")
+
+
 def check_graph_md_synced() -> None:
     """system/GRAPH.md must match what scripts/render_graph.py produces."""
     import subprocess
@@ -468,6 +546,7 @@ def main() -> int:
     check_registry_md_synced()
     check_index_md_synced()
     check_graph_md_synced()
+    check_template_mirror()
 
     if errors:
         sys.stderr.write(f"\n{len(errors)} validation error(s):\n")

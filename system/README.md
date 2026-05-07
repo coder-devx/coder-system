@@ -6,6 +6,9 @@ Everything in this folder describes the **real, current** state of Coder —
 what services exist, what repos hold them, what designs they implement, what
 roles operate them, and what decisions led there.
 
+**New here?** [`HOWTO.md`](./HOWTO.md) is a one-page index of "how do
+I X?" questions with pointers to the right file.
+
 | Folder | Source of truth for |
 |---|---|
 | [`services/`](./services/) | Running services |

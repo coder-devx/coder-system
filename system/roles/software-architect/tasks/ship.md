@@ -41,23 +41,71 @@ gh api "repos/{org}/{repo}/contents/system/designs/active/{slug}.md" --jq '.cont
 
 ## How to merge a WIP design into active/
 
-A WIP design is rarely a wholesale new design — usually it extends or
-amends an existing active design or two. Decide per logical chunk of
-the WIP body where it lands:
+The fold is **judgment, not mechanics**. A WIP design is rarely a
+wholesale new design; it usually refines or extends an existing
+active design or two. Decide per logical chunk of the WIP body where
+it lands:
 
-- **Edit an existing active design** when the WIP's content fits the
-  scope of one — extend its body, update `affects_*`, bump
-  `last_verified_at`. Emit `action: "edit"` with the full new body.
-- **Create a new active design** when the WIP names a genuinely new
-  logical unit (a new service, a new subsystem) that doesn't fit any
-  existing active. Emit `action: "create"` with the full body
-  (active slug, `status: active`, fresh `last_verified_at`,
-  `parent:` from the index).
+- **Edit an existing active design** when the chunk fits the scope
+  of one. The active design's `## Architecture` / `## Parts` /
+  `## Data flow` / `## Invariants` section gains a refined bullet
+  or paragraph; the surrounding scope is unchanged. Emit
+  `action: "edit"` with the full new body. Bump `last_verified_at`
+  to today; refresh `summary:` if the chunk reframes the
+  one-liner; update `affects_*` and `decided_by` if the chunk
+  pulls in new touchpoints or ADRs.
+- **Create a new active design** only when the WIP names a
+  *genuinely new logical unit* — a new service, a new subsystem, a
+  new architectural seam — that doesn't fit any existing active
+  design's scope. Emit `action: "create"` with the full body
+  (active subject-slug, `status: active`, fresh `last_verified_at`,
+  `summary:` ≤140 chars, `parent:` from the INDEX matching the
+  spec-side parent for shared-id pairs, all cross-links resolved
+  against active ids).
+
+The bias is towards extending. A new active design carries an
+ongoing maintenance commitment (its own freshness clock, its own
+cross-link surface, its own ADR fan-out). Don't fragment a coherent
+component into two design files just because the WIP added an
+implementation detail.
+
+### Decision rule
+
+Ask, for each chunk: *"If a future architect documented this
+component from scratch today, would they file this paragraph under
+an existing active design or under a new one?"* If the answer is
+"existing", edit. If the answer is "new", create. Words that suggest
+"create" — *new service*, *new module boundary*, *new subsystem*,
+*new pipeline stage*; words that suggest "edit" — *internal
+refactor*, *adds*, *extends*, *now also*, *adopts*, *replaces*.
+
+### Worked examples
+
+- WIP design `0027-transient-retry` had content about per-worker
+  classify-and-retry. Outcome: edited five existing active worker
+  designs (`pm-worker`, `architect-worker`, …) and
+  `worker-communication`. No new design file — the WIP refined
+  capabilities of existing components.
+- WIP design `0042-self-healing` introduced an orphan-task reaper.
+  Outcome: created `active/self-healing.md` (genuinely new
+  component with its own data flow and invariants) *and* edited
+  `active/worker-communication.md` to cross-link from the
+  task-state machine to the reaper.
+- WIP design `0051-coder-core-modular-monolith` introduced module
+  boundaries. Outcome: created
+  `active/coder-core-modular-monolith.md` (genuinely new
+  architectural surface — import-linter contracts and module
+  protocols) and edited `active/system-overview.md` to summarise
+  the new module shape at the top level.
+
+### Mechanical rules
 
 Active designs use **subject-named slugs** (`knowledge-freshness`),
-never numeric ids. Cross-links (`served_by_designs` /
-`related_designs` / spec `implements_specs`) must resolve to real
-slugs in the index.
+never numeric ids. Cross-links (`served_by_designs`,
+`related_designs`, `implements_specs`, `decided_by`) must resolve
+to real slugs/ids in the registry. The `parent:` field is required
+and must match the spec side for shared-id pairs (validated by ADR
+0029's parent-mismatch check).
 
 ## Output format
 

@@ -4,6 +4,7 @@ title: Short Title
 type: design
 status: wip
 owner: TBD
+last_verified_at: YYYY-MM-DD
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 summary: ~               # ≤140-char one-liner used by system/INDEX.md once landed in active/

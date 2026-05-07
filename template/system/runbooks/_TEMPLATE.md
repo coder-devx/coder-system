@@ -4,6 +4,7 @@ title: Short Title
 type: runbook
 status: active
 owner: TBD
+last_verified_at: YYYY-MM-DD
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 applies_to_services: []

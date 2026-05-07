@@ -4,6 +4,7 @@ name: Human Readable Name
 type: service
 status: active
 owner: TBD
+last_verified_at: YYYY-MM-DD
 tier: core
 repos: []
 tech: []

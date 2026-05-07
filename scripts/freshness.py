@@ -40,7 +40,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 SKIP_FILENAMES = {
     "README.md", "REGISTRY.md", "ROADMAP.md", "PHASES.md", "HISTORY.md",
-    "INDEX.md", "GRAPH.md",
+    "INDEX.md", "GRAPH.md", "HOWTO.md",
     "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md", "_common.md",
 }
 

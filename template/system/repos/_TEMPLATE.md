@@ -4,6 +4,7 @@ name: Human Readable Name
 type: repo
 status: active
 owner: TBD
+last_verified_at: YYYY-MM-DD
 github: org/repo
 default_branch: main
 hosts_services: []
