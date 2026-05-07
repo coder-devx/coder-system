@@ -9,8 +9,10 @@ can turn into Developer task rows, one per item in `tasks[]`.
 
 - `# Run context` — the project's `{org}` / `{repo}` (knowledge
   repo), your role, and the mode (`decompose`). The dispatcher does
-  **not** preload an INDEX or the spec body for TM today; you fetch
-  what you need below.
+  **not** preload an INDEX or the spec body for TM (ADR
+  [0030](../../../adrs/0030-index-preload-scope-authoring-roles-only.md)
+  — INDEX preload is for authoring roles); you fetch what you need
+  below.
 - The task prompt — names the spec id (and usually the design id) the
   decomposition is for.
 

@@ -535,6 +535,221 @@ def check_shared_id_parents_match(section_root: Path) -> None:
             )
 
 
+def check_lifecycle_consistency(section_root: Path) -> None:
+    """Catch contradictory lifecycle frontmatter.
+
+    ``status: active`` and ``deprecated_at`` / ``deprecated_reason`` /
+    ``superseded_by`` are mutually exclusive — an artifact is one
+    lifecycle state at a time. This check fires on the
+    competitive-intelligence-pipeline failure mode where a file
+    declared itself active in the registry but carried a multi-line
+    ``deprecated_reason`` block (post-merge state of PR #85, fixed
+    by the follow-up to that merge).
+    """
+    for md in iter_md_files(section_root):
+        parsed = parse_frontmatter(md)
+        if parsed is None:
+            continue
+        data, _ = parsed
+        status = data.get("status")
+        if not isinstance(status, str):
+            continue
+        # Active artifacts must not carry deprecation/supersession evidence.
+        if status == "active":
+            for field in ("deprecated_at", "deprecated_reason", "superseded_by"):
+                value = data.get(field)
+                if value is None:
+                    continue
+                if isinstance(value, str) and value.strip() in ("", "~", "null"):
+                    continue
+                err(
+                    f"{md}: status='active' but {field!r} is set "
+                    f"({value!r}) — pick one lifecycle state. Move "
+                    "to deprecated/ (set status:deprecated) or strip "
+                    "the deprecation field."
+                )
+        # Deprecated artifacts should have deprecated_at populated.
+        if status == "deprecated":
+            value = data.get("deprecated_at")
+            if value is None or (isinstance(value, str) and not value.strip()):
+                err(
+                    f"{md}: status='deprecated' but deprecated_at is "
+                    "missing — set the date the artifact was retired."
+                )
+        # Superseded ADRs must point at their replacement.
+        if status == "superseded":
+            value = data.get("superseded_by")
+            if value is None or (isinstance(value, str) and value.strip() in ("", "~", "null")):
+                err(
+                    f"{md}: status='superseded' but superseded_by is "
+                    "missing — point at the replacement ADR id."
+                )
+
+
+def check_parent_resolves(section_root: Path) -> None:
+    """``parent:`` on a spec/design must resolve to a real spec or
+    design id in the same section. Catches typos and the
+    ``parent: <category-id>`` placeholder leaking out of _TEMPLATE.md.
+    """
+    spec_ids: set[str] = set()
+    design_ids: set[str] = set()
+    for folder, sink in (("product-specs", spec_ids), ("designs", design_ids)):
+        active = section_root / folder / "active"
+        if not active.is_dir():
+            continue
+        for md in active.glob("*.md"):
+            if md.name in SKIP_FILENAMES:
+                continue
+            parsed = parse_frontmatter(md)
+            if parsed is None:
+                continue
+            data, _ = parsed
+            artifact_id = data.get("id")
+            if isinstance(artifact_id, str):
+                sink.add(artifact_id)
+    known = spec_ids | design_ids
+    for folder in ("product-specs", "designs"):
+        active = section_root / folder / "active"
+        if not active.is_dir():
+            continue
+        for md in active.glob("*.md"):
+            if md.name in SKIP_FILENAMES:
+                continue
+            parsed = parse_frontmatter(md)
+            if parsed is None:
+                continue
+            data, _ = parsed
+            raw = data.get("parent")
+            if raw is None:
+                continue
+            if isinstance(raw, str):
+                stripped = raw.strip()
+                if stripped in ("", "~", "null"):
+                    continue
+                if stripped not in known:
+                    err(
+                        f"{md}: parent={stripped!r} does not resolve "
+                        "to any active spec or design id — typo, "
+                        "stale reference, or unfilled template "
+                        "placeholder."
+                    )
+
+
+def check_narrative_links() -> None:
+    """Catch dead relative-path markdown links in narrative files.
+
+    The validator skips frontmatter on ROADMAP.md / PHASES.md /
+    HOWTO.md / README.md, so a stale ``[0029](./wip/0029-…)`` link
+    can rot silently for weeks (the post-orphan-cleanup ROADMAP "In
+    flight" table was 17 dead links on main as of PR #85). Walk the
+    narrative files and verify every ``[text](path)`` whose path
+    looks like a local file resolves on disk.
+    """
+    import re
+
+    targets = [
+        REPO_ROOT / "system" / "product-specs" / "ROADMAP.md",
+        REPO_ROOT / "system" / "product-specs" / "PHASES.md",
+        REPO_ROOT / "system" / "HOWTO.md",
+        REPO_ROOT / "system" / "README.md",
+        REPO_ROOT / "README.md",
+        REPO_ROOT / "AGENTS.md",
+    ]
+    # Match `[text](href)` where href starts with `.` or a path char
+    # but not `http`, `mailto`, or `#`. Also handle dangling spaces.
+    link_re = re.compile(r"\[(?P<text>[^\]]*)\]\((?P<href>[^)]+?)\)")
+    for path in targets:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for match in link_re.finditer(text):
+            href = match.group("href").strip()
+            if not href:
+                continue
+            # Skip absolute schemes and pure anchors.
+            if href.startswith(("http://", "https://", "mailto:", "#")):
+                continue
+            # Strip any in-page anchor component for the file check.
+            file_part = href.split("#", 1)[0]
+            if not file_part:
+                continue
+            target = (path.parent / file_part).resolve()
+            if not target.exists():
+                err(
+                    f"{path.relative_to(REPO_ROOT)}: dead link "
+                    f"[{match.group('text')}]({href}) → "
+                    f"{target.relative_to(REPO_ROOT) if REPO_ROOT in target.parents else target} "
+                    "does not exist."
+                )
+
+
+def check_template_optional_fields() -> None:
+    """Mirror check for *optional* frontmatter fields.
+
+    ``check_template_mirror`` only enforces required fields; this
+    catches blueprint drift on optional ones (``summary:``,
+    ``parent:``, …). Every top-level key declared in the system-side
+    ``_TEMPLATE.md`` frontmatter must also appear in the matching
+    ``template/system/.../_TEMPLATE.md``.
+
+    Only top-level keys count: nested keys (``path``/``port`` under
+    ``exposes:``, …) are sub-structure of their parent field, not
+    independent schema. We parse the YAML rather than line-matching
+    so we don't trip on prose or fenced-example frontmatter further
+    down the file.
+    """
+    import re
+
+    sys_root = REPO_ROOT / "system"
+    tpl_root = REPO_ROOT / "template" / "system"
+    if not sys_root.is_dir() or not tpl_root.is_dir():
+        return
+
+    type_to_folder = {
+        "service": "services",
+        "repo": "repos",
+        "design": "designs",
+        "spec": "product-specs",
+        "role": "roles",
+        "integration": "integrations",
+        "runbook": "runbooks",
+    }
+
+    def first_frontmatter_keys(text: str) -> set[str]:
+        if not text.startswith("---\n"):
+            return set()
+        try:
+            end = text.index("\n---\n", 4)
+        except ValueError:
+            return set()
+        try:
+            data = yaml.safe_load(text[4:end])
+        except yaml.YAMLError:
+            return set()
+        return set(data.keys()) if isinstance(data, dict) else set()
+
+    for _, folder_name in type_to_folder.items():
+        sys_template = sys_root / folder_name / "_TEMPLATE.md"
+        tpl_template = tpl_root / folder_name / "_TEMPLATE.md"
+        if not sys_template.exists() or not tpl_template.exists():
+            continue
+        sys_text = sys_template.read_text(encoding="utf-8")
+        tpl_text = tpl_template.read_text(encoding="utf-8")
+        sys_fields = first_frontmatter_keys(sys_text)
+        for field in sorted(sys_fields):
+            # Use the same top-of-line regex the required-field check
+            # uses, since the template side may carry the field as a
+            # YAML key or as a commented hint (``# ingestion_provenance:``).
+            pattern = rf"(?m)^\s*#?\s*{re.escape(str(field))}\s*:"
+            if not re.search(pattern, tpl_text):
+                err(
+                    f"{tpl_template.relative_to(REPO_ROOT)}: optional "
+                    f"frontmatter field `{field}` declared in "
+                    f"{sys_template.relative_to(REPO_ROOT)} but missing "
+                    "from the blueprint template (AGENTS.md rule 9)."
+                )
+
+
 def main() -> int:
     validate_section(REPO_ROOT / "system",   "system")
     validate_section(REPO_ROOT / "template", "template")
@@ -543,10 +758,14 @@ def main() -> int:
             check_active_not_numbered(root)
             check_wip_duplicate_titles(root)
             check_shared_id_parents_match(root)
+            check_lifecycle_consistency(root)
+            check_parent_resolves(root)
     check_registry_md_synced()
     check_index_md_synced()
     check_graph_md_synced()
     check_template_mirror()
+    check_template_optional_fields()
+    check_narrative_links()
 
     if errors:
         sys.stderr.write(f"\n{len(errors)} validation error(s):\n")

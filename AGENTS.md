@@ -123,12 +123,14 @@ See [`README.md`](./README.md) for the layout.
 
 1. `README.md` — what the repo is.
 2. `AGENTS.md` — this file, the rules.
-3. `system/HOWTO.md` — "how do I X?" entry point for common tasks
-   (authoring, shipping, navigating, validating).
-4. `system/glossary.md` — vocabulary.
-5. `system/INDEX.md` — unified category tree across product specs and
+3. `system/glossary.md` — vocabulary.
+4. `system/INDEX.md` — unified category tree across product specs and
    designs (ADR 0029). Pick the right entry point from here before
-   reading bodies.
+   reading bodies. One file for every role; cross-cutting work needs
+   no second fetch.
+5. `system/HOWTO.md` — "how do I X?" pointers for common tasks
+   (authoring, shipping, navigating, validating). Use after INDEX.md
+   when you know *what* you want and need *how*.
 6. `system/designs/active/system-overview.md` — the big picture, when
    you need engineering framing rather than just navigation.
 7. `system/services/REGISTRY.md` and `system/roles/REGISTRY.md` — the moving parts.

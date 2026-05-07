@@ -62,7 +62,8 @@ catches anything you missed.
   carries the WIP body and the proposed merges.
 
 The Reviewer does not get an INDEX preload — the work is grounded
-in the PR diff and the project's source, not the knowledge tree.
+in the PR diff and the project's source, not the knowledge tree
+(ADR [0030](../../../adrs/0030-index-preload-scope-authoring-roles-only.md)).
 Fetch design / ADR detail on demand.
 
 ## Tools at hand

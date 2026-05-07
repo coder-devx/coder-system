@@ -205,3 +205,10 @@ adrs:
     date: 2026-05-07
     file: 0029-unified-generated-knowledge-index.md
     relates_to_designs: [navigation-tree-pattern]
+
+  - id: "0030"
+    title: INDEX preload scope is authoring roles only (PM + Architect)
+    status: accepted
+    date: 2026-05-07
+    file: 0030-index-preload-scope-authoring-roles-only.md
+    relates_to_designs: [navigation-tree-pattern]
