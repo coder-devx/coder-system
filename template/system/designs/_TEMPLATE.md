@@ -15,6 +15,15 @@ affects_services: []
 affects_repos: []
 # optional — list pattern_ids from /v1/_admin/patterns that informed this artifact
 informed_by_patterns: []
+# Optional — present only on machine-ingested artifacts (spec 0045).
+# ingestion_provenance:
+#   source_paths: []
+#   source_commit: ""
+#   ingested_at: ""
+#   prompt_id: cold_start_v1
+#   model: ""
+#   confidence: 0
+#   human_edited: false
 ---
 
 # {Title}

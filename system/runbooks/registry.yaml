@@ -22,6 +22,11 @@ runbooks:
   status: active
   owner: ro
   file: cache-hit-drop.md
+- id: cold-start-review
+  title: Cold-start ingestion PR — review checklist
+  status: active
+  owner: ro
+  file: cold-start-review.md
 - id: cloud-sql-bootstrap
   title: Bootstrap Cloud SQL for coder-core
   status: active
