@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-11
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Per-task telemetry, token costs, and pipeline metrics.
 served_by_designs: [observability-and-cost-tracking]
 related_specs: [knowledge-freshness]
 parent: pipeline-operations

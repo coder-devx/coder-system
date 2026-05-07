@@ -7,6 +7,7 @@ owner: ro
 created: '2026-05-03'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: Page Slack at the 15-minute stuck-pipeline threshold.
 verified_by: knowledge-audit
 implements_specs: []
 decided_by: []

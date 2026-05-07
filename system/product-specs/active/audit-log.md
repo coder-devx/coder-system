@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-19
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Every mutation recorded with actor, action, before, after.
 served_by_designs: [audit-log]
 related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api]
 parent: tenancy-and-access

@@ -7,6 +7,7 @@ owner: ro
 created: '2026-04-28'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: Move worker subprocesses out of the HTTP service for durability.
 implements_specs: []
 decided_by: []
 related_designs:

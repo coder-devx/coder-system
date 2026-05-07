@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-27
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: "Bootstrap a new project's knowledge from existing repos."
 served_by_designs: []
 related_specs: [onboarding, architect-worker, knowledge-api, knowledge-freshness]
 parent: knowledge-and-admin

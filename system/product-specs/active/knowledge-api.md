@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-09
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Read-through layer over the knowledge repo with per-project cache.
 served_by_designs: [knowledge-write-api, knowledge-repo-model]
 related_specs: [knowledge-freshness, knowledge-schema-migration]
 parent: knowledge-and-admin

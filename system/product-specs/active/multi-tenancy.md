@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-09
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: project_id everywhere invariant — no cross-tenant data access.
 served_by_designs: [system-overview]
 related_specs: []
 parent: tenancy-and-access

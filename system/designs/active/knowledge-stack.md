@@ -7,10 +7,11 @@ owner: ro
 created: 2026-05-02
 updated: 2026-05-02
 last_verified_at: 2026-05-02
+summary: "How each project's knowledge repo is served, written, and kept fresh."
 implements_specs: [knowledge-and-admin]
 related_designs: [system-overview, knowledge-repo-model, knowledge-write-api, knowledge-freshness]
 affects_services: [coder-core, coder-admin]
-parent: system-overview
+parent: knowledge-and-admin
 ---
 
 # Knowledge stack
@@ -58,7 +59,7 @@ coder-core to GitHub and back to workers.
 ## Navigation
 
 This design itself is a category entry point — drill into the
-component designs above for deeper detail. See [design 0066](../wip/0066-navigation-tree-pattern.md)
+component designs above for deeper detail. See [design 0066](../active/navigation-tree-pattern.md)
 for the tree pattern this organisation follows.
 
 ## Links

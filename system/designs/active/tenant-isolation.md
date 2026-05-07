@@ -7,12 +7,13 @@ owner: ro
 created: 2026-04-19
 updated: 2026-04-21
 last_verified_at: 2026-04-21
+summary: Cross-tenant test harness.
 implements_specs: [tenant-isolation]
 decided_by: []
 related_designs: [system-overview, impersonation, audit-log]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin]
-parent: tenancy-and-access
+parent: delivery-and-infra
 ---
 
 # Tenant isolation test harness

@@ -25,6 +25,7 @@ deprecated_reason: 'Salvaged from the deleted coder-agent repo on 2026-04-08 as 
 
   '
 last_verified_at: '2026-05-06'
+summary: Pipeline that surfaces competitor moves into product context.
 verified_by: knowledge-audit
 implements_specs: []
 decided_by: []

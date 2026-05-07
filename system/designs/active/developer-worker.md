@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-03
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: Developer worker engineering view — implement.
 implements_specs: [developer-worker]
 decided_by: []
 related_designs: [worker-roles, worker-communication, branch-cleanup, pm-worker, architect-worker, team-manager-worker]
@@ -51,7 +52,7 @@ flowchart TB
   runner. Builds the per-task workspace via `workers/workspace.py`,
   applies `GH_TOKEN` through `_github_env.apply_github_token_env`,
   and spawns `claude`. The system prompt is assembled per
-  [0057-role-prompt-knowledge-layout](../wip/0057-role-prompt-knowledge-layout.md):
+  [0057-role-prompt-knowledge-layout](../active/role-prompt-knowledge-layout.md):
   `common_preamble` + `roles/developer/role.md` +
   `roles/developer/tasks/implement.md`. Mode is hardcoded to
   `"implement"`.
@@ -128,7 +129,7 @@ flowchart TB
   reviewer fills these), `task_logs` rows.
 - **GitHub:** PR opened on the project repo via `gh pr create`.
 - **System prompt path:** `system/roles/developer/role.md` +
-  `system/roles/developer/tasks/implement.md` (per [design 0057](../wip/0057-role-prompt-knowledge-layout.md)).
+  `system/roles/developer/tasks/implement.md` (per [design 0057](../active/role-prompt-knowledge-layout.md)).
 
 ## Evolution
 
@@ -148,7 +149,7 @@ flowchart TB
 - 0055 — `GH_TOKEN` injection routed through
   `_github_env.apply_github_token_env`; workspace token preferred,
   dispatcher-resolved `WorkerInput.github_token` as fallback.
-- [design 0057](../wip/0057-role-prompt-knowledge-layout.md) — system prompt
+- [design 0057](../active/role-prompt-knowledge-layout.md) — system prompt
   assembled from common preamble + role + task-mode files in the
   knowledge repo; mode hardcoded to `"implement"` for this worker.
 

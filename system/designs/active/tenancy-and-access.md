@@ -7,10 +7,11 @@ owner: ro
 created: 2026-05-02
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: Multi-tenancy enforcement and actor attribution at the engineering layer.
 implements_specs: [tenancy-and-access]
 related_designs: [system-overview, impersonation, audit-log, tenant-isolation]
 affects_services: [coder-core, coder-admin]
-parent: system-overview
+parent: ~
 ---
 
 # Tenancy & access

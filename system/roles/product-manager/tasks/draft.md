@@ -18,9 +18,11 @@ The dispatcher inlines four things into your prompt:
   (`reason: missing-allocation-context`). Do not invent or infer a
   numeric id from prior files, prompt history, or patterns —
   allocation is the dispatcher's job, refusal is yours.
-- `## Knowledge index (preloaded)` — `product-specs/INDEX.md`, the
-  curated navigation tree for specs. Use it to pick `parent:` and
-  `related_specs[]` correctly.
+- `## Knowledge index (preloaded)` — `system/INDEX.md`, the unified
+  category tree across product specs and designs (ADR 0029). Use it
+  to pick `parent:` and `related_specs[]` correctly; the design
+  surface is on the same map so cross-cutting checks need no second
+  fetch.
 - The problem statement (in the user message after `draft: `).
 
 The INDEX is your *map*, not the *bodies*. When the draft touches a

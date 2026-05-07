@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-08
 updated: 2026-04-19
 last_verified_at: 2026-04-19
+summary: Short-lived role-scoped tokens — the impersonation mechanism.
 implements_specs: []
 decided_by: ["0006"]
 related_designs: [worker-roles, system-overview, audit-log]

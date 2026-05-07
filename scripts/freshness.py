@@ -39,7 +39,8 @@ except ImportError:
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 SKIP_FILENAMES = {
-    "README.md", "REGISTRY.md", "ROADMAP.md", "HISTORY.md", "INDEX.md",
+    "README.md", "REGISTRY.md", "ROADMAP.md", "PHASES.md", "HISTORY.md",
+    "INDEX.md", "GRAPH.md",
     "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md", "_common.md",
 }
 

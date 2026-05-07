@@ -1,6 +1,13 @@
 # ADR Registry
 
-> Generated view of [`registry.yaml`](./registry.yaml). Do not hand-edit.
+> Human-readable view of [`registry.yaml`](./registry.yaml).
+> ADRs are append-only (AGENTS.md rule 4); a decision is reversed by
+> writing a new ADR that supersedes the old one and flipping the old
+> one's status to `superseded`.
+
+## Current decisions
+
+ADRs that are currently in force (`accepted` or `proposed`).
 
 | ID | Title | Status | Date | File |
 |---|---|---|---|---|
@@ -32,3 +39,14 @@
 | 0026 | Shared numeric ID pool for WIP specs and designs | accepted | 2026-05-03 | [0026-shared-numeric-id-pool-for-wip-specs-and-designs.md](./0026-shared-numeric-id-pool-for-wip-specs-and-designs.md) |
 | 0027 | Uniform folder shape for every role | accepted | 2026-05-07 | [0027-uniform-role-folder-shape.md](./0027-uniform-role-folder-shape.md) |
 | 0028 | Reaffirm shared WIP id pool with mandatory dispatcher-injected allocation | accepted | 2026-05-07 | [0028-reaffirm-shared-id-pool-with-allocation-guard.md](./0028-reaffirm-shared-id-pool-with-allocation-guard.md) |
+| 0029 | One generated knowledge index for the whole system | accepted | 2026-05-07 | [0029-unified-generated-knowledge-index.md](./0029-unified-generated-knowledge-index.md) |
+
+## Superseded
+
+ADRs that have been replaced by a later decision. Read the
+superseding ADR for current direction; this section preserves the
+reversed history per AGENTS.md rule 4.
+
+| ID | Title | Date | Superseded by | File |
+|---|---|---|---|---|
+| _(none yet)_ | | | | |

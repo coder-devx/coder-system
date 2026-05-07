@@ -7,13 +7,14 @@ owner: ro
 created: 2026-04-17
 updated: 2026-04-18
 last_verified_at: 2026-05-06
+summary: Freshness audit and automatic rewrites for stale artifacts.
 verified_by: knowledge-audit
 implements_specs: [knowledge-freshness]
 decided_by: ["0014"]
 related_designs: [knowledge-repo-model, knowledge-write-api, architect-worker, observability-and-cost-tracking]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin, coder-system]
-parent: knowledge-stack
+parent: knowledge-and-admin
 ---
 
 # Knowledge Freshness

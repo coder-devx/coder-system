@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-02
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: How one Coder deployment serves many projects without crossing wires and attributes every action to a real actor.
 served_by_designs: [impersonation, audit-log, tenant-isolation]
 related_specs: [pipeline-operations, worker-roles, knowledge-and-admin]
 parent: ~

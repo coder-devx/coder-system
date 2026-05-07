@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-23
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Three-rung on-call ladder with quiet hours.
 served_by_designs: [escalations]
 related_specs: [task-orchestration, observability, audit-log, admin-panel, multi-tenancy]
 parent: pipeline-operations

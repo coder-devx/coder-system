@@ -25,8 +25,8 @@ ADRs are append-only and never ship-merged.
 ## What's preloaded for you
 
 - `# Run context` — `{org}/{repo}` (knowledge repo) + role + mode.
-- `## Knowledge index (preloaded)` — `product-specs/INDEX.md`. Use
-  it to find the right active category file each AC lands in.
+- `## Knowledge index (preloaded)` — `system/INDEX.md` (ADR 0029).
+  Use it to find the right active category file each AC lands in.
 - The full WIP spec body in the user message after `# Knowledge
   ship draft`.
 

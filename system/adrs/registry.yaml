@@ -198,3 +198,10 @@ adrs:
     date: 2026-05-07
     file: 0028-reaffirm-shared-id-pool-with-allocation-guard.md
     relates_to_designs: []
+
+  - id: "0029"
+    title: One generated knowledge index for the whole system
+    status: accepted
+    date: 2026-05-07
+    file: 0029-unified-generated-knowledge-index.md
+    relates_to_designs: [navigation-tree-pattern]

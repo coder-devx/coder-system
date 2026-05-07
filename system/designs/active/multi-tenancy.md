@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-03
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: project_id propagation and enforcement across services and stores.
 implements_specs: [multi-tenancy]
 decided_by: ['0005']
 related_designs: [system-overview, tenancy-and-access, impersonation, tenant-isolation, audit-log, coder-core-modular-monolith]

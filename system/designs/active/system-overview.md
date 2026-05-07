@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-08
 updated: 2026-04-19
 last_verified_at: 2026-04-19
+summary: Big-picture engineering view of the Coder system.
 implements_specs: []
 decided_by: ["0001", "0005", "0006", "0007", "0008"]
 related_designs: [worker-roles, impersonation, knowledge-repo-model, audit-log]

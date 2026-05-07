@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-11
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Software Architect worker — designs, ADRs, and system shape.
 served_by_designs: [architect-worker]
 related_specs: []
 parent: worker-roles

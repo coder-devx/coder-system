@@ -124,9 +124,13 @@ See [`README.md`](./README.md) for the layout.
 1. `README.md` — what the repo is.
 2. `AGENTS.md` — this file, the rules.
 3. `system/glossary.md` — vocabulary.
-4. `system/designs/active/system-overview.md` — the big picture.
-5. `system/services/REGISTRY.md` and `system/roles/REGISTRY.md` — the moving parts.
-6. Specific files relevant to the task at hand.
+4. `system/INDEX.md` — unified category tree across product specs and
+   designs (ADR 0029). Pick the right entry point from here before
+   reading bodies.
+5. `system/designs/active/system-overview.md` — the big picture, when
+   you need engineering framing rather than just navigation.
+6. `system/services/REGISTRY.md` and `system/roles/REGISTRY.md` — the moving parts.
+7. Specific files relevant to the task at hand.
 
 ## Other agent surfaces
 

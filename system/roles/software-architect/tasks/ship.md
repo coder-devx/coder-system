@@ -22,8 +22,9 @@ ever emit `artifact_type: "design"` (the schema enforces this).
 ## What's preloaded for you
 
 - `# Run context` — `{org}/{repo}` + role + mode.
-- `## Knowledge index (preloaded)` — designs/INDEX.md (use it to
-  find the right active category file each component lands in).
+- `## Knowledge index (preloaded)` — `system/INDEX.md`, the unified
+  category tree across product specs and designs (ADR 0029). Use
+  it to find the right active category file each component lands in.
 - The full WIP design body in the user message after `# Knowledge
   ship draft`.
 

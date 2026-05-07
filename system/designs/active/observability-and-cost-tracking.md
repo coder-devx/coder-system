@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-12
 updated: 2026-04-19
 last_verified_at: 2026-04-19
+summary: Telemetry, cost accounting, and alerts for the running pipeline.
 implements_specs: [observability]
 decided_by: []
 related_designs: [system-overview, audit-log]

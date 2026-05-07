@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-17
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: Automatic stale-artifact detection and rewrites.
 served_by_designs: [knowledge-freshness]
 related_specs: [knowledge-api, architect-worker, reviewer-worker, admin-panel, observability]
 parent: knowledge-and-admin

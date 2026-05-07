@@ -7,6 +7,7 @@ owner: ro
 created: '2026-04-11'
 updated: '2026-05-07'
 last_verified_at: '2026-05-07'
+summary: Reviewer worker — technical-quality gate before PM acceptance.
 served_by_designs:
 - worker-roles
 related_specs: []

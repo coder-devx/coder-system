@@ -84,9 +84,9 @@ audit pipeline all read against this shape.
 5. **`served_by_designs` and `related_specs` resolve.** Use the
    preloaded INDEX to pick parents and cross-links — the audit
    pipeline checks these.
-6. **`parent:` is a real category** from the preloaded
-   product-specs INDEX. Per design 0066 every spec sits in a
-   navigation tree.
+6. **`parent:` is a real category** from the preloaded unified
+   `system/INDEX.md`. Per ADR 0029 every spec sits in the navigation
+   tree spanning specs and designs.
 7. **Concrete, not aspirational.** Name the running surfaces (admin
    panel pages, API endpoints, Slack channels, Cloud Run services).
    *"A new dashboard"* fails; *"a new card on the existing

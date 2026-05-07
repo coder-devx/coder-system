@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-23
 updated: 2026-04-23
 last_verified_at: 2026-04-23
+summary: On-call ladder for unresolved task failures.
 implements_specs: [escalations]
 related_designs: [system-overview, worker-communication, observability-and-cost-tracking, audit-log]
 affects_services: [coder-core, coder-admin]

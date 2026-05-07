@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-03
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: Reviewer worker engineering view — review.
 implements_specs: [reviewer-worker]
 decided_by: []
 related_designs: [worker-roles, worker-communication, developer-worker, knowledge-write-api]
@@ -59,7 +60,7 @@ flowchart TB
   Builds workspace, applies `GH_TOKEN` via the shared
   `_github_env.apply_github_token_env` helper, and spawns `claude`.
   System prompt is assembled per
-  [0057-role-prompt-knowledge-layout](../wip/0057-role-prompt-knowledge-layout.md):
+  [0057-role-prompt-knowledge-layout](../active/role-prompt-knowledge-layout.md):
   `common_preamble` + `roles/reviewer/role.md` +
   `roles/reviewer/tasks/review.md`. Mode is hardcoded to
   `"review"`.
@@ -136,7 +137,7 @@ flowchart TB
   admin ship-gate panel and is the orchestrator's request body for
   `POST /knowledge/ship`.
 - **System prompt path:** `system/roles/reviewer/role.md` +
-  `system/roles/reviewer/tasks/review.md` (per [design 0057](../wip/0057-role-prompt-knowledge-layout.md)).
+  `system/roles/reviewer/tasks/review.md` (per [design 0057](../active/role-prompt-knowledge-layout.md)).
 
 ## Evolution
 
@@ -149,7 +150,7 @@ flowchart TB
   `validate_and_retry` compliance loop. Non-ship reviews unchanged.
 - 0055 — `GH_TOKEN` injection routed through the shared
   `_github_env.apply_github_token_env` helper.
-- [design 0057](../wip/0057-role-prompt-knowledge-layout.md) — prompt assembly
+- [design 0057](../active/role-prompt-knowledge-layout.md) — prompt assembly
   from common preamble + role + task-mode files; mode hardcoded to
   `"review"` for this worker.
 

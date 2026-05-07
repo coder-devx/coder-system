@@ -7,6 +7,7 @@ owner: ro
 created: '2026-04-27'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: Reconcile pipeline state with GitHub PR state.
 deprecated_at: null
 reason: null
 implements_specs: []

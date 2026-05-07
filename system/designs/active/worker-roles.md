@@ -7,12 +7,13 @@ owner: ro
 created: 2026-04-08
 updated: 2026-04-29
 last_verified_at: 2026-04-29
+summary: The role-typed worker subprocesses, their input contract, and how they compose.
 implements_specs: []
 decided_by: ["0006", "0007"]
 related_designs: [system-overview, impersonation]
 affects_services: [coder-core]
 affects_repos: [coder-core, coder-system]
-parent: system-overview
+parent: ~
 ---
 
 # Worker Roles

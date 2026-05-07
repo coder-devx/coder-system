@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-03
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: Per-role GCP service-account brokering.
 implements_specs: [service-accounts]
 decided_by: ['0006']
 related_designs: [tenancy-and-access, impersonation, multi-tenancy, audit-log, worker-roles]

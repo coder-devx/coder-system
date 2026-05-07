@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-09
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Developer worker — code, tests, PRs.
 served_by_designs: [worker-roles]
 related_specs: []
 parent: worker-roles

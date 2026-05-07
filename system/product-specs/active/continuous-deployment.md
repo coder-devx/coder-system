@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-11
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: Push-to-main CD with health checks.
 served_by_designs: [system-overview]
 related_specs: []
 parent: delivery-and-infra

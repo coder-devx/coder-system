@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-12
 updated: 2026-04-19
 last_verified_at: 2026-04-19
+summary: Task-state machine, dispatcher protocol, and SSE streaming.
 implements_specs: [task-orchestration]
 decided_by: []
 related_designs: [system-overview, pm-worker, team-manager-worker]

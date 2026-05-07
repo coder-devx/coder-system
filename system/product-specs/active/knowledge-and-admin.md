@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-02
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: "How a project's knowledge is read, written, kept current, and surfaced to operators."
 served_by_designs: [knowledge-repo-model, knowledge-write-api, knowledge-freshness]
 related_specs: [worker-roles, tenancy-and-access, pipeline-operations]
 parent: ~

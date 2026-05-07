@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-06
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Distribute and version managed GitHub Actions across the fleet.
 served_by_designs: []
 related_specs: [knowledge-api, onboarding, audit-log, admin-panel]
 parent: knowledge-and-admin

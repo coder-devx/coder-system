@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-03
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: Engineering wiring for a new project under Coder.
 implements_specs: [onboarding]
 decided_by: []
 related_designs: [system-overview, multi-tenancy, service-accounts, knowledge-repo-model, knowledge-write-api]

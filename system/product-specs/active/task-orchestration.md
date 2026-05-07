@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-11
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Task lifecycle, dispatcher, and stage transitions.
 served_by_designs: [worker-communication]
 related_specs: [audit-log]
 parent: pipeline-operations
