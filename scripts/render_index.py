@@ -194,9 +194,18 @@ def load_artifacts(folder: str) -> list[Artifact]:
 def build_tree(artifacts: list[Artifact]) -> tuple[list[Node], list[Artifact]]:
     """Return (top_level_nodes, orphans).
 
-    Each Node groups same-id spec + design pairs. Orphans are
-    artifacts whose ``parent:`` references an unknown id; they are
-    surfaced at the bottom of the index so they don't disappear.
+    Each Node groups same-id spec + design pairs. Orphans are:
+      - artifacts whose ``parent:`` references an unknown id
+      - artifacts with ``parent: ~`` that aren't ``type: index``
+        and aren't on the explicit ``TOP_LEVEL_ORDER`` allow-list
+
+    Per ADR 0029 the navigation tree's top level is the five
+    category-rollup ``type: index`` artifacts plus the explicitly
+    anchored entries in ``TOP_LEVEL_ORDER``. Anything else with
+    ``parent: ~`` is treated as a missing parent rather than as a
+    top-level pillar — otherwise a typo or a forgotten parent would
+    silently promote a regular artifact to a category headline next
+    to "Pipeline operations".
     """
     nodes: dict[str, Node] = {}
     for a in artifacts:
@@ -206,13 +215,21 @@ def build_tree(artifacts: list[Artifact]) -> tuple[list[Node], list[Artifact]]:
         else:
             node.design = a
 
+    top_level_allowed = set(TOP_LEVEL_ORDER)
+
+    def may_be_top_level(a: Artifact) -> bool:
+        return a.type == "index" or a.artifact_id in top_level_allowed
+
     top_level: list[Node] = []
     orphans: list[Artifact] = []
     for a in artifacts:
         node = nodes[a.artifact_id]
         if a.parent is None:
-            if node not in top_level:
-                top_level.append(node)
+            if may_be_top_level(a):
+                if node not in top_level:
+                    top_level.append(node)
+            else:
+                orphans.append(a)
             continue
         parent_node = nodes.get(a.parent)
         if parent_node is None:

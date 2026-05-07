@@ -98,9 +98,3 @@ How code reaches production and how the system itself stays maintainable.
 - [coder-core-modular-monolith](./designs/active/coder-core-modular-monolith.md) (design) — Module boundaries enforced by import-linter contracts.
 - [continuous-deployment](./product-specs/active/continuous-deployment.md) (spec) · [continuous-deployment](./designs/active/continuous-deployment.md) (design) — Push-to-main CD with health checks.
 - [tenant-isolation](./product-specs/active/tenant-isolation.md) (spec) · [tenant-isolation](./designs/active/tenant-isolation.md) (design) — Test-suite harness for the multi-tenancy contract.
-
-## Competitive Intelligence Pipeline
-
-Pipeline that surfaces competitor moves into product context.
-
-- Design: [competitive-intelligence-pipeline](./designs/active/competitive-intelligence-pipeline.md)

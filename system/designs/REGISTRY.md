@@ -15,7 +15,6 @@ Logical components of the Coder system as it exists today.
 | [branch-cleanup](./active/branch-cleanup.md) | Branch cleanup | ro | [branch-cleanup](../product-specs/active/branch-cleanup.md) | — |
 | [coder-core-modular-monolith](./active/coder-core-modular-monolith.md) | coder-core modular monolith hardening | ro | [delivery-and-infra](../product-specs/active/delivery-and-infra.md) | — |
 | [cold-start-ingestion](./active/cold-start-ingestion.md) | Cold-start knowledge ingestion | ro | — | — |
-| [competitive-intelligence-pipeline](./active/competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | ro | — | — |
 | [confidence-auto-approval](./active/confidence-auto-approval.md) | Confidence-scored auto-approval | ro | — | — |
 | [continuous-deployment](./active/continuous-deployment.md) | Continuous Deployment | ro | [continuous-deployment](../product-specs/active/continuous-deployment.md) | — |
 | [cost-regression-alerts](./active/cost-regression-alerts.md) | Prompt & cost regression alerts | ro | — | — |
@@ -63,4 +62,6 @@ Logical components of the Coder system as it exists today.
 
 ## Deprecated
 
-_None yet._
+| ID | Title | Deprecated at | Reason |
+|---|---|---|---|
+| [competitive-intelligence-pipeline](./deprecated/competitive-intelligence-pipeline.md) | Competitive Intelligence Pipeline | — | — |

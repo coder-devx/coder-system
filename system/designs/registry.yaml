@@ -422,10 +422,10 @@ designs:
   file: active/navigation-tree-pattern.md
 - id: competitive-intelligence-pipeline
   title: Competitive Intelligence Pipeline
-  status: active
+  status: deprecated
   owner: ro
-  folder: active
-  file: active/competitive-intelligence-pipeline.md
+  folder: deprecated
+  file: deprecated/competitive-intelligence-pipeline.md
 - id: role-prompt-knowledge-layout
   title: "Role prompt knowledge layout \u2014 move per-role and per-mode worker prompts\
     \ into the knowledge repo"

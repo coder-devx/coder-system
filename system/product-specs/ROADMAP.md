@@ -16,11 +16,13 @@ is in an approval/override role, not a task-authoring role.
 pipeline run advances to `spec_approval` → ready for human approval →
 chain auto-creates architect task.
 
-**Latest:** 2026-05-07 — knowledge-repo hygiene Batch 2 (unified
-generated `system/INDEX.md`, ROADMAP/PHASES split, ADRs 0027–0029).
-Per-WIP detail and the per-phase plan live in
-[`PHASES.md`](./PHASES.md). Shipped history lives in `git log` and in
-the `## Evolution` sections of individual `active/` artifacts.
+**Latest:** 2026-05-07 — knowledge-repo hygiene Batches 1–3 (uniform
+role folder shape ADR 0027, allocation guard ADR 0028, unified
+generated `system/INDEX.md` ADR 0029, ROADMAP/PHASES split, HOWTO,
+smart-fold guidance, template-mirror validator). Per-WIP detail
+and the per-phase plan live in [`PHASES.md`](./PHASES.md). Shipped
+history lives in `git log` and in the `## Evolution` sections of
+individual `active/` artifacts.
 
 ---
 
@@ -53,32 +55,18 @@ The system today, by logical component. Each links to its active spec
 
 ---
 
----
+## In flight
 
-## In flight (`wip/`)
+Per-WIP scope, status, acceptance criteria, and ship dates live in
+[`PHASES.md`](./PHASES.md). The summary table below shows phase
+status; the dependency graph further down shows how WIPs and active
+components connect.
 
-| ID | Title | Status |
-|---|---|---|
-| [0029](./wip/0029-prompt-caching.md) | Prompt caching & shared context reuse | scope sealed 2026-04-27 — phase-1 LIVE; phase-2 ready for dispatch |
-| [0030](./wip/0030-model-tier-routing.md) | Model tier routing | scope sealed 2026-04-27 — phase-1 LIVE on canary; phase-2 ready for dispatch |
-| [0031](./wip/0031-token-budgets.md) | Per-project token budgets & cost gates | scope sealed 2026-04-27 — phase-1 LIVE per-project; phase-2 ready for dispatch |
-| [0032](./wip/0032-cost-regression-alerts.md) | Prompt & cost regression alerts | scope sealed 2026-04-27 — phase-1 LIVE alerts on; phase-2 ready for dispatch |
-| [0038](./wip/0038-secret-rotation.md) | Automated secret rotation | LIVE — ticking; first rotation due 2026-05-20; 3 of 6 OQs resolved 2026-04-27 |
-| [0040](./wip/0040-confidence-auto-approve.md) | Confidence-scored auto-approval | infra wired, Stage 2 shadow; OQs resolved 2026-04-27 — pre-Stage-3 work (AC11 static check, AC12 race lock) ready for dispatch |
-| [0045](./wip/0045-cold-start-ingestion.md) | Cold-start knowledge ingestion | scope sealed 2026-04-27 — ready for architect dispatch |
-| [0049](./wip/0049-mcp-agent-interface.md) | MCP agent interface | Stages 1+2+3 shipped; `MCP_ENABLED=true` + `coder.mcp_enabled=true` in prod; soaking through ~2026-05-25 |
-| [0046](./wip/0046-graph-aware-retrieval.md) | Graph-aware knowledge retrieval | Stage 0a shipped 2026-04-27 (PR #34) — pure-logic GraphExpander module live; route + migration + worker conversions still WIP |
-| [0047](./wip/0047-template-schema-migration.md) | Template schema migration | scope sealed 2026-04-27 — ready for architect dispatch (alias-tolerance is pre-work for first rename migration) |
-| [0048](./wip/0048-cross-project-patterns.md) | Cross-project pattern surfacing | scope sealed 2026-04-27 — ready for architect dispatch |
-| [0050](./wip/0050-oauth-for-mcp-clients.md) | OAuth 2.1 for MCP clients (claude.ai web) | Stages 1+2+3+4 shipped; claude.ai web registered + driving MCP via OAuth in prod; soaking through ~2026-05-25; OQs resolved 2026-04-27 |
-| [0052](./wip/0052-managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | Stage 0 shipped 2026-04-27 (coder-system#9 manifest + coder-core#33 receiver scaffold) — flag-off in prod; Stage 1 (helpers + sync CLI) and Stage 2 (admin matrix) still WIP |
-| [0053](./wip/0053-post-pr-ci-fix-loop.md) | Post-PR CI fix loop | Stage 0a shipped 2026-04-27 (PR #36) — preflight live in prod; Stage 0b + Stage 1 still WIP |
-| [0054](./wip/0054-orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | shipped 2026-04-28 (PR #37); flag `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED=true` flipped on revision `coder-core-00161-ln6` — live in prod |
-| 0055 | Non-developer-role workers need GitHub write access | shipped 2026-04-28 ([coder-core#41](https://github.com/coder-devx/coder-core/pull/41)); WIP folded into `architect-worker` / `team-manager-worker` / `pm-worker` / `reviewer-worker` / `developer-worker` / `task-orchestration` and `worker-roles` design — recovery dispatch of architect `62e0c95e` opens PRs cleanly |
-| [0056](./wip/0056-worker-dispatch-durability.md) | Worker dispatch durability — workers as Cloud Run Jobs | drafting 2026-04-28 — surfaced by wave-2 dispatch session where ~100% of workers zombied due to Cloud Run service-instance eviction killing the asyncio orchestrate_task before Phase 3b writeback. Three workarounds shipped today (PR #45 + reaper apply mode + threshold 25→45min) cover the symptom; this is the architectural fix |
-| 0051 | coder-core modular monolith hardening | shipped to prod 2026-04-26; folded into [delivery-and-infra](./active/delivery-and-infra.md) on 2026-05-03 (PR #54) |
-
----
+The `wip/` folder is intentionally empty between phase ships —
+numbered WIP files exist only while a roadmap item is actively being
+drafted/designed. After ship-and-fold (AGENTS.md rule 5), the file
+is deleted and the content lives under `active/`. "In flight" status
+that survives the fold is tracked in PHASES.md, not as a WIP file.
 
 ---
 

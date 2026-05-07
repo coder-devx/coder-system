@@ -2,31 +2,22 @@
 id: competitive-intelligence-pipeline
 title: Competitive Intelligence Pipeline
 type: design
-status: active
+status: deprecated
 owner: ro
 created: '2026-04-08'
-updated: '2026-05-06'
+updated: '2026-05-07'
 deprecated_at: '2026-04-23'
-deprecated_reason: 'Salvaged from the deleted coder-agent repo on 2026-04-08 as a
-
+deprecated_reason: >-
+  Salvaged from the deleted coder-agent repo on 2026-04-08 as a
   placeholder for a future PM-worker capability, but no spec was
-
   ever authored and no roadmap phase scheduled the rebuild. Sitting
-
-  in wip/ implied in-flight work when it wasn''t. Deprecating
-
-  preserves the historical design for future rehydration while
-
-  clearing the active surface. Rehydrate by re-authoring a fresh
-
-  spec with a current WIP number when the roadmap actually plans
-
-  the capability.
-
-  '
-last_verified_at: '2026-05-06'
-summary: Pipeline that surfaces competitor moves into product context.
-verified_by: knowledge-audit
+  in active/ implied a current logical component when it wasn't.
+  Deprecating preserves the historical design for future rehydration
+  while clearing the active surface. Rehydrate by re-authoring a
+  fresh spec with a current WIP number when the roadmap actually
+  plans the capability.
+last_verified_at: '2026-05-07'
+summary: Deprecated rehydration placeholder — competitor-moves pipeline (no active spec, no scheduled phase).
 implements_specs: []
 decided_by: []
 related_designs:
@@ -36,7 +27,7 @@ affects_services:
 - coder-core
 affects_repos:
 - coder-core
-parent: null
+parent: ~
 ---
 # Competitive Intelligence Pipeline
 

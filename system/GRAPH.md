@@ -300,13 +300,6 @@ flowchart LR
 
 ## Other
 
-### Competitive Intelligence Pipeline
-
-```mermaid
-flowchart LR
-  n000("design<br/>competitive-intelligence-pipeline")
-```
-
 ### System Overview
 
 ```mermaid

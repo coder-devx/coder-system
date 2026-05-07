@@ -165,7 +165,7 @@ hit-rate climb across roles over the next pipeline cycle.
 Migrations 0022, 0032-0034.
 
 - **Status:** LIVE (flag on fleet-wide)
-- **WIP:** [0029](./wip/0029-prompt-caching.md) · **Design:** [0029](../designs/wip/0029-prompt-caching.md)
+- **WIP:** 0029 · **Design:** 0029
 - **Extends:** `knowledge-api`, `observability`, `task-orchestration`
 - **Next:** ship WIP → active once the input-token-reduction numbers
   stabilise for 24-48 h at the measured rate. That also unblocks
@@ -181,7 +181,7 @@ project opted in with `pin_top_tier=false`. Reviewer tasks on `coder`
 route to Haiku; other projects stay on Sonnet. Migrations 0036, 0037.
 
 - **Status:** LIVE on `coder` canary; fleet flag off
-- **WIP:** [0030](./wip/0030-model-tier-routing.md) · **Design:** [0030](../designs/wip/0030-model-tier-routing.md)
+- **WIP:** 0030 · **Design:** 0030
 - **Extends:** `task-orchestration`, `observability`
 - **Next:** watch `coder` reviewer approval rate in the `by_tier`
   rollup for 48-72 h. If approval rate holds within 1 pp of baseline,
@@ -199,7 +199,7 @@ fleet defaults also 0 = disabled), so no task is gated yet — the
 machinery is ready when ops decides where to set caps. Migration 0035.
 
 - **Status:** LIVE (ready to configure per project)
-- **WIP:** [0031](./wip/0031-token-budgets.md) · **Design:** [0031](../designs/wip/0031-token-budgets.md)
+- **WIP:** 0031 · **Design:** 0031
 - **Extends:** `observability`
 - **Next:** set realistic soft caps on `coder` (`PATCH
   /v1/projects/coder budget_soft_tokens=<X>`) once the first full
@@ -217,7 +217,7 @@ the existing Slack webhook. Acknowledged events stop re-firing.
 Migration 0038.
 
 - **Status:** LIVE (flag on fleet-wide)
-- **WIP:** [0032](./wip/0032-cost-regression-alerts.md) · **Design:** [0032](../designs/wip/0032-cost-regression-alerts.md)
+- **WIP:** 0032 · **Design:** 0032
 - **Extends:** `observability`
 - **Next:** calibrate the +25% threshold against the first week of
   real alerts. Phase 2 adds `stage_cost_baseline` pre-aggregation +
@@ -366,7 +366,7 @@ first real rotation.
 
 - **Status:** LIVE — scheduler ticking, zero rotations to date
   (nothing due yet; first natural rotation 2026-05-20)
-- **WIP:** [0038](./wip/0038-secret-rotation.md) · **Design:** [0038](../designs/wip/0038-secret-rotation.md)
+- **WIP:** 0038 · **Design:** 0038
 - **Runbook:** [secret-rotation-scheduler](../runbooks/secret-rotation-scheduler.md)
 - **Extends:** `service-accounts`, `continuous-deployment`, `admin-panel`, `impersonation`, `audit-log`
 
@@ -436,7 +436,7 @@ for the flip procedure and the metrics to watch before each advance.
 
 - **Status:** infra wired, Stage 1 shadow (fleet flag off, tick
   ticking, no auto-approvals created)
-- **WIP:** [0040](./wip/0040-confidence-auto-approve.md) · **Design:** [0040](../designs/wip/0040-confidence-auto-approve.md)
+- **WIP:** 0040 · **Design:** 0040
 - **Runbook:** [auto-approve-rollout](../runbooks/auto-approve-rollout.md)
 - **Extends:** `task-orchestration`, `observability`, `pm-worker`, `architect-worker`, `team-manager-worker`, `audit-log`, `admin-panel`
 
@@ -561,7 +561,7 @@ external agent is onboarded.
   notifications.
 
 - **Status:** Stage 1 + half of Stage 2 shipped
-- **WIP:** [0049](./wip/0049-mcp-agent-interface.md) · **Design:** [0049](../designs/wip/0049-mcp-agent-interface.md)
+- **WIP:** 0049 · **Design:** 0049
 - **Extends:** `impersonation`, `service-accounts`, `audit-log`,
   `admin-panel`, `multi-tenancy`, `task-orchestration`,
   `knowledge-api`
@@ -694,7 +694,7 @@ existing repos → fleet flip → admin `/admin/cold-start` UI
 behind `VITE_COLD_START_ENABLED`.
 
 - **Status:** drafting
-- **WIP:** [0045](./wip/0045-cold-start-ingestion.md) · **Design:** [0045](../designs/wip/0045-cold-start-ingestion.md)
+- **WIP:** 0045 · **Design:** 0045
 - **Extends:** `onboarding`, `knowledge-api`, `architect-worker`, `knowledge-freshness`
 
 ### 0046 — Graph-aware knowledge retrieval (Stage 0a shipped 2026-04-27)
@@ -745,7 +745,7 @@ flip → admin tab → fallback removal after 1-week soak.
   are Stage 0b+). Open questions resolved inline at scope-sealing
   (depth=0 semantics, explicit edge_types, truncation reason field,
   stub-no-body, `min_freshness=70` decoupled to a follow-up).
-- **WIP:** [0046](./wip/0046-graph-aware-retrieval.md) · **Design:** [0046](../designs/wip/0046-graph-aware-retrieval.md)
+- **WIP:** 0046 · **Design:** 0046
 - **Extends:** `knowledge-api`, `knowledge-freshness`, `architect-worker`, `reviewer-worker`, `team-manager-worker`, `pm-worker`
 
 ### 0047 — Template schema migration (scope sealed 2026-04-27)
@@ -807,7 +807,7 @@ opt-in synthetic test → Action distribution sweep → fleet flip →
 first real schema change → admin UI on.
 
 - **Status:** drafting
-- **WIP:** [0047](./wip/0047-template-schema-migration.md) · **Design:** [0047](../designs/wip/0047-template-schema-migration.md)
+- **WIP:** 0047 · **Design:** 0047
 - **Extends:** `knowledge-api`, `onboarding`, `admin-panel`, `audit-log`
 
 ### 0048 — Cross-project pattern surfacing (scope sealed 2026-04-27)
@@ -878,7 +878,7 @@ architect consult flip on `coder` → fleet flip → PM/reviewer
 consult → first `template_drift`-driven 0047 promotion.
 
 - **Status:** drafting
-- **WIP:** [0048](./wip/0048-cross-project-patterns.md) · **Design:** [0048](../designs/wip/0048-cross-project-patterns.md)
+- **WIP:** 0048 · **Design:** 0048
 - **Extends:** `knowledge-api`, `admin-panel`, `architect-worker`, `pm-worker`, `team-manager-worker`, `reviewer-worker`, `developer-worker`, `multi-tenancy`, `knowledge-freshness`
 
 ---
@@ -893,8 +893,8 @@ in-flight reads first.
 
 ### 0052 — Managed-repo GitHub Action distribution (Stage 0 shipped 2026-04-27)
 
-Both [0045](./wip/0045-cold-start-ingestion.md) (cold-start)
-and [0047](./wip/0047-template-schema-migration.md) (template
+Both 0045 (cold-start)
+and 0047 (template
 migrations) need the same operational primitive: a per-managed-
 repo GitHub Action that POSTs back to coder-core when something
 happens in the project's knowledge repo. Without this spec,
@@ -928,9 +928,9 @@ managed-workflows sync`.
   CLI) and Stage 2 (admin matrix endpoint + SPA page) still WIP.
   When 0045 (cold-start) and 0047 (template migration) need to
   ship their respective workflows, they consume this helper.
-- **WIP:** [0052](./wip/0052-managed-repo-action-distribution.md) · **Design:** [0052](../designs/wip/0052-managed-repo-action-distribution.md)
+- **WIP:** 0052 · **Design:** 0052
 - **Extends:** `knowledge-api`, `onboarding`, `audit-log`, `admin-panel`
-- **Unblocks:** [0045](./wip/0045-cold-start-ingestion.md), [0047](./wip/0047-template-schema-migration.md)
+- **Unblocks:** 0045, 0047
 
 ### 0053 — Post-PR CI fix loop (Stage 0a shipped 2026-04-27)
 
@@ -964,7 +964,7 @@ path. Re-uses spec 0025's `validate_and_retry` shape for the
 worker re-prompt.
 
 - **Status:** Stage 0a shipped 2026-04-27 (coder-core#36 — preflight live in prod). Stage 0b (re-prompt path) and Stage 1 (post-PR CI watcher) still WIP.
-- **WIP:** [0053](./wip/0053-post-pr-ci-fix-loop.md) · **Design:** [0053](../designs/wip/0053-post-pr-ci-fix-loop.md)
+- **WIP:** 0053 · **Design:** 0053
 - **Extends:** `developer-worker`, `reviewer-worker`, `task-orchestration`, `audit-log`, `admin-panel`
 - **Closes:** the worker→CI feedback gap surfaced by PR #34
 
@@ -986,7 +986,7 @@ then, 0056 stays drafting; reraise during the next phase-planning
 sweep if the workarounds start showing strain.
 
 - **Status:** drafting (5+ days)
-- **WIP:** [0056](./wip/0056-worker-dispatch-durability.md) · **Design:** [0056](../designs/wip/0056-worker-dispatch-durability.md)
+- **WIP:** 0056 · **Design:** 0056
 - **Extends:** `task-orchestration`, all role workers, `continuous-deployment`, `observability`
 
 ---
@@ -1024,7 +1024,7 @@ to the existing stuck path on any error.
   for `user.type == "Bot"` detection. Then TM dispatch
   (task `8932c578`) produced a 5-task plan that the developer
   dispatch implemented one-shot in PR #37.
-- **WIP:** [0054](./wip/0054-orchestrator-github-state-reconciliation.md) · **Design:** [0054](../designs/wip/0054-orchestrator-github-state-reconciliation.md) · **ADR:** [0016](../adrs/0016-bot-identity-via-user-type.md)
+- **WIP:** 0054 · **Design:** 0054 · **ADR:** [0016](../adrs/0016-bot-identity-via-user-type.md)
 - **Extends:** `developer-worker`, `task-orchestration`, `audit-log`
 - **Closes:** the "PR exists but task is stuck" failure class
   (eliminated as of 2026-04-28; orchestrator now queries GitHub for
