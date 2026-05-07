@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-19
 updated: 2026-04-19
 last_verified_at: 2026-04-19
+summary: record_audit_event helper plus audit_events table.
 implements_specs: [audit-log]
 decided_by: []
 related_designs: [system-overview, impersonation, worker-communication, observability-and-cost-tracking, knowledge-write-api]

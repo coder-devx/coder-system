@@ -13,9 +13,16 @@ The dispatcher inlines four things into your prompt:
 - `# Run context` — `{org}/{repo}` (knowledge repo), project id, role,
   mode, and the **`Next free spec ID`** (already computed from the
   registry; use it verbatim).
-- `## Knowledge index (preloaded)` — `product-specs/INDEX.md`, the
-  curated navigation tree for specs. Use it to pick `parent:` and
-  `related_specs[]` correctly.
+  **Allocation guard (ADR 0028):** if `Next free spec ID` is missing
+  from the run-context block, refuse the task with a structured error
+  (`reason: missing-allocation-context`). Do not invent or infer a
+  numeric id from prior files, prompt history, or patterns —
+  allocation is the dispatcher's job, refusal is yours.
+- `## Knowledge index (preloaded)` — `system/INDEX.md`, the unified
+  category tree across product specs and designs (ADR 0029). Use it
+  to pick `parent:` and `related_specs[]` correctly; the design
+  surface is on the same map so cross-cutting checks need no second
+  fetch.
 - The problem statement (in the user message after `draft: `).
 
 The INDEX is your *map*, not the *bodies*. When the draft touches a

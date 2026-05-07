@@ -4,8 +4,10 @@ title: Short Title
 type: design
 status: wip
 owner: TBD
+last_verified_at: YYYY-MM-DD
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
+summary: ~               # ≤140-char one-liner used by system/INDEX.md once landed in active/
 deprecated_at:
 reason:
 implements_specs: []
@@ -13,6 +15,7 @@ decided_by: []
 related_designs: []
 affects_services: []
 affects_repos: []
+parent: ~                # category id once landed in active/
 # optional — list pattern_ids from /v1/_admin/patterns that informed this artifact
 informed_by_patterns: []
 # Optional — present only on machine-ingested artifacts (spec 0045).

@@ -28,6 +28,7 @@ owner: ro
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 last_verified_at: YYYY-MM-DD
+summary: ~               # ≤140-char one-liner used by system/INDEX.md once landed in active/
 implements_specs: []     # spec ids (numeric for wip) or slugs (for active)
 decided_by: []           # adr ids
 related_designs: []      # other design ids/slugs
@@ -92,6 +93,7 @@ owner: ro
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 last_verified_at: YYYY-MM-DD
+summary: One-line description of what this category groups (≤140 chars). Rendered into system/INDEX.md.
 implements_specs: []          # the matching product-spec category id, if any
 related_designs: []           # peer designs in or adjacent to this group
 affects_services: []
@@ -139,12 +141,13 @@ owner: ro
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 last_verified_at: YYYY-MM-DD
+summary: One-line description of what this component does (≤140 chars). Rendered into system/INDEX.md.
 implements_specs: []      # active spec slugs this component realizes
 decided_by: []            # adr ids
 related_designs: []       # adjacent component slugs
 affects_services: []      # service ids
 affects_repos: []         # repo ids
-parent: <category-id>     # required for active designs; pick from designs/INDEX.md
+parent: <category-id>     # required for active designs; pick from system/INDEX.md
 ---
 
 # {Component Name}

@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-06
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Automated, audited rotation of project secrets.
 served_by_designs: []
 related_specs: [service-accounts, audit-log, admin-panel, multi-tenancy, impersonation, continuous-deployment]
 parent: tenancy-and-access

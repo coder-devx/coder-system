@@ -106,6 +106,10 @@ See [`README.md`](./README.md) for the layout.
 ## How to update an existing artifact
 
 - Most fields can be edited in place.
+- When you re-verify a file against current reality, bump its
+  `last_verified_at` to today's date. Use `python3 scripts/freshness.py
+  --top 20` to see what's drifting and `--over 90` for a focused
+  staleness sweep.
 - Changing a file's **ID or slug** is a rename + registry update +
   cross-link sweep. Avoid it unless necessary.
 - For ADRs, see rule 4 above (append-only).
@@ -119,10 +123,16 @@ See [`README.md`](./README.md) for the layout.
 
 1. `README.md` — what the repo is.
 2. `AGENTS.md` — this file, the rules.
-3. `system/glossary.md` — vocabulary.
-4. `system/designs/active/system-overview.md` — the big picture.
-5. `system/services/REGISTRY.md` and `system/roles/REGISTRY.md` — the moving parts.
-6. Specific files relevant to the task at hand.
+3. `system/HOWTO.md` — "how do I X?" entry point for common tasks
+   (authoring, shipping, navigating, validating).
+4. `system/glossary.md` — vocabulary.
+5. `system/INDEX.md` — unified category tree across product specs and
+   designs (ADR 0029). Pick the right entry point from here before
+   reading bodies.
+6. `system/designs/active/system-overview.md` — the big picture, when
+   you need engineering framing rather than just navigation.
+7. `system/services/REGISTRY.md` and `system/roles/REGISTRY.md` — the moving parts.
+8. Specific files relevant to the task at hand.
 
 ## Other agent surfaces
 

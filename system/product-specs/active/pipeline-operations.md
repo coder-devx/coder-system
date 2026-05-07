@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-02
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: "How tasks flow reliably through a project's pipeline, stay observable, and recover when stalled."
 served_by_designs: [worker-communication, observability-and-cost-tracking, escalations, self-healing, branch-cleanup]
 related_specs: [worker-roles, tenancy-and-access]
 parent: ~

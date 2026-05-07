@@ -7,6 +7,7 @@ owner: ro
 created: '2026-04-27'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: Bounded CI-failure fix loop after Developer PRs land.
 deprecated_at: null
 reason: null
 implements_specs: []

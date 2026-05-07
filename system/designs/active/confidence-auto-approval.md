@@ -7,6 +7,7 @@ owner: ro
 created: '2026-04-19'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: Confidence-scored auto-approval for low-risk worker outputs.
 implements_specs: []
 related_designs:
 - worker-communication

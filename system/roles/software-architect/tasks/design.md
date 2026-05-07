@@ -17,12 +17,19 @@ The dispatcher inlines four things into your prompt:
   number on both files") + **`Next free ADR ID`** (already computed;
   use them verbatim). For standalone designs (rare — no spec) the
   hint is **`Next free design ID`** instead; same rule applies.
-- `## Knowledge index (preloaded)` — designs/INDEX.md (your map).
-- `## Product-spec index (preloaded)` — product-specs/INDEX.md (the
-  cross-tree map; use it to set `implements_specs` correctly).
+  **Allocation guard (ADR 0028):** if `Design ID` (or `Next free
+  design ID` for standalone designs) is missing from the run-context
+  block, refuse the task with a structured error
+  (`reason: missing-allocation-context`). Do not invent or infer a
+  numeric id from prior files, prompt history, or patterns —
+  allocation is the dispatcher's job, refusal is yours.
+- `## Knowledge index (preloaded)` — `system/INDEX.md`, the unified
+  category tree (ADR 0029). It's both your engineering map and the
+  cross-tree spec map; use it to set `implements_specs` and
+  `parent:` correctly.
 - The spec body (in the user message under `Spec content:`).
 
-Both indexes are *maps*, not bodies. When the task touches an active
+The index is a *map*, not bodies. When the task touches an active
 design's surface, fetch its body via `gh api`:
 
 ```bash

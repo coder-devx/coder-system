@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-15
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: Automatic GC of stale Developer feature branches.
 served_by_designs: [branch-cleanup]
 related_specs: [developer-worker, task-orchestration, observability]
 parent: pipeline-operations

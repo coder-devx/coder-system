@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-03
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: Push-to-main CD with health-checked deploys.
 implements_specs: [continuous-deployment]
 decided_by: []
 related_designs: [system-overview, observability-and-cost-tracking, audit-log]

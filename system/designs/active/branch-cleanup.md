@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-15
 updated: 2026-04-15
 last_verified_at: 2026-05-02
+summary: Stale-branch GC across Developer feature branches.
 verified_by: knowledge-audit
 implements_specs: [branch-cleanup]
 decided_by: []

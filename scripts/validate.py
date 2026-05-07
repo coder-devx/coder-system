@@ -44,7 +44,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # ``INDEX.md`` is the curated navigation entry point per artifact-type
 # folder (design 0062); narrative view over the registry, not a
 # knowledge artifact in its own right.
-SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "HISTORY.md", "INDEX.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md", "_common.md"}
+SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "PHASES.md", "HISTORY.md", "INDEX.md", "GRAPH.md", "HOWTO.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md", "_common.md"}
 
 # Required frontmatter fields per artifact type. Spec 0043 adds
 # ``last_verified_at`` to every non-ADR type — ADRs are append-only
@@ -183,6 +183,11 @@ def iter_md_files(root: Path):
         # Their content is fetched directly by the dispatcher and
         # concatenated into the worker's system prompt.
         if path.parent.name == "tasks" and path.parent.parent.parent.name == "roles":
+            continue
+        # ``reports/`` is the unstructured archive for time-bound
+        # analyses (see system/reports/README.md). Files there carry
+        # no frontmatter and intentionally bypass validation.
+        if "reports" in path.relative_to(root).parts:
             continue
         yield path
 
@@ -364,6 +369,172 @@ def check_registry_md_synced() -> None:
             err(f"{target}: out of sync with registry.yaml — run scripts/render_registry.py")
 
 
+def check_index_md_synced() -> None:
+    """system/INDEX.md must match what scripts/render_index.py produces.
+    Same drift-check pattern as REGISTRY.md (ADR 0029).
+    """
+    import subprocess
+
+    renderer = REPO_ROOT / "scripts" / "render_index.py"
+    if not renderer.exists():
+        return
+    result = subprocess.run(
+        [sys.executable, str(renderer), "--check"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0:
+        return
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if line.startswith("drift:"):
+            target = line[len("drift:"):].strip()
+            err(f"{target}: out of sync with parent: / summary: frontmatter — run scripts/render_index.py")
+
+
+def check_template_mirror() -> None:
+    """Catch ``template/`` drift from the schema declared in ``system/``.
+
+    Two structural checks:
+
+    1. Every artifact-type folder that exists in ``system/`` exists in
+       ``template/`` with the same ``_TEMPLATE.md`` / ``registry.yaml``
+       / ``README.md`` shape. Adding a new artifact type to ``system/``
+       without mirroring the shape into ``template/`` breaks the
+       blueprint a new project copies.
+
+    2. Every required frontmatter field declared in ``REQUIRED_FIELDS``
+       appears somewhere in the corresponding ``template/`` template.
+       Templates may carry multiple fenced examples; we only check
+       that the field name shows up at the start of a line under a
+       valid YAML key, anywhere in the file.
+
+    AGENTS.md rule 9: ``template/`` describes the shape of the
+    knowledge model, not project content. Schema additions must land
+    in both trees.
+    """
+    import re
+
+    sys_root = REPO_ROOT / "system"
+    tpl_root = REPO_ROOT / "template" / "system"
+    if not sys_root.is_dir() or not tpl_root.is_dir():
+        return
+
+    # Folders that ship with the blueprint. The roles flat-vs-folder
+    # rules are different on the template side (managed projects
+    # mostly inherit) — skip the per-role-folder check there.
+    expected_folders = list(REGISTRY_KEYS.keys())
+
+    for folder_name in expected_folders:
+        sys_folder = sys_root / folder_name
+        tpl_folder = tpl_root / folder_name
+        if not sys_folder.is_dir():
+            continue
+        if not tpl_folder.is_dir():
+            err(f"template/system/{folder_name}/: missing — "
+                "system/{folder_name}/ exists but the template "
+                "blueprint doesn't mirror it (AGENTS.md rule 9)")
+            continue
+        for filename in ("_TEMPLATE.md", "registry.yaml", "README.md"):
+            sys_file = sys_folder / filename
+            tpl_file = tpl_folder / filename
+            if sys_file.exists() and not tpl_file.exists():
+                err(f"template/system/{folder_name}/{filename}: missing — "
+                    f"mirrors system/{folder_name}/{filename}")
+
+    # Field-presence check on the templates we have on both sides.
+    # Map artifact type → (template path under each side, system folder).
+    type_to_folder = {
+        "service": "services",
+        "repo": "repos",
+        "design": "designs",
+        "spec": "product-specs",
+        "role": "roles",
+        "integration": "integrations",
+        "runbook": "runbooks",
+    }
+    for artifact_type, folder_name in type_to_folder.items():
+        tpl_template = tpl_root / folder_name / "_TEMPLATE.md"
+        if not tpl_template.exists():
+            continue
+        text = tpl_template.read_text(encoding="utf-8")
+        required = REQUIRED_FIELDS.get(artifact_type, set())
+        for field in sorted(required):
+            # Match `field:` on its own as a YAML key — at line start
+            # OR after the YAML indent that fenced examples carry.
+            pattern = rf"(?m)^\s*{re.escape(field)}\s*:"
+            if not re.search(pattern, text):
+                err(f"{tpl_template}: required frontmatter field "
+                    f"`{field}` (for type:{artifact_type}) is not "
+                    "declared in the template — schema mirror "
+                    "broken (AGENTS.md rule 9)")
+
+
+def check_graph_md_synced() -> None:
+    """system/GRAPH.md must match what scripts/render_graph.py produces."""
+    import subprocess
+
+    renderer = REPO_ROOT / "scripts" / "render_graph.py"
+    if not renderer.exists():
+        return
+    result = subprocess.run(
+        [sys.executable, str(renderer), "--check"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0:
+        return
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if line.startswith("drift:"):
+            target = line[len("drift:"):].strip()
+            err(f"{target}: out of sync with cross-link frontmatter — run scripts/render_graph.py")
+
+
+def check_shared_id_parents_match(section_root: Path) -> None:
+    """Per ADR 0029: when a spec and design share an id (the shared-id
+    pool from ADR 0026 — e.g. ``pipeline-operations`` exists in both
+    folders), their ``parent:`` values must agree. Otherwise the
+    unified index can't decide where to put the node.
+    """
+    spec_parents: dict[str, tuple[Path, str | None]] = {}
+    design_parents: dict[str, tuple[Path, str | None]] = {}
+
+    for folder, sink in (("product-specs", spec_parents),
+                         ("designs", design_parents)):
+        active = section_root / folder / "active"
+        if not active.is_dir():
+            continue
+        for md in active.glob("*.md"):
+            if md.name in SKIP_FILENAMES:
+                continue
+            parsed = parse_frontmatter(md)
+            if parsed is None:
+                continue
+            data, _ = parsed
+            artifact_id = data.get("id")
+            if not isinstance(artifact_id, str):
+                continue
+            raw = data.get("parent")
+            if raw is None or (isinstance(raw, str) and raw.strip() in ("", "~", "null")):
+                parent: str | None = None
+            elif isinstance(raw, str):
+                parent = raw.strip()
+            else:
+                parent = None
+            sink[artifact_id] = (md, parent)
+
+    for artifact_id in sorted(set(spec_parents) & set(design_parents)):
+        sp_path, sp_parent = spec_parents[artifact_id]
+        dp_path, dp_parent = design_parents[artifact_id]
+        if sp_parent != dp_parent:
+            err(
+                f"{dp_path}: parent={dp_parent!r} disagrees with "
+                f"{sp_path.name}'s parent={sp_parent!r} — shared-id "
+                "spec+design pairs must have matching parents (ADR 0029)"
+            )
+
+
 def main() -> int:
     validate_section(REPO_ROOT / "system",   "system")
     validate_section(REPO_ROOT / "template", "template")
@@ -371,7 +542,11 @@ def main() -> int:
         if root.is_dir():
             check_active_not_numbered(root)
             check_wip_duplicate_titles(root)
+            check_shared_id_parents_match(root)
     check_registry_md_synced()
+    check_index_md_synced()
+    check_graph_md_synced()
+    check_template_mirror()
 
     if errors:
         sys.stderr.write(f"\n{len(errors)} validation error(s):\n")

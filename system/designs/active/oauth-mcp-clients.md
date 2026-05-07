@@ -7,6 +7,7 @@ owner: ro
 created: '2026-04-25'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: OAuth 2.1 (auth-code + PKCE + DCR) for MCP clients.
 implements_specs: []
 related_designs:
 - system-overview

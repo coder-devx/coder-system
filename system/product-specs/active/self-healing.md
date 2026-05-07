@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-23
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Reaper for stuck tasks past timeout.
 served_by_designs: [self-healing]
 related_specs: [task-orchestration, observability, audit-log, escalations, admin-panel]
 parent: pipeline-operations

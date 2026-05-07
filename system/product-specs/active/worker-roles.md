@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-02
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: "The team of role-specialised agents that fill a project's pipeline."
 served_by_designs: [worker-roles, architect-worker, pm-worker, team-manager-worker]
 related_specs: [pipeline-operations, tenancy-and-access, knowledge-and-admin]
 parent: ~

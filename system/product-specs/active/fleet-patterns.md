@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-06
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Surface recurring failure patterns across managed projects.
 served_by_designs: []
 related_specs: [knowledge-api, admin-panel, architect-worker, pm-worker, reviewer-worker, multi-tenancy, knowledge-freshness]
 parent: knowledge-and-admin

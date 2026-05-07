@@ -7,6 +7,7 @@ owner: ro
 created: '2026-04-18'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: Per-project token budgets and cost-gate enforcement.
 verified_by: coder@vibedevx.com
 implements_specs: []
 decided_by: []

@@ -184,3 +184,24 @@ adrs:
     date: 2026-05-03
     file: 0026-shared-numeric-id-pool-for-wip-specs-and-designs.md
     relates_to_designs: []
+
+  - id: "0027"
+    title: Uniform folder shape for every role
+    status: accepted
+    date: 2026-05-07
+    file: 0027-uniform-role-folder-shape.md
+    relates_to_designs: [role-prompt-knowledge-layout]
+
+  - id: "0028"
+    title: Reaffirm shared WIP id pool with mandatory dispatcher-injected allocation
+    status: accepted
+    date: 2026-05-07
+    file: 0028-reaffirm-shared-id-pool-with-allocation-guard.md
+    relates_to_designs: []
+
+  - id: "0029"
+    title: One generated knowledge index for the whole system
+    status: accepted
+    date: 2026-05-07
+    file: 0029-unified-generated-knowledge-index.md
+    relates_to_designs: [navigation-tree-pattern]

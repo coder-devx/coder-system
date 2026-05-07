@@ -7,6 +7,7 @@ owner: ro
 created: '2026-04-27'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: Distribute managed GitHub Actions across the fleet.
 implements_specs: []
 decided_by:
 - 0018

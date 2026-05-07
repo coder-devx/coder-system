@@ -1,12 +1,14 @@
 # Source of truth for the roles registry.
-# REGISTRY.md is generated from this file.
+# REGISTRY.md is generated/maintained from this file.
 #
-# Worker roles use the folder shape introduced by design 0057:
+# Every role uses the folder shape (ADR 0027):
 #   <role-id>/role.md            — identity, scope, permissions
-#   <role-id>/tasks/<mode>.md    — per-mode task contract
-# Non-worker roles stay flat as <role-id>.md.
+#   <role-id>/tasks/<mode>.md    — per-mode task contract (worker roles only)
+#
+# Worker roles populate `tasks:`; non-worker roles omit it.
 # A common preamble at `_common.md` is prepended to every worker prompt
-# at runtime by the coder-core dispatcher.
+# at runtime by the coder-core dispatcher (design 0057,
+# `role-prompt-knowledge-layout`).
 
 roles:
   # ── User-defined ────────────────────────────────────────────────
@@ -14,7 +16,8 @@ roles:
     name: System Admin
     status: defined
     owner: ro
-    file: system-admin.md
+    dir: system-admin
+    file: system-admin/role.md
 
   - id: software-architect
     name: Software Architect
@@ -70,41 +73,48 @@ roles:
     name: Consultant
     status: defined
     owner: ro
-    file: consultant.md
+    dir: consultant
+    file: consultant/role.md
 
   # ── Proposed (review and accept/reject) ─────────────────────────
   - id: qa-engineer
     name: QA Engineer
     status: proposed
     owner: ro
-    file: qa-engineer.md
+    dir: qa-engineer
+    file: qa-engineer/role.md
 
   - id: sre
     name: Site Reliability Engineer
     status: proposed
     owner: ro
-    file: sre.md
+    dir: sre
+    file: sre/role.md
 
   - id: security-officer
     name: Security Officer
     status: proposed
     owner: ro
-    file: security-officer.md
+    dir: security-officer
+    file: security-officer/role.md
 
   - id: release-manager
     name: Release Manager
     status: proposed
     owner: ro
-    file: release-manager.md
+    dir: release-manager
+    file: release-manager/role.md
 
   - id: data-engineer
     name: Data Engineer
     status: proposed
     owner: ro
-    file: data-engineer.md
+    dir: data-engineer
+    file: data-engineer/role.md
 
   - id: doc-writer
     name: Documentation Writer
     status: proposed
     owner: ro
-    file: doc-writer.md
+    dir: doc-writer
+    file: doc-writer/role.md

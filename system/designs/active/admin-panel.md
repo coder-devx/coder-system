@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-03
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: Engineering shape of the admin SPA — pages, data flows, auth.
 implements_specs: [admin-panel]
 decided_by: []
 related_designs: [system-overview, audit-log, escalations, tenant-isolation, knowledge-write-api, observability-and-cost-tracking, worker-communication]

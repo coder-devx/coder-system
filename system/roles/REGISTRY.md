@@ -1,44 +1,43 @@
 # Roles Registry
 
-> Generated view of [`registry.yaml`](./registry.yaml). Do not hand-edit.
+> Human-readable view of [`registry.yaml`](./registry.yaml).
+> Every role uses the folder shape `<role-id>/role.md`
+> (ADR [0027](../adrs/0027-uniform-role-folder-shape.md)).
+> A populated `Modes` column means the role is dispatched as a worker;
+> an empty one means the role is advisory.
 
 ## Defined
 
-| ID | Name | One-line job | Layout | Modes |
+| ID | Name | One-line job | Folder | Modes |
 |---|---|---|---|---|
-| `system-admin` | System Admin | Owns cloud resources and brokers access. | flat: [system-admin.md](./system-admin.md) | — |
-| `software-architect` | Software Architect | Decides how the system is built. | folder: [software-architect/](./software-architect/) | `design`, `audit`, `ship` |
-| `team-manager` | Team Manager | Plans cycles and breaks down work. | folder: [team-manager/](./team-manager/) | `decompose` |
-| `product-manager` | Product Manager | Owns specs, roadmap, acceptance. | folder: [product-manager/](./product-manager/) | `draft`, `accept`, `ship`, `audit` |
-| `developer` | Developer | Executes tasks and writes tests. | folder: [developer/](./developer/) | `implement` |
-| `reviewer` | Reviewer | Reviews completed tasks for code quality before PM acceptance. | folder: [reviewer/](./reviewer/) | `review` |
-| `consultant` | Consultant | Async observer; improves prompts and process. | flat: [consultant.md](./consultant.md) | — |
+| `system-admin` | System Admin | Owns cloud resources and brokers access. | [system-admin/](./system-admin/) | — |
+| `software-architect` | Software Architect | Decides how the system is built. | [software-architect/](./software-architect/) | `design`, `audit`, `ship` |
+| `team-manager` | Team Manager | Plans cycles and breaks down work. | [team-manager/](./team-manager/) | `decompose` |
+| `product-manager` | Product Manager | Owns specs, roadmap, acceptance. | [product-manager/](./product-manager/) | `draft`, `accept`, `ship`, `audit` |
+| `developer` | Developer | Executes tasks and writes tests. | [developer/](./developer/) | `implement` |
+| `reviewer` | Reviewer | Reviews completed tasks for code quality before PM acceptance. | [reviewer/](./reviewer/) | `review` |
+| `consultant` | Consultant | Async observer; improves prompts and process. | [consultant/](./consultant/) | — |
 
 ## Proposed (review and accept/reject)
 
-| ID | Name | Why I'm proposing it | File |
+| ID | Name | Why I'm proposing it | Folder |
 |---|---|---|---|
-| `qa-engineer` | QA Engineer | Test strategy is heavy enough to deserve its own owner separate from the Developer who writes the code. | [qa-engineer.md](./qa-engineer.md) |
-| `sre` | Site Reliability Engineer | Reliability/oncall/observability is a distinct discipline from System Admin (who handles resources, not behavior). | [sre.md](./sre.md) |
-| `security-officer` | Security Officer | Auth, secrets policy, threat model — needs a single owner across services. | [security-officer.md](./security-officer.md) |
-| `release-manager` | Release Manager | Coordinating releases across services and projects, changelogs, rollbacks — orthogonal to dev work. | [release-manager.md](./release-manager.md) |
-| `data-engineer` | Data Engineer | For data-heavy projects; otherwise a Developer specialization. Optional per project. | [data-engineer.md](./data-engineer.md) |
-| `doc-writer` | Documentation Writer | Keeps user-facing docs in sync. Optional per project. | [doc-writer.md](./doc-writer.md) |
+| `qa-engineer` | QA Engineer | Test strategy is heavy enough to deserve its own owner separate from the Developer who writes the code. | [qa-engineer/](./qa-engineer/) |
+| `sre` | Site Reliability Engineer | Reliability/oncall/observability is a distinct discipline from System Admin (who handles resources, not behavior). | [sre/](./sre/) |
+| `security-officer` | Security Officer | Auth, secrets policy, threat model — needs a single owner across services. | [security-officer/](./security-officer/) |
+| `release-manager` | Release Manager | Coordinating releases across services and projects, changelogs, rollbacks — orthogonal to dev work. | [release-manager/](./release-manager/) |
+| `data-engineer` | Data Engineer | For data-heavy projects; otherwise a Developer specialization. Optional per project. | [data-engineer/](./data-engineer/) |
+| `doc-writer` | Documentation Writer | Keeps user-facing docs in sync. Optional per project. | [doc-writer/](./doc-writer/) |
 
 ## Layout
 
-Worker roles (the ones the `coder-core` dispatcher invokes) follow the
-folder shape introduced by design [0057](../designs/wip/0057-role-prompt-knowledge-layout.md):
-
-- `<role-id>/role.md` — identity, scope, permissions
-- `<role-id>/tasks/<mode>.md` — per-mode task contract
+Every role lives at `<role-id>/role.md`. The dispatcher assembles
+worker prompts as `_common.md + <role>/role.md + <role>/tasks/<mode>.md`
+(design [role-prompt-knowledge-layout](../designs/active/role-prompt-knowledge-layout.md)).
 
 A shared `_common.md` is prepended to every worker prompt at runtime,
 establishing the Coder System mission and where the role sits on the
 project's team.
-
-Non-worker roles (`system-admin`, `consultant`, and the proposed
-roles) stay flat as `<role-id>.md` until they need worker dispatch.
 
 ## Notes
 

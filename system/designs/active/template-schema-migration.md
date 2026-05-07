@@ -7,6 +7,7 @@ owner: ro
 created: '2026-04-19'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: Migrate managed-project knowledge repos when the template schema changes.
 implements_specs: []
 decided_by:
 - 0019

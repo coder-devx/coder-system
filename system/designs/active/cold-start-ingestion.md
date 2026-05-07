@@ -7,6 +7,7 @@ owner: ro
 created: '2026-04-19'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: "Bootstrap a new project's knowledge from existing repos."
 implements_specs: []
 related_designs:
 - architect-worker

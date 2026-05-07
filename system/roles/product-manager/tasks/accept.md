@@ -35,8 +35,8 @@ pass/fail. The schema's evidence pattern enforces this discipline.
 
 - `# Run context` — `{org}/{repo}` (knowledge repo), project id,
   role, mode (`accept`).
-- `## Knowledge index (preloaded)` — `product-specs/INDEX.md`. Use
-  it to locate the spec's category.
+- `## Knowledge index (preloaded)` — `system/INDEX.md` (ADR 0029).
+  Use it to locate the spec's category and any cross-cutting designs.
 - The task prompt — `accept: {spec_id}`.
 
 PM accept is the **one PM mode that gets a source workspace clone**

@@ -56,7 +56,7 @@ the Architect audits for designs.
 ## What's preloaded for you
 
 - `# Run context` — `{org}/{repo}` (knowledge repo) + role + mode.
-- `## Knowledge index (preloaded)` — `product-specs/INDEX.md`.
+- `## Knowledge index (preloaded)` — `system/INDEX.md` (ADR 0029).
 - `## Audit target: specs/{id} (preloaded)` — the **full body** of
   the spec you're auditing. Already inlined; do not refetch it via
   `gh api`.

@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-09
 updated: 2026-04-19
 last_verified_at: 2026-04-19
+summary: Short-lived role-scoped bearer tokens for worker actions.
 served_by_designs: [impersonation]
 related_specs: [audit-log]
 parent: tenancy-and-access

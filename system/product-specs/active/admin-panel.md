@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-09
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: User-facing SPA for status, debug, override.
 served_by_designs: [system-overview]
 related_specs: [audit-log]
 parent: knowledge-and-admin

@@ -7,6 +7,7 @@ owner: ro
 created: '2026-04-23'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: MCP surface — let external agents connect, impersonate, and drive Coder.
 implements_specs: []
 related_designs:
 - system-overview

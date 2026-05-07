@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-12
 updated: 2026-04-29
 last_verified_at: 2026-04-29
+summary: PM worker engineering view — draft, accept, ship, audit.
 implements_specs: [pm-worker]
 decided_by: []
 related_designs: [team-manager-worker, knowledge-write-api, worker-communication, worker-roles]

@@ -46,7 +46,6 @@ in each component's `## Evolution` section and in git.
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0065](./wip/0065-reviewer-scope-and-turn-cap.md) | Reviewer scope cut + turn cap | ro | — |
 
 ## Deprecated
 

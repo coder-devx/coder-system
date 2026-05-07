@@ -8,8 +8,9 @@ owner: ro
 created: '2026-05-01'
 updated: '2026-05-06'
 last_verified_at: '2026-05-06'
+summary: Per-role and per-mode prompt assembly from the knowledge repo.
 implements_specs: []
-decided_by: []
+decided_by: ["0027"]
 related_designs:
 - worker-roles
 - pm-worker

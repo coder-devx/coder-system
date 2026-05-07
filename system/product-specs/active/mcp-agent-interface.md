@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-01
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Let external agents connect, impersonate, and drive Coder via MCP.
 served_by_designs: []
 related_specs: [impersonation, service-accounts, audit-log, admin-panel, multi-tenancy, task-orchestration, knowledge-api]
 parent: tenancy-and-access

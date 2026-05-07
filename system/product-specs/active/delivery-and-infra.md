@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-02
 updated: 2026-05-03
 last_verified_at: 2026-05-03
+summary: How code reaches production and how the system itself stays maintainable.
 served_by_designs:
   - system-overview
   - coder-core-modular-monolith

@@ -7,6 +7,7 @@ owner: ro
 created: 2026-04-23
 updated: 2026-04-23
 last_verified_at: 2026-04-23
+summary: Orphan-task reaper that recovers stuck tasks.
 implements_specs: [self-healing]
 related_designs: [system-overview, worker-communication, worker-roles, observability-and-cost-tracking, audit-log, escalations]
 affects_services: [coder-core]

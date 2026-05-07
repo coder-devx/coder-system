@@ -7,6 +7,7 @@ owner: ro
 created: 2026-05-06
 updated: 2026-05-06
 last_verified_at: 2026-05-06
+summary: Migrate managed-project knowledge repos when the template schema changes.
 served_by_designs: []
 related_specs: [knowledge-api, onboarding, admin-panel, audit-log, knowledge-freshness]
 parent: knowledge-and-admin
