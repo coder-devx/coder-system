@@ -6,7 +6,8 @@ status: active
 owner: ro
 created: 2026-04-12
 updated: 2026-04-19
-last_verified_at: 2026-04-19
+last_verified_at: 2026-05-08
+verified_by: knowledge-audit
 summary: Telemetry, cost accounting, and alerts for the running pipeline.
 implements_specs: [observability]
 decided_by: []
