@@ -16,11 +16,14 @@ is in an approval/override role, not a task-authoring role.
 pipeline run advances to `spec_approval` → ready for human approval →
 chain auto-creates architect task.
 
-**Latest:** 2026-05-07 — knowledge-repo hygiene Batches 1–3 (uniform
-role folder shape ADR 0027, allocation guard ADR 0028, unified
-generated `system/INDEX.md` ADR 0029, ROADMAP/PHASES split, HOWTO,
-smart-fold guidance, template-mirror validator). Per-WIP detail
-and the per-phase plan live in [`PHASES.md`](./PHASES.md). Shipped
+**Latest:** 2026-05-09 — Phase 9 (operator surface coherence)
+opened with WIPs 0069–0074 and ADR 0031. Triggered by a live walk
+that found six admin pages disagreeing on the same project's
+counters; the phase commits to one canonical project-state read,
+an actionable Now landing surface, failure-mode grouping with
+runbooks, a real diagnostic view on TaskDetail, drive mode in the
+browser, and a working SpecCompose write path. Per-WIP detail and
+the per-phase plan live in [`PHASES.md`](./PHASES.md). Shipped
 history lives in `git log` and in the `## Evolution` sections of
 individual `active/` artifacts.
 
@@ -84,6 +87,7 @@ acceptance criteria.
 | 6 | Security & Compliance | 0037 + 0039 shipped; 0038 LIVE-soaking |
 | 7 | Trusted Autonomy | 0041 + 0042 shipped; 0040 stage-2 shadow; 0049 + 0050 stages 3–4 soaking |
 | 8 | Knowledge Depth | 0043 + 0044 shipped; 0045–0048 in flight |
+| 9 | Operator surface coherence | 0069–0074 drafting (opened 2026-05-09) |
 | Cross-cutting | Pre-work that unblocks the phases | see PHASES.md "Cross-cutting pre-work" |
 
 ---

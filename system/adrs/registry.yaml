@@ -212,3 +212,10 @@ adrs:
     date: 2026-05-07
     file: 0030-index-preload-scope-authoring-roles-only.md
     relates_to_designs: [navigation-tree-pattern]
+
+  - id: "0031"
+    title: One canonical project-state read for every operator surface
+    status: proposed
+    date: 2026-05-09
+    file: 0031-canonical-project-state-for-operator-surfaces.md
+    relates_to_designs: ["0069", "0070", "0071", "0072", "0073"]

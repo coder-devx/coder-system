@@ -552,3 +552,110 @@ designs:
   file: active/managed-repo-action-distribution.md
   decided_by:
   - 0018
+- id: '0069'
+  title: Canonical project-state endpoint and consumers
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0069-canonical-project-state.md
+  implements_specs:
+  - '0069'
+  decided_by:
+  - '0031'
+  related_designs:
+  - observability-and-cost-tracking
+  - worker-communication
+  affects_services:
+  - coder-core
+  - coder-admin
+  affects_repos:
+  - coder-core
+  - coder-admin
+  parent: ~
+- id: '0070'
+  title: Now — operator's actionable queue as default landing
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0070-now-landing-surface.md
+  implements_specs:
+  - '0070'
+  decided_by:
+  - '0031'
+  related_designs:
+  - escalations
+  - audit-log
+  - worker-communication
+  affects_services:
+  - coder-core
+  - coder-admin
+  affects_repos:
+  - coder-core
+  - coder-admin
+  parent: ~
+- id: '0071'
+  title: Failure-mode grouping and operator runbooks
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0071-failure-mode-grouping-and-runbooks.md
+  implements_specs:
+  - '0071'
+  decided_by:
+  - '0031'
+  related_designs:
+  - escalations
+  - self-healing
+  - knowledge-repo-model
+  - knowledge-write-api
+  affects_services:
+  - coder-core
+  - coder-admin
+  affects_repos:
+  - coder-core
+  - coder-admin
+  - coder-system
+  parent: ~
+- id: '0072'
+  title: Task replay and diagnostic surface
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0072-task-replay-and-diagnostics.md
+  implements_specs:
+  - '0072'
+  decided_by:
+  - '0031'
+  related_designs:
+  - worker-communication
+  - audit-log
+  - observability-and-cost-tracking
+  affects_services:
+  - coder-core
+  - coder-admin
+  affects_repos:
+  - coder-core
+  - coder-admin
+  parent: ~
+- id: '0073'
+  title: Drive mode — operator role takeover in the browser
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0073-drive-mode-in-browser.md
+  implements_specs:
+  - '0073'
+  decided_by:
+  - '0031'
+  related_designs:
+  - impersonation
+  - audit-log
+  - worker-roles
+  - oauth-mcp-clients
+  affects_services:
+  - coder-core
+  - coder-admin
+  affects_repos:
+  - coder-core
+  - coder-admin
+  parent: ~

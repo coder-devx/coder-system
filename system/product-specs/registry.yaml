@@ -391,3 +391,78 @@ specs:
   - onboarding
   - audit-log
   - admin-panel
+- id: '0069'
+  title: Canonical project-state endpoint and consumers
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0069-canonical-project-state.md
+  served_by_designs:
+  - '0069'
+  related_specs:
+  - admin-panel
+  - observability
+  parent: ~
+- id: '0070'
+  title: Now — operator's actionable queue as default landing
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0070-now-landing-surface.md
+  served_by_designs:
+  - '0070'
+  related_specs:
+  - admin-panel
+  - escalations
+  - self-healing
+  parent: ~
+- id: '0071'
+  title: Failure-mode grouping and operator runbooks
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0071-failure-mode-grouping-and-runbooks.md
+  served_by_designs:
+  - '0071'
+  related_specs:
+  - self-healing
+  - escalations
+  - observability
+  parent: ~
+- id: '0072'
+  title: Task replay and diagnostic surface
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0072-task-replay-and-diagnostics.md
+  served_by_designs:
+  - '0072'
+  related_specs:
+  - admin-panel
+  - task-orchestration
+  - observability
+  parent: ~
+- id: '0073'
+  title: Drive mode — operator role takeover in the browser
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0073-drive-mode-in-browser.md
+  served_by_designs:
+  - '0073'
+  related_specs:
+  - impersonation
+  - admin-panel
+  - mcp-agent-interface
+  parent: ~
+- id: '0074'
+  title: SpecCompose write endpoint and draft hand-off to Now
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0074-spec-compose-write-endpoint.md
+  served_by_designs: []
+  related_specs:
+  - admin-panel
+  - knowledge-api
+  parent: ~
