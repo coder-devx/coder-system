@@ -1180,7 +1180,7 @@ authenticated route.
 - **Extends:** `admin-panel`, `escalations`, `self-healing`
 - **Depends on:** 0069
 
-### 0071 — Failure-mode grouping and operator runbooks (drafting since 2026-05-09)
+### 0071 — Failure-mode grouping and operator runbooks (Stage 1 shipped 2026-05-09)
 
 Now (0070) collapses ≥3 open `stuck` tasks sharing a
 `failure_kind` into one `stuck-group` row with bulk-action buttons
@@ -1190,13 +1190,43 @@ frontmatter (`failure_kind`, `signal`, `suggested_action`,
 `owning_role`); `GET /v1/knowledge/runbooks/by-failure?kind=…`
 resolves them.
 
-Includes an honest audit of the escalation watchdog — the same 27
-stuck tasks have produced zero escalations to date, which means
-either the watchdog rules don't cover dev-task stalls or the
-watchdog isn't running. At minimum one rule covers the observed
-failure-mode patterns post-ship.
+**Stage 1 shipped 2026-05-09** ([coder-system#93](https://github.com/coder-devx/coder-system/pull/93),
+[coder-core#193](https://github.com/coder-devx/coder-core/pull/193)):
 
-- **Status:** drafting since 2026-05-09
+- New runbook subtype `failure-mode` under
+  `system/runbooks/failure-modes/` (mirrored to `template/`). Each
+  file's frontmatter carries `failure_kind` (matches
+  `tasks.failure_kind` enum), `signal` (regex predicate over
+  `failure_detail`), `suggested_action` (`retry` /
+  `retry_with_edit` / `escalate` / `manual_only`), `owning_role`.
+- Three first runbooks covering 11 of the 27 stuck-task rows
+  observed on the 2026-05-09 walk of `coder`:
+  `claude-exit-1` (6×), `coder-task-deadline-exceeded` (3×),
+  `ship-gate-remote-missing` (2×).
+- New endpoint
+  `GET /v1/projects/{project_id}/knowledge/runbooks/by-failure?kind=…`
+  resolves a `failure_kind` to its matched runbook (frontmatter +
+  rendered markdown body). 404 with
+  `details.next_action: "write-runbook"` and a `stub_url` when no
+  runbook covers the kind — the panel surfaces a CTA at the empty
+  state so an operator can author one (AC7).
+- Mounted on a dedicated `runbooks_router` BEFORE the main
+  knowledge router so the literal `by-failure` segment isn't
+  swallowed by the `/{type}/{id}` catch-all.
+
+**Stage 2 deferred:** NowAggregator grouping pass (collapse ≥3
+open stuck tasks sharing `failure_kind` to a single `stuck-group`
+row); bulk-retry endpoint
+(`POST /v1/projects/{id}/tasks:bulk-retry`); `[retry all]`,
+`[run runbook]`, `[open all]` inline actions on the grouped row.
+Includes an audit of the escalation watchdog — the same 27 stuck
+tasks have produced zero escalations to date.
+
+**Stage 3 deferred:** `/runbooks/{slug}` admin route rendering
+the runbook body and an inline `[run on N matched]` button;
+escalation-watchdog rule covering observed `failure_kind` shapes.
+
+- **Status:** Stage 1 shipped 2026-05-09; Stages 2 + 3 deferred
 - **WIP:** 0071 · **Design:** 0071 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `self-healing`, `escalations`, `observability`, knowledge runbooks
 - **Depends on:** 0069, 0070
