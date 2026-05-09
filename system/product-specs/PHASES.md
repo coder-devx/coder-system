@@ -1084,7 +1084,7 @@ chicken-and-egg unblock).
 > commits to one server-computed canonical read for every operator
 > surface; this phase ships under that rule.
 
-### 0069 — Canonical project-state endpoint and consumers (drafting since 2026-05-09)
+### 0069 — Canonical project-state endpoint and consumers (Stage 0a shipped 2026-05-09)
 
 One server-computed `GET /v1/projects/{id}/state` endpoint that every
 admin surface reads for project-level counters and cost totals.
@@ -1099,7 +1099,27 @@ fleet totals using the same schema, powering Fleet's stat cards and
 table rows. SSE event `project.state.changed` invalidates the
 cached browser state.
 
-- **Status:** drafting since 2026-05-09
+**Stage 0a shipped 2026-05-09** ([coder-core#188](https://github.com/coder-devx/coder-core/pull/188),
+[coder-core#189](https://github.com/coder-devx/coder-core/pull/189)
+follow-up isolation manifest registration,
+[coder-admin#31](https://github.com/coder-devx/coder-admin/pull/31)):
+
+- `GET /v1/projects/{id}/state` and `GET /v1/_admin/state` live in
+  prod with the typed schema in [design 0069](../designs/wip/0069-canonical-project-state.md).
+- `cache_hit_rate` is bounded `[0.0, 1.0]` server-side; the legacy
+  unit-confusion path (`351301%` / `366900%`) is unreproducible.
+- `coder-admin` consumes the endpoint via `useProjectState`:
+  `<ProjectStateStrip />` lands at the top of the project page,
+  `<ProjectStateHeaderPill />` renders site-wide while inside a
+  project, Pipeline's "Retry N stuck" reads `stuck` from canonical
+  state instead of a parallel `listTasks(stage='stuck')` call.
+
+Stage 0b (still WIP): migrate the remaining surfaces — Fleet header
+stat cards, Inbox stuck total, ProjectDetail's old worker strip and
+Cache Hit card, Metrics summary cards — onto the same canonical
+read so AC2 holds across every surface.
+
+- **Status:** Stage 0a shipped 2026-05-09; Stage 0b in flight
 - **WIP:** 0069 · **Design:** 0069 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `admin-panel`, `observability`
 - **Unblocks:** 0070, 0071, 0072, 0073, 0074
