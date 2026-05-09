@@ -1362,20 +1362,43 @@ Cloud Run.
 - **Extends:** `admin-panel`, `task-orchestration`, `observability`
 - **Depends on:** 0069
 
-### 0073 — Drive mode in the browser (drafting since 2026-05-09)
+### 0073 — Drive mode in the browser (v1 shipped 2026-05-09)
 
 `/drive/{project}/{role}` route gives the operator an in-browser
 takeover surface using the same impersonation token machinery the
 CLI already uses. Three-pane layout (role context · conversation ·
-scratch + artifact preview), persistent `<SessionBanner/>` with
-countdown, audit-event chain per session. `SpecTalk.tsx` (currently
-a frozen demo) folds into this surface.
+scratch + artifact preview), persistent banner with countdown,
+audit-event chain per session.
 
 The trust model does not change — drive sessions reuse role-scoped
 impersonation tokens (ADR 0006 unchanged). The new entry point is
 the surface, not the auth.
 
-- **Status:** drafting since 2026-05-09
+**v1 shipped 2026-05-09** ([coder-admin#44](https://github.com/coder-devx/coder-admin/pull/44)):
+
+- New `/drive/:projectId/:role` route + three-pane layout matching
+  the design HTML.
+- LEFT pane: role context with a per-role static description
+  (developer / pm / architect / reviewer / team_manager).
+  Knowledge-repo `roles/` lookup deferred to v2.
+- CENTER pane: recent tasks for this role via the existing
+  `listTasks(projectId, {role})`. Each row shows status / stage
+  chip + age + truncated prompt; click-through goes to TaskDetail.
+- RIGHT pane: scratch pad (localStorage-scoped per project +
+  role) + pinned-task card showing the latest task at a glance.
+- Banner with project + role chips and a synthetic 60-min
+  countdown that ticks rose ≤5min before "expiry".
+
+**v2 deferred:** wire the existing
+`POST /v1/projects/{id}/impersonate/{role}` endpoint to mint a
+real session token, persist session lifecycle (start / extend /
+revoke audit chain), enable the composer textarea + send button,
+fold `SpecTalk.tsx` into this surface, render full conversation
+turns from the agent-invocation backend (which itself is the
+biggest piece of v2). v1 ships the operator-visible shell; v2
+adds interactivity once the agent-invocation infra exists.
+
+- **Status:** v1 shipped 2026-05-09 (read-only shell); v2 deferred (impersonation token + composer + agent invocation)
 - **WIP:** 0073 · **Design:** 0073 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `impersonation`, `admin-panel`, `mcp-agent-interface`
 - **Depends on:** 0069
