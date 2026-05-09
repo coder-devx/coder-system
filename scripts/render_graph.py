@@ -159,7 +159,7 @@ def render_mermaid_for_category(
     def _has(other_key: str) -> bool:
         return other_key in members_set
 
-    for key in member_keys:
+    for key in sorted(member_keys):
         n = nodes[key]
         if n["kind"] == "spec":
             for design_id in n["served_by_designs"]:
