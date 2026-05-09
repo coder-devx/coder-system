@@ -1143,7 +1143,7 @@ count) and aren't in scope for canonical state migration.
 - **Extends:** `admin-panel`, `observability`
 - **Unblocks:** 0070, 0071, 0072, 0073, 0074
 
-### 0070 — Now landing surface (Stage 1 shipped 2026-05-09)
+### 0070 — Now landing surface (Stages 1 + 2 mostly shipped 2026-05-09)
 
 Default route at `/` is now **Now** — every actionable item across
 every project the operator can see, ranked severity × age, with
@@ -1165,17 +1165,29 @@ authenticated route.
 - `<NowBadge/>` polls `/v1/_admin/inbox` every 15s, tints emerald /
   amber / rose by count. Click-through is the implicit `/` link.
 
-**Stage 2 deferred** to follow-up specs and PRs:
-- Per-task retry endpoint (the inline retry on stuck rows depends on
-  this; today only bulk-retry exists).
-- `budget-breach` row kind (extends inbox aggregator with a 6th kind
-  reading from the per-project budget cap state).
-- `stuck-group` collapsing — depends on spec 0071's failure-mode
-  knowledge subtype.
-- `Inbox.tsx` deletion (kept as peer surface for now; users can
-  still hit `/inbox`).
+**Stage 2 — most slices shipped 2026-05-09 across paired PRs:**
 
-- **Status:** Stage 1 shipped 2026-05-09; Stage 2 deferred to 0071 + follow-ups
+- **Per-task retry endpoint:** already shipped pre-Phase-9 as
+  `POST /v1/projects/{id}/tasks/{task_id}/retry`. The Stage 2 plan
+  carried this forward; on revisit the endpoint already existed
+  ([api/tasks.py](https://github.com/coder-devx/coder-core/blob/main/src/coder_core/api/tasks.py)).
+  Inline retry on stuck rows can wire to it directly.
+- **stuck-group collapsing:** shipped via spec 0071 Stage 2
+  ([coder-core#194](https://github.com/coder-devx/coder-core/pull/194),
+  [coder-admin#38](https://github.com/coder-devx/coder-admin/pull/38)).
+  Now collapses ≥3 same-`failure_kind` cohorts into one row with
+  `[retry all]` inline.
+- **`Inbox.tsx` deletion:** shipped
+  ([coder-admin#40](https://github.com/coder-devx/coder-admin/pull/40)).
+  The legacy tabs view + `/inbox` route are gone; Now is the
+  canonical cross-project surface. -409 lines.
+
+**Stage 2 deferred slice:** the `budget-breach` row kind (a 6th
+inbox kind reading per-project budget-cap state). Useful but
+non-load-bearing; tracked as a follow-up. The other Stage 2 items
+above land Phase 9's actionable-queue rework.
+
+- **Status:** Stage 1 shipped 2026-05-09; Stage 2 mostly shipped 2026-05-09 (`budget-breach` row deferred)
 - **WIP:** 0070 · **Design:** 0070 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `admin-panel`, `escalations`, `self-healing`
 - **Depends on:** 0069
