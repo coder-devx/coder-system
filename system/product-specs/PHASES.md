@@ -1269,20 +1269,45 @@ the surface, not the auth.
 - **Extends:** `impersonation`, `admin-panel`, `mcp-agent-interface`
 - **Depends on:** 0069
 
-### 0074 — SpecCompose write endpoint and draft hand-off to Now (drafting since 2026-05-09)
+### 0074 — SpecCompose write endpoint and draft hand-off to Now (Stage 1 shipped 2026-05-09)
 
-`POST /v1/projects/{id}/specs` files a spec via the existing
-Knowledge Write API, returning `{spec_id, pr_url, status}`. The
-"Preview only" banner on `SpecCompose.tsx` is removed; `[file spec]`
-and `[save draft]` work end-to-end. Drafts >24h surface on Now
-(0070) as `draft-spec` rows; the Specs page distinguishes draft from
-shipped (today they render identically).
+`POST /v1/projects/{id}/specs` files a spec via PR (branch +
+`commit_tree` of artifact + registry + `create_pull_request`),
+returning `{spec_id, pr_url, status, branch, path}`. The "Preview
+only" banner on `SpecCompose.tsx` is removed; `[file spec]` is
+enabled and renders three post-submit states: `saving` (form locked
++ pill), `filed` (emerald success card with [Open PR], [Open spec],
+[Start another]), `validation-failed` (rose banner + per-field rose
+borders + inline error text anchored by the typed
+`SpecComposeFieldError` list under `ApiError.details.errors`).
 
-Smallest scope of the phase. No new design file — the SpecCompose
-surface already exists; this WIP wires the missing endpoint and
-adds the post-write states (`saving` / `filed` / `validation-failed`).
+**Stage 1 shipped 2026-05-09** ([coder-core#192](https://github.com/coder-devx/coder-core/pull/192),
+[coder-admin#37](https://github.com/coder-devx/coder-admin/pull/37)):
 
-- **Status:** drafting since 2026-05-09
+- New `coder_core.specs.compose` module with `plan_filing` +
+  `execute_filing` helpers; `POST /v1/projects/{id}/specs` endpoint.
+- Server allocates the next free spec id from the project's
+  `system/product-specs/registry.yaml`, renders the artifact
+  matching `_TEMPLATE.md` (frontmatter + Problem / Goals / Non-goals
+  / Acceptance criteria with `- **ACn.**` bullets / Links), and
+  lands artifact + registry update in one atomic `commit_tree` on a
+  `spec/{id}-{slug}` branch with one PR opened.
+- Validation failures return a typed field-error list under
+  `detail.code: "validation_failed"` + `detail.details.errors:
+  [{field, code, message}]` (AC4). Concurrent filings collide on
+  `branch_already_exists` (AC7) — the panel can re-submit to pick
+  up the next free id.
+- Frontend wires `[file spec]`, removes the "Preview only" banner,
+  renders `saving` / `filed` / `validation-failed` states (AC2,
+  AC4). `[save draft]` stays disabled — drafts ship in Stage 2.
+
+**Stage 2 deferred:** drafts (`status: "draft"` payload, no PR;
+form preserved); Specs-page draft chip + age + `[resume]`/`[discard]`
+on hover; Now `draft-spec` row kind for drafts >24h. The drafts
+work needs a persistence model that wasn't in scope for Stage 1.
+
+- **Status:** Stage 1 shipped 2026-05-09; Stage 2 deferred (drafts +
+  Specs page draft chip + Now draft-spec row)
 - **WIP:** 0074 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `admin-panel`, `knowledge-api`
 - **Depends on:** 0069, 0070

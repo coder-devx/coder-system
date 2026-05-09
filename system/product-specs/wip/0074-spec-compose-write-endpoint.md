@@ -7,7 +7,7 @@ owner: ro
 created: 2026-05-09
 updated: 2026-05-09
 last_verified_at: 2026-05-09
-summary: ~
+summary: SpecCompose [file spec] writes via POST /v1/projects/{id}/specs (branch + commit_tree + PR); Stage 1 shipped, Stage 2 (drafts) deferred.
 served_by_designs: []
 related_specs:
   - admin-panel
