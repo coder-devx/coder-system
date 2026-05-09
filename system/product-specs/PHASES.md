@@ -1380,7 +1380,7 @@ the surface, not the auth.
 - **Extends:** `impersonation`, `admin-panel`, `mcp-agent-interface`
 - **Depends on:** 0069
 
-### 0074 — SpecCompose write endpoint and draft hand-off to Now (Stage 1 shipped 2026-05-09)
+### 0074 — SpecCompose write endpoint and draft hand-off to Now (Stages 1 + 2 shipped 2026-05-09)
 
 `POST /v1/projects/{id}/specs` files a spec via PR (branch +
 `commit_tree` of artifact + registry + `create_pull_request`),
@@ -1412,13 +1412,41 @@ borders + inline error text anchored by the typed
   renders `saving` / `filed` / `validation-failed` states (AC2,
   AC4). `[save draft]` stays disabled — drafts ship in Stage 2.
 
-**Stage 2 deferred:** drafts (`status: "draft"` payload, no PR;
-form preserved); Specs-page draft chip + age + `[resume]`/`[discard]`
-on hover; Now `draft-spec` row kind for drafts >24h. The drafts
-work needs a persistence model that wasn't in scope for Stage 1.
+**Stage 2 — drafts persistence + save-draft button shipped 2026-05-09**
+([coder-core#197](https://github.com/coder-devx/coder-core/pull/197),
+[coder-admin#43](https://github.com/coder-devx/coder-admin/pull/43)):
 
-- **Status:** Stage 1 shipped 2026-05-09; Stage 2 deferred (drafts +
-  Specs page draft chip + Now draft-spec row)
+- New `draft_specs` table (migration 0070): `id` (`draft-<base32>`),
+  `project_id` (CASCADE), `payload` JSON carrying the SpecCompose
+  form, `actor`, `created_at`, `updated_at`. Index on
+  `(project_id, updated_at)` for newest-first list.
+- `SpecComposeBody` gains `intent: "file" | "draft"` (default
+  `file`). `intent=draft` persists to `draft_specs` and returns
+  `DraftSpecResult {draft_id, status: "draft", updated_at}`. The
+  filing path is otherwise unchanged. Drafts skip the strict
+  file-time validation gate so a partial form (no title, no ACs)
+  saves cleanly.
+- New endpoints:
+  - `GET /v1/projects/{id}/specs/drafts` — list this actor's
+    drafts in this project, newest first.
+  - `DELETE /v1/projects/{id}/specs/drafts/{draft_id}` — discard.
+    404 `draft_not_found` when missing or cross-project.
+- Audit: `knowledge.create` on save (target_type
+  `knowledge/specs:draft`); new `Actions.KNOWLEDGE_DELETE` on
+  discard.
+- Frontend `[Save draft]` button is enabled and posts to the new
+  draft endpoint. On success the form is replaced by a violet
+  draft-saved card with `[Specs page →]` / `[Start another]`.
+  File and save-draft buttons mutually disable during in-flight.
+
+**Stage 2 deferred slices** (follow-ups, not load-bearing): Specs-
+page draft chip + age + `[resume]`/`[discard]` on hover; Now
+`draft-spec` row kind for drafts >24h. The persistence + save-draft
+machinery is live; the surfaces above are pure UI on top.
+
+- **Status:** Stages 1 + 2 shipped 2026-05-09 (drafts persistence
+  + `[Save draft]` button); Specs-page draft chip + Now draft-spec
+  row deferred as follow-ups
 - **WIP:** 0074 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `admin-panel`, `knowledge-api`
 - **Depends on:** 0069, 0070
