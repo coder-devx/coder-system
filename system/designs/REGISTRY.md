@@ -59,6 +59,11 @@ Logical components of the Coder system as it exists today.
 
 | ID | Title | Owner | Implements specs | Decided by |
 |---|---|---|---|---|
+| [0069](./wip/0069-canonical-project-state.md) | Canonical project-state endpoint and consumers | ro | [0069](../product-specs/wip/0069-canonical-project-state.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
+| [0070](./wip/0070-now-landing-surface.md) | Now — operator's actionable queue as default landing | ro | [0070](../product-specs/wip/0070-now-landing-surface.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
+| [0071](./wip/0071-failure-mode-grouping-and-runbooks.md) | Failure-mode grouping and operator runbooks | ro | [0071](../product-specs/wip/0071-failure-mode-grouping-and-runbooks.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
+| [0072](./wip/0072-task-replay-and-diagnostics.md) | Task replay and diagnostic surface | ro | [0072](../product-specs/wip/0072-task-replay-and-diagnostics.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
+| [0073](./wip/0073-drive-mode-in-browser.md) | Drive mode — operator role takeover in the browser | ro | [0073](../product-specs/wip/0073-drive-mode-in-browser.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
 
 ## Deprecated
 

@@ -46,6 +46,12 @@ in each component's `## Evolution` section and in git.
 
 | ID | Title | Owner | Served by designs |
 |---|---|---|---|
+| [0069](./wip/0069-canonical-project-state.md) | Canonical project-state endpoint and consumers | ro | [0069](../designs/wip/0069-canonical-project-state.md) |
+| [0070](./wip/0070-now-landing-surface.md) | Now — operator's actionable queue as default landing | ro | [0070](../designs/wip/0070-now-landing-surface.md) |
+| [0071](./wip/0071-failure-mode-grouping-and-runbooks.md) | Failure-mode grouping and operator runbooks | ro | [0071](../designs/wip/0071-failure-mode-grouping-and-runbooks.md) |
+| [0072](./wip/0072-task-replay-and-diagnostics.md) | Task replay and diagnostic surface | ro | [0072](../designs/wip/0072-task-replay-and-diagnostics.md) |
+| [0073](./wip/0073-drive-mode-in-browser.md) | Drive mode — operator role takeover in the browser | ro | [0073](../designs/wip/0073-drive-mode-in-browser.md) |
+| [0074](./wip/0074-spec-compose-write-endpoint.md) | SpecCompose write endpoint and draft hand-off to Now | ro | — |
 
 ## Deprecated
 

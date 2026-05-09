@@ -1063,3 +1063,160 @@ chicken-and-egg unblock).
 - **Realised pain:** architect task `62e0c95e` (2026-04-27)
 
 ---
+
+## Phase 9 — Operator surface coherence *(drafting since 2026-05-09)*
+
+> Make the admin panel a coherent operator console. One canonical
+> project-state read, one actionable landing surface, grouped failure
+> modes with runbooks, a real diagnostic view on TaskDetail, drive
+> mode in the browser, and a working SpecCompose write path.
+>
+> Trigger: a 2026-05-09 live walk of the deployed admin found the
+> same project quantities reported with different values on different
+> pages of the same project (`coder`) — Pipeline `27 stuck`, Inbox
+> `27 items`, Fleet `8 blocked`, Escalations `0`, Workers `0/4` idle;
+> Cache hit shown as `351301%` on Overview and `366900%` on
+> TaskDetail; Metrics `139 = 18 + 8 + ?` with 113 tasks unaccounted.
+> Six pages, six different views of the same data, no source of
+> truth. Operator must mentally reconcile.
+>
+> ADR [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
+> commits to one server-computed canonical read for every operator
+> surface; this phase ships under that rule.
+
+### 0069 — Canonical project-state endpoint and consumers (Stage 0a shipped 2026-05-09)
+
+One server-computed `GET /v1/projects/{id}/state` endpoint that every
+admin surface reads for project-level counters and cost totals.
+Page-local recompute is forbidden going forward. Folds in the
+cache-hit-rate unit fix (`[0.0, 1.0]` bound, percentage rendering
+fixed once) and the Metrics summary-card math reconciliation
+(`total = succeeded + failed + running + queued + stuck + blocked +
+paused + cancelled`).
+
+Sibling `GET /v1/admin/state` returns the per-project array plus
+fleet totals using the same schema, powering Fleet's stat cards and
+table rows. SSE event `project.state.changed` invalidates the
+cached browser state.
+
+**Stage 0a shipped 2026-05-09** ([coder-core#188](https://github.com/coder-devx/coder-core/pull/188),
+[coder-core#189](https://github.com/coder-devx/coder-core/pull/189)
+follow-up isolation manifest registration,
+[coder-admin#31](https://github.com/coder-devx/coder-admin/pull/31)):
+
+- `GET /v1/projects/{id}/state` and `GET /v1/_admin/state` live in
+  prod with the typed schema in [design 0069](../designs/wip/0069-canonical-project-state.md).
+- `cache_hit_rate` is bounded `[0.0, 1.0]` server-side; the legacy
+  unit-confusion path (`351301%` / `366900%`) is unreproducible.
+- `coder-admin` consumes the endpoint via `useProjectState`:
+  `<ProjectStateStrip />` lands at the top of the project page,
+  `<ProjectStateHeaderPill />` renders site-wide while inside a
+  project, Pipeline's "Retry N stuck" reads `stuck` from canonical
+  state instead of a parallel `listTasks(stage='stuck')` call.
+
+Stage 0b (still WIP): migrate the remaining surfaces — Fleet header
+stat cards, Inbox stuck total, ProjectDetail's old worker strip and
+Cache Hit card, Metrics summary cards — onto the same canonical
+read so AC2 holds across every surface.
+
+- **Status:** Stage 0a shipped 2026-05-09; Stage 0b in flight
+- **WIP:** 0069 · **Design:** 0069 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
+- **Extends:** `admin-panel`, `observability`
+- **Unblocks:** 0070, 0071, 0072, 0073, 0074
+
+### 0070 — Now landing surface (drafting since 2026-05-09)
+
+Default route at `/` becomes Now — every actionable item across
+every project the operator can see, ranked by severity × age, with
+inline actions per row. Six row kinds: `plan-review`, `open-gate`,
+`stuck-task` (+ `stuck-group` from 0071), `regression`,
+`budget-breach`, `escalation`. Persistent `<NowBadge/>` site-wide.
+`Inbox.tsx` is deleted in the same change.
+
+The motivating data: as of 2026-05-09, 27 stuck developer tasks
+across the `coder` project sit 4–15 days old; one plan draft for
+spec 0060 has been sitting 5 days untouched. None of these surface
+without the operator typing the right URL.
+
+- **Status:** drafting since 2026-05-09
+- **WIP:** 0070 · **Design:** 0070 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
+- **Extends:** `admin-panel`, `escalations`, `self-healing`
+- **Depends on:** 0069
+
+### 0071 — Failure-mode grouping and operator runbooks (drafting since 2026-05-09)
+
+Now (0070) collapses ≥3 open `stuck` tasks sharing a
+`failure_kind` into one `stuck-group` row with bulk-action buttons
+(`retry all`, `run runbook`, `open all`). Failure-mode runbooks live
+under `system/runbooks/failure-modes/{slug}.md` with typed
+frontmatter (`failure_kind`, `signal`, `suggested_action`,
+`owning_role`); `GET /v1/knowledge/runbooks/by-failure?kind=…`
+resolves them.
+
+Includes an honest audit of the escalation watchdog — the same 27
+stuck tasks have produced zero escalations to date, which means
+either the watchdog rules don't cover dev-task stalls or the
+watchdog isn't running. At minimum one rule covers the observed
+failure-mode patterns post-ship.
+
+- **Status:** drafting since 2026-05-09
+- **WIP:** 0071 · **Design:** 0071 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
+- **Extends:** `self-healing`, `escalations`, `observability`, knowledge runbooks
+- **Depends on:** 0069, 0070
+
+### 0072 — Task replay and diagnostic surface (drafting since 2026-05-09)
+
+TaskDetail leads with an always-expanded stage timeline; diagnostic
+sections (`Turns`, `Tool uses`, `Knowledge lookups`, `Transcript`)
+render content by default for failed tasks. New `[replay with edit]`
+modal lets the operator edit a prompt or input-artifact set and
+re-dispatch a linked task (`replay_of` + shared `correlation_id`).
+The misleading `Logs: No logs yet` string on terminal tasks is gone.
+
+Realised pain: the diagnostic data is *already there* — just
+collapsed and contentless. A 2026-05-09 walk on a failed task
+showed Turns counts (3, 142, 11007 cache_read) but no actual
+content; operator falls through to Cloud Run logs.
+
+- **Status:** drafting since 2026-05-09
+- **WIP:** 0072 · **Design:** 0072 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
+- **Extends:** `admin-panel`, `task-orchestration`, `observability`
+- **Depends on:** 0069
+
+### 0073 — Drive mode in the browser (drafting since 2026-05-09)
+
+`/drive/{project}/{role}` route gives the operator an in-browser
+takeover surface using the same impersonation token machinery the
+CLI already uses. Three-pane layout (role context · conversation ·
+scratch + artifact preview), persistent `<SessionBanner/>` with
+countdown, audit-event chain per session. `SpecTalk.tsx` (currently
+a frozen demo) folds into this surface.
+
+The trust model does not change — drive sessions reuse role-scoped
+impersonation tokens (ADR 0006 unchanged). The new entry point is
+the surface, not the auth.
+
+- **Status:** drafting since 2026-05-09
+- **WIP:** 0073 · **Design:** 0073 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
+- **Extends:** `impersonation`, `admin-panel`, `mcp-agent-interface`
+- **Depends on:** 0069
+
+### 0074 — SpecCompose write endpoint and draft hand-off to Now (drafting since 2026-05-09)
+
+`POST /v1/projects/{id}/specs` files a spec via the existing
+Knowledge Write API, returning `{spec_id, pr_url, status}`. The
+"Preview only" banner on `SpecCompose.tsx` is removed; `[file spec]`
+and `[save draft]` work end-to-end. Drafts >24h surface on Now
+(0070) as `draft-spec` rows; the Specs page distinguishes draft from
+shipped (today they render identically).
+
+Smallest scope of the phase. No new design file — the SpecCompose
+surface already exists; this WIP wires the missing endpoint and
+adds the post-write states (`saving` / `filed` / `validation-failed`).
+
+- **Status:** drafting since 2026-05-09
+- **WIP:** 0074 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
+- **Extends:** `admin-panel`, `knowledge-api`
+- **Depends on:** 0069, 0070
+
+---
