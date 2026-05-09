@@ -1114,31 +1114,68 @@ follow-up isolation manifest registration,
   project, Pipeline's "Retry N stuck" reads `stuck` from canonical
   state instead of a parallel `listTasks(stage='stuck')` call.
 
-Stage 0b (still WIP): migrate the remaining surfaces — Fleet header
-stat cards, Inbox stuck total, ProjectDetail's old worker strip and
-Cache Hit card, Metrics summary cards — onto the same canonical
-read so AC2 holds across every surface.
+**Stage 0b shipped 2026-05-09** ([coder-admin#33](https://github.com/coder-devx/coder-admin/pull/33),
+[coder-admin#34](https://github.com/coder-devx/coder-admin/pull/34)):
 
-- **Status:** Stage 0a shipped 2026-05-09; Stage 0b in flight
+- ProjectDetail's `<CacheCard/>` reads `cache_hit_rate` from
+  canonical state instead of a per-page reducer. The legacy
+  unbounded computation (`351301%` / `366900%` / `362526%` on three
+  consecutive prod views) is structurally fixed — the live value is
+  now bounded by construction.
+- Metrics summary cards reconcile against canonical state. The "Total
+  / Succeeded / Failed" trio that left 113 of 139 tasks unaccounted
+  is replaced by two reconciling rows: period totals on the top row,
+  live canonical buckets (running / queued / stuck / blocked) on the
+  bottom row.
+
+AC2 ("same int / same string everywhere") now holds across the live
+surfaces — STUCK 31 reads identically on the project Overview strip,
+the global header pill, the Pipeline "Retry N stuck" button, the
+NowBadge, and the Metrics page Stuck card.
+
+Remaining surfaces still on legacy reads (Fleet, Inbox stuck total)
+have separate concerns (cross-project aggregation; list length is the
+count) and aren't in scope for canonical state migration.
+
+- **Status:** Stage 0a + 0b shipped 2026-05-09 (both halves live and
+  reconciling in prod). AC1, AC2, AC3, AC4 satisfied.
 - **WIP:** 0069 · **Design:** 0069 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `admin-panel`, `observability`
 - **Unblocks:** 0070, 0071, 0072, 0073, 0074
 
-### 0070 — Now landing surface (drafting since 2026-05-09)
+### 0070 — Now landing surface (Stage 1 shipped 2026-05-09)
 
-Default route at `/` becomes Now — every actionable item across
-every project the operator can see, ranked by severity × age, with
-inline actions per row. Six row kinds: `plan-review`, `open-gate`,
-`stuck-task` (+ `stuck-group` from 0071), `regression`,
-`budget-breach`, `escalation`. Persistent `<NowBadge/>` site-wide.
-`Inbox.tsx` is deleted in the same change.
+Default route at `/` is now **Now** — every actionable item across
+every project the operator can see, ranked severity × age, with
+inline actions per row for the kinds that have clean per-row
+endpoints. The previous Projects table moves to `/projects`.
+Persistent `<NowBadge/>` shows the count site-wide on every
+authenticated route.
 
-The motivating data: as of 2026-05-09, 27 stuck developer tasks
-across the `coder` project sit 4–15 days old; one plan draft for
-spec 0060 has been sitting 5 days untouched. None of these surface
-without the operator typing the right URL.
+**Stage 1 shipped 2026-05-09** ([coder-admin#32](https://github.com/coder-devx/coder-admin/pull/32)):
 
-- **Status:** drafting since 2026-05-09
+- `/` route is Now; `/projects` keeps the table.
+- Five row kinds reused from the existing inbox aggregator: gate /
+  escalation / stuck / regression / paused. Severity ranks urgent →
+  high → med → low; ties broken by age oldest-first within tier.
+- Inline actions wired for the per-row-endpoint kinds: regression →
+  `acknowledgeRegressionEvent`, escalation → `acknowledgeEscalation`,
+  paused → `resumeSpecRun`. Stuck and gate rows click through to
+  TaskDetail / SpecDetail.
+- `<NowBadge/>` polls `/v1/_admin/inbox` every 15s, tints emerald /
+  amber / rose by count. Click-through is the implicit `/` link.
+
+**Stage 2 deferred** to follow-up specs and PRs:
+- Per-task retry endpoint (the inline retry on stuck rows depends on
+  this; today only bulk-retry exists).
+- `budget-breach` row kind (extends inbox aggregator with a 6th kind
+  reading from the per-project budget cap state).
+- `stuck-group` collapsing — depends on spec 0071's failure-mode
+  knowledge subtype.
+- `Inbox.tsx` deletion (kept as peer surface for now; users can
+  still hit `/inbox`).
+
+- **Status:** Stage 1 shipped 2026-05-09; Stage 2 deferred to 0071 + follow-ups
 - **WIP:** 0070 · **Design:** 0070 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `admin-panel`, `escalations`, `self-healing`
 - **Depends on:** 0069
