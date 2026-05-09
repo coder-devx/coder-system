@@ -1362,7 +1362,7 @@ Cloud Run.
 - **Extends:** `admin-panel`, `task-orchestration`, `observability`
 - **Depends on:** 0069
 
-### 0073 — Drive mode in the browser (v1 shipped 2026-05-09)
+### 0073 — Drive mode in the browser (v1 + v2 shipped 2026-05-09 / 2026-05-10)
 
 `/drive/{project}/{role}` route gives the operator an in-browser
 takeover surface using the same impersonation token machinery the
@@ -1389,16 +1389,31 @@ the surface, not the auth.
 - Banner with project + role chips and a synthetic 60-min
   countdown that ticks rose ≤5min before "expiry".
 
-**v2 deferred:** wire the existing
-`POST /v1/projects/{id}/impersonate/{role}` endpoint to mint a
-real session token, persist session lifecycle (start / extend /
-revoke audit chain), enable the composer textarea + send button,
-fold `SpecTalk.tsx` into this surface, render full conversation
-turns from the agent-invocation backend (which itself is the
-biggest piece of v2). v1 ships the operator-visible shell; v2
-adds interactivity once the agent-invocation infra exists.
+**v2 shipped 2026-05-10** ([coder-admin#46](https://github.com/coder-devx/coder-admin/pull/46)):
 
-- **Status:** v1 shipped 2026-05-09 (read-only shell); v2 deferred (impersonation token + composer + agent invocation)
+- Composer textarea is enabled. Operator types a prompt and clicks
+  Send (or ⌘/Ctrl+Enter); the page calls
+  `POST /v1/projects/{id}/tasks` via the existing `createTask`
+  helper to dispatch a new task as the page's role.
+- On success: emerald `Dispatched as <task-id>` line below the
+  composer; the task list refreshes so the just-dispatched row
+  appears at the top.
+- On failure: rose error line renders inline; the prompt stays in
+  the textarea so the operator can edit + resend.
+
+**v3 deferred (audit-trail upgrade):** mint a role-scoped
+impersonation token via the existing
+`POST /v1/projects/{id}/impersonate/{role}` endpoint and swap the
+Authorization header for the dispatch + extend / revoke buttons
+in the banner + the per-session audit chain. v2 dispatches with
+the operator's existing admin JWT — works fine for the canonical
+project; v3 is purely the audit shape upgrade, not a functional
+change. Folding `SpecTalk.tsx` into this surface and rendering
+full conversation turns from an agent-invocation backend remains
+out of scope for v3 too — that needs the broader agent-invocation
+infra.
+
+- **Status:** v1 + v2 shipped 2026-05-09 / 2026-05-10; v3 (impersonation token + audit chain) deferred
 - **WIP:** 0073 · **Design:** 0073 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `impersonation`, `admin-panel`, `mcp-agent-interface`
 - **Depends on:** 0069
