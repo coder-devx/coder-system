@@ -1143,7 +1143,7 @@ count) and aren't in scope for canonical state migration.
 - **Extends:** `admin-panel`, `observability`
 - **Unblocks:** 0070, 0071, 0072, 0073, 0074
 
-### 0070 — Now landing surface (Stages 1 + 2 mostly shipped 2026-05-09)
+### 0070 — Now landing surface (Stages 1 + 2 fully shipped 2026-05-09)
 
 Default route at `/` is now **Now** — every actionable item across
 every project the operator can see, ranked severity × age, with
@@ -1165,7 +1165,7 @@ authenticated route.
 - `<NowBadge/>` polls `/v1/_admin/inbox` every 15s, tints emerald /
   amber / rose by count. Click-through is the implicit `/` link.
 
-**Stage 2 — most slices shipped 2026-05-09 across paired PRs:**
+**Stage 2 — all four slices shipped 2026-05-09 across paired PRs:**
 
 - **Per-task retry endpoint:** already shipped pre-Phase-9 as
   `POST /v1/projects/{id}/tasks/{task_id}/retry`. The Stage 2 plan
@@ -1181,13 +1181,17 @@ authenticated route.
   ([coder-admin#40](https://github.com/coder-devx/coder-admin/pull/40)).
   The legacy tabs view + `/inbox` route are gone; Now is the
   canonical cross-project surface. -409 lines.
+- **`budget-breach` row kind:** shipped
+  ([coder-core#196](https://github.com/coder-devx/coder-core/pull/196),
+  [coder-admin#41](https://github.com/coder-devx/coder-admin/pull/41)).
+  New `InboxItemKind.BUDGET_BREACH` fires when a project's lifetime
+  token consumption crosses SOFT (≥80% of cap, MEDIUM severity) or
+  HARD (≥100%, HIGH). Reuses `compute_project_state` so the bucket
+  matches the project-state strip + Metrics summary card per ADR
+  0031. Now renders an amber chip + "budget" label; click-through
+  goes to the project page where the cap details live.
 
-**Stage 2 deferred slice:** the `budget-breach` row kind (a 6th
-inbox kind reading per-project budget-cap state). Useful but
-non-load-bearing; tracked as a follow-up. The other Stage 2 items
-above land Phase 9's actionable-queue rework.
-
-- **Status:** Stage 1 shipped 2026-05-09; Stage 2 mostly shipped 2026-05-09 (`budget-breach` row deferred)
+- **Status:** Stages 1 + 2 fully shipped 2026-05-09
 - **WIP:** 0070 · **Design:** 0070 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `admin-panel`, `escalations`, `self-healing`
 - **Depends on:** 0069
@@ -1275,12 +1279,19 @@ This closes the 27-stuck → 0-escalations gap surfaced on the
 2026-05-09 walk of `coder`. Threshold + age (3, 6h) pinned per
 the spec design; tune on first 30d soak.
 
-**Stage 3 deferred slice:** `/runbooks/{slug}` admin route
-rendering the runbook body and an inline `[run on N matched]`
-button — operationally useful but not load-bearing for the
-watchdog audit. Tracked as a follow-up.
+**Stage 3 follow-up `/runbooks/{slug}` admin route shipped 2026-05-09**
+([coder-admin#42](https://github.com/coder-devx/coder-admin/pull/42)):
+read-only page at `/projects/:projectId/runbooks/:slug` rendering
+the runbook header chips (`failure_kind`, `suggested_action`,
+`owning_role`), the body markdown via the shared `MarkdownBody`
+component, and a "matches now" card carrying the live count of
+currently-stuck tasks for the runbook's `failure_kind` plus a
+`[Run on N matched]` button hooked to `POST /tasks/bulk-retry`.
+Empty-state disables the button; on success an emerald line shows
+the retried count + `correlation_id`. With this, spec 0071 is
+fully shipped — no deferred work remains.
 
-- **Status:** Stages 1 + 2 + 3 shipped 2026-05-09; `/runbooks/{slug}` admin route deferred
+- **Status:** Stages 1 + 2 + 3 + follow-up all shipped 2026-05-09
 - **WIP:** 0071 · **Design:** 0071 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `self-healing`, `escalations`, `observability`, knowledge runbooks
 - **Depends on:** 0069, 0070
