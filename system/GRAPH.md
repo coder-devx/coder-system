@@ -29,6 +29,50 @@ flowchart LR
   n018["spec<br/>pipeline-operations"]
   n019["spec<br/>self-healing"]
   n020["spec<br/>task-orchestration"]
+  n015 -->|served by| n000
+  n000 -.->|related| n013
+  n000 -.->|related| n005
+  n001 -.->|related| n013
+  n001 -.->|related| n005
+  n002 -.->|related| n005
+  n002 -.->|related| n013
+  n016 -->|served by| n003
+  n003 -.->|related| n013
+  n003 -.->|related| n005
+  n004 -.->|related| n013
+  n004 -.->|related| n005
+  n017 -->|served by| n005
+  n006 -.->|related| n013
+  n018 -->|served by| n007
+  n007 -.->|related| n013
+  n007 -.->|related| n005
+  n007 -.->|related| n010
+  n007 -.->|related| n003
+  n007 -.->|related| n000
+  n008 -.->|related| n013
+  n008 -.->|related| n003
+  n009 -.->|related| n013
+  n009 -.->|related| n005
+  n019 -->|served by| n010
+  n010 -.->|related| n013
+  n010 -.->|related| n005
+  n010 -.->|related| n003
+  n011 -.->|related| n003
+  n011 -.->|related| n010
+  n011 -.->|related| n007
+  n012 -.->|related| n005
+  n012 -.->|related| n013
+  n020 -->|served by| n013
+  n014 -.->|related| n013
+  n014 -.->|related| n010
+  n014 -.->|related| n005
+  n015 -->|served by| n000
+  n015 -.->|related| n020
+  n015 -.->|related| n017
+  n016 -->|served by| n003
+  n016 -.->|related| n020
+  n016 -.->|related| n017
+  n017 -->|served by| n005
   n018 -->|served by| n013
   n018 -->|served by| n005
   n018 -->|served by| n003
@@ -38,51 +82,7 @@ flowchart LR
   n019 -.->|related| n020
   n019 -.->|related| n017
   n019 -.->|related| n016
-  n015 -->|served by| n000
-  n015 -.->|related| n020
-  n015 -.->|related| n017
-  n017 -->|served by| n005
-  n016 -->|served by| n003
-  n016 -.->|related| n020
-  n016 -.->|related| n017
   n020 -->|served by| n013
-  n018 -->|served by| n007
-  n007 -.->|related| n013
-  n007 -.->|related| n005
-  n007 -.->|related| n010
-  n007 -.->|related| n003
-  n007 -.->|related| n000
-  n019 -->|served by| n010
-  n010 -.->|related| n013
-  n010 -.->|related| n005
-  n010 -.->|related| n003
-  n020 -->|served by| n013
-  n014 -.->|related| n013
-  n014 -.->|related| n010
-  n014 -.->|related| n005
-  n006 -.->|related| n013
-  n011 -.->|related| n003
-  n011 -.->|related| n010
-  n011 -.->|related| n007
-  n001 -.->|related| n013
-  n001 -.->|related| n005
-  n015 -->|served by| n000
-  n000 -.->|related| n013
-  n000 -.->|related| n005
-  n012 -.->|related| n005
-  n012 -.->|related| n013
-  n008 -.->|related| n013
-  n008 -.->|related| n003
-  n009 -.->|related| n013
-  n009 -.->|related| n005
-  n002 -.->|related| n005
-  n002 -.->|related| n013
-  n017 -->|served by| n005
-  n016 -->|served by| n003
-  n003 -.->|related| n013
-  n003 -.->|related| n005
-  n004 -.->|related| n013
-  n004 -.->|related| n005
 ```
 
 ## Worker roles
@@ -102,24 +102,21 @@ flowchart LR
   n010["spec<br/>reviewer-worker"]
   n011["spec<br/>team-manager-worker"]
   n012["spec<br/>worker-roles"]
-  n008 -->|served by| n006
   n007 -->|served by| n000
-  n012 -->|served by| n006
-  n012 -->|served by| n000
-  n012 -->|served by| n002
-  n012 -->|served by| n005
-  n011 -->|served by| n005
-  n009 -->|served by| n002
-  n010 -->|served by| n006
+  n000 -.->|related| n005
+  n000 -.->|related| n002
+  n000 -.->|related| n006
   n008 -->|served by| n001
   n001 -.->|related| n006
   n001 -.->|related| n002
   n001 -.->|related| n000
   n001 -.->|related| n005
-  n007 -->|served by| n000
-  n000 -.->|related| n005
-  n000 -.->|related| n002
-  n000 -.->|related| n006
+  n009 -->|served by| n002
+  n002 -.->|related| n005
+  n002 -.->|related| n006
+  n010 -->|served by| n003
+  n003 -.->|related| n006
+  n003 -.->|related| n001
   n004 -.->|related| n006
   n004 -.->|related| n002
   n004 -.->|related| n000
@@ -128,12 +125,15 @@ flowchart LR
   n005 -.->|related| n006
   n005 -.->|related| n000
   n005 -.->|related| n002
+  n007 -->|served by| n000
+  n008 -->|served by| n006
   n009 -->|served by| n002
-  n002 -.->|related| n005
-  n002 -.->|related| n006
-  n010 -->|served by| n003
-  n003 -.->|related| n006
-  n003 -.->|related| n001
+  n010 -->|served by| n006
+  n011 -->|served by| n005
+  n012 -->|served by| n006
+  n012 -->|served by| n000
+  n012 -->|served by| n002
+  n012 -->|served by| n005
 ```
 
 ## Tenancy & access
@@ -155,43 +155,43 @@ flowchart LR
   n012["spec<br/>secret-rotation"]
   n013["spec<br/>service-accounts"]
   n014["spec<br/>tenancy-and-access"]
-  n011 -->|served by| n004
-  n011 -.->|related| n008
-  n011 -.->|related| n007
+  n007 -->|served by| n000
+  n000 -.->|related| n002
+  n001 -.->|related| n002
+  n001 -.->|related| n000
+  n002 -.->|related| n000
+  n010 -->|served by| n003
+  n003 -.->|related| n006
+  n003 -.->|related| n002
+  n003 -.->|related| n000
+  n004 -.->|related| n002
+  n004 -.->|related| n000
+  n013 -->|served by| n005
+  n005 -.->|related| n006
+  n005 -.->|related| n002
+  n005 -.->|related| n003
+  n005 -.->|related| n000
+  n014 -->|served by| n006
+  n006 -.->|related| n002
+  n006 -.->|related| n000
+  n007 -->|served by| n000
+  n007 -.->|related| n008
+  n007 -.->|related| n013
+  n008 -->|served by| n002
+  n008 -.->|related| n007
   n009 -.->|related| n008
   n009 -.->|related| n013
   n009 -.->|related| n007
   n009 -.->|related| n010
+  n011 -->|served by| n004
+  n011 -.->|related| n008
+  n011 -.->|related| n007
   n012 -.->|related| n013
   n012 -.->|related| n007
   n012 -.->|related| n010
   n012 -.->|related| n008
   n014 -->|served by| n002
   n014 -->|served by| n000
-  n008 -->|served by| n002
-  n008 -.->|related| n007
-  n007 -->|served by| n000
-  n007 -.->|related| n008
-  n007 -.->|related| n013
-  n013 -->|served by| n005
-  n005 -.->|related| n006
-  n005 -.->|related| n002
-  n005 -.->|related| n003
-  n005 -.->|related| n000
-  n010 -->|served by| n003
-  n003 -.->|related| n006
-  n003 -.->|related| n002
-  n003 -.->|related| n000
-  n001 -.->|related| n002
-  n001 -.->|related| n000
-  n014 -->|served by| n006
-  n006 -.->|related| n002
-  n006 -.->|related| n000
-  n004 -.->|related| n002
-  n004 -.->|related| n000
-  n002 -.->|related| n000
-  n007 -->|served by| n000
-  n000 -.->|related| n002
 ```
 
 ## Knowledge & admin
@@ -220,64 +220,64 @@ flowchart LR
   n019["spec<br/>knowledge-schema-migration"]
   n020["spec<br/>managed-workflows"]
   n021["spec<br/>onboarding"]
-  n019 -.->|related| n017
-  n019 -.->|related| n021
-  n019 -.->|related| n013
-  n019 -.->|related| n018
-  n015 -.->|related| n017
-  n015 -.->|related| n013
-  n015 -.->|related| n018
-  n017 -->|served by| n007
-  n017 -->|served by| n005
-  n017 -.->|related| n018
-  n017 -.->|related| n019
-  n014 -.->|related| n021
-  n014 -.->|related| n017
-  n014 -.->|related| n018
-  n020 -.->|related| n017
-  n020 -.->|related| n021
-  n020 -.->|related| n013
-  n016 -->|served by| n005
-  n016 -->|served by| n007
-  n016 -->|served by| n004
-  n018 -->|served by| n004
-  n018 -.->|related| n017
-  n018 -.->|related| n013
-  n021 -.->|related| n019
-  n001 -.->|related| n007
-  n001 -.->|related| n005
-  n009 -.->|related| n007
-  n003 -.->|related| n007
-  n003 -.->|related| n005
-  n003 -.->|related| n004
-  n016 -->|served by| n006
-  n006 -.->|related| n005
-  n006 -.->|related| n007
-  n006 -.->|related| n004
-  n010 -.->|related| n005
-  n010 -.->|related| n007
   n013 -->|served by| n000
   n000 -.->|related| n007
-  n005 -.->|related| n007
-  n012 -.->|related| n007
-  n012 -.->|related| n005
-  n012 -.->|related| n008
+  n001 -.->|related| n007
+  n001 -.->|related| n005
   n002 -.->|related| n007
   n002 -.->|related| n005
   n002 -.->|related| n004
   n002 -.->|related| n003
   n002 -.->|related| n009
-  n008 -.->|related| n001
-  n008 -.->|related| n012
-  n008 -.->|related| n007
+  n003 -.->|related| n007
+  n003 -.->|related| n005
+  n003 -.->|related| n004
   n018 -->|served by| n004
   n004 -.->|related| n005
   n004 -.->|related| n007
+  n005 -.->|related| n007
+  n016 -->|served by| n006
+  n006 -.->|related| n005
+  n006 -.->|related| n007
+  n006 -.->|related| n004
+  n017 -->|served by| n007
+  n007 -.->|related| n005
+  n008 -.->|related| n001
+  n008 -.->|related| n012
+  n008 -.->|related| n007
+  n009 -.->|related| n007
+  n010 -.->|related| n005
+  n010 -.->|related| n007
   n021 -->|served by| n011
   n011 -.->|related| n005
   n011 -.->|related| n007
+  n012 -.->|related| n007
+  n012 -.->|related| n005
+  n012 -.->|related| n008
+  n014 -.->|related| n021
+  n014 -.->|related| n017
+  n014 -.->|related| n018
+  n015 -.->|related| n017
+  n015 -.->|related| n013
+  n015 -.->|related| n018
+  n016 -->|served by| n005
+  n016 -->|served by| n007
+  n016 -->|served by| n004
   n017 -->|served by| n007
-  n007 -.->|related| n005
+  n017 -->|served by| n005
+  n017 -.->|related| n018
+  n017 -.->|related| n019
+  n018 -->|served by| n004
+  n018 -.->|related| n017
+  n018 -.->|related| n013
+  n019 -.->|related| n017
+  n019 -.->|related| n021
+  n019 -.->|related| n013
+  n019 -.->|related| n018
+  n020 -.->|related| n017
+  n020 -.->|related| n021
+  n020 -.->|related| n013
+  n021 -.->|related| n019
 ```
 
 ## Delivery & infra
@@ -291,10 +291,10 @@ flowchart LR
   n004["spec<br/>delivery-and-infra"]
   n005["spec<br/>tenant-isolation"]
   n004 -->|served by| n000
-  n005 -->|served by| n002
-  n003 -->|served by| n001
-  n004 -->|served by| n000
   n000 -.->|related| n002
+  n003 -->|served by| n001
+  n005 -->|served by| n002
+  n004 -->|served by| n000
   n005 -->|served by| n002
 ```
 
