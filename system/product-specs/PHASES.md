@@ -1201,21 +1201,40 @@ failure-mode patterns post-ship.
 - **Extends:** `self-healing`, `escalations`, `observability`, knowledge runbooks
 - **Depends on:** 0069, 0070
 
-### 0072 — Task replay and diagnostic surface (drafting since 2026-05-09)
+### 0072 — Task replay and diagnostic surface (Stage 1 shipped 2026-05-09)
 
-TaskDetail leads with an always-expanded stage timeline; diagnostic
-sections (`Turns`, `Tool uses`, `Knowledge lookups`, `Transcript`)
-render content by default for failed tasks. New `[replay with edit]`
-modal lets the operator edit a prompt or input-artifact set and
-re-dispatch a linked task (`replay_of` + shared `correlation_id`).
-The misleading `Logs: No logs yet` string on terminal tasks is gone.
+TaskDetail surfaces diagnostic data the orchestrator has been
+recording for months — counts only, until now.
 
-Realised pain: the diagnostic data is *already there* — just
-collapsed and contentless. A 2026-05-09 walk on a failed task
-showed Turns counts (3, 142, 11007 cache_read) but no actual
-content; operator falls through to Cloud Run logs.
+**Stage 1 shipped 2026-05-09** ([coder-admin#35](https://github.com/coder-devx/coder-admin/pull/35)):
 
-- **Status:** drafting since 2026-05-09
+- **Stage timeline at the top.** Always-expanded horizontal segmented
+  bar over `task_stage_runs` (the data already lives in the spec-0024
+  endpoint); rose on failure, emerald on success, sky on the current
+  stage. Hover shows stage / status / duration / tokens / error.
+- **Tool uses panel renders `input_args` per invocation.** The legacy
+  panel was counts-only — operators couldn't see what was actually
+  called. The aggregate by-tool table stays; below it a per-
+  invocation list collapses `input_args` to a one-liner per row and
+  expands on click to a pretty-printed JSON block.
+- **Logs empty state distinguishes running vs terminal.** Terminal
+  tasks now point at the Cloud Run execution + GCS transcript prefix
+  instead of saying "No logs yet" (which was misleading on a
+  finished task that *had* no captured stdout).
+
+**Stage 2 deferred** to follow-up PRs:
+- `[replay with edit]` modal + a `POST .../replay` endpoint that
+  creates a new task with `replay_of=<original>` and a chained
+  `correlation_id`.
+- Content-bearing turn rendering. The body of each Claude turn isn't
+  in `task_turns` today (only `text_length` / token counts) — the
+  full transcript lives in the GCS prefix referenced by
+  `tasks.transcript_uri`. Stage 2 either lazy-loads that on demand
+  through a new proxy endpoint or backfills `task_turns` with the
+  content. The Stage 1 deep-link to GCS partially covers the pain
+  in the meantime.
+
+- **Status:** Stage 1 shipped 2026-05-09; Stage 2 deferred
 - **WIP:** 0072 · **Design:** 0072 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `admin-panel`, `task-orchestration`, `observability`
 - **Depends on:** 0069
