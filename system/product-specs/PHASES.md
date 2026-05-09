@@ -1273,7 +1273,7 @@ watchdog audit. Tracked as a follow-up.
 - **Extends:** `self-healing`, `escalations`, `observability`, knowledge runbooks
 - **Depends on:** 0069, 0070
 
-### 0072 — Task replay and diagnostic surface (Stages 1 + 2 shipped 2026-05-09)
+### 0072 — Task replay and diagnostic surface (Stages 1 + 2 + 3 shipped 2026-05-09)
 
 TaskDetail surfaces diagnostic data the orchestrator has been
 recording for months — counts only, until now.
@@ -1311,14 +1311,30 @@ recording for months — counts only, until now.
   retry" vs "Dispatch replay") so the operator sees what audit shape
   their action will produce.
 
-**Stage 3 deferred** (content-bearing turn rendering): the body of
-each Claude turn isn't in `task_turns` today (only `text_length` /
-token counts) — the full transcript lives in the GCS prefix
-referenced by `tasks.transcript_uri`. Stage 1's GCS deep-link
-partially covers that pain; a future PR can lazy-load the JSONL
-through a new proxy endpoint when the operator expands a turn row.
+**Stage 3 shipped 2026-05-09** ([coder-admin#39](https://github.com/coder-devx/coder-admin/pull/39)):
 
-- **Status:** Stages 1 + 2 shipped 2026-05-09; Stage 3 deferred
+- TurnsPanel rows on TaskDetail are now expandable. Click a row →
+  the actual turn body renders below it (text + tool_use +
+  tool_result blocks).
+- The transcript JSONL is lazy-fetched once on the first row click
+  via the existing `/tasks/{id}/transcript` endpoint and parsed
+  client-side into a `turn_index → TranscriptTurn` map; subsequent
+  expands render from the cached map without another fetch.
+- Three block kinds render: `text` as a wrapped pre block; `tool_use`
+  as a sky-tinted card with tool name + pretty-printed input JSON;
+  `tool_result` as an emerald or rose card depending on `is_error`,
+  with the result payload.
+- New `transcriptParse` helper mirrors the server-side
+  `coder_core.workers.transcript_parser` so client-parsed turn rows
+  join cleanly to `task_turns.turn_index`.
+
+No coder-core change was needed — the existing `/tasks/{id}/transcript`
+endpoint already serves the JSONL. Cleaner than introducing a new
+proxy endpoint per the original spec note; the server stays
+read-only and the parsing pressure stays on the browser, not on
+Cloud Run.
+
+- **Status:** Stages 1 + 2 + 3 all shipped 2026-05-09
 - **WIP:** 0072 · **Design:** 0072 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `admin-panel`, `task-orchestration`, `observability`
 - **Depends on:** 0069
