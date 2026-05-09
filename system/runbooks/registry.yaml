@@ -22,6 +22,20 @@ runbooks:
   status: active
   owner: ro
   file: cache-hit-drop.md
+- id: claude-exit-1
+  title: Claude exited with code 1
+  status: active
+  owner: ro
+  file: failure-modes/claude-exit-1.md
+  subtype: failure-mode
+  failure_kind: claude_exit_1
+- id: coder-task-deadline-exceeded
+  title: Coder task deadline exceeded — process ran past 2400s
+  status: active
+  owner: ro
+  file: failure-modes/coder-task-deadline-exceeded.md
+  subtype: failure-mode
+  failure_kind: coder_task_deadline_exceeded
 - id: cold-start-review
   title: Cold-start ingestion PR — review checklist
   status: active
@@ -107,6 +121,13 @@ runbooks:
   status: active
   owner: ro
   file: secret-rotation-scheduler.md
+- id: ship-gate-remote-missing
+  title: Ship gate failed — remote_missing
+  status: active
+  owner: ro
+  file: failure-modes/ship-gate-remote-missing.md
+  subtype: failure-mode
+  failure_kind: ship_gate_remote_missing
 - id: ship-wip-into-active
   title: Ship a WIP into active — Architect draft, Reviewer attest, TM close
   status: active
