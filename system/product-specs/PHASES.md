@@ -1201,7 +1201,7 @@ failure-mode patterns post-ship.
 - **Extends:** `self-healing`, `escalations`, `observability`, knowledge runbooks
 - **Depends on:** 0069, 0070
 
-### 0072 — Task replay and diagnostic surface (Stage 1 shipped 2026-05-09)
+### 0072 — Task replay and diagnostic surface (Stages 1 + 2 shipped 2026-05-09)
 
 TaskDetail surfaces diagnostic data the orchestrator has been
 recording for months — counts only, until now.
@@ -1222,19 +1222,31 @@ recording for months — counts only, until now.
   instead of saying "No logs yet" (which was misleading on a
   finished task that *had* no captured stdout).
 
-**Stage 2 deferred** to follow-up PRs:
-- `[replay with edit]` modal + a `POST .../replay` endpoint that
-  creates a new task with `replay_of=<original>` and a chained
-  `correlation_id`.
-- Content-bearing turn rendering. The body of each Claude turn isn't
-  in `task_turns` today (only `text_length` / token counts) — the
-  full transcript lives in the GCS prefix referenced by
-  `tasks.transcript_uri`. Stage 2 either lazy-loads that on demand
-  through a new proxy endpoint or backfills `task_turns` with the
-  content. The Stage 1 deep-link to GCS partially covers the pain
-  in the meantime.
+**Stage 2 shipped 2026-05-09** ([coder-core#191](https://github.com/coder-devx/coder-core/pull/191),
+[coder-admin#36](https://github.com/coder-devx/coder-admin/pull/36)):
 
-- **Status:** Stage 1 shipped 2026-05-09; Stage 2 deferred
+- New endpoint `POST /v1/projects/{id}/tasks/{taskId}/replay`. Body
+  `{prompt?, rationale?}`. Empty body delegates to retry; non-empty
+  edited prompt writes a `task.replay` audit event (vs `task.retry`)
+  and a `replay`-keyed task-log row, so history can tell apart
+  "operator clicked retry" from "operator edited and re-dispatched".
+  Reuses the existing retry plumbing under the hood — same retry-
+  chain pointer (`original_task_id`), same retryability rules, no
+  new schema migration.
+- **Replay-with-edit modal** on TaskDetail. The button sits next to
+  Retry on stuck/rejected tasks; the modal pre-fills the original
+  prompt; the dispatch button label tracks the edit state ("Dispatch
+  retry" vs "Dispatch replay") so the operator sees what audit shape
+  their action will produce.
+
+**Stage 3 deferred** (content-bearing turn rendering): the body of
+each Claude turn isn't in `task_turns` today (only `text_length` /
+token counts) — the full transcript lives in the GCS prefix
+referenced by `tasks.transcript_uri`. Stage 1's GCS deep-link
+partially covers that pain; a future PR can lazy-load the JSONL
+through a new proxy endpoint when the operator expands a turn row.
+
+- **Status:** Stages 1 + 2 shipped 2026-05-09; Stage 3 deferred
 - **WIP:** 0072 · **Design:** 0072 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `admin-panel`, `task-orchestration`, `observability`
 - **Depends on:** 0069
