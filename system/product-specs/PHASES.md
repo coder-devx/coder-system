@@ -1403,7 +1403,7 @@ adds interactivity once the agent-invocation infra exists.
 - **Extends:** `impersonation`, `admin-panel`, `mcp-agent-interface`
 - **Depends on:** 0069
 
-### 0074 — SpecCompose write endpoint and draft hand-off to Now (Stages 1 + 2 shipped 2026-05-09)
+### 0074 — SpecCompose write endpoint and draft hand-off to Now (fully shipped 2026-05-10)
 
 `POST /v1/projects/{id}/specs` files a spec via PR (branch +
 `commit_tree` of artifact + registry + `create_pull_request`),
@@ -1462,14 +1462,28 @@ borders + inline error text anchored by the typed
   draft-saved card with `[Specs page →]` / `[Start another]`.
   File and save-draft buttons mutually disable during in-flight.
 
-**Stage 2 deferred slices** (follow-ups, not load-bearing): Specs-
-page draft chip + age + `[resume]`/`[discard]` on hover; Now
-`draft-spec` row kind for drafts >24h. The persistence + save-draft
-machinery is live; the surfaces above are pure UI on top.
+**Stage 2 follow-ups shipped 2026-05-10** ([coder-admin#45](https://github.com/coder-devx/coder-admin/pull/45),
+[coder-core#198](https://github.com/coder-devx/coder-core/pull/198)):
 
-- **Status:** Stages 1 + 2 shipped 2026-05-09 (drafts persistence
-  + `[Save draft]` button); Specs-page draft chip + Now draft-spec
-  row deferred as follow-ups
+- **Specs-page draft chip + age + actions.** New
+  `<SpecsDraftsList />` renders above the spec-runs table on
+  `/projects/:id/specs`. Each row shows a violet `draft` chip,
+  title (or `(untitled)`), owner, age. Amber `stale` chip when
+  `updated_at > 7d`. `[resume]` is a Link to
+  `/specs/new?draft=<id>`; `[discard]` calls
+  `DELETE /specs/drafts/{draft_id}` and removes the row in place.
+- **Resume.** SpecCompose reads `?draft=<id>` and rehydrates the
+  form by finding the matching row in `listSpecDrafts`.
+- **Now `draft-spec` row.** New
+  `InboxItemKind.DRAFT_SPEC` fires for drafts older than 24h.
+  Low-severity row labeled `Draft spec — <title>` carrying
+  `draft_id` / `actor` / `updated_at_iso` in `meta`. Click-through
+  navigates to `/specs/new?draft=<id>` for resume; no inline
+  action — the resume click is the operator's verb.
+
+With this, spec 0074 is fully shipped — no deferred slices remain.
+
+- **Status:** Stages 1 + 2 + follow-ups all shipped 2026-05-09 / 2026-05-10
 - **WIP:** 0074 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `admin-panel`, `knowledge-api`
 - **Depends on:** 0069, 0070
