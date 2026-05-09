@@ -1180,7 +1180,7 @@ authenticated route.
 - **Extends:** `admin-panel`, `escalations`, `self-healing`
 - **Depends on:** 0069
 
-### 0071 — Failure-mode grouping and operator runbooks (Stage 1 shipped 2026-05-09)
+### 0071 — Failure-mode grouping and operator runbooks (Stages 1 + 2 shipped 2026-05-09)
 
 Now (0070) collapses ≥3 open `stuck` tasks sharing a
 `failure_kind` into one `stuck-group` row with bulk-action buttons
@@ -1214,19 +1214,39 @@ resolves them.
   knowledge router so the literal `by-failure` segment isn't
   swallowed by the `/{type}/{id}` catch-all.
 
-**Stage 2 deferred:** NowAggregator grouping pass (collapse ≥3
-open stuck tasks sharing `failure_kind` to a single `stuck-group`
-row); bulk-retry endpoint
-(`POST /v1/projects/{id}/tasks:bulk-retry`); `[retry all]`,
-`[run runbook]`, `[open all]` inline actions on the grouped row.
-Includes an audit of the escalation watchdog — the same 27 stuck
-tasks have produced zero escalations to date.
+**Stage 2 shipped 2026-05-09** ([coder-core#194](https://github.com/coder-devx/coder-core/pull/194),
+[coder-admin#38](https://github.com/coder-devx/coder-admin/pull/38)):
+
+- New `InboxItemKind.STUCK_GROUP` collapses ≥3 open stuck tasks
+  sharing `(project_id, failure_kind)` into a single row.
+  Threshold pinned at 3 per the 2026-05-09 walk of `coder` — the
+  6 `claude_exit_1` + 3 deadline rows on the live panel collapse
+  to 2 group rows. Cohorts <3 pass through as individual rows;
+  untagged stuck rows always pass through individually so an
+  operator never loses a row to grouping.
+- `InboxItem.meta` now optional, carrying `count`, `failure_kind`,
+  `oldest_age_iso`, `newest_age_iso`, `task_ids`, `roles` for
+  stuck-group rows so the panel can render the count badge + drill
+  link without a second fetch.
+- New endpoint `POST /v1/projects/{id}/tasks/bulk-retry` accepts
+  `{failure_kind, max_age_seconds?}`. Filters open stuck tasks by
+  `failure_kind` (with optional age cutoff), retries each, writes
+  per-task `TaskLogRow` tagged with the shared `correlation_id`
+  so audit-trail readers can fan out from one click. Empty match
+  returns `retried=0` cleanly so re-clicks after a partial resolve
+  no-op.
+- Now renders stuck-group rows distinctly: rose chip "stuck
+  group", `×N` count badge inline with the label, `retry all`
+  inline action wired to the bulk-retry endpoint, `open →`
+  navigates to the project pipeline filtered by failure_kind.
 
 **Stage 3 deferred:** `/runbooks/{slug}` admin route rendering
 the runbook body and an inline `[run on N matched]` button;
-escalation-watchdog rule covering observed `failure_kind` shapes.
+escalation-watchdog rule covering observed `failure_kind` shapes
+(the 2026-05-09 walk found 27 stuck tasks producing zero
+escalations — the watchdog audit lands here).
 
-- **Status:** Stage 1 shipped 2026-05-09; Stages 2 + 3 deferred
+- **Status:** Stages 1 + 2 shipped 2026-05-09; Stage 3 deferred
 - **WIP:** 0071 · **Design:** 0071 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `self-healing`, `escalations`, `observability`, knowledge runbooks
 - **Depends on:** 0069, 0070
