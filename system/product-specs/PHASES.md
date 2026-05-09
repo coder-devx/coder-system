@@ -1180,7 +1180,7 @@ authenticated route.
 - **Extends:** `admin-panel`, `escalations`, `self-healing`
 - **Depends on:** 0069
 
-### 0071 — Failure-mode grouping and operator runbooks (Stages 1 + 2 shipped 2026-05-09)
+### 0071 — Failure-mode grouping and operator runbooks (Stages 1 + 2 + 3 shipped 2026-05-09)
 
 Now (0070) collapses ≥3 open `stuck` tasks sharing a
 `failure_kind` into one `stuck-group` row with bulk-action buttons
@@ -1240,13 +1240,35 @@ resolves them.
   inline action wired to the bulk-retry endpoint, `open →`
   navigates to the project pipeline filtered by failure_kind.
 
-**Stage 3 deferred:** `/runbooks/{slug}` admin route rendering
-the runbook body and an inline `[run on N matched]` button;
-escalation-watchdog rule covering observed `failure_kind` shapes
-(the 2026-05-09 walk found 27 stuck tasks producing zero
-escalations — the watchdog audit lands here).
+**Stage 3 shipped 2026-05-09** ([coder-core#195](https://github.com/coder-devx/coder-core/pull/195)):
 
-- **Status:** Stages 1 + 2 shipped 2026-05-09; Stage 3 deferred
+- New escalation detector `detect_stuck_groups` fires on
+  `(project_id, failure_kind)` cohorts of ≥3 open stuck tasks
+  whose oldest member has been stuck for ≥6h. Untagged stuck
+  rows (no `failure_kind`) are deliberately ignored — paging on
+  rows with no actionable kind would noise on-call.
+- Candidate is keyed to the cohort's oldest task id so the
+  existing `(project_id, trigger_kind, task_id)` partial unique
+  index dedupes ticks against the same cohort. When the operator
+  retries the oldest and a fresh oldest takes its place, the next
+  tick opens a follow-on row — same shape as `failure_streak`.
+- New `EscalationTrigger.STUCK_GROUP` value + migration 0069
+  widening `ck_escalations_trigger_kind` (same shape as 0054
+  which added `ci_fix_exhausted`).
+- Wired into `scan_triggers` so the existing 1-min watcher tick
+  picks it up alongside `stall` / `failure_streak` /
+  `sla_breach` / `ci_fix_exhausted`.
+
+This closes the 27-stuck → 0-escalations gap surfaced on the
+2026-05-09 walk of `coder`. Threshold + age (3, 6h) pinned per
+the spec design; tune on first 30d soak.
+
+**Stage 3 deferred slice:** `/runbooks/{slug}` admin route
+rendering the runbook body and an inline `[run on N matched]`
+button — operationally useful but not load-bearing for the
+watchdog audit. Tracked as a follow-up.
+
+- **Status:** Stages 1 + 2 + 3 shipped 2026-05-09; `/runbooks/{slug}` admin route deferred
 - **WIP:** 0071 · **Design:** 0071 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `self-healing`, `escalations`, `observability`, knowledge runbooks
 - **Depends on:** 0069, 0070
