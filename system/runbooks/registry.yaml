@@ -81,6 +81,11 @@ runbooks:
   status: active
   owner: ro
   file: knowledge-freshness-audit.md
+- id: managed-workflows
+  title: Managed-repo GitHub Action distribution — operate the matrix
+  status: active
+  owner: ro
+  file: managed-workflows.md
 - id: mcp-agent-interface-rollout
   title: MCP agent interface — Stage 3 staged rollout
   status: active
