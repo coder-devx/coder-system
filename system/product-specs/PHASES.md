@@ -1594,3 +1594,155 @@ With this, spec 0074 is fully shipped — no deferred slices remain.
 - **Depends on:** 0069, 0070
 
 ---
+
+## Phase A — Studio Foundations and Founder *(in active build since 2026-05-10)*
+
+> Extend `coder-core` into the B2C product portfolio Studio: a new
+> `project_kind="b2c_product"` alongside `internal_tool`, the Founder
+> role end-to-end, the `coder-product-template` repo contract, and
+> Stripe Connect + PostHog wired into the existing dispatcher. No
+> B2C product is launched yet — Phase A ends when the Founder
+> agent's idea selection has earned the operator's trust through a
+> dozen calibration cycles dogfooded inside Coder. See
+> [`STUDIO_ROADMAP.md`](../../STUDIO_ROADMAP.md) for the four-phase
+> arc and [`STUDIO_CHARTER.md`](../../STUDIO_CHARTER.md) for the
+> what / what-not.
+
+The dispatch loop on 2026-05-10 surfaced two meta-system gaps that
+were filed and shipped alongside the Studio specs proper:
+
+- **0076** — Spec-bound architect dispatch from admin UI. The
+  architect lifecycle wasn't auto-binding to a freshly-filed spec;
+  shipped via [coder-core#201](https://github.com/coder-devx/coder-core/pull/201)
+  + [coder-core#202](https://github.com/coder-devx/coder-core/pull/202)
+  + [coder-admin#49](https://github.com/coder-devx/coder-admin/pull/49)
+  on 2026-05-10.
+- **0078** — Spec-run lifecycle auto-bootstrap for fresh wip specs.
+  Without this, every newly-filed spec needed manual `POST
+  /spec-runs` to start its lifecycle. Shipped via
+  [coder-core#203](https://github.com/coder-devx/coder-core/pull/203)
+  + [coder-core#206](https://github.com/coder-devx/coder-core/pull/206)
+  + [coder-admin#50](https://github.com/coder-devx/coder-admin/pull/50)
+  + [coder-admin#51](https://github.com/coder-devx/coder-admin/pull/51)
+  on 2026-05-10.
+
+### 0075 — Studio operator contract — `project_kind`, sidebar, idea queue, kill workflow *(in flight)*
+
+Parent spec for the Studio extension. Adds `project_kind="b2c_product"`
+discriminator with dispatcher routing, the studio-mode admin sidebar
+and idea-queue UI, the role permission table for the five new
+workers (Founder / Designer / Marketer / Analyst / Researcher), and
+the kill-pipeline cascade workflow (sunset trigger → revoke Stripe
+→ archive repos → redirect domain → notify customers). Acceptance
+criteria span DB schema, dispatcher gate, Designer launch-gate, and
+operator-facing UI.
+
+**Shipped slices:**
+
+- ord 1 (DB tables + STUDIO_ENABLED flag) — [coder-core#212](https://github.com/coder-devx/coder-core/pull/212), 2026-05-10.
+- ord 2 (Founder recurring job — AC3 tick + admin endpoints + inbox item) — [coder-core#214](https://github.com/coder-devx/coder-core/pull/214), 2026-05-10.
+- ord 3 (Designer launch-gate + asset_artifact GCS integration + override API) — [coder-core#219](https://github.com/coder-devx/coder-core/pull/219), 2026-05-10.
+- ord 7 (five Studio role definitions in `system/roles/`) — [coder-system#109](https://github.com/coder-devx/coder-system/pull/109), 2026-05-10.
+
+**Blocked slices:**
+
+- ord 4 (kill_pipeline cascade + SSE streaming + sunset trigger endpoints) — task `5f2c7bdb` died at the 40-min worker deadline with no PR; needs operator decomposition into smaller tasks.
+- ord 5 + ord 6 — depend on ord 4; will unblock once ord 4 lands.
+
+- **Status:** ord 1 + 2 + 3 + 7 shipped; ord 4 blocked on decomposition; ord 5 + 6 blocked behind ord 4.
+- **WIP:** 0075 · **Design:** 0075 · **ADRs:** [0032](../adrs/0032-project_kind-discriminator.md), [0033](../adrs/0033-stripe-connect-per-product.md), [0034](../adrs/0034-designer-launch-gate.md), [0035](../adrs/0035-founder-as-recurring-meta-orchestrator.md)
+- **Extends:** `task-orchestration`, `admin-panel`, `worker-roles`, `self-healing`
+
+### 0077 — Founder role Phase A — Cloud Run Job, idea cycle daily, portfolio review weekly *(in flight)*
+
+Founder runs as a Cloud Run Job on a daily schedule for `idea_cycle`
+and weekly Sun 18:00 UTC for `weekly_review`. Calibration dogfood
+fires `FOUNDER_CALIBRATION_COMPLETE` after the 12th cycle; pause
+/resume endpoints gate runs against operator trust.
+
+**Shipped slices:**
+
+- ord 0 (Phase A migration + domain models) — [coder-core#210](https://github.com/coder-devx/coder-core/pull/210), 2026-05-10.
+- ord 2 (idea-cycle worker + `NowItemRow` + `insert_now_item`) — [coder-core#213](https://github.com/coder-devx/coder-core/pull/213), 2026-05-10.
+
+**Held for design call:**
+
+- ord 3 (weekly_review handler + `FOUNDER_REVIEW` inbox flow) — [coder-core#216](https://github.com/coder-devx/coder-core/pull/216) opened by task `3733741a` but conflicts with #214's `_founder_reviews` (different source-of-truth tables: `founder_job_runs` vs `founder_cycles`). Operator design call needed.
+
+- **Status:** ord 0 + 2 shipped; ord 3 awaiting design decision; ord 4–6 blocked.
+- **WIP:** 0077 · **Design:** 0077
+
+### 0079 — `coder-product-template` repo contract *(blocked on operator)*
+
+Next.js + Tailwind + Stripe + PostHog + Resend + legal pages
+pre-wired; eight routes; `theme.config.ts`; Lighthouse <2 s budget.
+The template is the scaffold every new B2C product instantiates from.
+
+**Operator-blocked:** the worker bot lacks `administration:write` on
+the `coder-devx` org, so it cannot create the GitHub template repo.
+[coder-system#108](https://github.com/coder-devx/coder-system/pull/108)
+holds the `repos.yaml` registration; merge gates on the operator
+running `gh api -X POST /orgs/coder-devx/repos -f
+name=coder-product-template -f private=true` and adding the repo to
+the `coder-coder-github-pat` Secret Manager scope.
+
+**Blocked slices:** ord 2–6 (every dev task targets `coder-product-template` and fails with `failed to load system prompt: github request failed` until the repo exists). ord 7 (create-product bootstrap on coder-core: Cloudflare CNAME + Cloud Run deploy + `dns.yaml` write) is too big for the 40-min worker deadline; task `583e6fe1` died with no PR — needs operator decomposition.
+
+- **Status:** every executable slice operator-blocked; ord 1 (`repos.yaml` registration) ready to merge once the GitHub repo exists.
+- **WIP:** 0079 · **Design:** 0079 · **ADR:** [0036](../adrs/0036-template-repo-contract.md)
+
+### 0080 — Stripe Connect + PostHog wired into coder-core *(in flight)*
+
+Stripe Connect Express OAuth for one connected account per product
+(per-product revenue accounting), webhook ingestion, MRR meter on
+the budget endpoint, PostHog configure / disconnect endpoints, and
+the 6-hour funnel poll job.
+
+**Shipped slices:**
+
+- ord 0 (Stripe Connect + PostHog migration + domain models) — [coder-core#209](https://github.com/coder-devx/coder-core/pull/209), 2026-05-10.
+- ord 3 (Stripe webhook + MRR computation, AC2 / AC3 / AC6) — [coder-core#218](https://github.com/coder-devx/coder-core/pull/218), 2026-05-10.
+- ord 4 (PostHog configure / disconnect / snapshot endpoints + 6-hour funnel poll job) — [coder-core#217](https://github.com/coder-devx/coder-core/pull/217), 2026-05-10.
+- ord 5 (`mrr_cents` + `is_loss_making` on the budget endpoint, AC3 / AC7) — [coder-core#220](https://github.com/coder-devx/coder-core/pull/220), 2026-05-10.
+
+**Blocked slices:**
+
+- ord 2 (Stripe Connect Express OAuth flow) — task `183fc445` died at the 40-min worker deadline with no PR; needs operator decomposition.
+- ord 6 (admin UI for Stripe + PostHog connection state) — depends on ord 2 + 3 + 4 + 5; ord 3/4/5 done, blocked behind ord 2.
+
+- **Status:** ord 0 + 3 + 4 + 5 shipped; ord 2 blocked on decomposition; ord 6 blocked behind ord 2.
+- **WIP:** 0080 · **Design:** 0080
+
+### 0076 — Spec-bound architect dispatch from admin UI *(shipped 2026-05-10)*
+
+Meta-system gap surfaced when spec 0075 was filed and the architect
+task didn't auto-bind to it. Adds `spec_id` field on `TaskCreate`,
+relaxes the same-batch cross-link check in
+`_commit_artifact_with_registry`, and tags `failure_kind` on PM-draft
+collisions so silent drops are visible to the operator. UI binding
+on the Create Task form + spec chip on the Pipeline list + spec
+line on TaskDetail.
+
+- **Status:** shipped via [coder-core#201](https://github.com/coder-devx/coder-core/pull/201), [coder-core#202](https://github.com/coder-devx/coder-core/pull/202), [coder-admin#49](https://github.com/coder-devx/coder-admin/pull/49) on 2026-05-10.
+- **WIP:** 0076
+
+### 0078 — `spec_run` lifecycle auto-bootstrap for fresh wip specs *(shipped 2026-05-10)*
+
+Meta-system gap surfaced after 0076 — the architect-dispatch chain
+past the architect didn't auto-fire because freshly-filed specs had
+no `spec_run` lifecycle. Auto-bootstraps the lifecycle on PM-draft
+ship; adds `POST /spec-runs` for explicit start; adds `Start
+lifecycle` button on `SpecDetail`; fixes the dispatcher's
+column-0 indent path on registry append (#208) and the architect
+ADR-collision tagging (#207) along the way.
+
+- **Status:** shipped via [coder-core#203](https://github.com/coder-devx/coder-core/pull/203), [coder-core#204](https://github.com/coder-devx/coder-core/pull/204), [coder-core#205](https://github.com/coder-devx/coder-core/pull/205), [coder-core#206](https://github.com/coder-devx/coder-core/pull/206), [coder-core#207](https://github.com/coder-devx/coder-core/pull/207), [coder-core#208](https://github.com/coder-devx/coder-core/pull/208), [coder-admin#50](https://github.com/coder-devx/coder-admin/pull/50), [coder-admin#51](https://github.com/coder-devx/coder-admin/pull/51) on 2026-05-10.
+- **WIP:** 0078
+
+### Operator-only items blocking Phase A close-out
+
+1. **Create `coder-devx/coder-product-template` GitHub template repo** + add it to the `coder-coder-github-pat` Secret Manager scope. Unblocks 0079 ord 2–6 (5 dev tasks).
+2. **Decompose three tasks too big for the 40-min worker deadline:** 0075 ord 4 (`5f2c7bdb`, kill_pipeline + SSE + sunset), 0079 ord 7 (`583e6fe1`, Cloudflare/DNS bootstrap), 0080 ord 2 (`183fc445`, Stripe Connect Express OAuth).
+3. **Resolve `_founder_reviews` design conflict** between merged #214 (sources from `founder_job_runs.report_uri`) and pending #216 (sources from `founder_cycles.report_body` + `acknowledge` endpoint). Both PRs from parallel workers without visibility into each other's commits.
+
+---
