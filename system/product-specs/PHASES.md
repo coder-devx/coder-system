@@ -921,7 +921,7 @@ in-flight reads first.
 
 ### In flight
 
-### 0052 — Managed-repo GitHub Action distribution (Stages 0 + 1 shipped; Stage 2 WIP)
+### 0052 — Managed-repo GitHub Action distribution (fully shipped 2026-05-10)
 
 Both 0045 (cold-start)
 and 0047 (template
@@ -957,15 +957,23 @@ managed-workflows sync`.
   ([coder-core#59](https://github.com/coder-devx/coder-core/pull/59)):
   `install_workflow` / `verify_workflow` / `iter_managed_workflows`
   helpers in `coder_core/integrations/managed_repo_workflows.py` plus
-  the `coder managed-workflows sync` CLI surface. **Stage 2 (admin
-  matrix endpoint + SPA page) still WIP.** When 0045 (cold-start)
-  and 0047 (template migration) need to ship their respective
-  workflows, they consume this helper.
+  the `coder managed-workflows sync` CLI surface. **Stage 2 shipped
+  2026-05-10** across three PRs:
+  [coder-core#199](https://github.com/coder-devx/coder-core/pull/199)
+  (`GET /v1/_admin/managed-workflows` matrix endpoint with 5-min cache,
+  AC7),
+  [coder-admin#47](https://github.com/coder-devx/coder-admin/pull/47)
+  (`/admin/managed-workflows` SPA page behind
+  `VITE_MANAGED_WORKFLOWS_ENABLED`, AC8), and
+  [coder-system#105](https://github.com/coder-devx/coder-system/pull/105)
+  (`system/runbooks/managed-workflows.md`, AC9). When 0045
+  (cold-start) and 0047 (template migration) need to ship their
+  respective workflows, they consume this helper.
 - **WIP:** 0052 · **Design:** 0052
 - **Extends:** `knowledge-api`, `onboarding`, `audit-log`, `admin-panel`
 - **Unblocks:** 0045, 0047
 
-### 0053 — Post-PR CI fix loop (Stages 0a + 1 shipped; Stage 0b WIP)
+### 0053 — Post-PR CI fix loop (Stages 0a + 1 shipped; Stage 0b folded into spec 0025)
 
 The developer-worker pipeline today ends at `succeeded|accepted`
 once internal pytest passes and the reviewer accepts the PR.
@@ -1004,7 +1012,14 @@ worker re-prompt.
   through the spec-0052 callback receiver, dedupes on
   `(task_id, head_sha)`, dispatches a fix-up developer task up to
   `MAX_CI_FIX_ATTEMPTS = 3`, and escalates via 0041 on exhaustion.
-  Stage 0b (preflight re-prompt path) still WIP.
+  **Stage 0b is not a separate stage:** the active design
+  ([`post-pr-ci-fix-loop`](../designs/active/post-pr-ci-fix-loop.md))
+  folds the re-prompt path into spec 0025's `validate_and_retry`
+  pattern on TESTING-stage failures (already shipped). Preflight
+  surviving failures fall through to a PR-body comment without
+  re-prompt — operationally rare (most ruff issues auto-fix; mypy /
+  prettier surface earlier in pytest), so the re-prompt cost didn't
+  pencil out.
 - **WIP:** 0053 · **Design:** 0053
 - **Extends:** `developer-worker`, `reviewer-worker`, `task-orchestration`, `audit-log`, `admin-panel`
 - **Closes:** the worker→CI feedback gap surfaced by PR #34
