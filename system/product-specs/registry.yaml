@@ -480,3 +480,10 @@ specs:
   folder: wip
   file: wip/0076-spec-bound-architect-dispatch-from-admin-ui.md
   parent: pipeline-operations
+- id: '0077'
+  title: Coder Studio — Founder role Phase A
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0077-coder-studio-founder-role-phase-a.md
+  parent: knowledge-and-admin
