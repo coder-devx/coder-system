@@ -64,6 +64,7 @@ Logical components of the Coder system as it exists today.
 | [0071](./wip/0071-failure-mode-grouping-and-runbooks.md) | Failure-mode grouping and operator runbooks | ro | [0071](../product-specs/wip/0071-failure-mode-grouping-and-runbooks.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
 | [0072](./wip/0072-task-replay-and-diagnostics.md) | Task replay and diagnostic surface | ro | [0072](../product-specs/wip/0072-task-replay-and-diagnostics.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
 | [0073](./wip/0073-drive-mode-in-browser.md) | Drive mode — operator role takeover in the browser | ro | [0073](../product-specs/wip/0073-drive-mode-in-browser.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
+| [0075](./wip/0075-studio-architecture.md) | Studio Architecture | ro | — | — |
 
 ## Deprecated
 
