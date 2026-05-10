@@ -39,3 +39,5 @@ repos:
     default_branch: main
   - name: coder-system
     default_branch: main
+  - name: coder-product-template
+    default_branch: main
