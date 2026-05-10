@@ -219,3 +219,9 @@ adrs:
     date: 2026-05-09
     file: 0031-canonical-project-state-for-operator-surfaces.md
     relates_to_designs: ["0069", "0070", "0071", "0072", "0073"]
+- id: '0032'
+  title: Extend coder-core rather than spin up a sibling service
+  status: proposed
+  deciders:
+  - ro
+  file: 0032-extend-coder-core-rather-than-spin-up-a-sibling-service.md
