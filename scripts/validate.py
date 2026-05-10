@@ -44,7 +44,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # ``INDEX.md`` is the curated navigation entry point per artifact-type
 # folder (design 0062); narrative view over the registry, not a
 # knowledge artifact in its own right.
-SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "PHASES.md", "HISTORY.md", "INDEX.md", "GRAPH.md", "HOWTO.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "glossary.md", "_common.md"}
+SKIP_FILENAMES = {"README.md", "REGISTRY.md", "ROADMAP.md", "PHASES.md", "HISTORY.md", "INDEX.md", "GRAPH.md", "HOWTO.md", "_TEMPLATE.md", "AGENTS.md", "CLAUDE.md", "STUDIO_CHARTER.md", "glossary.md", "_common.md"}
 
 # Required frontmatter fields per artifact type. Spec 0043 adds
 # ``last_verified_at`` to every non-ADR type — ADRs are append-only
