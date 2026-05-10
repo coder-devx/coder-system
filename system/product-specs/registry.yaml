@@ -473,3 +473,10 @@ specs:
   folder: wip
   file: wip/0075-coder-studio-b2c-product-portfolio-operator-contract.md
   parent: knowledge-and-admin
+- id: '0076'
+  title: Spec-bound architect dispatch from admin UI
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0076-spec-bound-architect-dispatch-from-admin-ui.md
+  parent: pipeline-operations
