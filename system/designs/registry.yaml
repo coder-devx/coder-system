@@ -659,3 +659,11 @@ designs:
   - coder-core
   - coder-admin
   parent: ~
+- id: '0075'
+  title: Studio Architecture
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0075-studio-architecture.md
+  parent: system-overview
+  target_slug: studio-architecture
