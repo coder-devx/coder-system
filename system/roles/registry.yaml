@@ -76,6 +76,52 @@ roles:
     dir: consultant
     file: consultant/role.md
 
+  - id: founder
+    name: Founder
+    status: defined
+    owner: ro
+    dir: founder
+    file: founder/role.md
+    tasks:
+      - weekly_review
+      - idea_scan
+
+  - id: designer
+    name: Designer
+    status: defined
+    owner: ro
+    dir: designer
+    file: designer/role.md
+    tasks:
+      - design_sprint
+
+  - id: marketer
+    name: Marketer
+    status: defined
+    owner: ro
+    dir: marketer
+    file: marketer/role.md
+    tasks:
+      - content_sprint
+
+  - id: analyst
+    name: Analyst
+    status: defined
+    owner: ro
+    dir: analyst
+    file: analyst/role.md
+    tasks:
+      - funnel_review
+
+  - id: researcher
+    name: Researcher
+    status: defined
+    owner: ro
+    dir: researcher
+    file: researcher/role.md
+    tasks:
+      - synthesis
+
   # ── Proposed (review and accept/reject) ─────────────────────────
   - id: qa-engineer
     name: QA Engineer
