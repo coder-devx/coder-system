@@ -1604,8 +1604,8 @@ With this, spec 0074 is fully shipped — no deferred slices remain.
 > B2C product is launched yet — Phase A ends when the Founder
 > agent's idea selection has earned the operator's trust through a
 > dozen calibration cycles dogfooded inside Coder. See
-> [`STUDIO_ROADMAP.md`](../../STUDIO_ROADMAP.md) for the four-phase
-> arc and [`STUDIO_CHARTER.md`](../../STUDIO_CHARTER.md) for the
+> [`STUDIO_ROADMAP.md`](../STUDIO_ROADMAP.md) for the four-phase
+> arc and [`STUDIO_CHARTER.md`](../STUDIO_CHARTER.md) for the
 > what / what-not.
 
 The dispatch loop on 2026-05-10 surfaced two meta-system gaps that
