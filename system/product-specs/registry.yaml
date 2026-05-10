@@ -487,3 +487,10 @@ specs:
   folder: wip
   file: wip/0077-coder-studio-founder-role-phase-a.md
   parent: knowledge-and-admin
+- id: 0078
+  title: Spec-run lifecycle auto-bootstrap for fresh WIP specs
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md
+  parent: pipeline-operations
