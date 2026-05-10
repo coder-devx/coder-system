@@ -501,3 +501,10 @@ specs:
   folder: wip
   file: wip/0079-coder-studio-coder-product-template-repo-contract.md
   parent: knowledge-and-admin
+- id: 0080
+  title: Coder Studio — Stripe Connect and PostHog integration in coder-core
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0080-coder-studio-stripe-connect-and-posthog-integration-in-coder-core.md
+  parent: knowledge-and-admin
