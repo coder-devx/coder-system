@@ -17,6 +17,11 @@
 | `developer` | Developer | Executes tasks and writes tests. | [developer/](./developer/) | `implement` |
 | `reviewer` | Reviewer | Reviews completed tasks for code quality before PM acceptance. | [reviewer/](./reviewer/) | `review` |
 | `consultant` | Consultant | Async observer; improves prompts and process. | [consultant/](./consultant/) | — |
+| `founder` | Founder | Runs weekly portfolio review and idea-scoring for Studio B2C products. | [founder/](./founder/) | `weekly_review`, `idea_scan` |
+| `designer` | Designer | Produces visual asset artifacts and emits design_quality gate verdicts. | [designer/](./designer/) | `design_sprint` |
+| `marketer` | Marketer | Produces SEO content and Resend sends within opted-in lists. | [marketer/](./marketer/) | `content_sprint` |
+| `analyst` | Analyst | Interprets PostHog event streams and proposes experiments for Founder. | [analyst/](./analyst/) | `funnel_review` |
+| `researcher` | Researcher | Synthesises qualitative inputs (surveys, support threads) for Founder. | [researcher/](./researcher/) | `synthesis` |
 
 ## Proposed (review and accept/reject)
 
