@@ -648,7 +648,7 @@ when `settings.ship_draft_dispatch_enabled` is on.
   (ship-draft mode)
 - **ADR:** [`0015 — ship gate lives in the Coder pipeline`](../adrs/0015-ship-gate-in-coder-pipeline.md)
 
-### 0045 — Cold-start knowledge ingestion (scope sealed 2026-04-27)
+### 0045 — Cold-start knowledge ingestion (Stages 1–3 shipped; operational rollout pending)
 
 A oneshot Cloud Run Job `coder-core-cold-start-ingest` takes
 `(project_id, code_repo_url, code_repo_ref)` and produces a single
@@ -693,7 +693,21 @@ true → dry run on `coder` for calibration → Action sweep across
 existing repos → fleet flip → admin `/admin/cold-start` UI
 behind `VITE_COLD_START_ENABLED`.
 
-- **Status:** drafting
+- **Status:** Schemas, runtime, and Action distribution shipped 2026-05-06 / 2026-05-07 across six PRs:
+  [coder-core#138](https://github.com/coder-devx/coder-core/pull/138)
+  (architect cold-start mode + schema),
+  [coder-core#142](https://github.com/coder-devx/coder-core/pull/142)
+  (DB migrations + ORM + fleet config),
+  [coder-core#155](https://github.com/coder-devx/coder-core/pull/155)
+  (batch artifact aggregator),
+  [coder-core#147](https://github.com/coder-devx/coder-core/pull/147)
+  (scanner + batcher modules),
+  [coder-core#156](https://github.com/coder-devx/coder-core/pull/156)
+  (API endpoints + `coder project ingest` CLI subcommand),
+  [coder-system#79](https://github.com/coder-devx/coder-system/pull/79)
+  (`flip-cold-start-provenance` GitHub Action + fleet seed script).
+  Operational rollout (dry-run on `coder`, fleet flip, admin
+  `/admin/cold-start` UI behind `VITE_COLD_START_ENABLED`) still WIP.
 - **WIP:** 0045 · **Design:** 0045
 - **Extends:** `onboarding`, `knowledge-api`, `architect-worker`, `knowledge-freshness`
 
@@ -748,7 +762,7 @@ flip → admin tab → fallback removal after 1-week soak.
 - **WIP:** 0046 · **Design:** 0046
 - **Extends:** `knowledge-api`, `knowledge-freshness`, `architect-worker`, `reviewer-worker`, `team-manager-worker`, `pm-worker`
 
-### 0047 — Template schema migration (scope sealed 2026-04-27)
+### 0047 — Template schema migration (schema scaffold shipped; runner + endpoints WIP)
 
 A schema author writes one migration file in
 `coder-system/migrations/knowledge/00NN-<slug>.py` (or `.yaml` for
@@ -806,11 +820,19 @@ no migrations → `0001-baseline.py` no-op proves the path → `coder`
 opt-in synthetic test → Action distribution sweep → fleet flip →
 first real schema change → admin UI on.
 
-- **Status:** drafting
+- **Status:** Schema scaffold shipped 2026-05-06:
+  [coder-core#154](https://github.com/coder-devx/coder-core/pull/154)
+  (`template_migrations` table + `template_migrations_enabled` projects flag),
+  [coder-system#77](https://github.com/coder-devx/coder-system/pull/77)
+  (knowledge-repo artifacts for the migration spec). Runner Job
+  (`coder-core-template-migrate`), pure-SDK migration runtime,
+  `?min_schema_version=N` knowledge-API integration, per-repo
+  `record-template-migration.yml` Action, and admin
+  `/admin/template-migrations` matrix all still WIP.
 - **WIP:** 0047 · **Design:** 0047
 - **Extends:** `knowledge-api`, `onboarding`, `admin-panel`, `audit-log`
 
-### 0048 — Cross-project pattern surfacing (scope sealed 2026-04-27)
+### 0048 — Cross-project pattern surfacing (schema scaffold shipped; indexer + endpoints WIP)
 
 A read-only fleet-scoped pattern index produced by a daily Cloud
 Run Job `coder-core-pattern-indexer` (03:00 UTC + manual
@@ -877,7 +899,15 @@ flag → manual `coder`-only indexer run → second project added →
 architect consult flip on `coder` → fleet flip → PM/reviewer
 consult → first `template_drift`-driven 0047 promotion.
 
-- **Status:** drafting
+- **Status:** Schema scaffold shipped 2026-05-06:
+  [coder-core#141](https://github.com/coder-devx/coder-core/pull/141)
+  (`pattern_groups` + `pattern_index_runs` + `consultations` tables,
+  ORM models, tests),
+  [coder-system#74](https://github.com/coder-devx/coder-system/pull/74)
+  (`informed_by_patterns` template field + fleet-patterns runbook).
+  Indexer Cloud Run Job, admin endpoints, worker consult endpoint,
+  architect consult flow, and `/admin/patterns` SPA page all still
+  WIP.
 - **WIP:** 0048 · **Design:** 0048
 - **Extends:** `knowledge-api`, `admin-panel`, `architect-worker`, `pm-worker`, `team-manager-worker`, `reviewer-worker`, `developer-worker`, `multi-tenancy`, `knowledge-freshness`
 
@@ -891,7 +921,7 @@ in-flight reads first.
 
 ### In flight
 
-### 0052 — Managed-repo GitHub Action distribution (Stage 0 shipped 2026-04-27)
+### 0052 — Managed-repo GitHub Action distribution (Stages 0 + 1 shipped; Stage 2 WIP)
 
 Both 0045 (cold-start)
 and 0047 (template
@@ -923,16 +953,19 @@ managed-workflows sync`.
   [coder-core#33](https://github.com/coder-devx/coder-core/pull/33)
   (callback receiver scaffold + register_handler API +
   `CODER_MANAGED_WORKFLOWS_ENABLED` flag). Flag default-off in prod;
-  manifest is empty. Stage 1 (install_workflow / verify_workflow /
-  iter_managed_workflows helpers + `coder managed-workflows sync`
-  CLI) and Stage 2 (admin matrix endpoint + SPA page) still WIP.
-  When 0045 (cold-start) and 0047 (template migration) need to
-  ship their respective workflows, they consume this helper.
+  manifest is empty. **Stage 1 shipped**
+  ([coder-core#59](https://github.com/coder-devx/coder-core/pull/59)):
+  `install_workflow` / `verify_workflow` / `iter_managed_workflows`
+  helpers in `coder_core/integrations/managed_repo_workflows.py` plus
+  the `coder managed-workflows sync` CLI surface. **Stage 2 (admin
+  matrix endpoint + SPA page) still WIP.** When 0045 (cold-start)
+  and 0047 (template migration) need to ship their respective
+  workflows, they consume this helper.
 - **WIP:** 0052 · **Design:** 0052
 - **Extends:** `knowledge-api`, `onboarding`, `audit-log`, `admin-panel`
 - **Unblocks:** 0045, 0047
 
-### 0053 — Post-PR CI fix loop (Stage 0a shipped 2026-04-27)
+### 0053 — Post-PR CI fix loop (Stages 0a + 1 shipped; Stage 0b WIP)
 
 The developer-worker pipeline today ends at `succeeded|accepted`
 once internal pytest passes and the reviewer accepts the PR.
@@ -963,12 +996,20 @@ Re-uses 0052's HMAC-webhook pattern. Re-uses 0041's escalation
 path. Re-uses spec 0025's `validate_and_retry` shape for the
 worker re-prompt.
 
-- **Status:** Stage 0a shipped 2026-04-27 (coder-core#36 — preflight live in prod). Stage 0b (re-prompt path) and Stage 1 (post-PR CI watcher) still WIP.
+- **Status:** Stage 0a shipped 2026-04-27
+  ([coder-core#36](https://github.com/coder-devx/coder-core/pull/36) —
+  preflight live in prod). **Stage 1 shipped**
+  ([coder-core#55](https://github.com/coder-devx/coder-core/pull/55))
+  — `coder_core/workers/ci_watcher.py` registers a `check_run` handler
+  through the spec-0052 callback receiver, dedupes on
+  `(task_id, head_sha)`, dispatches a fix-up developer task up to
+  `MAX_CI_FIX_ATTEMPTS = 3`, and escalates via 0041 on exhaustion.
+  Stage 0b (preflight re-prompt path) still WIP.
 - **WIP:** 0053 · **Design:** 0053
 - **Extends:** `developer-worker`, `reviewer-worker`, `task-orchestration`, `audit-log`, `admin-panel`
 - **Closes:** the worker→CI feedback gap surfaced by PR #34
 
-### 0056 — Worker dispatch durability (drafting since 2026-04-28)
+### 0056 — Worker dispatch durability (Phases 1 + 2 shipped, soaking)
 
 Surfaced by the wave-2 dispatch session where ~100% of workers
 zombied — Cloud Run service-instance eviction killed the
@@ -978,14 +1019,35 @@ CPU bump to 4 vCPU, reaper apply mode, threshold 25→45 min); this
 spec is the architectural fix — workers run as their own Cloud Run
 Jobs rather than as asyncio tasks of the HTTP service.
 
-Status note: **drafting since 2026-04-28** — symptom is mitigated in
-production, so this hasn't been load-bearing. The right time to
-unblock is when (a) symptom recurs despite the workarounds, or (b)
-0050 / 0049 graduate from soak and free up dispatch attention. Until
-then, 0056 stays drafting; reraise during the next phase-planning
-sweep if the workarounds start showing strain.
+**Phase 1 shipped 2026-04-28** across three PRs:
+- [coder-core#48](https://github.com/coder-devx/coder-core/pull/48)
+  (1ab — Cloud Run Job entry + per-project feature flags),
+- [coder-core#49](https://github.com/coder-devx/coder-core/pull/49)
+  (1c — HTTP dispatch wired to optionally kick the Job),
+- [coder-core#50](https://github.com/coder-devx/coder-core/pull/50)
+  (1d+1e — CI job sync + admin endpoint to flip the per-project flag).
 
-- **Status:** drafting (5+ days)
+**Phase 2 shipped 2026-04-29**
+([coder-core#51](https://github.com/coder-devx/coder-core/pull/51) +
+[coder-core#52](https://github.com/coder-devx/coder-core/pull/52)) —
+architect uses the shared role-worker timeout; entry installs runtime
+singletons before dispatch.
+
+**Post-rollout fixes (2026-05-04 → 2026-05-06):**
+- [#96](https://github.com/coder-devx/coder-core/pull/96) — Job entry
+  drives `orchestrate_task` so multi-stage tasks complete.
+- [#98](https://github.com/coder-devx/coder-core/pull/98) — kick the
+  Cloud Run Job inline so HTTP 201 means a Job is queued.
+- [#153](https://github.com/coder-devx/coder-core/pull/153) —
+  `approve_plan` dispatches route through worker-via-job.
+- [#157](https://github.com/coder-devx/coder-core/pull/157) — zombie
+  reaper TOCTOU race no longer overwrites successful tasks.
+
+Currently soaking — no further phases planned. Memory still tracks
+an "orphan dispatch" cost signal; reconcile against the post-rollout
+fix landscape during the next phase-planning sweep before reopening.
+
+- **Status:** Phase 1 + Phase 2 shipped 2026-04-28 / 2026-04-29; soak in progress (post-rollout fixes through 2026-05-06)
 - **WIP:** 0056 · **Design:** 0056
 - **Extends:** `task-orchestration`, all role workers, `continuous-deployment`, `observability`
 
@@ -1064,7 +1126,7 @@ chicken-and-egg unblock).
 
 ---
 
-## Phase 9 — Operator surface coherence *(drafting since 2026-05-09)*
+## Phase 9 — Operator surface coherence *(in active rollout since 2026-05-09; 0070 / 0071 / 0072 / 0074 shipped, 0069 / 0073 partial)*
 
 > Make the admin panel a coherent operator console. One canonical
 > project-state read, one actionable landing surface, grouped failure
