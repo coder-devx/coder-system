@@ -6,7 +6,8 @@ status: active
 owner: ro
 created: 2026-04-19
 updated: 2026-04-21
-last_verified_at: 2026-04-21
+last_verified_at: 2026-05-10
+verified_by: knowledge-audit
 summary: Cross-tenant test harness.
 implements_specs: [tenant-isolation]
 decided_by: []
