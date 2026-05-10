@@ -1604,8 +1604,8 @@ With this, spec 0074 is fully shipped — no deferred slices remain.
 > B2C product is launched yet — Phase A ends when the Founder
 > agent's idea selection has earned the operator's trust through a
 > dozen calibration cycles dogfooded inside Coder. See
-> [`STUDIO_ROADMAP.md`](../../STUDIO_ROADMAP.md) for the four-phase
-> arc and [`STUDIO_CHARTER.md`](../../STUDIO_CHARTER.md) for the
+> [`STUDIO_ROADMAP.md`](../STUDIO_ROADMAP.md) for the four-phase
+> arc and [`STUDIO_CHARTER.md`](../STUDIO_CHARTER.md) for the
 > what / what-not.
 
 The dispatch loop on 2026-05-10 surfaced two meta-system gaps that
@@ -1650,7 +1650,7 @@ operator-facing UI.
 - ord 5 + ord 6 — depend on ord 4; will unblock once ord 4 lands.
 
 - **Status:** ord 1 + 2 + 3 + 7 shipped; ord 4 blocked on decomposition; ord 5 + 6 blocked behind ord 4.
-- **WIP:** 0075 · **Design:** 0075 · **ADRs:** [0032](../adrs/0032-project_kind-discriminator.md), [0033](../adrs/0033-stripe-connect-per-product.md), [0034](../adrs/0034-designer-launch-gate.md), [0035](../adrs/0035-founder-as-recurring-meta-orchestrator.md)
+- **WIP:** 0075 · **Design:** 0075 · **ADRs:** [0032](../adrs/0032-extend-coder-core-rather-than-spin-up-a-sibling-service.md), [0033](../adrs/0033-polymorphic-project-kind-over-a-separate-product-entity.md), [0034](../adrs/0034-studio-mode-in-coder-admin-over-a-separate-studio-spa.md), [0035](../adrs/0035-founder-as-a-recurring-job-over-a-normal-dispatcher-task.md)
 - **Extends:** `task-orchestration`, `admin-panel`, `worker-roles`, `self-healing`
 
 ### 0077 — Founder role Phase A — Cloud Run Job, idea cycle daily, portfolio review weekly *(in flight)*
@@ -1689,7 +1689,7 @@ the `coder-coder-github-pat` Secret Manager scope.
 **Blocked slices:** ord 2–6 (every dev task targets `coder-product-template` and fails with `failed to load system prompt: github request failed` until the repo exists). ord 7 (create-product bootstrap on coder-core: Cloudflare CNAME + Cloud Run deploy + `dns.yaml` write) is too big for the 40-min worker deadline; task `583e6fe1` died with no PR — needs operator decomposition.
 
 - **Status:** every executable slice operator-blocked; ord 1 (`repos.yaml` registration) ready to merge once the GitHub repo exists.
-- **WIP:** 0079 · **Design:** 0079 · **ADR:** [0036](../adrs/0036-template-repo-contract.md)
+- **WIP:** 0079 · **Design:** 0079 · **ADR:** [0036](../adrs/0036-renovate-style-pr-template-sync.md)
 
 ### 0080 — Stripe Connect + PostHog wired into coder-core *(in flight)*
 
