@@ -466,3 +466,10 @@ specs:
   - admin-panel
   - knowledge-api
   parent: ~
+- id: '0075'
+  title: Coder Studio — B2C product portfolio operator contract
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0075-coder-studio-b2c-product-portfolio-operator-contract.md
+  parent: knowledge-and-admin
