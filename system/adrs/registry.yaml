@@ -246,3 +246,10 @@ adrs:
     date: 2026-05-10
     file: 0035-founder-as-a-recurring-job-over-a-normal-dispatcher-task.md
     relates_to_designs: ["0075"]
+
+  - id: "0036"
+    title: Renovate-style automated PRs for template sync over git subtree or manual versioning
+    status: proposed
+    date: 2026-05-10
+    file: 0036-renovate-style-pr-template-sync.md
+    relates_to_designs: ["0079"]

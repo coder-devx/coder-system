@@ -667,11 +667,27 @@ designs:
   file: wip/0075-studio-architecture.md
   parent: system-overview
   target_slug: studio-architecture
-  - id: '0077'
-    title: Coder Studio — Founder Role Phase A
-    status: wip
-    owner: ro
-    folder: wip
-    file: wip/0077-coder-studio-founder-role-phase-a.md
-    parent: knowledge-and-admin
-    target_slug: studio-founder-phase-a
+- id: '0077'
+  title: Coder Studio — Founder Role Phase A
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0077-coder-studio-founder-role-phase-a.md
+  parent: knowledge-and-admin
+  target_slug: studio-founder-phase-a
+- id: '0079'
+  title: Coder Product Template Repo Contract
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0079-coder-product-template-repo-contract.md
+  parent: system-overview
+  target_slug: coder-product-template-contract
+- id: '0080'
+  title: Studio Stripe Connect and PostHog Integration
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0080-studio-stripe-posthog-integration.md
+  parent: knowledge-and-admin
+  target_slug: studio-stripe-posthog-integration
