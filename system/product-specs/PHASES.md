@@ -1439,7 +1439,7 @@ Cloud Run.
 - **Extends:** `admin-panel`, `task-orchestration`, `observability`
 - **Depends on:** 0069
 
-### 0073 — Drive mode in the browser (v1 + v2 shipped 2026-05-09 / 2026-05-10)
+### 0073 — Drive mode in the browser (v1 + v2 + v3 shipped 2026-05-09 / 2026-05-10)
 
 `/drive/{project}/{role}` route gives the operator an in-browser
 takeover surface using the same impersonation token machinery the
@@ -1478,19 +1478,32 @@ the surface, not the auth.
 - On failure: rose error line renders inline; the prompt stays in
   the textarea so the operator can edit + resend.
 
-**v3 deferred (audit-trail upgrade):** mint a role-scoped
-impersonation token via the existing
-`POST /v1/projects/{id}/impersonate/{role}` endpoint and swap the
-Authorization header for the dispatch + extend / revoke buttons
-in the banner + the per-session audit chain. v2 dispatches with
-the operator's existing admin JWT — works fine for the canonical
-project; v3 is purely the audit shape upgrade, not a functional
-change. Folding `SpecTalk.tsx` into this surface and rendering
-full conversation turns from an agent-invocation backend remains
-out of scope for v3 too — that needs the broader agent-invocation
-infra.
+**v3 shipped 2026-05-10** ([coder-core#200](https://github.com/coder-devx/coder-core/pull/200),
+[coder-admin#48](https://github.com/coder-devx/coder-admin/pull/48)):
 
-- **Status:** v1 + v2 shipped 2026-05-09 / 2026-05-10; v3 (impersonation token + audit chain) deferred
+- New `POST /v1/_admin/projects/{id}/impersonate/{role}` and
+  `POST /v1/_admin/projects/{id}/sessions/{token_id}/revoke` —
+  admin-JWT-callable mirrors of the existing project-API-key paths.
+  Audit rows record `actor=human:{admin_email}` +
+  `actor_method=admin_jwt` so the impersonation chain ties
+  downstream actions back to the operator (AC3).
+- Drive page mints a role-scoped broker token at session start and
+  uses it as the bearer for `createTask` (new `createTaskAs` helper
+  with explicit Authorization override). Resulting Task rows carry
+  `actor_token_id` linking to the `impersonation_sessions` row.
+- Banner gains a real `[revoke session]` button + token-id chip +
+  expiry countdown driven by `token.expires_at`. Composer is
+  locked while minting, after mint failure, and after revoke.
+- Per AGENTS.md auth/audit-soak rule, v3 stays in `wip/` until the
+  ≥30-day soak window closes; PHASES.md retains the entry. Extend
+  / re-mint is deferred — re-engagement requires re-mounting the
+  drive route.
+
+Folding `SpecTalk.tsx` into this surface and rendering full
+conversation turns from an agent-invocation backend remains out of
+scope — that needs the broader agent-invocation infra.
+
+- **Status:** v1 + v2 + v3 shipped 2026-05-09 / 2026-05-10; soaking through 2026-06-09 per the auth/audit ≥30-day rule
 - **WIP:** 0073 · **Design:** 0073 · **ADR:** [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - **Extends:** `impersonation`, `admin-panel`, `mcp-agent-interface`
 - **Depends on:** 0069
