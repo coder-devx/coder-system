@@ -667,3 +667,11 @@ designs:
   file: wip/0075-studio-architecture.md
   parent: system-overview
   target_slug: studio-architecture
+  - id: '0077'
+    title: Coder Studio — Founder Role Phase A
+    status: wip
+    owner: ro
+    folder: wip
+    file: wip/0077-coder-studio-founder-role-phase-a.md
+    parent: knowledge-and-admin
+    target_slug: studio-founder-phase-a
