@@ -1664,12 +1664,15 @@ fires `FOUNDER_CALIBRATION_COMPLETE` after the 12th cycle; pause
 
 - ord 0 (Phase A migration + domain models) — [coder-core#210](https://github.com/coder-devx/coder-core/pull/210), 2026-05-10.
 - ord 2 (idea-cycle worker + `NowItemRow` + `insert_now_item`) — [coder-core#213](https://github.com/coder-devx/coder-core/pull/213), 2026-05-10.
+- ord 4 (Founder REST API: run / pause / resume / cycles / approve-idea) — [coder-core#222](https://github.com/coder-devx/coder-core/pull/222), 2026-05-11. Companion stub PR [coder-core#224](https://github.com/coder-devx/coder-core/pull/224) registers the cycle-acknowledge route as 501 until ord 3 lands.
+- ord 5 (Founder Studio mode sidebar — `FounderHeader`, `FounderActivityPanel`, pause banner) — [coder-admin#52](https://github.com/coder-devx/coder-admin/pull/52), 2026-05-11.
+- ord 6 (`IdeaQueue` component + `FOUNDER_REVIEW` / `FOUNDER_CALIBRATION_COMPLETE` Now feed kinds) — [coder-admin#54](https://github.com/coder-devx/coder-admin/pull/54), 2026-05-11.
 
 **Held for design call:**
 
-- ord 3 (weekly_review handler + `FOUNDER_REVIEW` inbox flow) — [coder-core#216](https://github.com/coder-devx/coder-core/pull/216) opened by task `3733741a` but conflicts with #214's `_founder_reviews` (different source-of-truth tables: `founder_job_runs` vs `founder_cycles`). Operator design call needed.
+- ord 3 (weekly_review handler + `FOUNDER_REVIEW` inbox flow) — [coder-core#216](https://github.com/coder-devx/coder-core/pull/216) opened by task `3733741a` but conflicts with #214's `_founder_reviews` (different source-of-truth tables: `founder_job_runs` vs `founder_cycles`). Operator design call needed. ord 4's #224 registers a 501 stub for the `acknowledge` endpoint that this slice will fill in.
 
-- **Status:** ord 0 + 2 shipped; ord 3 awaiting design decision; ord 4–6 blocked.
+- **Status:** ord 0 + 2 + 4 + 5 + 6 shipped; only ord 3 outstanding (awaiting design decision).
 - **WIP:** 0077 · **Design:** 0077
 
 ### 0079 — `coder-product-template` repo contract *(blocked on operator)*
