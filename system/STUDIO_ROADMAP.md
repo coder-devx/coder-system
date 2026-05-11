@@ -19,7 +19,7 @@ and the per-ord ship/blocked breakdown live in
 |---|---|---|
 | 0075 | Studio operator contract — `project_kind`, sidebar, idea queue, kill workflow | ord 1 + 2 + 3 + 7 shipped; ord 4 needs decomposition; ord 5 + 6 blocked behind 4 |
 | 0076 | Spec-bound architect dispatch from admin UI | shipped |
-| 0077 | Founder role Phase A | ord 0 + 2 shipped; ord 3 awaiting design call (PR #216 conflict on `_founder_reviews`); ord 4–6 blocked |
+| 0077 | Founder role Phase A | ord 0 + 2 + 4 + 5 + 6 shipped (#210/#213/#222+#224/coder-admin#52/coder-admin#54); only ord 3 outstanding — awaiting design call on PR #216 conflict on `_founder_reviews` |
 | 0078 | spec_run lifecycle auto-bootstrap | shipped |
 | 0079 | `coder-product-template` repo contract | every executable slice operator-blocked on GitHub template-repo creation |
 | 0080 | Stripe Connect + PostHog wired into coder-core | ord 0 + 3 + 4 + 5 shipped; ord 2 (Stripe OAuth) needs decomposition; ord 6 blocked behind ord 2 |
