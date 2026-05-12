@@ -64,6 +64,7 @@ in each component's `## Evolution` section and in git.
 | [0084](./wip/0084-worker-pr-url-guard-against-duplicate-prs.md) | Worker pr_url guard against duplicate PRs on retry | ro | — |
 | [0085](./wip/0085-adr-id-allocation-race-under-concurrent-dispatch.md) | ADR ID allocation race under concurrent architect dispatch | ro | — |
 | [0086](./wip/0086-architect-adr-collision-failure-kind.md) | failure_kind tagging for architect ADR collisions inside the same batch | ro | — |
+| [0087](./wip/0087-lint-preflight-hard-worker-gate.md) | Lint pre-flight as a hard worker gate before PR open | ro | — |
 
 ## Deprecated
 
