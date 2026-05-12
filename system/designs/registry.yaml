@@ -707,3 +707,11 @@ designs:
   file: wip/0086-adr-collision-failure-kind-tagging.md
   parent: pipeline-operations
   target_slug: adr-collision-failure-kind
+- id: 0084
+  title: Worker PR-URL Guard Against Duplicate PRs on Retry
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0084-worker-pr-url-guard-against-duplicate-prs-on-retry.md
+  parent: pipeline-operations
+  target_slug: worker-pr-url-guard-duplicate-prs
