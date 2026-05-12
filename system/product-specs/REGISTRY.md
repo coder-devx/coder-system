@@ -58,6 +58,7 @@ in each component's `## Evolution` section and in git.
 | [0078](./wip/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md) | Spec-run lifecycle auto-bootstrap for fresh WIP specs | ro | — |
 | [0079](./wip/0079-coder-studio-coder-product-template-repo-contract.md) | Coder Studio — coder-product-template repo contract | ro | — |
 | [0080](./wip/0080-coder-studio-stripe-connect-and-posthog-integration-in-coder-core.md) | Coder Studio — Stripe Connect and PostHog integration in coder-core | ro | — |
+| [0081](./wip/0081-dispatcher-rekick-queued-executing-stuck-tasks.md) | Dispatcher re-kick for tasks stuck at queued/executing with no started_at | ro | — |
 
 ## Deprecated
 
