@@ -1665,12 +1665,9 @@ fires `FOUNDER_CALIBRATION_COMPLETE` after the 12th cycle; pause
 - ord 4 (Founder REST API: run / pause / resume / cycles / approve-idea) — [coder-core#222](https://github.com/coder-devx/coder-core/pull/222), 2026-05-11. Companion stub PR [coder-core#224](https://github.com/coder-devx/coder-core/pull/224) registers the cycle-acknowledge route as 501 until ord 3 lands.
 - ord 5 (Founder Studio mode sidebar — `FounderHeader`, `FounderActivityPanel`, pause banner) — [coder-admin#52](https://github.com/coder-devx/coder-admin/pull/52), 2026-05-11.
 - ord 6 (`IdeaQueue` component + `FOUNDER_REVIEW` / `FOUNDER_CALIBRATION_COMPLETE` Now feed kinds) — [coder-admin#54](https://github.com/coder-devx/coder-admin/pull/54), 2026-05-11.
+- ord 3 (real `run_weekly_review` handler — Markdown report assembling MRR / MTD cost / PostHog funnel / kill criteria for every active b2c_product project) — [coder-core#232](https://github.com/coder-devx/coder-core/pull/232), 2026-05-12. Salvaged from #216 (which would have stomped 10,000+ lines of work merged after its fork point). The `_founder_reviews` inbox-source question and the acknowledge-endpoint table were decoupled from this slice — #224's 501 stub for acknowledge stays; #214's `founder_job_runs`-based inbox source stays.
 
-**Held for design call:**
-
-- ord 3 (weekly_review handler + `FOUNDER_REVIEW` inbox flow) — [coder-core#216](https://github.com/coder-devx/coder-core/pull/216) opened by task `3733741a` but conflicts with #214's `_founder_reviews` (different source-of-truth tables: `founder_job_runs` vs `founder_cycles`). Operator design call needed. ord 4's #224 registers a 501 stub for the `acknowledge` endpoint that this slice will fill in.
-
-- **Status:** ord 0 + 2 + 4 + 5 + 6 shipped; only ord 3 outstanding (awaiting design decision).
+- **Status:** **all 6 ords shipped.**
 - **WIP:** 0077 · **Design:** 0077
 
 ### 0079 — `coder-product-template` repo contract *(blocked on operator)*
@@ -1679,21 +1676,17 @@ Next.js + Tailwind + Stripe + PostHog + Resend + legal pages
 pre-wired; eight routes; `theme.config.ts`; Lighthouse <2 s budget.
 The template is the scaffold every new B2C product instantiates from.
 
-**Operator-blocked:** the worker bot lacks `administration:write` on
-the `coder-devx` org, so it cannot create the GitHub template repo.
-[coder-system#108](https://github.com/coder-devx/coder-system/pull/108)
-holds the `repos.yaml` registration; merge gates on the operator
-running `gh api -X POST /orgs/coder-devx/repos -f
-name=coder-product-template -f private=true` and adding the repo to
-the `coder-coder-github-pat` Secret Manager scope.
-
 **Shipped slices:**
 
+- ord 1 (`repos.yaml` registration of `coder-product-template`) — [coder-system#108](https://github.com/coder-devx/coder-system/pull/108), 2026-05-12. Template repo created the same day (`coder-devx` turned out to be a User account, not an org — `gh repo create` succeeded with my token's `repo` scope; marked as template via `PATCH is_template=true`; seeded with a placeholder README).
+- ord 2 (Next.js App Router scaffold — 8 pages, `theme.config`, layout) — [coder-product-template#1](https://github.com/coder-devx/coder-product-template/pull/1), 2026-05-12.
+- ord 3 (Stripe Connect checkout with graceful degradation) — [coder-product-template#3](https://github.com/coder-devx/coder-product-template/pull/3), 2026-05-12.
+- ord 4 (PostHog analytics with DNT/EU compliance) — [coder-product-template#4](https://github.com/coder-devx/coder-product-template/pull/4), 2026-05-12.
+- ord 5 (Resend contact API + sliding-window rate limiter) — [coder-product-template#5](https://github.com/coder-devx/coder-product-template/pull/5), 2026-05-12.
+- ord 6 (Lighthouse CI — LCP < 2 s on mobile cold-load) — [coder-product-template#2](https://github.com/coder-devx/coder-product-template/pull/2), 2026-05-12.
 - ord 7 (create-product bootstrap library — Cloudflare integration + Cloud Build + Cloud Run deploy + `dns.yaml` write) — [coder-core#231](https://github.com/coder-devx/coder-core/pull/231), 2026-05-12. Library only — admin endpoint deferred to a follow-up. The worker's first attempt (#229) was closed because it stomped 1,256 lines of work merged after its fork point; the cherry-picked salvage went in cleanly.
 
-**Blocked slices:** ord 2–6 (every dev task targets `coder-product-template` and fails with `failed to load system prompt: github request failed` until the repo exists).
-
-- **Status:** ord 7 shipped; ord 2–6 operator-blocked on template repo creation; ord 1 (`repos.yaml` registration) ready to merge once the GitHub repo exists.
+- **Status:** **all 7 ords shipped.**
 - **WIP:** 0079 · **Design:** 0079 · **ADR:** [0036](../adrs/0036-renovate-style-pr-template-sync.md)
 
 ### 0080 — Stripe Connect + PostHog wired into coder-core *(in flight)*
@@ -1741,10 +1734,8 @@ ADR-collision tagging (#207) along the way.
 - **Status:** shipped via [coder-core#203](https://github.com/coder-devx/coder-core/pull/203), [coder-core#204](https://github.com/coder-devx/coder-core/pull/204), [coder-core#205](https://github.com/coder-devx/coder-core/pull/205), [coder-core#206](https://github.com/coder-devx/coder-core/pull/206), [coder-core#207](https://github.com/coder-devx/coder-core/pull/207), [coder-core#208](https://github.com/coder-devx/coder-core/pull/208), [coder-admin#50](https://github.com/coder-devx/coder-admin/pull/50), [coder-admin#51](https://github.com/coder-devx/coder-admin/pull/51) on 2026-05-10.
 - **WIP:** 0078
 
-### Operator-only items blocking Phase A close-out
+### Phase A close-out
 
-1. **Create `coder-devx/coder-product-template` GitHub template repo** + add it to the `coder-coder-github-pat` Secret Manager scope. Unblocks 0079 ord 2–6 (5 dev tasks).
-2. **Decompose three tasks too big for the 40-min worker deadline:** 0075 ord 4 (`5f2c7bdb`, kill_pipeline + SSE + sunset), 0079 ord 7 (`583e6fe1`, Cloudflare/DNS bootstrap), 0080 ord 2 (`183fc445`, Stripe Connect Express OAuth).
-3. **Resolve `_founder_reviews` design conflict** between merged #214 (sources from `founder_job_runs.report_uri`) and pending #216 (sources from `founder_cycles.report_body` + `acknowledge` endpoint). Both PRs from parallel workers without visibility into each other's commits.
+All six Phase A WIPs are shipped (2026-05-12). The remaining gate per the charter is the **Founder calibration dogfood** — twelve idea-pipeline cycles inside Coder with the operator in the loop until its judgment matches expectations. Phase B does not start until that cycle is done.
 
 ---
