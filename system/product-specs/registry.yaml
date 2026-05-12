@@ -543,3 +543,10 @@ specs:
   folder: wip
   file: wip/0085-adr-id-allocation-race-under-concurrent-dispatch.md
   parent: pipeline-operations
+- id: 0086
+  title: failure_kind tagging for architect ADR collisions inside the same batch
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0086-architect-adr-collision-failure-kind.md
+  parent: pipeline-operations
