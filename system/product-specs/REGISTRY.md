@@ -59,6 +59,7 @@ in each component's `## Evolution` section and in git.
 | [0079](./wip/0079-coder-studio-coder-product-template-repo-contract.md) | Coder Studio — coder-product-template repo contract | ro | — |
 | [0080](./wip/0080-coder-studio-stripe-connect-and-posthog-integration-in-coder-core.md) | Coder Studio — Stripe Connect and PostHog integration in coder-core | ro | — |
 | [0081](./wip/0081-dispatcher-rekick-queued-executing-stuck-tasks.md) | Dispatcher re-kick for tasks stuck at queued/executing with no started_at | ro | — |
+| [0082](./wip/0082-alembic-head-conflict-detection-in-developer-worker.md) | Alembic head-conflict detection in the developer worker | ro | — |
 
 ## Deprecated
 

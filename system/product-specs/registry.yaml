@@ -515,3 +515,10 @@ specs:
   folder: wip
   file: wip/0081-dispatcher-rekick-queued-executing-stuck-tasks.md
   parent: pipeline-operations
+- id: 0082
+  title: Alembic head-conflict detection in the developer worker
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0082-alembic-head-conflict-detection-in-developer-worker.md
+  parent: pipeline-operations
