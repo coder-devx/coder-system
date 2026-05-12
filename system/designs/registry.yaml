@@ -699,3 +699,11 @@ designs:
   file: wip/0085-adr-id-allocation-race-claim-on-dispatch.md
   parent: pipeline-operations
   target_slug: adr-id-allocation-claim-on-dispatch
+- id: 0086
+  title: ADR Collision failure_kind Tagging
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0086-adr-collision-failure-kind-tagging.md
+  parent: pipeline-operations
+  target_slug: adr-collision-failure-kind
