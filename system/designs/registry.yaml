@@ -739,3 +739,11 @@ designs:
   file: wip/0082-alembic-head-conflict-detection-and-deploy-migrate-paging.md
   parent: pipeline-operations
   target_slug: alembic-head-conflict-detection
+- id: 0087
+  title: Lint pre-flight hard gate
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0087-lint-pre-flight-hard-gate.md
+  parent: pipeline-operations
+  target_slug: lint-preflight-hard-gate
