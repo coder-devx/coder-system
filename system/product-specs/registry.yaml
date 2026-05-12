@@ -536,3 +536,10 @@ specs:
   folder: wip
   file: wip/0084-worker-pr-url-guard-against-duplicate-prs.md
   parent: pipeline-operations
+- id: 0085
+  title: ADR ID allocation race under concurrent architect dispatch
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0085-adr-id-allocation-race-under-concurrent-dispatch.md
+  parent: pipeline-operations
