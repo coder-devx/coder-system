@@ -691,3 +691,11 @@ designs:
   file: wip/0080-studio-stripe-posthog-integration.md
   parent: knowledge-and-admin
   target_slug: studio-stripe-posthog-integration
+- id: 0085
+  title: ADR ID Allocation Race — Claim-on-Dispatch
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0085-adr-id-allocation-race-claim-on-dispatch.md
+  parent: pipeline-operations
+  target_slug: adr-id-allocation-claim-on-dispatch
