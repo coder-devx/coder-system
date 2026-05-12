@@ -723,3 +723,11 @@ designs:
   file: wip/0083-plan-unblock-retry-chain-awareness.md
   parent: pipeline-operations
   target_slug: plan-unblock-retry-chain
+- id: 0081
+  title: Dispatcher re-kick for tasks stuck at queued/executing
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0081-dispatcher-re-kick-for-tasks-stuck-at-queued-executing.md
+  parent: pipeline-operations
+  target_slug: dispatcher-rekick-stuck-executing-tasks
