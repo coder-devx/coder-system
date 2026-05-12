@@ -522,3 +522,10 @@ specs:
   folder: wip
   file: wip/0082-alembic-head-conflict-detection-in-developer-worker.md
   parent: pipeline-operations
+- id: 0083
+  title: Plan-unblock check accounts for retry chain, not just original task's stage
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0083-plan-unblock-checks-retry-chain.md
+  parent: pipeline-operations
