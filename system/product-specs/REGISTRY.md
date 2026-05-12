@@ -62,6 +62,7 @@ in each component's `## Evolution` section and in git.
 | [0082](./wip/0082-alembic-head-conflict-detection-in-developer-worker.md) | Alembic head-conflict detection in the developer worker | ro | — |
 | [0083](./wip/0083-plan-unblock-checks-retry-chain.md) | Plan-unblock check accounts for retry chain, not just original task's stage | ro | — |
 | [0084](./wip/0084-worker-pr-url-guard-against-duplicate-prs.md) | Worker pr_url guard against duplicate PRs on retry | ro | — |
+| [0085](./wip/0085-adr-id-allocation-race-under-concurrent-dispatch.md) | ADR ID allocation race under concurrent architect dispatch | ro | — |
 
 ## Deprecated
 
