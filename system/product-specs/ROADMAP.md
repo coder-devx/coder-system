@@ -16,19 +16,21 @@ is in an approval/override role, not a task-authoring role.
 pipeline run advances to `spec_approval` → ready for human approval →
 chain auto-creates architect task.
 
-**Latest:** 2026-05-10 — Studio Phase A (B2C product portfolio
-extension to coder-core) in active build. Six WIPs filed: 0075
-(operator contract / `project_kind` routing / kill workflow), 0077
-(Founder role Phase A), 0079 (`coder-product-template` repo
-contract), 0080 (Stripe Connect + PostHog wired into coder-core),
+**Latest:** 2026-05-12 — **Studio Phase A complete.** All six WIPs
+shipped: 0075 (operator contract / `project_kind` routing / kill
+workflow), 0077 (Founder role Phase A), 0079
+(`coder-product-template` repo contract + Cloudflare/Cloud-Build
+bootstrap), 0080 (Stripe Connect + PostHog wired into coder-core),
 plus two meta-system gaps surfaced by the dispatch loop — 0076
 (spec-bound architect dispatch from admin UI) and 0078 (spec_run
-lifecycle auto-bootstrap for fresh wip specs). Phase 9 (operator
-surface coherence, opened 2026-05-09) all six WIPs shipped on
-2026-05-09 / 2026-05-10. Per-WIP detail in [`PHASES.md`](./PHASES.md).
-Per-phase Studio scope in [`../STUDIO_ROADMAP.md`](../STUDIO_ROADMAP.md).
-Shipped history lives in `git log` and in the `## Evolution`
-sections of individual `active/` artifacts.
+lifecycle auto-bootstrap). Phase 9 (operator surface coherence)
+all six WIPs shipped 2026-05-09 / 2026-05-10. Per-WIP detail in
+[`PHASES.md`](./PHASES.md). Per-phase Studio scope in
+[`../STUDIO_ROADMAP.md`](../STUDIO_ROADMAP.md). Phase A close-out
+gate per the charter: Founder calibration dogfood — twelve
+idea-pipeline cycles inside Coder with the operator in the loop
+until its judgment matches expectations. Phase B does not start
+until that cycle is done.
 
 ---
 
@@ -91,7 +93,7 @@ acceptance criteria.
 | 7 | Trusted Autonomy | 0041 + 0042 shipped; 0040 stage-2 shadow; 0049 + 0050 stages 3–4 soaking |
 | 8 | Knowledge Depth | 0043 + 0044 shipped; 0045–0048 in flight |
 | 9 | Operator surface coherence | 0069–0074 all shipped 2026-05-09 / 2026-05-10 |
-| A | Studio — Foundations and Founder | 0075 / 0077 / 0079 / 0080 in flight; 0076 / 0078 meta-system gaps shipped (opened 2026-05-10) |
+| A | Studio — Foundations and Founder | **complete** 2026-05-12 — all six WIPs shipped; close-out gate is Founder calibration dogfood (12 idea-pipeline cycles inside Coder) |
 | Cross-cutting | Pre-work that unblocks the phases | see PHASES.md "Cross-cutting pre-work" |
 
 ---
