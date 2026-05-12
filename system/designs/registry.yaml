@@ -731,3 +731,11 @@ designs:
   file: wip/0081-dispatcher-re-kick-for-tasks-stuck-at-queued-executing.md
   parent: pipeline-operations
   target_slug: dispatcher-rekick-stuck-executing-tasks
+- id: 0082
+  title: Alembic Head-Conflict Detection and Deploy-Migrate Paging
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0082-alembic-head-conflict-detection-and-deploy-migrate-paging.md
+  parent: pipeline-operations
+  target_slug: alembic-head-conflict-detection
