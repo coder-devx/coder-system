@@ -253,3 +253,10 @@ adrs:
     date: 2026-05-10
     file: 0036-renovate-style-pr-template-sync.md
     relates_to_designs: ["0079"]
+  - id: '0037'
+    title: Deploy-migrate failure paging via coder-core webhook over direct CI PagerDuty
+      call
+    status: proposed
+    deciders:
+    - ro
+    file: 0037-deploy-migrate-failure-paging-via-coder-core-webhook-over-direct-ci-pagerduty-call.md
