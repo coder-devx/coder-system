@@ -715,3 +715,11 @@ designs:
   file: wip/0084-worker-pr-url-guard-against-duplicate-prs-on-retry.md
   parent: pipeline-operations
   target_slug: worker-pr-url-guard-duplicate-prs
+- id: 0083
+  title: Plan-unblock retry-chain awareness
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0083-plan-unblock-retry-chain-awareness.md
+  parent: pipeline-operations
+  target_slug: plan-unblock-retry-chain
