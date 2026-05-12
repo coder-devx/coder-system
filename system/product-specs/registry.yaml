@@ -508,3 +508,10 @@ specs:
   folder: wip
   file: wip/0080-coder-studio-stripe-connect-and-posthog-integration-in-coder-core.md
   parent: knowledge-and-admin
+- id: 0081
+  title: Dispatcher re-kick for tasks stuck at queued/executing with no started_at
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0081-dispatcher-rekick-queued-executing-stuck-tasks.md
+  parent: pipeline-operations
