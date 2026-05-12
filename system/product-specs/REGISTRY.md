@@ -61,6 +61,7 @@ in each component's `## Evolution` section and in git.
 | [0081](./wip/0081-dispatcher-rekick-queued-executing-stuck-tasks.md) | Dispatcher re-kick for tasks stuck at queued/executing with no started_at | ro | — |
 | [0082](./wip/0082-alembic-head-conflict-detection-in-developer-worker.md) | Alembic head-conflict detection in the developer worker | ro | — |
 | [0083](./wip/0083-plan-unblock-checks-retry-chain.md) | Plan-unblock check accounts for retry chain, not just original task's stage | ro | — |
+| [0084](./wip/0084-worker-pr-url-guard-against-duplicate-prs.md) | Worker pr_url guard against duplicate PRs on retry | ro | — |
 
 ## Deprecated
 
