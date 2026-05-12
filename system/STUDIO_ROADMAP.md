@@ -9,7 +9,7 @@
 > per-phase scope is a starting hypothesis — phases B–D will be
 > revised based on what Phase A reveals.
 
-## Phase A live status (2026-05-11)
+## Phase A live status (2026-05-12)
 
 Six WIPs filed 2026-05-10 cover the Phase A surface. Per-WIP detail
 and the per-ord ship/blocked breakdown live in
@@ -17,20 +17,21 @@ and the per-ord ship/blocked breakdown live in
 
 | Spec | Title | State |
 |---|---|---|
-| 0075 | Studio operator contract — `project_kind`, sidebar, idea queue, kill workflow | ord 1 + 2 + 3 + 7 shipped; ord 4 needs decomposition; ord 5 + 6 blocked behind 4 |
+| 0075 | Studio operator contract — `project_kind`, sidebar, idea queue, kill workflow | **all 7 ords shipped** (#212/#214/#219/#227/#228/admin#58/coder-system#109) |
 | 0076 | Spec-bound architect dispatch from admin UI | shipped |
-| 0077 | Founder role Phase A | ord 0 + 2 + 4 + 5 + 6 shipped (#210/#213/#222+#224/coder-admin#52/coder-admin#54); only ord 3 outstanding — awaiting design call on PR #216 conflict on `_founder_reviews` |
+| 0077 | Founder role Phase A | ord 0 + 2 + 4 + 5 + 6 shipped (#210/#213/#222+#224/admin#52/admin#54); only ord 3 outstanding — awaiting design call on [coder-core#216](https://github.com/coder-devx/coder-core/pull/216) conflict on `_founder_reviews` |
 | 0078 | spec_run lifecycle auto-bootstrap | shipped |
-| 0079 | `coder-product-template` repo contract | every executable slice operator-blocked on GitHub template-repo creation |
-| 0080 | Stripe Connect + PostHog wired into coder-core | ord 0 + 3 + 4 + 5 shipped; ord 2 (Stripe OAuth) needs decomposition; ord 6 blocked behind ord 2 |
+| 0079 | `coder-product-template` repo contract | ord 7 (Cloudflare/Cloud-Build bootstrap library) shipped via [coder-core#231](https://github.com/coder-devx/coder-core/pull/231); ord 1 + 2–6 still operator-blocked on GitHub template-repo creation |
+| 0080 | Stripe Connect + PostHog wired into coder-core | **all 6 ords shipped** (#209/#225/#218/#217/#220/admin#56) |
 
-**Operator-only items blocking Phase A close-out:**
+**Phase A close-out remainder — operator-only:**
 
 1. Create `coder-devx/coder-product-template` GitHub template repo + scope `coder-coder-github-pat` to it (unblocks 0079 ord 2–6).
-2. Decompose three tasks that exceed the 40-min worker deadline: 0075 ord 4 (kill_pipeline + SSE + sunset), 0079 ord 7 (Cloudflare/DNS bootstrap), 0080 ord 2 (Stripe Connect Express OAuth).
-3. Resolve the `_founder_reviews` design conflict on PR [coder-core#216](https://github.com/coder-devx/coder-core/pull/216) — `founder_job_runs.report_uri` (merged #214) vs `founder_cycles.report_body` + acknowledge endpoint.
+2. Resolve the `_founder_reviews` design conflict on [coder-core#216](https://github.com/coder-devx/coder-core/pull/216) — `founder_job_runs.report_uri` (merged #214) vs `founder_cycles.report_body` + acknowledge endpoint (the missing 0077 ord 3).
 
-Once those land, the Founder calibration dogfood (idea-pipeline cycles inside Coder) is the Phase A close-out gate per the charter rule that "phase N+1 doesn't start until one product is fully running on phase N."
+Note: the three "too big for the 40-min worker deadline" tasks flagged on 2026-05-10 (0075 ord 4 kill_pipeline, 0080 ord 2 Stripe OAuth, 0079 ord 7 Cloudflare bootstrap) all completed on second attempts after `action: resume` overrides on 2026-05-12. The 40-min deadline is a probabilistic ceiling, not a hard wall — re-running the same task often gets through on the second go.
+
+Once the operator items land, the Founder calibration dogfood (idea-pipeline cycles inside Coder) is the Phase A close-out gate per the charter rule that "phase N+1 doesn't start until one product is fully running on phase N."
 
 ## What we're building
 

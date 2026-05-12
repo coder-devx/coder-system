@@ -1642,14 +1642,12 @@ operator-facing UI.
 - ord 1 (DB tables + STUDIO_ENABLED flag) — [coder-core#212](https://github.com/coder-devx/coder-core/pull/212), 2026-05-10.
 - ord 2 (Founder recurring job — AC3 tick + admin endpoints + inbox item) — [coder-core#214](https://github.com/coder-devx/coder-core/pull/214), 2026-05-10.
 - ord 3 (Designer launch-gate + asset_artifact GCS integration + override API) — [coder-core#219](https://github.com/coder-devx/coder-core/pull/219), 2026-05-10.
+- ord 4 (kill_pipeline cascade + SSE events + sunset endpoints) — [coder-core#227](https://github.com/coder-devx/coder-core/pull/227), 2026-05-12. Earlier worker run died at the 40-min deadline; second attempt completed.
+- ord 5 (Studio REST API: idea queue, portfolio, product detail, Stripe Connect) — [coder-core#228](https://github.com/coder-devx/coder-core/pull/228), 2026-05-12.
+- ord 6 (Studio UI — idea queue, portfolio, product detail pages) — [coder-admin#58](https://github.com/coder-devx/coder-admin/pull/58), 2026-05-12.
 - ord 7 (five Studio role definitions in `system/roles/`) — [coder-system#109](https://github.com/coder-devx/coder-system/pull/109), 2026-05-10.
 
-**Blocked slices:**
-
-- ord 4 (kill_pipeline cascade + SSE streaming + sunset trigger endpoints) — task `5f2c7bdb` died at the 40-min worker deadline with no PR; needs operator decomposition into smaller tasks.
-- ord 5 + ord 6 — depend on ord 4; will unblock once ord 4 lands.
-
-- **Status:** ord 1 + 2 + 3 + 7 shipped; ord 4 blocked on decomposition; ord 5 + 6 blocked behind ord 4.
+- **Status:** **all 7 ords shipped.**
 - **WIP:** 0075 · **Design:** 0075 · **ADRs:** [0032](../adrs/0032-extend-coder-core-rather-than-spin-up-a-sibling-service.md), [0033](../adrs/0033-polymorphic-project-kind-over-a-separate-product-entity.md), [0034](../adrs/0034-studio-mode-in-coder-admin-over-a-separate-studio-spa.md), [0035](../adrs/0035-founder-as-a-recurring-job-over-a-normal-dispatcher-task.md)
 - **Extends:** `task-orchestration`, `admin-panel`, `worker-roles`, `self-healing`
 
@@ -1689,9 +1687,13 @@ running `gh api -X POST /orgs/coder-devx/repos -f
 name=coder-product-template -f private=true` and adding the repo to
 the `coder-coder-github-pat` Secret Manager scope.
 
-**Blocked slices:** ord 2–6 (every dev task targets `coder-product-template` and fails with `failed to load system prompt: github request failed` until the repo exists). ord 7 (create-product bootstrap on coder-core: Cloudflare CNAME + Cloud Run deploy + `dns.yaml` write) is too big for the 40-min worker deadline; task `583e6fe1` died with no PR — needs operator decomposition.
+**Shipped slices:**
 
-- **Status:** every executable slice operator-blocked; ord 1 (`repos.yaml` registration) ready to merge once the GitHub repo exists.
+- ord 7 (create-product bootstrap library — Cloudflare integration + Cloud Build + Cloud Run deploy + `dns.yaml` write) — [coder-core#231](https://github.com/coder-devx/coder-core/pull/231), 2026-05-12. Library only — admin endpoint deferred to a follow-up. The worker's first attempt (#229) was closed because it stomped 1,256 lines of work merged after its fork point; the cherry-picked salvage went in cleanly.
+
+**Blocked slices:** ord 2–6 (every dev task targets `coder-product-template` and fails with `failed to load system prompt: github request failed` until the repo exists).
+
+- **Status:** ord 7 shipped; ord 2–6 operator-blocked on template repo creation; ord 1 (`repos.yaml` registration) ready to merge once the GitHub repo exists.
 - **WIP:** 0079 · **Design:** 0079 · **ADR:** [0036](../adrs/0036-renovate-style-pr-template-sync.md)
 
 ### 0080 — Stripe Connect + PostHog wired into coder-core *(in flight)*
@@ -1704,16 +1706,13 @@ the 6-hour funnel poll job.
 **Shipped slices:**
 
 - ord 0 (Stripe Connect + PostHog migration + domain models) — [coder-core#209](https://github.com/coder-devx/coder-core/pull/209), 2026-05-10.
+- ord 2 (Stripe Connect Express OAuth flow + disconnect, AC1 / AC6) — [coder-core#225](https://github.com/coder-devx/coder-core/pull/225), 2026-05-12. Earlier worker run died at the 40-min deadline; second attempt completed.
 - ord 3 (Stripe webhook + MRR computation, AC2 / AC3 / AC6) — [coder-core#218](https://github.com/coder-devx/coder-core/pull/218), 2026-05-10.
 - ord 4 (PostHog configure / disconnect / snapshot endpoints + 6-hour funnel poll job) — [coder-core#217](https://github.com/coder-devx/coder-core/pull/217), 2026-05-10.
 - ord 5 (`mrr_cents` + `is_loss_making` on the budget endpoint, AC3 / AC7) — [coder-core#220](https://github.com/coder-devx/coder-core/pull/220), 2026-05-10.
+- ord 6 (Stripe Connect + PostHog integration chips on ProjectDetail) — [coder-admin#56](https://github.com/coder-devx/coder-admin/pull/56), 2026-05-12.
 
-**Blocked slices:**
-
-- ord 2 (Stripe Connect Express OAuth flow) — task `183fc445` died at the 40-min worker deadline with no PR; needs operator decomposition.
-- ord 6 (admin UI for Stripe + PostHog connection state) — depends on ord 2 + 3 + 4 + 5; ord 3/4/5 done, blocked behind ord 2.
-
-- **Status:** ord 0 + 3 + 4 + 5 shipped; ord 2 blocked on decomposition; ord 6 blocked behind ord 2.
+- **Status:** **all 6 ords shipped.**
 - **WIP:** 0080 · **Design:** 0080
 
 ### 0076 — Spec-bound architect dispatch from admin UI *(shipped 2026-05-10)*
