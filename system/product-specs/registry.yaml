@@ -578,3 +578,10 @@ specs:
   folder: wip
   file: wip/0090-deploy-chain-resilience-to-test-flake.md
   parent: pipeline-operations
+- id: 0091
+  title: Diagnose and fix the caplog inter-test pollution affecting 4 tests
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0091-conftest-log-pollution-root-cause.md
+  parent: pipeline-operations

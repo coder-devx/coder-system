@@ -68,6 +68,7 @@ in each component's `## Evolution` section and in git.
 | [0088](./wip/0088-worker-prod-creds-isolation.md) | Developer-worker subprocesses must never inherit prod DB credentials | ro | — |
 | [0089](./wip/0089-branch-protection-enforcement-on-coder-core-main.md) | Branch-protection enforcement on coder-core/main blocks all direct pushes | ro | — |
 | [0090](./wip/0090-deploy-chain-resilience-to-test-flake.md) | Deploy chain must not be hostage to a single flaky test | ro | — |
+| [0091](./wip/0091-conftest-log-pollution-root-cause.md) | Diagnose and fix the caplog inter-test pollution affecting 4 tests | ro | — |
 
 ## Deprecated
 
