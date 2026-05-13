@@ -75,6 +75,9 @@ Logical components of the Coder system as it exists today.
 | [0085](./wip/0085-adr-id-allocation-race-claim-on-dispatch.md) | ADR ID Allocation Race — Claim-on-Dispatch | ro | — | — |
 | [0086](./wip/0086-adr-collision-failure-kind-tagging.md) | ADR Collision failure_kind Tagging | ro | — | — |
 | [0087](./wip/0087-lint-pre-flight-hard-gate.md) | Lint pre-flight hard gate | ro | — | — |
+| [0088](./wip/0088-worker-prod-credentials-isolation.md) | Worker Prod-Credentials Isolation | ro | — | — |
+| [0090](./wip/0090-deploy-chain-flake-resilience.md) | Deploy-chain flake resilience | ro | — | — |
+| [0091](./wip/0091-caplog-inter-test-pollution-bisect-fix-and-harness-regression.md) | Caplog inter-test pollution: bisect, fix, and harness regression | ro | — | — |
 
 ## Deprecated
 
