@@ -391,20 +391,20 @@ specs:
   - onboarding
   - audit-log
   - admin-panel
-- id: '0069'
+- id: 0069
   title: Canonical project-state endpoint and consumers
   status: wip
   owner: ro
   folder: wip
   file: wip/0069-canonical-project-state.md
   served_by_designs:
-  - '0069'
+  - 0069
   related_specs:
   - admin-panel
   - observability
-  parent: ~
+  parent: null
 - id: '0070'
-  title: Now — operator's actionable queue as default landing
+  title: "Now \u2014 operator's actionable queue as default landing"
   status: wip
   owner: ro
   folder: wip
@@ -415,7 +415,7 @@ specs:
   - admin-panel
   - escalations
   - self-healing
-  parent: ~
+  parent: null
 - id: '0071'
   title: Failure-mode grouping and operator runbooks
   status: wip
@@ -428,7 +428,7 @@ specs:
   - self-healing
   - escalations
   - observability
-  parent: ~
+  parent: null
 - id: '0072'
   title: Task replay and diagnostic surface
   status: wip
@@ -441,9 +441,9 @@ specs:
   - admin-panel
   - task-orchestration
   - observability
-  parent: ~
+  parent: null
 - id: '0073'
-  title: Drive mode — operator role takeover in the browser
+  title: "Drive mode \u2014 operator role takeover in the browser"
   status: wip
   owner: ro
   folder: wip
@@ -454,7 +454,7 @@ specs:
   - impersonation
   - admin-panel
   - mcp-agent-interface
-  parent: ~
+  parent: null
 - id: '0074'
   title: SpecCompose write endpoint and draft hand-off to Now
   status: wip
@@ -465,9 +465,9 @@ specs:
   related_specs:
   - admin-panel
   - knowledge-api
-  parent: ~
+  parent: null
 - id: '0075'
-  title: Coder Studio — B2C product portfolio operator contract
+  title: "Coder Studio \u2014 B2C product portfolio operator contract"
   status: wip
   owner: ro
   folder: wip
@@ -481,7 +481,7 @@ specs:
   file: wip/0076-spec-bound-architect-dispatch-from-admin-ui.md
   parent: pipeline-operations
 - id: '0077'
-  title: Coder Studio — Founder role Phase A
+  title: "Coder Studio \u2014 Founder role Phase A"
   status: wip
   owner: ro
   folder: wip
@@ -495,26 +495,19 @@ specs:
   file: wip/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md
   parent: pipeline-operations
 - id: 0079
-  title: Coder Studio — coder-product-template repo contract
+  title: "Coder Studio \u2014 coder-product-template repo contract"
   status: wip
   owner: ro
   folder: wip
   file: wip/0079-coder-studio-coder-product-template-repo-contract.md
   parent: knowledge-and-admin
 - id: 0080
-  title: Coder Studio — Stripe Connect and PostHog integration in coder-core
+  title: "Coder Studio \u2014 Stripe Connect and PostHog integration in coder-core"
   status: wip
   owner: ro
   folder: wip
   file: wip/0080-coder-studio-stripe-connect-and-posthog-integration-in-coder-core.md
   parent: knowledge-and-admin
-- id: 0081
-  title: Dispatcher re-kick for tasks stuck at queued/executing with no started_at
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0081-dispatcher-rekick-queued-executing-stuck-tasks.md
-  parent: pipeline-operations
 - id: 0082
   title: Alembic head-conflict detection in the developer worker
   status: wip
@@ -593,7 +586,8 @@ specs:
   file: wip/0092-pm-retry-via-override.md
   parent: pipeline-operations
 - id: 0093
-  title: Architect broken_cross_link should surface the specific field/target instead of silent-dropping
+  title: Architect broken_cross_link should surface the specific field/target instead
+    of silent-dropping
   status: wip
   owner: ro
   folder: wip

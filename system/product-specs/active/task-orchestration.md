@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-05-06
-last_verified_at: 2026-05-06
+updated: 2026-05-12
+last_verified_at: 2026-05-12
 summary: Task lifecycle, dispatcher, and stage transitions.
 served_by_designs: [worker-communication]
 related_specs: [audit-log]
@@ -232,6 +232,25 @@ and `/pipeline-runs` endpoints in `coder-core`.
   decommission gated on `failure_kind='orchestrator_died'` real-death
   rate ≤ 5% for reviewer and developer over a 7-day
   post-coder-core#157 window.
+- **Dispatcher re-kick for stuck queued/executing tasks.** Each
+  coordinator tick queries for tasks where `status='queued' AND
+  stage='executing' AND started_at IS NULL AND updated_at <
+  now() - settings.dispatcher_rekick_grace_seconds` (default 60 s,
+  configurable without a deploy). For each match the coordinator
+  attempts to re-dispatch into the worker pool: if free capacity
+  exists the task is handed off in place (`started_at` is populated,
+  `stage` stays `executing`); if the pool is still full `stage` flips
+  back to `queued` so the standard round-robin admission picks it up
+  at the next free slot. The re-kick is idempotent: a task whose
+  `started_at` was populated by a racing worker between the query and
+  the re-kick is skipped (`action_taken=already_started`). A
+  structured log line `dispatcher.rekick_stuck_task` is emitted with
+  `task_id`, `previous_stage`, `pool_capacity`, and `action_taken`
+  (`re_dispatched` | `flipped_to_queued`); an audit event
+  `task.dispatcher_rekick` lands in the task's audit timeline so
+  operators can see the recovery without a log dive. The `action:
+  retry` override remains available as a manual escape hatch but
+  day-to-day pool-saturation recovery does not require it.
 
 ## Interfaces
 
@@ -347,7 +366,7 @@ and `/pipeline-runs` endpoints in `coder-core`.
 - `0030` — model tier routing: migrations 0036/0037 add
   `projects.pin_top_tier` + `tasks.model_override`.
   `resolve_tier_model` in the dispatcher stamps
-  `WorkerInput.model_override` so runners hit the picked model
+  `WorkerInput.model_override` so runners use the picked model
   without changing their own code path. `/metrics` gains `by_tier`.
   `coder` canary runs with `pin_top_tier=false`; fleet
   `tier_routing_enabled` still off.
@@ -446,33 +465,33 @@ and `/pipeline-runs` endpoints in `coder-core`.
   `VITE_SPEC_COORDINATOR_ENABLED`) renders the fleet view with
   per-row pause/resume actions gated to admin scope. Later-state
   probes (`planning → plan_pending`, `plan_pending → implementing`,
-  `implementing → ship_pending`) and circuit breakers (cost cap,
-  per-stage retry cap, stuck-stage) are follow-up; the Cloud Run Job
+  `implementing → ship_pending`) and circuit breakers (cost cap, per-stage retry cap,
+  stuck-stage) are follow-up; the Cloud Run Job
   `coder-core-spec-coord-tick` schedule lands as part of that
   follow-up too.
 - `0064` — schema-gate recovery (shipped 2026-05-04): the dispatcher
   now persists the full untruncated last-attempt raw output on
-  ``tasks.raw_output_held`` (TEXT, migration 0059) when the
+  `tasks.raw_output_held` (TEXT, migration 0059) when the
   compliance gate exhausts its retry budget. New endpoint
-  ``POST /v1/projects/{id}/tasks/{task_id}/gate-replay`` accepts
-  ``{"raw_output": "..."}``: re-runs the task's role-specific schema
+  `POST /v1/projects/{id}/tasks/{task_id}/gate-replay` accepts
+  `{"raw_output": "..."}`: re-runs the task's role-specific schema
   validator in a single pass (no re-prompting — operator path), and on
-  pass stores the parsed payload as ``tasks.result``, transitions the
-  row to ``status='succeeded'`` (clearing failure_kind / failure_detail
-  / error and flipping ``stage`` from ``stuck`` back to ``accepted``),
-  and emits ``schema_replay.{attempted,passed}`` audit rows; on fail
-  returns ``422 {errors: [...]}`` with the validator messages and emits
-  ``schema_replay.{attempted,failed}``. Admin TaskDetail renders the
+  pass stores the parsed payload as `tasks.result`, transitions the
+  row to `status='succeeded'` (clearing failure_kind / failure_detail
+  / error and flipping `stage` from `stuck` back to `accepted`),
+  and emits `schema_replay.{attempted,passed}` audit rows; on fail
+  returns `422 {errors: [...]}` with the validator messages and emits
+  `schema_replay.{attempted,failed}`. Admin TaskDetail renders the
   held output read-only and exposes a "Replay gate" button that opens
   an editable textarea pre-populated with it; submit posts back to the
   endpoint and the panel unmounts on pass via parent re-fetch. Phase 4
   side-effects (knowledge-repo writes, registry updates) on a passed
   replay are *not* invoked from the replay seam — operators trigger
-  them via task retry (which sees the validated ``tasks.result``) or
+  them via task retry (which sees the validated `tasks.result`) or
   by manually performing the side-effect; called out as deferred
   follow-up in the replay service docstring. Three new audit actions —
-  ``schema_replay.attempted``, ``schema_replay.passed``,
-  ``schema_replay.failed`` — give operators the full replay history.
+  `schema_replay.attempted`, `schema_replay.passed`,
+  `schema_replay.failed` — give operators the full replay history.
 - `0056` — worker dispatch durability (Phase 1 shipped 2026-04-28,
   PRs coder-core #45–#50, coder-system #28–#34; Phase 2 soak `coder`
   project started 2026-04-29): introduces `coder-core-worker-tick`
@@ -492,6 +511,25 @@ and `/pipeline-runs` endpoints in `coder-core`.
   decommission gated on AC8: `failure_kind='orchestrator_died'`
   real-death rate ≤ 5% for reviewer and developer roles over the 7-day
   post-coder-core#157 reaper-fix window (target gate: 2026-05-12).
+- `0081` — dispatcher re-kick for `queued/executing/started_at=NULL`
+  tasks (2026-05-12): pool saturation at dispatch time could flip a
+  task to `stage='executing'` before any worker grabbed it, leaving
+  `started_at=NULL` indefinitely with no later tick re-evaluating it
+  — observed across five tasks on 2026-05-10 and 2026-05-12. Fix adds
+  a query at the top of the coordinator tick for rows matching
+  `status='queued' AND stage='executing' AND started_at IS NULL AND
+  updated_at < now() - grace_seconds`; for each match the tick either
+  re-dispatches into a free slot (`action_taken=re_dispatched`) or
+  flips `stage` back to `queued` so round-robin admission reclaims it
+  (`action_taken=flipped_to_queued`). Grace window defaults to 60 s,
+  configurable via `settings.dispatcher_rekick_grace_seconds`. Audit
+  action `task.dispatcher_rekick` and structured log line
+  `dispatcher.rekick_stuck_task` (fields: `task_id`,
+  `previous_stage`, `pool_capacity`, `action_taken`) give operators
+  recovery visibility without a log dive. Manual end-to-end test
+  (AC5): four PM tasks against a three-worker pool — the fourth
+  recovered to `executing/started_at!=NULL` or `queued/queued` within
+  `grace_seconds + tick_interval` without an operator override.
 
 ## Links
 
