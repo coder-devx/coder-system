@@ -787,3 +787,11 @@ designs:
   file: wip/0093-broken-cross-link-failure-detail.md
   parent: pipeline-operations
   target_slug: broken-cross-link-failure-detail
+- id: 0092
+  title: PM retry via override
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0092-pm-retry-via-override.md
+  parent: pipeline-operations
+  target_slug: pm-retry-via-override
