@@ -747,3 +747,11 @@ designs:
   file: wip/0087-lint-pre-flight-hard-gate.md
   parent: pipeline-operations
   target_slug: lint-preflight-hard-gate
+- id: 0088
+  title: Worker Prod-Credentials Isolation
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0088-worker-prod-credentials-isolation.md
+  parent: tenancy-and-access
+  target_slug: worker-prod-creds-isolation
