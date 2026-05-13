@@ -557,3 +557,10 @@ specs:
   folder: wip
   file: wip/0087-lint-preflight-hard-worker-gate.md
   parent: pipeline-operations
+- id: 0088
+  title: Developer-worker subprocesses must never inherit prod DB credentials
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0088-worker-prod-creds-isolation.md
+  parent: tenancy-and-access

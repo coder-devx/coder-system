@@ -68,6 +68,13 @@ Logical components of the Coder system as it exists today.
 | [0077](./wip/0077-coder-studio-founder-role-phase-a.md) | Coder Studio — Founder Role Phase A | ro | — | — |
 | [0079](./wip/0079-coder-product-template-repo-contract.md) | Coder Product Template Repo Contract | ro | — | — |
 | [0080](./wip/0080-studio-stripe-posthog-integration.md) | Studio Stripe Connect and PostHog Integration | ro | — | — |
+| [0081](./wip/0081-dispatcher-re-kick-for-tasks-stuck-at-queued-executing.md) | Dispatcher re-kick for tasks stuck at queued/executing | ro | — | — |
+| [0082](./wip/0082-alembic-head-conflict-detection-and-deploy-migrate-paging.md) | Alembic Head-Conflict Detection and Deploy-Migrate Paging | ro | — | — |
+| [0083](./wip/0083-plan-unblock-retry-chain-awareness.md) | Plan-unblock retry-chain awareness | ro | — | — |
+| [0084](./wip/0084-worker-pr-url-guard-against-duplicate-prs-on-retry.md) | Worker PR-URL Guard Against Duplicate PRs on Retry | ro | — | — |
+| [0085](./wip/0085-adr-id-allocation-race-claim-on-dispatch.md) | ADR ID Allocation Race — Claim-on-Dispatch | ro | — | — |
+| [0086](./wip/0086-adr-collision-failure-kind-tagging.md) | ADR Collision failure_kind Tagging | ro | — | — |
+| [0087](./wip/0087-lint-pre-flight-hard-gate.md) | Lint pre-flight hard gate | ro | — | — |
 
 ## Deprecated
 
