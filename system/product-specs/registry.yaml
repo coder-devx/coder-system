@@ -585,3 +585,10 @@ specs:
   folder: wip
   file: wip/0091-conftest-log-pollution-root-cause.md
   parent: pipeline-operations
+- id: 0092
+  title: PM and other stage=None tasks must be retriable via override
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0092-pm-retry-via-override.md
+  parent: pipeline-operations
