@@ -260,3 +260,9 @@ adrs:
     deciders:
     - ro
     file: 0037-deploy-migrate-failure-paging-via-coder-core-webhook-over-direct-ci-pagerduty-call.md
+  - id: 0038
+    title: Deny-list strip over allow-list for worker subprocess DB credentials
+    status: proposed
+    deciders:
+    - ro
+    file: 0038-deny-list-strip-over-allow-list-for-worker-subprocess-db-credentials.md
