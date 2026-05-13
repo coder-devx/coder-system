@@ -592,3 +592,10 @@ specs:
   folder: wip
   file: wip/0092-pm-retry-via-override.md
   parent: pipeline-operations
+- id: 0093
+  title: Architect broken_cross_link should surface the specific field/target instead of silent-dropping
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0093-architect-broken-cross-link-recovery.md
+  parent: pipeline-operations
