@@ -755,3 +755,11 @@ designs:
   file: wip/0088-worker-prod-credentials-isolation.md
   parent: tenancy-and-access
   target_slug: worker-prod-creds-isolation
+- id: 0090
+  title: Deploy-chain flake resilience
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0090-deploy-chain-flake-resilience.md
+  parent: pipeline-operations
+  target_slug: deploy-chain-flake-resilience
