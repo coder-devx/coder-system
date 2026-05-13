@@ -73,6 +73,16 @@ produces.
   the fix-loop iteration does not run. Operator recovery: retry via
   `POST /v1/projects/{id}/tasks/{task_id}/override` with
   `{"action": "retry"}`.
+- **Migration head-conflict pre-commit gate.** After staging any file
+  under `migrations/versions/`, the worker runs `uv run alembic heads`.
+  If the output contains more than one revision id, the worker refuses
+  to open the PR, logs a structured `developer.migration_head_conflict_refusal`
+  event, and exits with `failure_kind="migration_head_conflict"` (`failure_detail`
+  populated with the raw `alembic heads` output). Exactly one head after
+  staging is the fast path — unaffected. Tasks with no changes under
+  `migrations/versions/` skip the gate entirely. Operator recovery:
+  `POST /v1/projects/{id}/tasks/{task_id}/override` with
+  `{"action": "retry"}` after rebasing the migration to a clean head.
 
 ## Interfaces
 
@@ -137,6 +147,14 @@ produces.
   turns spent on lint remediation surfaces the failure early. Sibling
   `failure_kind` tag to the `turn_cap_exceeded` tag introduced in
   [coder-core#211](https://github.com/coder-devx/coder-core/pull/211).
+- **0082** — Migration head-conflict pre-commit gate. After staging
+  files under `migrations/versions/`, runs `uv run alembic heads`; more
+  than one head → `failure_kind="migration_head_conflict"`, no PR opened.
+  Single-head fast path and tasks with no migration changes are
+  unaffected. Responds to the 2026-05-10 silent-failure incident
+  (17 deploys broken by dual-head alembic state from
+  [coder-core#213](https://github.com/coder-devx/coder-core/pull/213)
+  and [coder-core#214](https://github.com/coder-devx/coder-core/pull/214)).
 
 ## Links
 

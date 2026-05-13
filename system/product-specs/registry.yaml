@@ -508,13 +508,6 @@ specs:
   folder: wip
   file: wip/0080-coder-studio-stripe-connect-and-posthog-integration-in-coder-core.md
   parent: knowledge-and-admin
-- id: 0082
-  title: Alembic head-conflict detection in the developer worker
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0082-alembic-head-conflict-detection-in-developer-worker.md
-  parent: pipeline-operations
 - id: 0083
   title: Plan-unblock check accounts for retry chain, not just original task's stage
   status: wip

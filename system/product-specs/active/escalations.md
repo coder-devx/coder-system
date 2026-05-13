@@ -5,11 +5,11 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-23
-updated: 2026-05-06
-last_verified_at: 2026-05-06
+updated: 2026-05-13
+last_verified_at: 2026-05-13
 summary: Three-rung on-call ladder with quiet hours.
 served_by_designs: [escalations]
-related_specs: [task-orchestration, observability, audit-log, admin-panel, multi-tenancy]
+related_specs: [task-orchestration, observability, audit-log, admin-panel, multi-tenancy, continuous-deployment]
 parent: pipeline-operations
 ---
 
@@ -29,7 +29,7 @@ a stall no longer waits for someone to open the admin panel.
 
 ## Capabilities
 
-- **Four trigger kinds.** The watcher scans Postgres state every
+- **Five trigger kinds.** The watcher scans Postgres state every
   minute: `stall` (`pipeline_runs.blocked_since` older than
   `projects.sla_stall_minutes`, default 60), `failure_streak`
   (≥ `projects.failure_streak_n` consecutive `tasks.status='failed'`
@@ -38,9 +38,14 @@ a stall no longer waits for someone to open the admin panel.
   `sla_wall_clock_minutes`, default 720 = 12h), and
   `ci_fix_exhausted` — fired by the CI fix-loop watcher (spec 0053)
   when `MAX_CI_FIX_ATTEMPTS` consecutive fix-up tasks fail on a
-  managed PR; `target_type='pr'`, `target_id=pr_url`. The three-rung
-  ladder and ack/resolve flow are identical for all trigger kinds.
-  DispatcherQueue-blocked tasks are excluded from `stall` detection.
+  managed PR; `target_type='pr'`, `target_id=pr_url`. Additionally,
+  `migrate_failure` — fired directly by the `coder-core` deploy
+  workflow when the `coder-core-migrate` Cloud Run Job step exits
+  non-zero; `target_type='deploy_job'`, payload carries the Cloud Run
+  Job execution name and the Alembic error output; severity `high`.
+  The three-rung ladder and ack/resolve flow are identical for all
+  trigger kinds. DispatcherQueue-blocked tasks are excluded from
+  `stall` detection.
 - **Three-rung ladder.** Each escalation picks a policy (`off` /
   `standard` / `aggressive`) and advances monotonically. `standard`:
   L0 post to project Slack channel → wait 5 min → L1 DM the on-call →
@@ -135,6 +140,9 @@ a stall no longer waits for someone to open the admin panel.
 - [admin-panel](./admin-panel.md) — hosts the two admin pages.
 - [multi-tenancy](./multi-tenancy.md) — the per-project tri-state
   flags + Slack/PD configuration sit on the `projects` row.
+- [continuous-deployment](./continuous-deployment.md) — the deploy
+  workflow fires `migrate_failure` escalations directly via
+  `open_escalation` when the migrate step exits non-zero.
 
 ## Evolution
 
@@ -167,9 +175,18 @@ a stall no longer waits for someone to open the admin panel.
   are NULL for PR-scoped escalations, `target_id` carries the PR URL.
   Admin escalations pages surface CI-stuck PRs with a
   `ci_fix_exhausted` chip alongside pipeline-run stalls.
+- **0082 — `migrate_failure` trigger kind.** The `coder-core` deploy
+  workflow calls `open_escalation` with `trigger_kind='migrate_failure'`,
+  `target_type='deploy_job'`, severity `high`, and a structured payload
+  (Cloud Run Job execution name + Alembic error) when the
+  `coder-core-migrate` step exits non-zero. No schema migration — the
+  existing `escalations` table accommodates the new trigger kind.
+  Additive to the existing Slack deploy-failure notification. Responds
+  to the 2026-05-10 incident where 17 deploys failed silently at the
+  migrate step without paging anyone.
 
 ## Links
 
 - Designs: [escalations](../../designs/active/escalations.md)
 - Related components: task-orchestration, observability, audit-log,
-  admin-panel, multi-tenancy, self-healing
+  admin-panel, multi-tenancy, self-healing, continuous-deployment
