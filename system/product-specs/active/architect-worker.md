@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-05-06
-last_verified_at: 2026-05-06
+updated: 2026-05-13
+last_verified_at: 2026-05-13
 summary: Software Architect worker — designs, ADRs, and system shape.
 served_by_designs: [architect-worker]
 related_specs: []
@@ -115,6 +115,17 @@ planner gets a concrete architecture to decompose.
   `reviewer.py` / `developer.py`. The hardcoded constant is removed;
   the setting name is shared across all roles as a fleet-wide
   default.
+- 0085 — ADR ID reservation at admission: the dispatcher now
+  atomically claims a non-overlapping ID range from the new
+  `adr_id_reservations` table before writing the architect's
+  run-context block. The run-context info block gains an
+  "ADR reservation: [XXXX–YYYY]" line so the architect's prompt
+  carries the guaranteed range. No change to the architect prompt
+  schema or the ADR registry format. The reservation lifecycle
+  (release on zero-commit terminal, sentinel on partial-commit) is
+  owned by the dispatcher; see
+  [task-orchestration](./task-orchestration.md) for the full
+  mechanics.
 
 ## Links
 
