@@ -55,3 +55,20 @@ repos:
       trigger: none
     file: coder-system.md
     notes: This knowledge repository.
+
+  - id: coder-product-template
+    name: coder-product-template
+    status: active
+    owner: ro
+    github: coder-devx/coder-product-template
+    default_branch: main
+    hosts_services: []
+    language: typescript
+    ci:
+      provider: github-actions
+      workflows: [ci]
+    cd:
+      target: cloud-run
+      trigger: push-to-main
+    file: coder-product-template.md
+    notes: GitHub template; per-product forks deploy via the Studio bootstrap pipeline.
