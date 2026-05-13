@@ -771,3 +771,11 @@ designs:
   file: wip/0091-caplog-inter-test-pollution-bisect-fix-and-harness-regression.md
   parent: pipeline-operations
   target_slug: caplog-pollution-root-cause-fix
+- id: 0089
+  title: Branch Protection Enforcement for Orchestrator-Managed Repos
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0089-branch-protection-enforcement.md
+  parent: tenancy-and-access
+  target_slug: branch-protection-enforcement
