@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-05-06
-last_verified_at: 2026-05-06
+updated: 2026-05-12
+last_verified_at: 2026-05-12
 summary: User-facing SPA for status, debug, override.
 served_by_designs: [system-overview]
 related_specs: [audit-log]
@@ -45,6 +45,14 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   tasks (squash-merge via GitHub API).
 - Real-time updates via SSE — stage transitions and new messages appear
   within ~2s without polling.
+- **`failure_kind` chip label map.** The Pipeline list's status chip
+  resolves known `failure_kind` codes to human-readable labels:
+  `spec_collision` → "Spec collision", `adr_collision` → "ADR
+  collision", `schema` → "Schema error". All collision-kind chips
+  share consistent styling. The task-detail page renders the
+  `failure_detail` JSON block when present; for `adr_collision` tasks
+  this surfaces `collided_adr_ids` and `committed_adr_ids` inline,
+  giving operators a direct list of which ADRs need hand-recovery.
 - **Ship gate panel.** RunDetail renders a two-column Ship gate when
   the close-cycle backstop has stamped `wips_pending_merge` on a
   pipeline run: left column shows the architect-drafted `merges[]`
@@ -325,6 +333,13 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   endpoint; deep-links to each attempt task. Behind
   `VITE_CI_FIX_LOOP_ENABLED` (default off, mirrors fleet flag
   default). No new routes.
+- 0086 ADR-collision chip (shipped 2026-05-12) — the Pipeline list's
+  `StatusChip` label map gains `adr_collision` → "ADR collision",
+  styled consistently with the existing `spec_collision` chip. The
+  task-detail `failure_detail` block already renders structured JSON;
+  for `adr_collision` tasks it surfaces `collided_adr_ids` and
+  `committed_adr_ids` inline so operators see exactly which ADRs need
+  hand-recovery without inspecting the preserved task output.
 
 ## Links
 
