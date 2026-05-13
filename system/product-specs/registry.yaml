@@ -571,3 +571,10 @@ specs:
   folder: wip
   file: wip/0089-branch-protection-enforcement-on-coder-core-main.md
   parent: tenancy-and-access
+- id: 0090
+  title: Deploy chain must not be hostage to a single flaky test
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0090-deploy-chain-resilience-to-test-flake.md
+  parent: pipeline-operations
