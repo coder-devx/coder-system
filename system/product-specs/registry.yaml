@@ -564,3 +564,10 @@ specs:
   folder: wip
   file: wip/0088-worker-prod-creds-isolation.md
   parent: tenancy-and-access
+- id: 0089
+  title: Branch-protection enforcement on coder-core/main blocks all direct pushes
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0089-branch-protection-enforcement-on-coder-core-main.md
+  parent: tenancy-and-access

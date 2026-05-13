@@ -66,6 +66,7 @@ in each component's `## Evolution` section and in git.
 | [0086](./wip/0086-architect-adr-collision-failure-kind.md) | failure_kind tagging for architect ADR collisions inside the same batch | ro | — |
 | [0087](./wip/0087-lint-preflight-hard-worker-gate.md) | Lint pre-flight as a hard worker gate before PR open | ro | — |
 | [0088](./wip/0088-worker-prod-creds-isolation.md) | Developer-worker subprocesses must never inherit prod DB credentials | ro | — |
+| [0089](./wip/0089-branch-protection-enforcement-on-coder-core-main.md) | Branch-protection enforcement on coder-core/main blocks all direct pushes | ro | — |
 
 ## Deprecated
 
