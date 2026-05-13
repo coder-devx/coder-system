@@ -522,13 +522,6 @@ specs:
   folder: wip
   file: wip/0083-plan-unblock-checks-retry-chain.md
   parent: pipeline-operations
-- id: 0084
-  title: Worker pr_url guard against duplicate PRs on retry
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0084-worker-pr-url-guard-against-duplicate-prs.md
-  parent: pipeline-operations
 - id: 0085
   title: ADR ID allocation race under concurrent architect dispatch
   status: wip
