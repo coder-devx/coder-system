@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-05-12
-last_verified_at: 2026-05-12
+updated: 2026-05-13
+last_verified_at: 2026-05-13
 summary: Developer worker — code, tests, PRs.
 served_by_designs: [worker-roles]
 related_specs: []
@@ -59,22 +59,20 @@ produces.
   admin panel renders a "recovered after N transient retries" chip.
   The per-task deadline is distinct: a deadline hit surfaces as
   `TaskStatus.TIMED_OUT`, not retried.
-- **`pr_url` guard on retry.** Before opening a new PR the worker
-  checks `task.pr_url`. If set, it reads the existing PR's state via
-  the GitHub REST API and branches on three outcomes: (1) PR is
-  open-and-unmerged — the worker resumes against the existing branch
-  (`git checkout <existing_branch>`) and pushes new commits there;
-  no second PR is opened and `pr_url` stays the same. (2) PR is
-  merged — the task's prior work already shipped; the worker exits
-  with `failure_kind=duplicate_retry_on_merged_pr`, logs a
-  structured event, and opens no new PR; the orchestrator's unblock
-  check picks up downstream tasks. (3) PR is closed without merging
-  (operator-killed) — the worker proceeds as normal, opening a fresh
-  PR. A distinct log line (`developer.pr_state_check_operator_killed`)
-  distinguishes this from the no-prior-pr_url case. The check is
-  fail-open: a GitHub API error logs `developer.pr_state_check_failed`
-  and falls through to the existing open-fresh-PR behaviour — no new
-  hang path on a transient GitHub outage.
+- **Lint pre-flight hard gate.** After `ruff format` + `ruff check
+  --fix` complete, if surviving failures remain the worker runs one
+  fix-loop iteration (re-prompt with the lint output injected as
+  context, re-stage files, re-run pre-flight) before opening the PR.
+  If the second pass is clean, the PR opens normally. If lint still
+  fails, the task exits with `failure_kind="lint_preflight_failed"`
+  and `failure_detail` populated with the surviving output (truncated
+  to ~2 KB); no PR is opened. The fix-loop iteration draws from the
+  existing `developer.fix_attempts` budget; if lint remediation
+  somehow consumes >10 turns the gate surfaces `lint_preflight_failed`
+  early. The clean-path (zero first-pass failures) is unaffected —
+  the fix-loop iteration does not run. Operator recovery: retry via
+  `POST /v1/projects/{id}/tasks/{task_id}/override` with
+  `{"action": "retry"}`.
 
 ## Interfaces
 
@@ -130,14 +128,15 @@ produces.
   back to the dispatcher-resolved `WorkerInput.github_token`. Lifts
   the credential out of workspace-prep so the same helper serves
   every role worker.
-- 0084 — `pr_url` guard against duplicate PRs on retry. Before the
-  PR-open step, the worker inspects `task.pr_url`; if set it reads the
-  existing PR state from the GitHub REST API and branches: open →
-  resume on existing branch (no new PR); merged →
-  `failure_kind=duplicate_retry_on_merged_pr`, clean exit; closed →
-  proceed fresh. API errors fall through (fail-open). Eliminates
-  operator-side duplicate-PR closures on retry (Phase A: seven
-  closures tracked in gap #8 of the Phase A note).
+- 0087 — Lint pre-flight hard gate. Surviving `ruff format` /
+  `ruff check --fix` failures now block PR-open. Worker runs one
+  fix-loop iteration (re-prompt with lint output, re-stage, re-run
+  pre-flight); if still failing, exits
+  `failure_kind="lint_preflight_failed"` with the surviving ruff
+  output in `failure_detail` (truncated ~2 KB). Budget guard: >10
+  turns spent on lint remediation surfaces the failure early. Sibling
+  `failure_kind` tag to the `turn_cap_exceeded` tag introduced in
+  [coder-core#211](https://github.com/coder-devx/coder-core/pull/211).
 
 ## Links
 

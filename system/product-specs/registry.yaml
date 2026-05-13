@@ -522,13 +522,6 @@ specs:
   folder: wip
   file: wip/0083-plan-unblock-checks-retry-chain.md
   parent: pipeline-operations
-- id: 0087
-  title: Lint pre-flight as a hard worker gate before PR open
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0087-lint-preflight-hard-worker-gate.md
-  parent: pipeline-operations
 - id: 0088
   title: Developer-worker subprocesses must never inherit prod DB credentials
   status: wip
