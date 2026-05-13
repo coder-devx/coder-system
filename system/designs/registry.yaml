@@ -763,3 +763,11 @@ designs:
   file: wip/0090-deploy-chain-flake-resilience.md
   parent: pipeline-operations
   target_slug: deploy-chain-flake-resilience
+- id: 0091
+  title: 'Caplog inter-test pollution: bisect, fix, and harness regression'
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0091-caplog-inter-test-pollution-bisect-fix-and-harness-regression.md
+  parent: pipeline-operations
+  target_slug: caplog-pollution-root-cause-fix
