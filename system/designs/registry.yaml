@@ -779,3 +779,11 @@ designs:
   file: wip/0089-branch-protection-enforcement.md
   parent: tenancy-and-access
   target_slug: branch-protection-enforcement
+- id: 0093
+  title: broken_cross_link Failure Detail
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0093-broken-cross-link-failure-detail.md
+  parent: pipeline-operations
+  target_slug: broken-cross-link-failure-detail
