@@ -14,7 +14,7 @@ related_designs:
 - architect-worker
 - knowledge-write-api
 - worker-communication
-- 0086
+- architect-worker
 affects_services:
 - coder-core
 affects_repos:
