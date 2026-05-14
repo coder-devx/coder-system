@@ -81,6 +81,7 @@ Logical components of the Coder system as it exists today.
 | [0091](./wip/0091-caplog-inter-test-pollution-bisect-fix-and-harness-regression.md) | Caplog inter-test pollution: bisect, fix, and harness regression | ro | — | — |
 | [0092](./wip/0092-pm-retry-via-override.md) | PM retry via override | ro | — | — |
 | [0093](./wip/0093-broken-cross-link-failure-detail.md) | broken_cross_link Failure Detail | ro | — | — |
+| [0094](./wip/0094-reviewer-security-and-performance-analysis.md) | Reviewer Security and Performance Analysis | ro | — | — |
 
 ## Deprecated
 
