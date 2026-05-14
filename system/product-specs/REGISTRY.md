@@ -65,7 +65,6 @@ in each component's `## Evolution` section and in git.
 | [0091](./wip/0091-conftest-log-pollution-root-cause.md) | Diagnose and fix the caplog inter-test pollution affecting 4 tests | ro | — |
 | [0092](./wip/0092-pm-retry-via-override.md) | PM and other stage=None tasks must be retriable via override | ro | — |
 | [0093](./wip/0093-architect-broken-cross-link-recovery.md) | Architect broken_cross_link should surface the specific field/target instead of silent-dropping | ro | — |
-| [0094](./wip/0094-ai-powered-code-review-security-and-performance-analysis.md) | AI-Powered Code Review: Security and Performance Analysis | ro | — |
 
 ## Deprecated
 
