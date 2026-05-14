@@ -8,7 +8,7 @@ created: '2026-05-14'
 updated: '2026-05-14'
 last_verified_at: '2026-05-14'
 implements_specs:
-- 0094
+- reviewer-worker
 decided_by:
 - 0039
 related_designs:
