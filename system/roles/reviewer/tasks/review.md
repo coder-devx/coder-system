@@ -8,8 +8,9 @@ orchestrator can route on.
 This contract covers two flavours that share most of their work:
 
 - **Normal review** (the common case) — a Developer-opened PR
-  implementing a Team-Manager task. Output: `VERDICT: approve` or
-  `VERDICT: request_changes` plus the review URL.
+  implementing a Team-Manager task. Output: a JSON envelope with
+  `verdict`, `review_url`, `security_findings`, and
+  `performance_findings`. See *§ 5. Output the JSON envelope* below.
 - **Ship-mode review** (spec 0044) — the prompt begins with `# Ship
   review`. The PR is a wip→active merge proposed by an Architect or
   PM ship-draft worker. Same verdict envelope, **plus** a
@@ -104,9 +105,11 @@ for *this* run.
       `request_changes` for genuine defects.
 - [ ] **Test coverage** is a real bar. New behaviour without a
       behaviour-named test is `request_changes`.
-- [ ] **Security check** — injection, auth bypass, secret leakage,
-      and especially **multi-tenant scoping** (every endpoint must
-      scope by `project_id`; this is non-negotiable in this system).
+- [ ] **Security analysis** — OWASP Top 10 (injection, broken auth,
+      XSS, IDOR, SSRF, etc.), credential exposure, and especially
+      **multi-tenant scoping** (every endpoint must scope by
+      `project_id`; this is non-negotiable in this system). Post
+      `[security][{severity}]` inline comments for each finding.
 - [ ] **Drive-by refactors** get split — bundle defects, not style
       changes.
 - [ ] Branch + PR hygiene: `task/<short-slug>` branch, *why*-not-*what*
@@ -117,7 +120,8 @@ for *this* run.
 - [ ] **No exploration outside the diff.** Source reads are limited
       to files the diff cites + AGENTS.md + the linked design. If
       you read more, name which file and why in the review body.
-- [ ] You emit the **`VERDICT:`** marker line + the review URL.
+- [ ] You emit the **JSON envelope** with `verdict`, `review_url`,
+      `security_findings[]`, and `performance_findings[]`.
 
 ## Worker protocol
 
@@ -153,8 +157,32 @@ Walk the diff against:
   handling. The diff itself usually shows enough; if you're tempted
   to read the whole module to check, the diff is probably too large
   and `request_changes` for splitting is the right call.
-- **Security** — injection, auth bypass, secret leakage, **tenant
-  scoping** (every endpoint scopes by `project_id`).
+- **Security analysis** — walk the diff for:
+  - *OWASP Top 10*: injection (SQL, command, LDAP), broken
+    authentication, XSS, IDOR, security misconfiguration, SSRF,
+    cryptographic failures, insecure deserialization,
+    vulnerable/outdated components, logging/monitoring gaps, and
+    especially **multi-tenant scoping** (every endpoint scopes by
+    `project_id`; non-negotiable in this system).
+  - *Credential exposure*: hardcoded secrets, API keys, tokens
+    committed to source.
+  - For each finding, post a `[security][{severity}]` inline PR
+    comment via `gh api repos/{org}/{repo}/pulls/{number}/comments`
+    with `path`, `line`, and `body` fields. Severity levels:
+    `critical`, `high`, `medium`, `low`.
+
+- **Performance analysis** — walk the diff for:
+  - *N+1 queries*: ORM iteration loops with per-row `.get()` /
+    `.filter()` calls inside.
+  - *Unbounded pagination*: endpoints returning all rows without a
+    `LIMIT` or page-size cap.
+  - *Missing index hints*: `WHERE` clauses on columns that appear
+    un-indexed in the diff.
+  - *O(n²)+ complexity*: nested loops over input-scaled collections.
+  - For each finding, post a `[performance][{severity}]` inline PR
+    comment via `gh api repos/{org}/{repo}/pulls/{number}/comments`
+    with `path`, `line`, and `body` fields.
+
 - **Idiom + conventions** — language idioms, project conventions
   cited in `AGENTS.md`, patterns from neighbouring code (read the
   *cited* neighbours; don't go fishing).
@@ -187,38 +215,42 @@ feedback, drop into `gh api` against
 payload. For most reviews, citing `path:line` in the prose body is
 enough.
 
-### 5. Output the marker lines
+### 5. Output the JSON envelope
 
-After posting the review, your final message MUST include:
+After posting the review, your final message MUST be a single JSON
+object — **no prose, no fence**. First byte `{`, last byte `}`:
 
-```
-VERDICT: approve
-```
+    {
+      "verdict": "approve",
+      "review_url": "https://github.com/{org}/{source-repo}/pull/{number}#pullrequestreview-{id}",
+      "security_findings": [
+        {"severity": "high", "path": "api/projects.py", "line": 142, "detail": "SQL query built from unsanitised user input"}
+      ],
+      "performance_findings": [
+        {"severity": "medium", "path": "api/projects.py", "line": 198, "detail": "N+1: filter() called inside iteration"}
+      ]
+    }
 
-or
-
-```
-VERDICT: request_changes
-```
-
-…and the GitHub review URL on its own line:
-
-```
-https://github.com/{org}/{source-repo}/pull/{number}#pullrequestreview-{id}
-```
-
-The verdict line is parsed strictly. Use exactly `approve` or
-`request_changes` (lowercase, underscore). The orchestrator does
-fall back to keyword heuristics in `reviewer.py` when the line is
-missing, but **that's a safety net, not a contract** — emit the
-strict line. The review URL must be the actual URL printed by
-`gh pr review`, not a fabricated one.
+Rules:
+- `verdict` is `"approve"` or `"request_changes"` (lowercase,
+  underscore).
+- `review_url` is the verbatim URL printed by `gh pr review` —
+  never fabricated.
+- `security_findings` and `performance_findings` are **required
+  arrays** — use `[]` when there are no findings.
+- **`approve` requires `security_findings` to contain no `critical`
+  entries.** The schema gate rejects an approve verdict with a
+  critical finding and re-prompts. Downgrade to `request_changes`
+  when any critical finding exists.
+- The compliance gate strict-parses per ADR 0012. Any prose before
+  the `{` or after the `}` causes a parse failure and re-prompt.
 
 ## Common mistakes that fail the gate
 
-- **No `VERDICT:` line.** *"This looks good to merge"* — the
-  orchestrator falls back to a keyword heuristic that occasionally
-  routes wrong.
+- **No JSON envelope / prose output instead.** *"This looks good to
+  merge"* — the orchestrator strict-parses the final message as
+  JSON; prose causes a parse failure and re-prompt (up to 3 times
+  before the task fails). First byte must be `{`.
 - **Posting feedback via `gh pr review --comment`.** That flag posts
   a single review-level comment, not threaded inline comments.
   Cite `path:line` in the prose body instead.
@@ -243,6 +275,14 @@ strict line. The review URL must be the actual URL printed by
   turns and still exploring, **post a `request_changes` with what
   you have**; what you've found is more useful than what you might
   find with another 20 turns.
+- **Missing `security_findings` or `performance_findings` arrays.**
+  Both keys are required in the envelope even when empty (`[]`).
+  The compliance gate strict-parses the JSON and re-prompts up to
+  3 times when either key is absent — always emit both, using `[]`
+  for a clean diff.
+- **Emitting `approve` with a `critical` security finding.** The
+  schema gate rejects it and re-prompts. A critical finding always
+  forces `request_changes`; there are no exceptions.
 
 ## Ship-mode addendum (spec 0044)
 
