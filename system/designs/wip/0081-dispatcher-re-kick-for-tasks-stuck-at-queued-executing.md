@@ -8,7 +8,7 @@ created: '2026-05-12'
 updated: '2026-05-12'
 last_verified_at: '2026-05-12'
 implements_specs:
-- 0081
+- task-orchestration
 decided_by: []
 related_designs:
 - self-healing

@@ -11,7 +11,7 @@ deprecated_at: null
 reason: null
 served_by_designs: []
 related_specs:
-- 0086
+- architect-worker
 - 0089
 parent: pipeline-operations
 ---
