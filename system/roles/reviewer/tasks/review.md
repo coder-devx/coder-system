@@ -8,8 +8,9 @@ orchestrator can route on.
 This contract covers two flavours that share most of their work:
 
 - **Normal review** (the common case) — a Developer-opened PR
-  implementing a Team-Manager task. Output: `VERDICT: approve` or
-  `VERDICT: request_changes` plus the review URL.
+  implementing a Team-Manager task. Output: a JSON envelope with
+  `verdict`, `review_url`, `security_findings`, and
+  `performance_findings`.
 - **Ship-mode review** (spec 0044) — the prompt begins with `# Ship
   review`. The PR is a wip→active merge proposed by an Architect or
   PM ship-draft worker. Same verdict envelope, **plus** a
@@ -104,9 +105,11 @@ for *this* run.
       `request_changes` for genuine defects.
 - [ ] **Test coverage** is a real bar. New behaviour without a
       behaviour-named test is `request_changes`.
-- [ ] **Security check** — injection, auth bypass, secret leakage,
-      and especially **multi-tenant scoping** (every endpoint must
-      scope by `project_id`; this is non-negotiable in this system).
+- [ ] **Security analysis** — OWASP Top 10 (injection, broken auth,
+      XSS, IDOR, SSRF, crypto failures, etc.), credential exposure,
+      and **multi-tenant scoping** (every endpoint must scope by
+      `project_id`; non-negotiable). Post `[security][{severity}]`
+      inline comments; record findings for the output envelope.
 - [ ] **Drive-by refactors** get split — bundle defects, not style
       changes.
 - [ ] Branch + PR hygiene: `task/<short-slug>` branch, *why*-not-*what*
@@ -117,7 +120,10 @@ for *this* run.
 - [ ] **No exploration outside the diff.** Source reads are limited
       to files the diff cites + AGENTS.md + the linked design. If
       you read more, name which file and why in the review body.
-- [ ] You emit the **`VERDICT:`** marker line + the review URL.
+- [ ] You emit the **JSON envelope** — `{"verdict": ...,
+      "review_url": ..., "security_findings": [...],
+      "performance_findings": [...]}` — as your final message (first
+      byte `{`, last byte `}`, no prose, no fence).
 
 ## Worker protocol
 
@@ -248,9 +254,9 @@ will be re-prompted.
 
 ## Common mistakes that fail the gate
 
-- **No `VERDICT:` line.** *"This looks good to merge"* — the
-  orchestrator falls back to a keyword heuristic that occasionally
-  routes wrong.
+- **No JSON envelope.** *"This looks good to merge"* — the
+  orchestrator strict-parses the final message; free-text prose fails
+  the compliance gate and re-prompts.
 - **Posting feedback via `gh pr review --comment`.** That flag posts
   a single review-level comment, not threaded inline comments.
   Cite `path:line` in the prose body instead.
