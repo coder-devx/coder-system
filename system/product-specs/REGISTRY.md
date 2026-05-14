@@ -59,7 +59,6 @@ in each component's `## Evolution` section and in git.
 | [0079](./wip/0079-coder-studio-coder-product-template-repo-contract.md) | Coder Studio — coder-product-template repo contract | ro | — |
 | [0080](./wip/0080-coder-studio-stripe-connect-and-posthog-integration-in-coder-core.md) | Coder Studio — Stripe Connect and PostHog integration in coder-core | ro | — |
 | [0083](./wip/0083-plan-unblock-checks-retry-chain.md) | Plan-unblock check accounts for retry chain, not just original task's stage | ro | — |
-| [0088](./wip/0088-worker-prod-creds-isolation.md) | Developer-worker subprocesses must never inherit prod DB credentials | ro | — |
 | [0089](./wip/0089-branch-protection-enforcement-on-coder-core-main.md) | Branch-protection enforcement on coder-core/main blocks all direct pushes | ro | — |
 | [0090](./wip/0090-deploy-chain-resilience-to-test-flake.md) | Deploy chain must not be hostage to a single flaky test | ro | — |
 | [0091](./wip/0091-conftest-log-pollution-root-cause.md) | Diagnose and fix the caplog inter-test pollution affecting 4 tests | ro | — |

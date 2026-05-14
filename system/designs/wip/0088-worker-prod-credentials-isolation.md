@@ -8,7 +8,7 @@ created: '2026-05-13'
 updated: '2026-05-13'
 last_verified_at: '2026-05-13'
 implements_specs:
-- 0088
+- developer-worker
 decided_by: []
 related_designs:
 - developer-worker
