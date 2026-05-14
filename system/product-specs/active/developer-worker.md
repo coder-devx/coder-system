@@ -5,11 +5,11 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-05-13
-last_verified_at: 2026-05-13
+updated: 2026-05-14
+last_verified_at: 2026-05-14
 summary: Developer worker — code, tests, PRs.
 served_by_designs: [worker-roles]
-related_specs: []
+related_specs: [tenant-isolation]
 parent: worker-roles
 ---
 
@@ -83,6 +83,26 @@ produces.
   `migrations/versions/` skip the gate entirely. Operator recovery:
   `POST /v1/projects/{id}/tasks/{task_id}/override` with
   `{"action": "retry"}` after rebasing the migration to a clean head.
+- **Prod-creds isolation.** Before spawning the `claude` subprocess,
+  the worker's env-construction stage explicitly removes
+  `CLOUD_SQL_INSTANCE`, `CLOUD_SQL_USER`, `CLOUD_SQL_DATABASE`,
+  `DATABASE_URL`, `PGHOST`, `PGUSER`, `PGPASSWORD`, and `PGDATABASE`
+  from the inherited env and replaces them with a DSN pointing at an
+  ephemeral, per-turn test DB:
+  - *SQLite in-memory* (default) — `sqlite+aiosqlite:///:memory:`
+    exposed via `DATABASE_URL`. Sufficient for most dev tasks;
+    PG-only migration guards (`if bind.dialect.name != "postgresql"`)
+    no-op cleanly.
+  - *Postgres-15 test container* (opt-in) — when
+    `needs_postgres_test_db: true` appears in the task prompt, the
+    harness boots a throwaway postgres-15 container, exposes its DSN
+    via `DATABASE_URL`, and tears it down on subprocess exit (~30 s
+    overhead; estimated <5 % of dev turns).
+  The strip is logged as a `worker.prod_creds_stripped` audit event
+  on every dispatch, carrying `task_id` and the comma-separated list
+  of stripped env keys. Implemented in
+  `coder_core/workers/_auth_env.py` and the new
+  `coder_core/workers/_test_db.py` module.
 
 ## Interfaces
 
@@ -155,6 +175,16 @@ produces.
   (17 deploys broken by dual-head alembic state from
   [coder-core#213](https://github.com/coder-devx/coder-core/pull/213)
   and [coder-core#214](https://github.com/coder-devx/coder-core/pull/214)).
+- **0088** — Prod-credentials isolation. Subprocess env construction
+  strips all DB-credential env vars (`CLOUD_SQL_INSTANCE`,
+  `CLOUD_SQL_USER`, `CLOUD_SQL_DATABASE`, `DATABASE_URL`, `PGHOST`,
+  `PGUSER`, `PGPASSWORD`, `PGDATABASE`) and replaces them with an
+  ephemeral test-DB DSN (SQLite in-memory by default; postgres-15
+  container via `needs_postgres_test_db: true`). Every dispatch emits
+  a `worker.prod_creds_stripped` audit event. Closes the blast-radius
+  gap exposed by the 2026-05-12 prod-DB incident
+  ([coder-core#249](https://github.com/coder-devx/coder-core/pull/249),
+  recovered via [coder-core#251](https://github.com/coder-devx/coder-core/pull/251)).
 
 ## Links
 
@@ -162,4 +192,5 @@ produces.
 - Related components: [reviewer-worker](./reviewer-worker.md),
   [task-orchestration](./task-orchestration.md),
   [branch-cleanup](./branch-cleanup.md),
-  [service-accounts](./service-accounts.md)
+  [service-accounts](./service-accounts.md),
+  [tenant-isolation](./tenant-isolation.md)
