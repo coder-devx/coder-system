@@ -58,13 +58,7 @@ in each component's `## Evolution` section and in git.
 | [0078](./wip/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md) | Spec-run lifecycle auto-bootstrap for fresh WIP specs | ro | — |
 | [0079](./wip/0079-coder-studio-coder-product-template-repo-contract.md) | Coder Studio — coder-product-template repo contract | ro | — |
 | [0080](./wip/0080-coder-studio-stripe-connect-and-posthog-integration-in-coder-core.md) | Coder Studio — Stripe Connect and PostHog integration in coder-core | ro | — |
-| [0081](./wip/0081-dispatcher-rekick-queued-executing-stuck-tasks.md) | Dispatcher re-kick for tasks stuck at queued/executing with no started_at | ro | — |
-| [0082](./wip/0082-alembic-head-conflict-detection-in-developer-worker.md) | Alembic head-conflict detection in the developer worker | ro | — |
 | [0083](./wip/0083-plan-unblock-checks-retry-chain.md) | Plan-unblock check accounts for retry chain, not just original task's stage | ro | — |
-| [0084](./wip/0084-worker-pr-url-guard-against-duplicate-prs.md) | Worker pr_url guard against duplicate PRs on retry | ro | — |
-| [0085](./wip/0085-adr-id-allocation-race-under-concurrent-dispatch.md) | ADR ID allocation race under concurrent architect dispatch | ro | — |
-| [0086](./wip/0086-architect-adr-collision-failure-kind.md) | failure_kind tagging for architect ADR collisions inside the same batch | ro | — |
-| [0087](./wip/0087-lint-preflight-hard-worker-gate.md) | Lint pre-flight as a hard worker gate before PR open | ro | — |
 | [0088](./wip/0088-worker-prod-creds-isolation.md) | Developer-worker subprocesses must never inherit prod DB credentials | ro | — |
 | [0089](./wip/0089-branch-protection-enforcement-on-coder-core-main.md) | Branch-protection enforcement on coder-core/main blocks all direct pushes | ro | — |
 | [0090](./wip/0090-deploy-chain-resilience-to-test-flake.md) | Deploy chain must not be hostage to a single flaky test | ro | — |
