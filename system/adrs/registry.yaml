@@ -266,3 +266,9 @@ adrs:
     deciders:
     - ro
     file: 0038-deny-list-strip-over-allow-list-for-worker-subprocess-db-credentials.md
+  - id: 0039
+    title: Enable compliance gate for normal reviewer runs over free-text VERDICT protocol
+    status: proposed
+    deciders:
+    - ro
+    file: 0039-enable-compliance-gate-for-normal-reviewer-runs-over-free-text-verdict-protocol.md
