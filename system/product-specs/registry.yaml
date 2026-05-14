@@ -551,3 +551,10 @@ specs:
   folder: wip
   file: wip/0093-architect-broken-cross-link-recovery.md
   parent: pipeline-operations
+- id: '0095'
+  title: Cache-hit and cost-regression observability is wrong or absent
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0095-cache-and-cost-observability-correctness.md
+  parent: pipeline-operations
