@@ -79,6 +79,8 @@ Logical components of the Coder system as it exists today.
 | [0089](./wip/0089-branch-protection-enforcement.md) | Branch Protection Enforcement for Orchestrator-Managed Repos | ro | — | — |
 | [0090](./wip/0090-deploy-chain-flake-resilience.md) | Deploy-chain flake resilience | ro | — | — |
 | [0091](./wip/0091-caplog-inter-test-pollution-bisect-fix-and-harness-regression.md) | Caplog inter-test pollution: bisect, fix, and harness regression | ro | — | — |
+| [0092](./wip/0092-pm-retry-via-override.md) | PM retry via override | ro | — | — |
+| [0093](./wip/0093-broken-cross-link-failure-detail.md) | broken_cross_link Failure Detail | ro | — | — |
 
 ## Deprecated
 
