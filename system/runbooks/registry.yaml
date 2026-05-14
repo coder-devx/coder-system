@@ -121,6 +121,11 @@ runbooks:
   status: active
   owner: ro
   file: provision-spec-coord-tick.md
+- id: redeploy-bypassing-test-suite
+  title: Redeploy bypassing the full test suite
+  status: active
+  owner: ro
+  file: redeploy-bypassing-test-suite.md
 - id: run-migration-coder-core
   title: Run an alembic migration against the prod coder-core DB
   status: active
