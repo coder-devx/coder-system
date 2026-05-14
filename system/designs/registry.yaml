@@ -795,3 +795,11 @@ designs:
   file: wip/0092-pm-retry-via-override.md
   parent: pipeline-operations
   target_slug: pm-retry-via-override
+- id: 0094
+  title: Reviewer Security and Performance Analysis
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0094-reviewer-security-and-performance-analysis.md
+  parent: worker-roles
+  target_slug: reviewer-security-performance-analysis
