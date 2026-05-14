@@ -341,7 +341,7 @@ Two extra things change for ship-mode:
    is rejected by the schema** — you cannot ship-approve and skip
    the attestation.
 
-The output here is **structured JSON**, not the marker-line
-free-text shape used for normal reviews. First byte `{`, last byte
-`}`, no fence, no preface. The compliance gate strict-parses per
-ADR 0012.
+The output is **structured JSON** — same envelope discipline as
+normal reviews (first byte `{`, last byte `}`, no fence, no
+preface), but the ship-mode schema additionally requires
+`ship_attestation`. The compliance gate strict-parses per ADR 0012.
