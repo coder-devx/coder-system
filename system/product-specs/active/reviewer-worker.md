@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: '2026-04-11'
-updated: '2026-05-07'
-last_verified_at: '2026-05-07'
+updated: '2026-05-14'
+last_verified_at: '2026-05-14'
 summary: Reviewer worker — technical-quality gate before PM acceptance.
 served_by_designs:
 - worker-roles
@@ -57,14 +57,47 @@ developer-produced PR and a human-facing merge decision.
   a compliant attestation is rejected by the schema. The attestation
   is the left-hand half of the admin ship-gate panel and the payload
   the orchestrator POSTs to `/knowledge/ship`.
+- **Security analysis pass.** Every reviewer run executes a structured
+  security analysis pass over the PR diff, aligned to OWASP Top 10
+  categories plus credential-exposure patterns (hardcoded secrets,
+  logging of sensitive values). Findings are emitted as
+  `security_findings` in the structured output — each entry carries
+  `severity` (`critical` | `high` | `medium` | `low`), `category`,
+  `file`, `line`, and `description`. `critical`-severity findings
+  unconditionally escalate the verdict to `request-changes`; the
+  `approve` path requires `security_findings` to contain no `critical`
+  entries (schema-enforced). Findings surface as `[security][severity]`
+  inline PR comments on the offending lines, distinct from convention
+  comments. The role prompt at `system/roles/reviewer/tasks/review.md`
+  contains an explicit "Security analysis" section listing OWASP-aligned
+  check categories.
+- **Performance analysis pass.** Every reviewer run executes a
+  structured performance analysis pass covering N+1 query patterns,
+  missing index hints on hot paths, unbounded pagination, and
+  algorithmic complexity regressions (Python/SQL scope). Findings are
+  emitted as `performance_findings` with the same per-entry shape as
+  security findings. Performance findings post `[performance]` inline
+  PR comments but do not change an `approve` verdict to
+  `request-changes`. The role prompt at
+  `system/roles/reviewer/tasks/review.md` contains a "Performance
+  analysis" section listing query, pagination, and complexity patterns.
+- **Finding counts persisted.** The orchestrator writes
+  `security_finding_count` and `performance_finding_count` to task
+  metadata on reviewer-task completion so the admin panel task detail
+  can display them.
 
 ## Interfaces
 
 - **Consumes:** tasks with `role=reviewer`, a PR URL in the prompt,
   and `project_id` for knowledge scoping.
 - **Produces:** GitHub PR review (approve | request-changes) with
-  inline comments; writes `review_verdict` and `review_url` back to
+  inline comments; writes `review_verdict`, `review_url`,
+  `security_finding_count`, and `performance_finding_count` back to
   the task.
+- **Schema:** `reviewer.json` — includes `security_findings` and
+  `performance_findings` arrays with severity-tagged finding objects;
+  schema enforces that `approve` requires `security_findings` to
+  contain no `critical` entries.
 - **Code:** `src/coder_core/workers/reviewer.py`; prompt at
   `system/roles/reviewer.md`.
 
@@ -102,8 +135,18 @@ developer-produced PR and a human-facing merge decision.
   `depth=1, edge_types=served_by_designs`; `min_freshness` omitted
   on initial conversion. Falls back to direct fetch when
   `CODER_KNOWLEDGE_GRAPH_ENABLED` is off.
-- 0065 — reviewer scope cut + turn cap. ``--max-turns 30`` enforced via ``worker_max_turns_reviewer`` (coder-core#160); ``failure_kind=turn_cap_exceeded`` written by the dispatcher and rendered as a distinct chip in the admin panel (coder-core#163, coder-admin#17). Reviewer task contract in ``system/roles/reviewer/tasks/review.md`` rewritten to constrain scope to pre-loaded diff + ACs + edge-cases + CI report (no free-form repo browsing). 7-day reviewer turn-count and cost metrics are tracked on the observability dashboard for post-soak verification.
-
+- 0065 — reviewer scope cut + turn cap. ``--max-turns 30`` enforced via ``worker_max_turns_reviewer`` (coder-core#160); ``failure_kind=turn_cap_exceeded`` written by the dispatcher and rendered as a distinct chip in the admin panel (coder-admin#17). Reviewer task contract in ``system/roles/reviewer/tasks/review.md`` rewritten to constrain scope to pre-loaded diff + ACs + edge-cases + CI report (no free-form repo browsing). 7-day reviewer turn-count and cost metrics are tracked on the observability dashboard for post-soak verification.
+- 0094 — security and performance analysis passes. `reviewer.json`
+  schema gains `security_findings` and `performance_findings` arrays
+  with severity-tagged finding objects; `approve` path schema-enforces
+  no `critical` security findings. `critical` findings escalate to
+  `request-changes`; findings post tagged inline PR comments
+  (`[security][severity]`, `[performance]`). Role prompt at
+  `system/roles/reviewer/tasks/review.md` gains explicit "Security
+  analysis" (OWASP-aligned categories) and "Performance analysis"
+  (query/pagination/complexity patterns) sections. Orchestrator
+  persists `security_finding_count` and `performance_finding_count`
+  to task metadata.
 
 ## Links
 

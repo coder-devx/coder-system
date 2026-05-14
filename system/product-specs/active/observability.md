@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-05-06
-last_verified_at: 2026-05-06
+updated: 2026-05-14
+last_verified_at: 2026-05-14
 summary: Per-task telemetry, token costs, and pipeline metrics.
 served_by_designs: [observability-and-cost-tracking]
 related_specs: [knowledge-freshness]
@@ -88,13 +88,24 @@ without SSH.
   task-outcome rows joined via `auto_approvals.artifact_id`; a > 3pp
   drop in the auto-approved cohort is a rollback signal surfaced on
   the admin Metrics dashboard.
+- **Reviewer finding counts.** On reviewer-task completion the
+  orchestrator writes `security_finding_count` and
+  `performance_finding_count` to task metadata. `/metrics` includes a
+  `request_changes_by_kind` breakdown with `critical_security` as a
+  distinct subcategory, tracking the fraction of `request-changes`
+  verdicts driven by critical security findings versus AC/convention
+  failures. The admin observability dashboard surfaces the
+  `critical_security` subcategory as a labelled row on the
+  verdict-breakdown table.
 
 ## Interfaces
 
 - `GET /v1/projects/{id}/metrics?period=` — returns daily cost, success
   rate, per-spec cost breakdown, average stage durations, per-role
-  `cache_stats` with hit rate, and (when `AUTO_APPROVE_ENABLED`)
-  auto-approval telemetry for the requested window.
+  `cache_stats` with hit rate, `request_changes_by_kind` breakdown
+  (including `critical_security` subcategory), and (when
+  `AUTO_APPROVE_ENABLED`) auto-approval telemetry for the requested
+  window.
 - `/metrics` route in `coder-admin` — dashboard view.
 - Slack webhook — cost, success-rate, and cache-hit-floor alerts.
 - Postgres `task_stage_durations` table — raw timing data for ad-hoc
@@ -160,6 +171,13 @@ without SSH.
   dashboard. `self_confidence` token-cost comparison (Stage 2 shadow
   data vs. the 0029 pre-0040 baseline) feeds the
   cost-regression-alert feed (0032) before Stage 3 flag flip.
+- `0094` — reviewer security/performance finding counts (shipped
+  2026-05-14): orchestrator writes `security_finding_count` and
+  `performance_finding_count` to task metadata on reviewer-task
+  completion. `/metrics` gains a `request_changes_by_kind` breakdown
+  with `critical_security` as a distinct subcategory; surfaced on the
+  admin observability dashboard as a labelled row on the
+  verdict-breakdown table.
 
 ## Links
 

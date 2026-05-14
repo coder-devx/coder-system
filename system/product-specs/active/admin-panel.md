@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-05-12
-last_verified_at: 2026-05-12
+updated: 2026-05-14
+last_verified_at: 2026-05-14
 summary: User-facing SPA for status, debug, override.
 served_by_designs: [system-overview]
 related_specs: [audit-log]
@@ -177,6 +177,14 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Backed by the `pr_to_task_map` row surfaced through the task detail
   endpoint. Operators can deep-link to each attempt task directly
   from the card.
+- **Reviewer security and performance chips.** TaskDetail for
+  reviewer-role tasks shows a "Security" count chip and a
+  "Performance" count chip alongside the existing verdict chip,
+  reading `security_finding_count` and `performance_finding_count`
+  from task metadata. Counts of 0 render as `0 security` /
+  `0 performance`; non-zero counts use a distinct colour to draw
+  operator attention. Behind `VITE_REVIEWER_FINDINGS_ENABLED`
+  (default on).
 
 ## Interfaces
 
@@ -213,7 +221,7 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `VITE_ESCALATIONS_ENABLED`, `VITE_AUTO_APPROVE_ENABLED`,
   `VITE_RUN_TIMELINE_ENABLED`, `VITE_PR_VIEWER_ENABLED`,
   `VITE_KNOWLEDGE_EDITOR_ENABLED`, `VITE_COMMAND_PALETTE_ENABLED`,
-  `VITE_CI_FIX_LOOP_ENABLED`.
+  `VITE_CI_FIX_LOOP_ENABLED`, `VITE_REVIEWER_FINDINGS_ENABLED`.
 
 ## Dependencies
 
@@ -340,6 +348,13 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   for `adr_collision` tasks it surfaces `collided_adr_ids` and
   `committed_adr_ids` inline so operators see exactly which ADRs need
   hand-recovery without inspecting the preserved task output.
+- 0094 Reviewer security and performance chips (shipped 2026-05-14) —
+  TaskDetail for reviewer-role tasks gains a "Security" count chip and
+  a "Performance" count chip alongside the existing verdict chip,
+  reading `security_finding_count` and `performance_finding_count` from
+  task metadata written by the orchestrator on task completion. Counts
+  of 0 render normally; non-zero counts use a distinct colour. Behind
+  `VITE_REVIEWER_FINDINGS_ENABLED` (default on).
 
 ## Links
 
@@ -347,4 +362,5 @@ email allowlist; sessions carry an admin JWT with cross-project access.
 - Related components: [multi-tenancy](./multi-tenancy.md),
   [knowledge-api](./knowledge-api.md), [audit-log](./audit-log.md),
   [escalations](./escalations.md), [observability](./observability.md),
-  [task-orchestration](./task-orchestration.md)
+  [task-orchestration](./task-orchestration.md),
+  [reviewer-worker](./reviewer-worker.md)
