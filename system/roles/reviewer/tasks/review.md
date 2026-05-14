@@ -153,8 +153,40 @@ Walk the diff against:
   handling. The diff itself usually shows enough; if you're tempted
   to read the whole module to check, the diff is probably too large
   and `request_changes` for splitting is the right call.
-- **Security** — injection, auth bypass, secret leakage, **tenant
-  scoping** (every endpoint scopes by `project_id`).
+- **Security analysis** — Walk the diff for:
+  - *OWASP Top 10*: injection (SQL, command, LDAP), broken auth,
+    XSS, IDOR, security misconfiguration, SSRF, cryptographic
+    failures, insecure deserialization, vulnerable/outdated
+    components, logging/monitoring gaps. Multi-tenant scoping
+    remains non-negotiable: every endpoint must scope by
+    `project_id`.
+  - *Credential exposure*: hardcoded secrets, API keys, tokens in
+    source.
+  - For each finding, post a `[security][{severity}]` inline PR
+    comment via `gh api`:
+    ```bash
+    gh api repos/{org}/{repo}/pulls/{number}/comments \
+      --method POST \
+      --field path="{file}" \
+      --field line={line} \
+      --field body="[security][critical] <description>"
+    ```
+  Record every finding (path, line, severity, description) — you
+  will need them for the `security_findings` array in the output
+  envelope.
+- **Performance analysis** — Walk the diff for:
+  - *N+1 queries*: ORM iteration loops with per-row `.get()` /
+    `.filter()` calls inside.
+  - *Unbounded pagination*: endpoints returning all rows without a
+    `LIMIT` or page-size cap.
+  - *Missing index hints*: `WHERE` clauses on columns that appear
+    un-indexed in the diff.
+  - *O(n²)+ complexity*: nested loops over input-scaled
+    collections.
+  - For each finding, post a `[performance][{severity}]` inline PR
+    comment via `gh api` (same shape as security comments above).
+  Record every finding for the `performance_findings` array in the
+  output envelope.
 - **Idiom + conventions** — language idioms, project conventions
   cited in `AGENTS.md`, patterns from neighbouring code (read the
   *cited* neighbours; don't go fishing).
@@ -187,32 +219,32 @@ feedback, drop into `gh api` against
 payload. For most reviews, citing `path:line` in the prose body is
 enough.
 
-### 5. Output the marker lines
+### 5. Output the JSON envelope
 
-After posting the review, your final message MUST include:
-
-```
-VERDICT: approve
-```
-
-or
+After posting the review, your final message MUST be a single JSON
+object — first byte `{`, last byte `}`, no prose, no fence:
 
 ```
-VERDICT: request_changes
+{"verdict": "approve", "review_url": "https://github.com/{org}/{source-repo}/pull/{number}#pullrequestreview-{id}", "security_findings": [...], "performance_findings": [...]}
 ```
 
-…and the GitHub review URL on its own line:
+Fields:
 
-```
-https://github.com/{org}/{source-repo}/pull/{number}#pullrequestreview-{id}
-```
+- `verdict` — `"approve"` or `"request_changes"` (lowercase,
+  underscore).
+- `review_url` — the actual URL printed by `gh pr review`. Do not
+  fabricate.
+- `security_findings` — array of objects, one per security finding:
+  `{"path": "...", "line": N, "severity": "critical|high|medium|low", "description": "..."}`.
+  Empty array `[]` when no findings.
+- `performance_findings` — array of objects, one per performance
+  finding: `{"path": "...", "line": N, "severity": "high|medium|low", "description": "..."}`.
+  Empty array `[]` when no findings.
 
-The verdict line is parsed strictly. Use exactly `approve` or
-`request_changes` (lowercase, underscore). The orchestrator does
-fall back to keyword heuristics in `reviewer.py` when the line is
-missing, but **that's a safety net, not a contract** — emit the
-strict line. The review URL must be the actual URL printed by
-`gh pr review`, not a fabricated one.
+**`approve` requires `security_findings` to contain no `critical`
+entries.** The compliance gate enforces this via schema — an
+`approve` with a `critical` security finding is rejected and you
+will be re-prompted.
 
 ## Common mistakes that fail the gate
 
@@ -243,6 +275,14 @@ strict line. The review URL must be the actual URL printed by
   turns and still exploring, **post a `request_changes` with what
   you have**; what you've found is more useful than what you might
   find with another 20 turns.
+- **Missing `security_findings` array.** The compliance gate
+  strict-parses the JSON envelope and will re-prompt if
+  `security_findings` is absent or not an array. Always include it,
+  even as `[]`.
+- **Emitting `approve` with a `critical` security finding.** The
+  schema gate rejects this combination and will re-prompt. Downgrade
+  the verdict to `request_changes` whenever any entry in
+  `security_findings` has `"severity": "critical"`.
 
 ## Ship-mode addendum (spec 0044)
 
