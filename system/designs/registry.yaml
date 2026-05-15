@@ -811,3 +811,11 @@ designs:
   file: wip/0076-spec-bound-architect-dispatch.md
   parent: pipeline-operations
   target_slug: spec-bound-architect-dispatch
+- id: 0078
+  title: Spec-Run Lifecycle Auto-Bootstrap
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0078-spec-run-lifecycle-auto-bootstrap.md
+  parent: pipeline-operations
+  target_slug: spec-run-lifecycle-auto-bootstrap
