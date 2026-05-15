@@ -475,10 +475,10 @@ specs:
   parent: knowledge-and-admin
 - id: '0076'
   title: Spec-bound architect dispatch from admin UI
-  status: wip
+  status: active
   owner: ro
-  folder: wip
-  file: wip/0076-spec-bound-architect-dispatch-from-admin-ui.md
+  folder: active
+  file: active/0076-spec-bound-architect-dispatch-from-admin-ui.md
   parent: pipeline-operations
 - id: '0077'
   title: "Coder Studio \u2014 Founder role Phase A"
