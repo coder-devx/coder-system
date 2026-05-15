@@ -489,10 +489,10 @@ specs:
   parent: knowledge-and-admin
 - id: 0078
   title: Spec-run lifecycle auto-bootstrap for fresh WIP specs
-  status: wip
+  status: active
   owner: ro
-  folder: wip
-  file: wip/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md
+  folder: active
+  file: active/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md
   parent: pipeline-operations
 - id: 0079
   title: "Coder Studio \u2014 coder-product-template repo contract"
