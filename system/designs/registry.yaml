@@ -803,3 +803,11 @@ designs:
   file: wip/0094-reviewer-security-and-performance-analysis.md
   parent: worker-roles
   target_slug: reviewer-security-performance-analysis
+- id: '0076'
+  title: Spec-bound Architect Dispatch
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0076-spec-bound-architect-dispatch.md
+  parent: pipeline-operations
+  target_slug: spec-bound-architect-dispatch
