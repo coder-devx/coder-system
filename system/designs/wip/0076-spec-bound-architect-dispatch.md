@@ -9,6 +9,7 @@ updated: '2026-05-15'
 last_verified_at: '2026-05-15'
 implements_specs:
 - admin-panel
+- spec-lifecycle-coordinator
 - task-orchestration
 decided_by:
 - '0040'

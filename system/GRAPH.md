@@ -30,7 +30,8 @@ flowchart LR
   n019["spec<br/>observability"]
   n020["spec<br/>pipeline-operations"]
   n021["spec<br/>self-healing"]
-  n022["spec<br/>task-orchestration"]
+  n022["spec<br/>spec-lifecycle-coordinator"]
+  n023["spec<br/>task-orchestration"]
   n017 -->|served by| n000
   n000 -.->|related| n015
   n000 -.->|related| n006
@@ -78,21 +79,21 @@ flowchart LR
   n014 -.->|related| n006
   n014 -.->|related| n015
   n014 -.->|related| n005
-  n022 -->|served by| n015
+  n023 -->|served by| n015
   n016 -.->|related| n015
   n016 -.->|related| n011
   n016 -.->|related| n006
   n017 -->|served by| n000
-  n017 -.->|related| n022
+  n017 -.->|related| n023
   n017 -.->|related| n019
   n018 -->|served by| n004
-  n018 -.->|related| n022
+  n018 -.->|related| n023
   n018 -.->|related| n019
   n019 -->|served by| n006
   n019 -.->|related| n017
   n019 -.->|related| n018
   n019 -.->|related| n021
-  n019 -.->|related| n022
+  n019 -.->|related| n023
   n020 -->|served by| n015
   n020 -->|served by| n006
   n020 -->|served by| n004
@@ -102,15 +103,16 @@ flowchart LR
   n020 -.->|related| n018
   n020 -.->|related| n019
   n020 -.->|related| n021
-  n020 -.->|related| n022
+  n020 -.->|related| n023
   n021 -->|served by| n011
-  n021 -.->|related| n022
+  n021 -.->|related| n023
   n021 -.->|related| n019
   n021 -.->|related| n018
-  n022 -->|served by| n015
-  n022 -.->|related| n018
-  n022 -.->|related| n019
-  n022 -.->|related| n021
+  n022 -.->|related| n023
+  n023 -->|served by| n015
+  n023 -.->|related| n018
+  n023 -.->|related| n019
+  n023 -.->|related| n021
 ```
 
 ## Worker roles
@@ -367,19 +369,23 @@ flowchart LR
   n001("design<br/>continuous-deployment")
   n002("design<br/>delivery-and-infra")
   n003("design<br/>tenant-isolation")
-  n004["spec<br/>continuous-deployment"]
-  n005["spec<br/>delivery-and-infra"]
-  n006["spec<br/>tenant-isolation"]
-  n005 -->|served by| n000
+  n004["spec<br/>coder-core-modular-monolith"]
+  n005["spec<br/>continuous-deployment"]
+  n006["spec<br/>delivery-and-infra"]
+  n007["spec<br/>tenant-isolation"]
+  n006 -->|served by| n000
   n000 -.->|related| n003
-  n004 -->|served by| n001
-  n005 -->|served by| n002
+  n005 -->|served by| n001
+  n006 -->|served by| n002
   n002 -.->|related| n000
   n002 -.->|related| n001
-  n006 -->|served by| n003
-  n005 -->|served by| n000
-  n005 -.->|related| n004
-  n005 -.->|related| n006
+  n007 -->|served by| n003
+  n004 -->|served by| n000
+  n004 -.->|related| n005
+  n004 -.->|related| n007
+  n006 -->|served by| n000
+  n006 -.->|related| n005
+  n006 -.->|related| n007
 ```
 
 ## Other

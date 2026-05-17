@@ -29,6 +29,7 @@ How tasks flow reliably through a project's pipeline, stay observable, and recov
 - [post-pr-ci-fix-loop](./designs/active/pipeline/post-pr-ci-fix-loop.md) (design) — Bounded CI-failure fix loop after Developer PRs land.
 - [prompt-caching-architecture](./designs/active/pipeline/prompt-caching-architecture.md) (design) — Prompt caching and shared-context reuse across workers.
 - [self-healing](./product-specs/active/pipeline/self-healing.md) (spec) · [self-healing](./designs/active/pipeline/self-healing.md) (design) — Reaper for stuck tasks past timeout.
+- [spec-lifecycle-coordinator](./product-specs/active/pipeline/spec-lifecycle-coordinator.md) (spec) — Per-spec state machine that auto-dispatches the architect → TM → developer chain between human approval gates.
 - [stuck-pipeline-slack-paging](./designs/active/pipeline/stuck-pipeline-slack-paging.md) (design) — Page Slack at the 15-minute stuck-pipeline threshold.
 - [task-lifecycle](./designs/active/pipeline/task-lifecycle.md) (design) — Orthogonal status × stage machine; admin override actions (retry / resume / skip_to_stage / pause / reject).
 - [task-orchestration](./product-specs/active/pipeline/task-orchestration.md) (spec) — Task lifecycle, dispatcher, and stage transitions.
@@ -100,6 +101,6 @@ How code reaches production and how the system itself stays maintainable.
 - Spec: [delivery-and-infra](./product-specs/active/delivery-and-infra.md)
 - Design: [delivery-and-infra](./designs/active/delivery-and-infra.md)
 
-- [coder-core-modular-monolith](./designs/active/delivery/coder-core-modular-monolith.md) (design) — Layered import contracts (adapters → services → domain), enforced by import-linter.
+- [coder-core-modular-monolith](./product-specs/active/delivery/coder-core-modular-monolith.md) (spec) · [coder-core-modular-monolith](./designs/active/delivery/coder-core-modular-monolith.md) (design) — coder-core stays a single deployable with explicit internal boundaries so out-of-process extraction is one-file work later.
 - [continuous-deployment](./product-specs/active/delivery/continuous-deployment.md) (spec) · [continuous-deployment](./designs/active/delivery/continuous-deployment.md) (design) — Push-to-main CD with health checks.
 - [tenant-isolation](./product-specs/active/delivery/tenant-isolation.md) (spec) · [tenant-isolation](./designs/active/delivery/tenant-isolation.md) (design) — Test-suite harness for the multi-tenancy contract.

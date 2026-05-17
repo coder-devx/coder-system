@@ -13,6 +13,7 @@ in each component's `## Evolution` section and in git.
 | [architect-worker](./active/workers/architect-worker.md) | Architect Worker | ro | architect-worker |
 | [audit-log](./active/tenancy/audit-log.md) | Audit log | ro | audit-log |
 | [branch-cleanup](./active/pipeline/branch-cleanup.md) | Branch cleanup | ro | branch-cleanup |
+| [coder-core-modular-monolith](./active/delivery/coder-core-modular-monolith.md) | coder-core modular monolith | ro | coder-core-modular-monolith |
 | [cold-start-ingestion](./active/knowledge/cold-start-ingestion.md) | Cold-start knowledge ingestion | ro | — |
 | [continuous-deployment](./active/delivery/continuous-deployment.md) | Continuous Deployment | ro | continuous-deployment |
 | [delivery-and-infra](./active/delivery-and-infra.md) | Delivery & infra | ro | [system-overview](../designs/active/system-overview.md), 0051 |
@@ -36,6 +37,7 @@ in each component's `## Evolution` section and in git.
 | [secret-rotation](./active/tenancy/secret-rotation.md) | Automated secret rotation | ro | — |
 | [self-healing](./active/pipeline/self-healing.md) | Self-healing stuck pipelines | ro | self-healing |
 | [service-accounts](./active/tenancy/service-accounts.md) | Service Accounts | ro | service-accounts |
+| [spec-lifecycle-coordinator](./active/pipeline/spec-lifecycle-coordinator.md) | Spec-lifecycle coordinator | ro | [0076](../designs/wip/0076-spec-bound-architect-dispatch.md), [0078](../designs/wip/0078-spec-run-lifecycle-auto-bootstrap.md) |
 | [task-orchestration](./active/pipeline/task-orchestration.md) | Task Orchestration | ro | worker-communication |
 | [team-manager-worker](./active/workers/team-manager-worker.md) | Team Manager Worker | ro | team-manager-worker |
 | [tenancy-and-access](./active/tenancy-and-access.md) | Tenancy & access | ro | impersonation, audit-log, tenant-isolation |

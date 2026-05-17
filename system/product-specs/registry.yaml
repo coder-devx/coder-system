@@ -47,6 +47,21 @@ specs:
   - task-orchestration
   - observability
   parent: pipeline-operations
+- id: coder-core-modular-monolith
+  title: coder-core modular monolith
+  status: active
+  owner: ro
+  folder: active
+  file: active/delivery/coder-core-modular-monolith.md
+  served_by_designs:
+  - coder-core-modular-monolith
+  related_specs:
+  - audit-log
+  - continuous-deployment
+  - knowledge-api
+  - task-orchestration
+  - tenant-isolation
+  parent: delivery-and-infra
 - id: continuous-deployment
   title: Continuous Deployment
   status: active
@@ -189,6 +204,23 @@ specs:
   served_by_designs:
   - service-accounts
   parent: tenancy-and-access
+- id: spec-lifecycle-coordinator
+  title: Spec-lifecycle coordinator
+  status: active
+  owner: ro
+  folder: active
+  file: active/pipeline/spec-lifecycle-coordinator.md
+  served_by_designs:
+  - '0076'
+  - '0078'
+  related_specs:
+  - admin-panel
+  - architect-worker
+  - knowledge-api
+  - pm-worker
+  - task-orchestration
+  - team-manager-worker
+  parent: pipeline-operations
 - id: task-orchestration
   title: Task Orchestration
   status: active

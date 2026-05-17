@@ -103,35 +103,6 @@ and `/pipeline-runs` endpoints in `coder-core`.
   `failure_kind="budget"` when the project's calendar-month spend
   exceeds the resolved hard cap from `projects.budget_*_tokens`.
 
-- **Spec-lifecycle coordinator.** A per-spec state machine generalises
-  the close-cycle backstop one level up. The `spec_runs` table tracks
-  each WIP spec as it moves
-  `accepted → designing → design_landed → planning → plan_pending →
-  implementing → ship_pending → shipped` (plus `deprecated` and
-  `paused`). A `coder-core-spec-coord-tick` Cloud Run Job runs
-  `coder_core.spec_runs.coordinator.tick` every 60 s, claims active
-  runs with `FOR UPDATE SKIP LOCKED`, and probes the next transition:
-  `accepted → designing` via `dispatch_architect` (with `spec_id`
-  bound so the design lands at the matching numeric id per
-  ADR 0026), `designing → planning` via `dispatch_team_manager` once
-  the architect task succeeds. Both dispatchers are idempotent — an
-  existing non-terminal task reattaches with `trigger="manual_override"`
-  rather than duplicating. Three entry points start a row in
-  `accepted`: (1) the admin spec-detail "Start lifecycle" button →
-  `POST .../spec-runs` (201 create, 200 idempotent repeat),
-  (2) SpecCompose's `auto_start_lifecycle` flag (default true) after
-  the PR opens, (3) the PM-draft Phase 4 handler after the spec file
-  commits (swallow-on-exception so Phase 4 is not gated on bootstrap
-  success), (4) the historical PM-accept `all_pass` path (preserved as
-  regression guard). Operators read state via
-  `GET .../spec-runs[?state=]` and `.../spec-runs/{wip_spec_id}`;
-  pause/resume via `POST .../{wip_spec_id}/{pause,resume}`. Audit
-  actions `spec_run.{transitioned,paused,resumed}` let operators
-  reconstruct any spec's lifecycle from the audit log alone. Human
-  approval gates remain at PM-accept, plan-approve, and ship-merge;
-  the coordinator only auto-dispatches at the spawn points between
-  them (ADR 0015).
-
 - **Ship-gate close-cycle backstop.** When every developer task for a
   run's spec reaches `accepted`, `on_all_dev_tasks_accepted` consults
   the Knowledge API's orphan-WIP query before promoting the run to
@@ -190,15 +161,17 @@ and `/pipeline-runs` endpoints in `coder-core`.
   end-to-end run visibility + pause/resume/cancel.
 - `GET .../pipeline-runs/{run_id}/timeline` — per-run swim-lane
   payload backing the admin `RunTimeline`.
-- `GET .../spec-runs[?state=]` / `GET .../spec-runs/{wip_spec_id}` /
-  `POST .../spec-runs` (bootstrap) / `POST .../{wip_spec_id}/{pause,resume}`
-  — spec-lifecycle coordinator surface.
+
+The per-spec lifecycle (architect → TM auto-dispatch + four bootstrap
+entry points) lives in its own component — see
+[spec-lifecycle-coordinator](./spec-lifecycle-coordinator.md).
 
 ## Dependencies
 
 - Postgres (`tasks`, `task_messages`, `task_logs`, `pipeline_runs`,
-  `knowledge_reviews`, `task_stage_runs`, `spec_runs`,
-  `pipeline_run_contexts`, `adr_id_reservations`) — state of record.
+  `knowledge_reviews`, `task_stage_runs`, `pipeline_run_contexts`,
+  `adr_id_reservations`) — state of record. (`spec_runs` belongs to
+  [spec-lifecycle-coordinator](./spec-lifecycle-coordinator.md).)
 - Developer, Reviewer, PM, Architect, Team Manager workers — the
   stages the orchestrator drives.
 - [knowledge-api](../knowledge/knowledge-api.md) — file moves and registry
@@ -215,15 +188,17 @@ and `/pipeline-runs` endpoints in `coder-core`.
 - 2026-04-19 — observability week: worker compliance gate, prompt
   caching, model tier routing, token budgets, run dashboard, schema
   replay (specs 0025, 0028–0034, 0064).
-- 2026-05 — spec-lifecycle coordinator + worker-dispatch durability +
-  atomic ADR reservation + auto-bootstrap from PM-draft / SpecCompose
-  / admin button (specs 0056, 0068, 0078, 0085).
+- 2026-05 — worker-dispatch durability + atomic ADR reservation
+  (specs 0056, 0085). The per-spec lifecycle layer (specs 0068, 0078)
+  spun out into its own component — see
+  [spec-lifecycle-coordinator](./spec-lifecycle-coordinator.md).
 
 ## Links
 
 - Designs: [worker-communication](../../../designs/active/pipeline/worker-communication.md),
   [pipeline-operations](../../../designs/active/pipeline-operations.md)
-- Related components: [audit-log](../tenancy/audit-log.md),
+- Related components: [spec-lifecycle-coordinator](./spec-lifecycle-coordinator.md),
+  [audit-log](../tenancy/audit-log.md),
   [observability](./observability.md), [escalations](./escalations.md),
   [self-healing](./self-healing.md),
   [developer-worker](../workers/developer-worker.md),
