@@ -8,8 +8,8 @@ created: 2026-04-11
 updated: 2026-05-13
 last_verified_at: 2026-05-13
 summary: Push-to-main CD with health checks.
-served_by_designs: [system-overview]
-related_specs: [escalations]
+served_by_designs: []
+related_specs: [audit-log, escalations, observability, onboarding]
 parent: delivery-and-infra
 ---
 

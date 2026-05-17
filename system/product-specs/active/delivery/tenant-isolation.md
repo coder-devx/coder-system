@@ -8,7 +8,7 @@ created: 2026-04-19
 updated: 2026-04-21
 last_verified_at: 2026-04-21
 summary: Test-suite harness for the multi-tenancy contract.
-served_by_designs: [tenant-isolation]
+served_by_designs: []
 related_specs:
   - multi-tenancy
   - service-accounts

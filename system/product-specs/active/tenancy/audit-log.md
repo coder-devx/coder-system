@@ -9,7 +9,7 @@ updated: 2026-05-06
 last_verified_at: 2026-05-06
 summary: Every mutation recorded with actor, action, before, after.
 served_by_designs: [audit-log]
-related_specs: [admin-panel, impersonation, service-accounts, task-orchestration, knowledge-api]
+related_specs: [admin-panel, escalations, impersonation, knowledge-api, self-healing, service-accounts, task-orchestration]
 parent: tenancy-and-access
 ---
 
@@ -101,51 +101,13 @@ an incident timeline, review a peer's actions, or answer a customer's
 
 ## Evolution
 
-- 0037 Audit log service (shipped 2026-04-19) — migration 0041 adds
-  the `audit_events` table with indexes on `(project_id, created_at)`,
-  `(actor, created_at)`, `(action, created_at)`, `(correlation_id)`.
-  Downgrade is irreversible by design (`raise RuntimeError` — no
-  rollback should drop audit data). `coder_core.audit.record_audit_event`
-  + `Actions` constant module land the helper + action-string registry.
-  `CorrelationMiddleware` registers before the auth middleware so the
-  ID is set even on unauthenticated requests. Phase-1 wires the 15
-  highest-signal mutation endpoints listed in Capabilities.
-  `AuditLog.tsx` admin page + `listProjectAuditEvents` /
-  `listFleetAuditEvents` client bindings. Behind
-  `CODER_AUDIT_LOG_ENABLED` (default on).
-- 0041 Escalation action namespace (shipped 2026-04-22) — five new
-  actions registered with `Actions`: `escalation.opened`,
-  `escalation.rung_fired`, `escalation.acknowledged`,
-  `escalation.resolved`, `escalation.expired`. Every escalation
-  state transition writes an `audit_events` row inside the same
-  transaction as the `escalations` row update; the watcher's
-  system-initiated transitions use `actor_type='system'`,
-  `actor_id='escalation-watch'`. Slack-button acks from external
-  users that don't resolve to an internal `user` land
-  `actor_type='slack_external'` with the raw Slack handle captured
-  in the row for traceability. See [escalations](../pipeline/escalations.md).
-- 0042 Self-heal action namespace (shipped 2026-04-22) — two new
-  actions: `self_heal.remediated`, `self_heal.failed`. The 5-minute
-  watchdog writes a row per successful or errored remediation;
-  `skipped_cap` and `dry_run` outcomes are attempt-row only (no
-  audit event, to avoid noise). See [self-healing](../pipeline/self-healing.md).
-- Claude OAuth auth-mode action (shipped 2026-04-22) — new
-  `project.set_auth_mode` action registered with `Actions` and
-  emitted from the admin `PATCH /v1/_admin/projects/{id}/auth-mode`
-  handler. Captures the prior + new mode for the trail.
-- `0054` Orchestrator reconciliation action namespace (shipped
-  2026-04-28) — two new actions registered in `Actions`:
-  `task.pr_url_reconciled_from_github` (successful reconciliation of
-  a missing PR URL from GitHub) and `task.pr_url_reconcile_failed`
-  (GitHub call errored or returned unexpected shape). Both write
-  `target_type='task'`, `target_id=<task_id>`, `project_id=<project>`;
-  success `details` carry `{pr_url, branch_name, commit_sha}`;
-  failure `details` carry `{error_class, error_message}`. Written
-  inside `_reconcile_pr_url_from_github` (fail-soft: exception →
-  audit row + return None, never blocks the STUCK path). Observable
-  via `/audit-events` filtered to these action strings; headline KPIs:
-  reconciliation hit rate and failure rate per week. See
-  [task-orchestration](../pipeline/task-orchestration.md).
+- 2026-04-19 — Initial ship (spec 0037): `audit_events` table, helper +
+  `Actions` registry, correlation middleware, 15-endpoint Phase-1 wiring,
+  admin viewer.
+- 2026-04-22 — Action namespaces extended for escalations, self-heal,
+  and Claude OAuth auth-mode transitions (specs 0041 / 0042).
+- 2026-04-28 — Orchestrator-reconciliation namespace for task PR-URL
+  recovery (spec 0054, fail-soft).
 
 ## Links
 

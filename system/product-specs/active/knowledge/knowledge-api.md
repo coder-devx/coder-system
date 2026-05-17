@@ -8,8 +8,8 @@ created: 2026-04-09
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 summary: Read-through layer over the knowledge repo with per-project cache.
-served_by_designs: [knowledge-write-api, knowledge-repo-model]
-related_specs: [knowledge-freshness, knowledge-schema-migration]
+served_by_designs: [knowledge-repo-model, knowledge-stack, knowledge-write-api]
+related_specs: [admin-panel, audit-log, knowledge-freshness, knowledge-schema-migration, multi-tenancy, task-orchestration]
 parent: knowledge-and-admin
 ---
 
@@ -109,37 +109,17 @@ checks, and actor attribution.
 
 ## Evolution
 
-- 0002 Knowledge repo read API (shipped 2026-04) — typed read routes,
-  cross-link resolution with broken-link surfacing, TTL cache with
-  metrics endpoint.
-- 0014 Knowledge write API (shipped 2026-04) — `POST`/`PUT` wrapping
-  GitHub Contents API, frontmatter validation, cross-link integrity,
-  actor-attributed commits, status-change file moves.
-- 0044 Write-through enforcement on ship (shipped 2026-04-18) —
-  `POST /v1/projects/{id}/knowledge/ship` atomic WIP→active merge via
-  Git Trees (single commit covering every touched file + both
-  registries + WIP delete) behind `settings.ship_gate_enabled`; new
-  `GET /v1/projects/{id}/knowledge/wips?shipped=true` orphan query
-  powering the close-cycle backstop and the admin ship-gate panel;
-  pre-commit validator enforces AC coverage, cross-link resolution
-  against the post-merge snapshot, and template-path refusal.
-- 0035 Inline knowledge editor (shipped 2026-04-19, body-only) —
-  admin-panel now drives the existing `PUT /knowledge/{type}/{id}`
-  endpoint from the artifact view (body-only payload, shallow
-  frontmatter merge still server-supported for phase 2). No backend
-  changes. New `knowledge_edited` structured log event at save
-  (`{project_id, artifact_type, artifact_id, commit_sha}`) flows
-  through the existing `coder_core.api.knowledge` logger. SHA
-  conflicts bubble as 502 `github_upstream` for the editor's
-  "reload" branch; 422 `invalid_frontmatter` / broken cross-links
-  render inline.
-- 0047 Template schema migration (shipped 2026-05-06) — new
-  `?min_schema_version=N` param on single-artifact fetch: returns
-  `409 SCHEMA_DRIFT` with `pending_migrations[]` when the project's
-  `template_version < N`; absent param preserves 200 legacy contract.
-  New `GET /v1/projects/{id}/template/version` (per-project auth) and
-  `GET /v1/_admin/template/migrations` (admin JWT, fleet matrix).
-  See [knowledge-schema-migration](./knowledge-schema-migration.md).
+- 2026-04 — Typed read + write API: read routes with cross-link
+  resolution, write endpoints wrapping GitHub Contents, frontmatter
+  validation, actor-attributed commits, status-change file moves
+  (specs 0002, 0014).
+- 2026-04-18/19 — Ship gate + inline editor: atomic WIP→active
+  `/knowledge/ship` via Git Trees with pre-commit validator;
+  body-only inline editor wired from admin-panel through the
+  existing PUT endpoint (specs 0044, 0035).
+- 2026-05-06 — Template schema-migration signal: `?min_schema_version=N`
+  → `409 SCHEMA_DRIFT`; version + matrix endpoints (spec 0047, see
+  [knowledge-schema-migration](./knowledge-schema-migration.md)).
 
 ## Links
 

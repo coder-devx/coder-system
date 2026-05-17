@@ -9,7 +9,7 @@ updated: 2026-05-17
 last_verified_at: 2026-05-17
 summary: Task lifecycle, dispatcher, and stage transitions.
 served_by_designs: [worker-communication]
-related_specs: [audit-log]
+related_specs: [admin-panel, architect-worker, audit-log, developer-worker, escalations, knowledge-api, observability, pm-worker, reviewer-worker, self-healing, team-manager-worker]
 parent: pipeline-operations
 ---
 

@@ -8,13 +8,8 @@ created: 2026-05-02
 updated: 2026-05-03
 last_verified_at: 2026-05-03
 summary: How code reaches production and how the system itself stays maintainable.
-served_by_designs:
-  - system-overview
-  - coder-core-modular-monolith
-related_specs:
-  - pipeline-operations
-  - knowledge-and-admin
-  - tenancy-and-access
+served_by_designs: [coder-core-modular-monolith]
+related_specs: [audit-log, continuous-deployment, knowledge-and-admin, observability, pipeline-operations, tenancy-and-access, tenant-isolation]
 parent: ~
 ---
 

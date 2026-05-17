@@ -9,7 +9,7 @@ updated: 2026-05-06
 last_verified_at: 2026-05-06
 summary: Product Manager worker — owns specs and acceptance.
 served_by_designs: [pm-worker]
-related_specs: []
+related_specs: [architect-worker, knowledge-api, service-accounts, task-orchestration, team-manager-worker]
 parent: worker-roles
 ---
 
@@ -87,21 +87,12 @@ spec is promoted.
   Phase 4 wires both modes to the knowledge write API and messaging.
   First self-hosted spec drafted by the PM and shipped end-to-end
   (0019).
-- 0025 — worker output compliance: `pm_draft` and `pm_accept` JSON
-  schemas, shared `validate_and_retry` gate in front of Phase 4.
-  Schema exhaustion lands `failure_kind="schema"` on the task row and
-  leaves no side effect; ADR 0012 explains the re-prompt-only choice.
-- 0027 — transient-failure retry around the claude spawn; composes
-  with 0025's schema loop. ADR 0013.
-- 0055 — `GH_TOKEN` injection for non-workspace roles. PM worker
-  calls the shared `_github_env.apply_github_token_env` helper from
-  the dispatcher-resolved `WorkerInput.github_token` so `gh`
-  commands inside the `claude` subprocess authenticate without a
-  workspace clone.
-- 0046 — accept-mode context load converted from direct spec fetch to
-  a single graph fetch: `depth=1, edge_types=related_specs`;
-  `min_freshness` omitted on initial conversion. Falls back to direct
-  fetch when `CODER_KNOWLEDGE_GRAPH_ENABLED` is off.
+- 2026-04 — Output compliance gate (`pm_draft`, `pm_accept` schemas),
+  transient-failure retry; first PM-drafted spec shipped end-to-end
+  (specs 0025, 0027, 0019).
+- 2026-04 — `GH_TOKEN` unified via `_github_env`; accept-mode context
+  converted to single graph fetch behind `CODER_KNOWLEDGE_GRAPH_ENABLED`
+  (specs 0046, 0055).
 
 ## Links
 

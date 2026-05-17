@@ -146,44 +146,15 @@ a stall no longer waits for someone to open the admin panel.
 
 ## Evolution
 
-- **0041 Escalation policies & on-call routing (shipped 2026-04-22,
-  coder-core `c992a7b`).** Migrations 0046/0047/0048,
-  `coder_core.escalations` package (watcher, detectors, policies,
-  oncall, Slack + PagerDuty dispatchers), `api/escalations.py`,
-  `api/on_call.py`, `api/slack_hooks.py`, Cloud Run Job + Scheduler.
-  3,000+ LoC of tests. Default flag off fleet-wide; rollout is the
-  documented 3-stage ramp (shadow → L0-only fleet → per-project
-  full-ladder opt-in with `coder` first).
-- **Admin UI shipped 2026-05-03.** `/admin/escalations` (fleet)
-  and `/projects/:projectId/escalations` (per-project) pages render
-  the existing `EscalationRead` rows from
-  `GET /v1/_admin/escalations` and `GET /v1/projects/{id}/escalations`
-  with status + trigger filters, rung chips, target run/task deep
-  links, and inline `Ack` / `Resolve` actions wired to the existing
-  POST endpoints. New `listProjectEscalations` /
-  `listFleetEscalations` / `acknowledgeEscalation` /
-  `resolveEscalation` client bindings; project sub-nav grows the
-  Escalations tab. 6 vitest cases. Behind `VITE_ESCALATIONS_ENABLED`
-  (default on). No backend changes — the UI rides the contract that
-  shipped on 2026-04-22.
-- **0053 CI-fix-exhausted trigger** — the CI fix-loop watcher (spec
-  0053) calls the escalation service's `open_escalation` with
-  `trigger_kind='ci_fix_exhausted'`, `target_type='pr'`,
-  `target_id=pr_url` when `MAX_CI_FIX_ATTEMPTS` is exhausted on a
-  managed PR. No schema migration — the existing `escalations` table
-  accommodates the new trigger kind; `pipeline_run_id` and `task_id`
-  are NULL for PR-scoped escalations, `target_id` carries the PR URL.
-  Admin escalations pages surface CI-stuck PRs with a
-  `ci_fix_exhausted` chip alongside pipeline-run stalls.
-- **0082 — `migrate_failure` trigger kind.** The `coder-core` deploy
-  workflow calls `open_escalation` with `trigger_kind='migrate_failure'`,
-  `target_type='deploy_job'`, severity `high`, and a structured payload
-  (Cloud Run Job execution name + Alembic error) when the
-  `coder-core-migrate` step exits non-zero. No schema migration — the
-  existing `escalations` table accommodates the new trigger kind.
-  Additive to the existing Slack deploy-failure notification. Responds
-  to the 2026-05-10 incident where 17 deploys failed silently at the
-  migrate step without paging anyone.
+- 2026-04-22 — Initial ship (spec 0041): three-rung ladder, five
+  trigger kinds, stateless watcher, Slack + PagerDuty dispatchers,
+  rolling out via shadow → L0-only → per-project full-ladder.
+- 2026-05-03 — Admin UI ships the existing escalation surface as
+  `/admin/escalations` + per-project tab.
+- 2026-05 — New trigger kinds: `ci_fix_exhausted` for managed-PR fix
+  loops (spec 0053) and `migrate_failure` for deploy migrate-step
+  failures (spec 0082, response to the 2026-05-10 silent-deploy
+  incident). No schema change.
 
 ## Links
 

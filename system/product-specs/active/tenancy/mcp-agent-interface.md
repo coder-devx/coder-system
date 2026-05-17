@@ -9,7 +9,7 @@ updated: 2026-05-17
 last_verified_at: 2026-05-17
 summary: Let external agents connect, impersonate, and drive Coder via MCP.
 served_by_designs: [mcp-agent-interface-design]
-related_specs: [impersonation, service-accounts, audit-log, admin-panel, multi-tenancy, task-orchestration, knowledge-api]
+related_specs: [admin-panel, audit-log, impersonation, knowledge-api, multi-tenancy, oauth-mcp, service-accounts, task-orchestration]
 parent: tenancy-and-access
 ---
 

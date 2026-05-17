@@ -89,16 +89,28 @@ flowchart LR
   n018 -.->|related| n022
   n018 -.->|related| n019
   n019 -->|served by| n006
+  n019 -.->|related| n017
+  n019 -.->|related| n018
+  n019 -.->|related| n021
+  n019 -.->|related| n022
   n020 -->|served by| n015
   n020 -->|served by| n006
   n020 -->|served by| n004
   n020 -->|served by| n011
   n020 -->|served by| n000
+  n020 -.->|related| n017
+  n020 -.->|related| n018
+  n020 -.->|related| n019
+  n020 -.->|related| n021
+  n020 -.->|related| n022
   n021 -->|served by| n011
   n021 -.->|related| n022
   n021 -.->|related| n019
   n021 -.->|related| n018
   n022 -->|served by| n015
+  n022 -.->|related| n018
+  n022 -.->|related| n019
+  n022 -.->|related| n021
 ```
 
 ## Worker roles
@@ -145,14 +157,26 @@ flowchart LR
   n013 -->|served by| n006
   n006 -.->|related| n007
   n008 -->|served by| n000
-  n009 -->|served by| n007
+  n008 -.->|related| n010
+  n008 -.->|related| n012
+  n009 -.->|related| n011
   n010 -->|served by| n002
-  n011 -->|served by| n007
+  n010 -.->|related| n008
+  n010 -.->|related| n012
+  n011 -.->|related| n009
+  n011 -.->|related| n010
   n012 -->|served by| n005
-  n013 -->|served by| n007
+  n012 -.->|related| n008
+  n012 -.->|related| n009
+  n012 -.->|related| n010
   n013 -->|served by| n000
   n013 -->|served by| n002
   n013 -->|served by| n005
+  n013 -.->|related| n008
+  n013 -.->|related| n009
+  n013 -.->|related| n010
+  n013 -.->|related| n011
+  n013 -.->|related| n012
 ```
 
 ## Tenancy & access
@@ -198,10 +222,16 @@ flowchart LR
   n007 -.->|related| n013
   n008 -->|served by| n002
   n008 -.->|related| n007
-  n009 -.->|related| n008
-  n009 -.->|related| n013
+  n008 -.->|related| n010
+  n008 -.->|related| n013
   n009 -.->|related| n007
+  n009 -.->|related| n008
   n009 -.->|related| n010
+  n009 -.->|related| n011
+  n009 -.->|related| n013
+  n010 -.->|related| n007
+  n010 -.->|related| n008
+  n010 -.->|related| n013
   n011 -->|served by| n004
   n011 -.->|related| n008
   n011 -.->|related| n007
@@ -209,8 +239,18 @@ flowchart LR
   n012 -.->|related| n007
   n012 -.->|related| n010
   n012 -.->|related| n008
+  n013 -.->|related| n007
+  n013 -.->|related| n008
+  n013 -.->|related| n010
   n014 -->|served by| n002
   n014 -->|served by| n000
+  n014 -.->|related| n007
+  n014 -.->|related| n008
+  n014 -.->|related| n009
+  n014 -.->|related| n010
+  n014 -.->|related| n011
+  n014 -.->|related| n012
+  n014 -.->|related| n013
 ```
 
 ## Knowledge & admin
@@ -278,17 +318,30 @@ flowchart LR
   n013 -.->|related| n008
   n013 -.->|related| n006
   n013 -.->|related| n009
-  n015 -.->|related| n022
+  n014 -->|served by| n000
+  n014 -.->|related| n018
   n015 -.->|related| n018
   n015 -.->|related| n019
+  n015 -.->|related| n021
+  n015 -.->|related| n022
   n016 -.->|related| n018
   n016 -.->|related| n014
   n016 -.->|related| n019
   n017 -->|served by| n006
   n017 -->|served by| n008
   n017 -->|served by| n005
-  n018 -->|served by| n008
+  n017 -.->|related| n014
+  n017 -.->|related| n015
+  n017 -.->|related| n016
+  n017 -.->|related| n018
+  n017 -.->|related| n019
+  n017 -.->|related| n020
+  n017 -.->|related| n021
+  n017 -.->|related| n022
   n018 -->|served by| n006
+  n018 -->|served by| n007
+  n018 -->|served by| n008
+  n018 -.->|related| n014
   n018 -.->|related| n019
   n018 -.->|related| n020
   n019 -->|served by| n005
@@ -301,6 +354,8 @@ flowchart LR
   n021 -.->|related| n018
   n021 -.->|related| n022
   n021 -.->|related| n014
+  n022 -.->|related| n014
+  n022 -.->|related| n018
   n022 -.->|related| n020
 ```
 
@@ -323,7 +378,8 @@ flowchart LR
   n002 -.->|related| n001
   n006 -->|served by| n003
   n005 -->|served by| n000
-  n006 -->|served by| n003
+  n005 -.->|related| n004
+  n005 -.->|related| n006
 ```
 
 ## Other

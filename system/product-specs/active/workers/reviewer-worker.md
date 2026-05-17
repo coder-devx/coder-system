@@ -8,9 +8,8 @@ created: '2026-04-11'
 updated: '2026-05-14'
 last_verified_at: '2026-05-14'
 summary: Reviewer worker — technical-quality gate before PM acceptance.
-served_by_designs:
-- worker-roles
-related_specs: []
+served_by_designs: []
+related_specs: [developer-worker, knowledge-api, pm-worker, service-accounts, task-orchestration]
 parent: worker-roles
 ---
 # Reviewer worker
@@ -112,41 +111,15 @@ developer-produced PR and a human-facing merge decision.
 
 ## Evolution
 
-- 0009 — `workers/reviewer.py`, `review_verdict` and `review_url`
-  columns (migration 0009), knowledge-grounded reviews, first live
-  review caught a real convention violation on
-  `coder-devx/coder-core#2`.
-- 0027 — transient-failure retry around the claude spawn via the
-  shared classifier + retry wrapper.
-- 0044 — ship-mode reviewer schema (`reviewer_ship.json`) with
-  required `ship_attestation`; the worker loads the ship schema when
-  the task carries the ship-mode flag and enforces AC coverage via
-  the 0025 `validate_and_retry` gate. Non-ship reviews keep the
-  existing schema unchanged.
-- 0055 — `GH_TOKEN` injection routed through the shared
-  `_github_env.apply_github_token_env` helper. Reviewer worker
-  prefers `task.workspace.github_token` when a workspace is
-  prepared and falls back to the dispatcher-resolved
-  `WorkerInput.github_token` otherwise — `gh pr diff` /
-  `gh pr review` keep working when reviewer tasks dispatch without
-  a workspace.
-- 0046 — spec-context load converted from direct spec fetch to a
-  single graph fetch when a developer task references a spec:
-  `depth=1, edge_types=served_by_designs`; `min_freshness` omitted
-  on initial conversion. Falls back to direct fetch when
-  `CODER_KNOWLEDGE_GRAPH_ENABLED` is off.
-- 0065 — reviewer scope cut + turn cap. ``--max-turns 30`` enforced via ``worker_max_turns_reviewer`` (coder-core#160); ``failure_kind=turn_cap_exceeded`` written by the dispatcher and rendered as a distinct chip in the admin panel (coder-admin#17). Reviewer task contract in ``system/roles/reviewer/tasks/review.md`` rewritten to constrain scope to pre-loaded diff + ACs + edge-cases + CI report (no free-form repo browsing). 7-day reviewer turn-count and cost metrics are tracked on the observability dashboard for post-soak verification.
-- 0094 — security and performance analysis passes. `reviewer.json`
-  schema gains `security_findings` and `performance_findings` arrays
-  with severity-tagged finding objects; `approve` path schema-enforces
-  no `critical` security findings. `critical` findings escalate to
-  `request-changes`; findings post tagged inline PR comments
-  (`[security][severity]`, `[performance]`). Role prompt at
-  `system/roles/reviewer/tasks/review.md` gains explicit "Security
-  analysis" (OWASP-aligned categories) and "Performance analysis"
-  (query/pagination/complexity patterns) sections. Orchestrator
-  persists `security_finding_count` and `performance_finding_count`
-  to task metadata.
+- 2026-04 — v1 reviewer with knowledge-grounded analysis, transient-
+  failure retry, ship-mode schema with required `ship_attestation`
+  (specs 0009, 0027, 0044).
+- 2026-04 — `GH_TOKEN` unified via `_github_env`; spec-context load
+  converted to single graph fetch behind
+  `CODER_KNOWLEDGE_GRAPH_ENABLED` (specs 0046, 0055).
+- 2026-05 — Reviewer scope cut + turn cap (`--max-turns 30`) and
+  Security/Performance analysis passes with `critical` findings
+  blocking `approve` (specs 0065, 0094).
 
 ## Links
 

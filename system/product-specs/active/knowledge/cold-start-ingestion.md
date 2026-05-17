@@ -9,7 +9,7 @@ updated: 2026-05-06
 last_verified_at: 2026-05-06
 summary: "Bootstrap a new project's knowledge from existing repos."
 served_by_designs: []
-related_specs: [onboarding, architect-worker, knowledge-api, knowledge-freshness]
+related_specs: [architect-worker, knowledge-api, knowledge-freshness, managed-workflows, onboarding]
 parent: knowledge-and-admin
 ---
 

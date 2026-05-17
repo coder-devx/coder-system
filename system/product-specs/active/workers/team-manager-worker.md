@@ -9,7 +9,7 @@ updated: 2026-05-06
 last_verified_at: 2026-05-06
 summary: Team Manager worker — decomposes specs into developer tasks.
 served_by_designs: [team-manager-worker]
-related_specs: []
+related_specs: [architect-worker, developer-worker, knowledge-api, pm-worker, service-accounts, task-orchestration]
 parent: worker-roles
 ---
 
@@ -88,32 +88,13 @@ dependency order.
 
 ## Evolution
 
-- 0013 — `team-manager` role, `task_plans` table (migration 0012),
-  plan CRUD + approve/reject endpoints, `blocked` stage with
-  `_unblock_dependents`, admin plan-review UI with inline editing.
-- 0025 — worker output compliance: `team_manager` JSON schema gates
-  the draft-row write. Cycle checks and role validation move from
-  the Phase 4 handler into the schema itself; ADR 0012 explains why
-  auto-repair is out.
-- 0027 — transient-failure retry around the claude spawn. ADR 0013.
-- 0044 — close-cycle backstop: `on_all_dev_tasks_accepted` consults
-  the orphan-WIP query, stamps `wips_pending_merge` +
-  `blocked_since` on the pipeline run, publishes
-  `pipeline_run.close_cycle_blocked`, and optionally auto-dispatches
-  a `knowledge-ship-draft` architect task (behind
-  `ship_draft_dispatch_enabled`). Fails open on GitHub errors.
-  ADR 0015 explains why the gate lives in the Coder pipeline rather
-  than GitHub branch protection.
-- 0055 — `GH_TOKEN` injection for non-workspace roles. TM worker
-  calls the shared `_github_env.apply_github_token_env` helper from
-  the dispatcher-resolved `WorkerInput.github_token` so `gh`
-  commands inside the `claude` subprocess authenticate without a
-  workspace clone.
-- 0046 — plan-authoring context load converted from serial walk to a
-  single graph fetch rooted at the approved design: `depth=2,
-  edge_types=decided_by,related_designs,affects_services`;
-  `min_freshness` omitted on initial conversion. Falls back to serial
-  walk when `CODER_KNOWLEDGE_GRAPH_ENABLED` is off.
+- 2026-04 — v1 TM with `task_plans` table, plan CRUD + approve/reject,
+  `blocked` stage + dependency unblock, admin plan-review UI; plus
+  output compliance gate, transient-failure retry, close-cycle
+  backstop (specs 0013, 0025, 0027, 0044).
+- 2026-04 — `GH_TOKEN` unified via `_github_env`; plan-authoring
+  context load converted to single graph fetch behind
+  `CODER_KNOWLEDGE_GRAPH_ENABLED` (specs 0046, 0055).
 
 ## Links
 

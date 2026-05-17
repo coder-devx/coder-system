@@ -8,8 +8,8 @@ created: 2026-04-09
 updated: 2026-05-17
 last_verified_at: 2026-05-17
 summary: User-facing SPA for status, debug, override.
-served_by_designs: [system-overview]
-related_specs: [audit-log]
+served_by_designs: [admin-panel]
+related_specs: [audit-log, multi-tenancy, knowledge-api, escalations, observability, task-orchestration, reviewer-worker]
 parent: knowledge-and-admin
 ---
 
@@ -126,7 +126,8 @@ views, per-feature `VITE_*_ENABLED` flags for hotfix rollback.
 
 ## Links
 
-- Designs: [system-overview](../../../designs/active/system-overview.md)
+- Designs: [admin-panel](../../../designs/active/knowledge/admin-panel.md),
+  [system-overview](../../../designs/active/system-overview.md)
 - Related components: [multi-tenancy](../tenancy/multi-tenancy.md),
   [knowledge-api](./knowledge-api.md), [audit-log](../tenancy/audit-log.md),
   [escalations](../pipeline/escalations.md), [observability](../pipeline/observability.md),

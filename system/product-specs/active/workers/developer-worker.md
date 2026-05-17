@@ -8,8 +8,8 @@ created: 2026-04-09
 updated: 2026-05-14
 last_verified_at: 2026-05-14
 summary: Developer worker — code, tests, PRs.
-served_by_designs: [worker-roles]
-related_specs: [tenant-isolation]
+served_by_designs: []
+related_specs: [branch-cleanup, reviewer-worker, service-accounts, task-orchestration, tenant-isolation]
 parent: worker-roles
 ---
 
@@ -128,63 +128,15 @@ produces.
 
 ## Evolution
 
-- 0004 — in-process worker, race-free leasing, per-task workspace,
-  JSONL transcript capture, `task_logs` table, `timed_out` state.
-- 0020 — branch/commit/push/PR flow, `pr_url` column (migration 0016),
-  reviewer prompt receives the PR URL, hard failure on missing PR.
-- 0023 — capture `tasks.branch_name` (migration 0019) on push so the
-  [branch-cleanup](../pipeline/branch-cleanup.md) GC can resolve remote
-  `task/*` branches back to their task rows.
-- 0027 — worker transient-failure retry: `_transient.classify` +
-  `run_with_transient_retry` wrap the claude spawn. Migration 0021
-  adds `tasks.transient_retry_history`. ADR 0013 documents why the
-  retry loop lives inside the worker and not at the dispatcher; the
-  pre-0027 dispatcher-level wrapper was removed on ship.
-- `0054` — Orchestrator GitHub-state reconciliation (shipped
-  2026-04-28, revision `coder-core-00161-ln6`): when a developer task
-  succeeds but the worker stdout didn't include the PR URL, the
-  orchestrator now queries GitHub for an open PR on the task's
-  `branch_name` before marking the task STUCK — eliminating the
-  "PR exists but task is stuck" false-positive class. Worker-authored
-  PRs only (`pr.user.type == 'Bot'`, per ADR 0016); fail-soft to the
-  existing STUCK path on any GitHub API error. Flag-gated via
-  `coder_orchestrator_pr_url_reconcile_enabled`. See
-  [task-orchestration](../pipeline/task-orchestration.md) Evolution for the
-  full implementation detail.
-- 0055 — `GH_TOKEN` injection refactored through the shared
-  `_github_env.apply_github_token_env` helper (no behaviour change).
-  The inline `env["GH_TOKEN"] = task.workspace.github_token` access
-  becomes a call site that prefers the workspace token and falls
-  back to the dispatcher-resolved `WorkerInput.github_token`. Lifts
-  the credential out of workspace-prep so the same helper serves
-  every role worker.
-- 0087 — Lint pre-flight hard gate. Surviving `ruff format` /
-  `ruff check --fix` failures now block PR-open. Worker runs one
-  fix-loop iteration (re-prompt with lint output, re-stage, re-run
-  pre-flight); if still failing, exits
-  `failure_kind="lint_preflight_failed"` with the surviving ruff
-  output in `failure_detail` (truncated ~2 KB). Budget guard: >10
-  turns spent on lint remediation surfaces the failure early. Sibling
-  `failure_kind` tag to the `turn_cap_exceeded` tag introduced in
-  [coder-core#211](https://github.com/coder-devx/coder-core/pull/211).
-- **0082** — Migration head-conflict pre-commit gate. After staging
-  files under `migrations/versions/`, runs `uv run alembic heads`; more
-  than one head → `failure_kind="migration_head_conflict"`, no PR opened.
-  Single-head fast path and tasks with no migration changes are
-  unaffected. Responds to the 2026-05-10 silent-failure incident
-  (17 deploys broken by dual-head alembic state from
-  [coder-core#213](https://github.com/coder-devx/coder-core/pull/213)
-  and [coder-core#214](https://github.com/coder-devx/coder-core/pull/214)).
-- **0088** — Prod-credentials isolation. Subprocess env construction
-  strips all DB-credential env vars (`CLOUD_SQL_INSTANCE`,
-  `CLOUD_SQL_USER`, `CLOUD_SQL_DATABASE`, `DATABASE_URL`, `PGHOST`,
-  `PGUSER`, `PGPASSWORD`, `PGDATABASE`) and replaces them with an
-  ephemeral test-DB DSN (SQLite in-memory by default; postgres-15
-  container via `needs_postgres_test_db: true`). Every dispatch emits
-  a `worker.prod_creds_stripped` audit event. Closes the blast-radius
-  gap exposed by the 2026-05-12 prod-DB incident
-  ([coder-core#249](https://github.com/coder-devx/coder-core/pull/249),
-  recovered via [coder-core#251](https://github.com/coder-devx/coder-core/pull/251)).
+- 2026-04 — v1 worker + leasing + workspace + transcripts + PR flow +
+  branch-name capture + transient-failure retry (specs 0004, 0020,
+  0023, 0027).
+- 2026-04-28 — GH_TOKEN unified through `_github_env.apply_github_token_env`;
+  orchestrator-side GitHub PR-URL reconciliation closes the
+  "PR exists but task stuck" gap (specs 0054, 0055).
+- 2026-05 — Hard pre-flight gates on lint, alembic head-conflict, and
+  prod-credential isolation; the last responds to the 2026-05-12
+  prod-DB incident (specs 0082, 0087, 0088).
 
 ## Links
 

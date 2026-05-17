@@ -8,8 +8,8 @@ created: 2026-04-09
 updated: 2026-05-06
 last_verified_at: 2026-05-06
 summary: How a new project gets wired into Coder.
-served_by_designs: [system-overview]
-related_specs: [knowledge-schema-migration]
+served_by_designs: []
+related_specs: [admin-panel, continuous-deployment, impersonation, knowledge-api, knowledge-schema-migration, multi-tenancy, service-accounts]
 parent: knowledge-and-admin
 ---
 

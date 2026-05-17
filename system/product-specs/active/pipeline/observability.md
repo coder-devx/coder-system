@@ -9,7 +9,7 @@ updated: 2026-05-14
 last_verified_at: 2026-05-14
 summary: Per-task telemetry, token costs, and pipeline metrics.
 served_by_designs: [observability-and-cost-tracking]
-related_specs: [knowledge-freshness]
+related_specs: [admin-panel, branch-cleanup, escalations, knowledge-freshness, self-healing, task-orchestration]
 parent: pipeline-operations
 ---
 
@@ -122,62 +122,16 @@ without SSH.
 
 ## Evolution
 
-- `0018-observability-and-cost-tracking` — `task_stage_durations`
-  (migration 0014), `/metrics` endpoint, Slack alerts with per-type
-  rate limiting, admin dashboard with period selector and per-spec
-  cost table. Design `0011`.
-- `0023` — `gc_events` audit table (migration 0019) and
-  `/v1/_admin/gc/metrics` counter surface for the branch-cleanup GC.
-- `0029` — prompt-cache telemetry: migration 0022 adds
-  `tasks.cache_read_input_tokens` + `cache_creation_input_tokens`,
-  `/metrics` exposes per-role `cache_stats` with hit rate, the admin
-  Metrics page renders a "Prompt Cache Efficiency" table and the
-  ProjectDetail `CacheCard` aggregate chip. `SLACK_CACHE_HIT_FLOOR`
-  alert fires when per-project rolling-24h hit ratio drops below the
-  floor (gated on effective `prompt_caching_enabled` per project +
-  3-task min sample). `PROMPT_CACHING_ENABLED=true` on revision
-  `coder-core-00115-vhp` (2026-04-19) so cache_stats are driven by
-  real cache_control markers, not a zero baseline.
-- `0031` — per-project token budgets: migration 0035 adds
-  `projects.budget_{soft,hard}_tokens` tri-state overrides.
-  `resolve_budget_limits` is the single resolution point (per-project
-  override → fleet default → 0 disables). Dispatcher hard-gate fails
-  budget-exhausted tasks with `failure_kind="budget"`; soft-breach
-  Slack alerts dedup per month via the yyyymm suffix on
-  `alert_type`. `PATCH /v1/projects/{id}` accepts the override
-  fields. Rollup table + admin override UI + monthly-reset cron
-  deferred to phase 2.
-- `0030` — model tier routing: migrations 0036/0037 add
-  `projects.pin_top_tier` tri-state + `tasks.model_override`.
-  `resolve_tier_model` in the dispatcher routes reviewer tasks to
-  Haiku when `tier_routing_enabled=True` OR the project has
-  `pin_top_tier=false`. `/metrics` `by_tier` rolls usage up by
-  Haiku/Sonnet/Opus classification. `coder` project runs as the
-  first canary with `pin_top_tier=false`.
-- `0032` — cost regression alerts: migration 0038 adds
-  `regression_events`. The nightly detector persists findings with
-  dedupe on `(role, metric, day_utc)`. Acknowledge flow
-  (`POST /v1/_admin/regression/events/{id}/acknowledge`) suppresses
-  repeat Slack fires. `REGRESSION_ALERTS_ENABLED=true` as of
-  2026-04-19 un-gates the Slack post. `stage_cost_baseline`
-  pre-aggregation + commit-range attribution deferred to phase 2.
-- `0040` — auto-approval metrics (shipped 2026-05-06): `/metrics`
-  extended with per-gate-kind auto-approval telemetry — auto-approve
-  rate, undo rate, mean wall-clock gate time (manual vs. auto buckets),
-  deferral-reason distribution, and downstream developer-task success
-  rate comparison between auto-approved and manually-approved chains.
-  All derived from `auto_approvals` joined to existing task and
-  audit-event rows; no new tables. Surfaced on the admin Metrics
-  dashboard. `self_confidence` token-cost comparison (Stage 2 shadow
-  data vs. the 0029 pre-0040 baseline) feeds the
-  cost-regression-alert feed (0032) before Stage 3 flag flip.
-- `0094` — reviewer security/performance finding counts (shipped
-  2026-05-14): orchestrator writes `security_finding_count` and
-  `performance_finding_count` to task metadata on reviewer-task
-  completion. `/metrics` gains a `request_changes_by_kind` breakdown
-  with `critical_security` as a distinct subcategory; surfaced on the
-  admin observability dashboard as a labelled row on the
-  verdict-breakdown table.
+- 2026-04 — Initial ship (spec 0018): `task_stage_durations`,
+  `/metrics`, Slack alerts, admin dashboard; plus `gc_events` for
+  branch-cleanup (spec 0023).
+- 2026-04-19 — Cost & cache observability week: prompt-cache
+  telemetry, per-project token budgets, model-tier routing, cost-
+  regression alerts (specs 0029, 0030, 0031, 0032).
+- 2026-05 — Auto-approval and reviewer-finding telemetry
+  (specs 0040, 0094): auto-approve / undo / wall-clock rate,
+  security and performance finding counts per task, breakdown on
+  the admin Metrics dashboard.
 
 ## Links
 

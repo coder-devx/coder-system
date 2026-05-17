@@ -114,78 +114,14 @@ each remediator's worst case is no change — never a wrong change.
 
 ## Evolution
 
-- **0042 Self-healing stuck pipelines (v1 shipped 2026-04-22,
-  coder-core `c992a7b`).** Migration 0049, `coder_core.self_heal`
-  package, Cloud Run Job watchdog, `stuck_queued` pattern, escalation
-  close-out integration. Default flag off. 556 LoC of tests in
-  `tests/test_self_heal_watch.py`. v1 ship scope was `stuck_queued`
-  only.
-- **`zombie_executing` v1.1 (timestamp-based) shipped 2026-04-25.**
-  Adds the second pattern from the original WIP, scoped down: detects
-  rows in `status='running'` whose `started_at` is older than
-  `zombie_executing_min_minutes` (default 25) and CAS-resets them to
-  `queued` for re-dispatch. Deliberately omits the heartbeat-based
-  variant (`tasks.heartbeat_at` + `/tasks/{id}/heartbeat`) — that
-  needs a migration and a worker-supervisor wrapper, both deferred.
-  The pure-timestamp version covers the operationally-felt symptom
-  (rows stuck running for hours after a Cloud Run instance died
-  mid-dispatch) without any schema change. Pattern uses the
-  established mode flag (`self_heal_pattern_zombie_executing_mode`,
-  default `off`); rollout is the documented `dry_run` → `apply` ramp.
-- **Watchdog infra deployed 2026-04-25.** The Cloud Run Job
-  `coder-core-self-heal-tick` runs `python -m coder_core.self_heal.watch`
-  every minute, triggered by Cloud Scheduler of the same name —
-  matching the existing `coder-core-auto-approve-tick` shape.
-  Without this, `tick()` had no callsite and the
-  `self_healing_enabled` flag was effectively a no-op. Same deploy
-  flipped `SELF_HEALING_ENABLED=true` and
-  `SELF_HEAL_PATTERN_ZOMBIE_EXECUTING_MODE=dry_run` — soak begins.
-- **`zombie_executing` threshold and mode alignment (2026-04-28).**
-  Two operational fixes shipped alongside spec 0056 Phase 1: (1) the
-  `coder-core-self-heal-tick` Cloud Run Job had
-  `SELF_HEAL_PATTERN_ZOMBIE_EXECUTING_MODE=dry_run` while the service
-  had `apply` — the Job's reaper detected zombies but wrote `dry_run`
-  attempt rows that filled the daily cap without mutating task rows;
-  fixed by flipping the Job env var to `apply`. (2)
-  `zombie_executing_min_minutes` bumped 25 → 45 to exceed the worker
-  subprocess timeout (`coder_developer_task_timeout_seconds=2400 s =
-  40 min`) plus a 5-min grace, preventing premature eviction of live
-  workers that were still running within their budget.
-- **`zombie_executing` TOCTOU race fix (2026-05-05,
-  [coder-core#157](https://github.com/coder-devx/coder-core/pull/157)).**
-  The watch-loop tick held one ORM session for the full pass:
-  `detect()` loaded the row into the session identity map while
-  `status=running`; between `detect()` and `remediate()` the
-  worker's writeback (separate pod, separate transaction) flipped
-  the row to `status=succeeded`. `session.get()` in `remediate()`
-  returned the cached snapshot — the safety-check passed, an ORM
-  UPDATE without a status `WHERE` clobbered `failure_kind` /
-  `failure_detail` / `error` onto a legitimately-succeeded row.
-  Fix: `remediate()` now issues an atomic
-  `UPDATE … WHERE id=? AND status='running'` and reports
-  `action=already_moved` on `rowcount=0`. Regression test updated
-  to reuse the same session for detect + remediate, mirroring
-  production (the pre-existing `already_moved` test used fresh
-  sessions per call, which inadvertently dodged the bug). Post-fix
-  real orphan-death rate on `coder` project (7-day window): 0%
-  reviewer, ~4% developer — far below the pre-fix apparent figures
-  of 50% / 11% which were measurement artifacts from the race.
-- **Role clarification: `zombie_executing` is a guardrail, not a
-  recovery path.** Post-spec-0056 Phase 2, the canonical terminal
-  writeback is performed by the Cloud Run Job itself before exiting.
-  The `zombie_executing` remediator fires only when the Job is
-  abnormally terminated before its writeback (genuine OOM, GCP
-  eviction, container crash). Per-day-cap + `apply` mode ensure it
-  does not loop on healthy runs. Self-heal remains a safety net;
-  routine task completion must not depend on it.
-- The `orphan_chain_hook` (replay pipeline chain after hook failure)
-  pattern is **not yet shipped** — needs
-  `/v1/_admin/pipeline-runs/{id}/replay-chain` first.
-- **Admin UI.** `/admin/self-heal` listing attempts is **not yet
-  shipped** — a follow-up once the fleet flag flips from `off` and
-  there's real attempt data worth a page. Operator visibility in v1
-  is via `SELECT * FROM self_heal_attempts ORDER BY attempted_at
-  DESC` plus the `self_heal.*` audit events.
+- 2026-04-22 — Initial ship (spec 0042): watchdog, `stuck_queued`
+  pattern, escalation close-out, default flag off.
+- 2026-04-25 — `zombie_executing` (timestamp-based) ships; Cloud Run
+  Job `coder-core-self-heal-tick` deployed; fleet flag on, pattern in
+  `dry_run`. Threshold bumped 25→45 min alongside spec 0056 Phase 1.
+- 2026-05-05 — TOCTOU race fix (coder-core#157): atomic CAS in
+  remediate() prevents clobbering rows that succeeded mid-tick.
+  Post-fix real orphan-death rate ≤ 4% on `coder` project.
 
 ## Links
 

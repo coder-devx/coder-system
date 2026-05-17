@@ -9,7 +9,7 @@ updated: 2026-05-12
 last_verified_at: 2026-05-12
 summary: Software Architect worker — designs, ADRs, and system shape.
 served_by_designs: [architect-worker]
-related_specs: []
+related_specs: [knowledge-api, pm-worker, service-accounts, task-orchestration, team-manager-worker]
 parent: worker-roles
 ---
 
@@ -90,53 +90,14 @@ planner gets a concrete architecture to decompose.
 
 ## Evolution
 
-- 0017 — `workers/architect.py` with built-in system prompt, Mermaid
-  requirement, ADR drafting, dispatcher Phase 4 write-through to the
-  knowledge API.
-- 0025 — worker output compliance: `architect` JSON schema gates
-  Phase 4 via `validate_and_retry`. Schema exhaustion writes
-  `failure_kind="schema"` with the validator errors and truncated
-  raw snippet in `failure_detail`; ADR 0012 for the re-prompt-only
-  rationale.
-- 0027 — transient-failure retry around the claude spawn. ADR 0013.
-- 0044 — knowledge-ship-draft mode: the worker detects the
-  `# Knowledge ship draft` prompt header, swaps in
-  `architect_ship_draft.json`, and emits `merges[]` instead of a
-  design envelope. Close-cycle backstop auto-dispatches ship-draft
-  tasks (idempotent via task-existence query) when
-  `ship_draft_dispatch_enabled` is on.
-- 0055 — `GH_TOKEN` injection for non-workspace roles. Architect
-  worker now calls the shared `_github_env.apply_github_token_env`
-  helper before spawning `claude`, populated from the
-  dispatcher-resolved `WorkerInput.github_token`. Closes the
-  manual-dispatch failure mode where architect tasks ran
-  productively but exited with `gh is unauthenticated`. Realised
-  pain: task `62e0c95e` (2026-04-27).
-- [coder-core#51](https://github.com/coder-devx/coder-core/pull/51)
-  (2026-04-29, surfaced by spec 0056 Phase 2 soak) — architect task
-  deadline aligned with all other role workers. The hardcoded
-  `architect_timeout = 900` (15 min) was never exercised before
-  spec 0056 Phase 2 because Cloud Run service eviction killed worker
-  subprocesses first. With Job-mode workers durable, real architect
-  runs exploring the codebase for sealed-spec design refinements ran
-  25–46 min empirically and hit the 900 s ceiling cleanly. Fix:
-  reads `settings.coder_developer_task_timeout_seconds` (2400 s =
-  40 min in prod), matching `pm.py` / `team_manager.py` /
-  `reviewer.py` / `developer.py`. The hardcoded constant is removed;
-  the setting name is shared across all roles as a fleet-wide
-  default.
-- 0086 — ADR-collision `failure_kind` tagging. When any ADR in an
-  architect batch collides at commit time, Phase 4 tags the task row
-  with `failure_kind="adr_collision"` and `failure_detail` listing
-  `collided_adr_ids` / `committed_adr_ids`. Partial success
-  preserved: non-colliding ADRs and the design still commit. The
-  audit event records the same payload. Mirrors the `spec_collision`
-  pattern (PR [coder-core#202](https://github.com/coder-devx/coder-core/pull/202))
-  and the design-collision pattern
-  (PR [coder-core#166](https://github.com/coder-devx/coder-core/pull/166)).
-  Realised pain: spec 0075 architect batch (2026-05-10) — four ADRs
-  emitted, three silently dropped, recovered by hand from preserved
-  task output.
+- 2026-04 — v1 worker, ADR drafting, output compliance gate,
+  transient-failure retry, ship-draft mode (specs 0017, 0025, 0027, 0044).
+- 2026-04-29 — `GH_TOKEN` unified via `_github_env`; task deadline
+  aligned to the fleet default (40 min) after spec 0056 Phase 2 soak
+  exposed the old 15 min ceiling (specs 0055 + coder-core#51).
+- 2026-05 — ADR-collision `failure_kind` tagging preserves partial
+  success on batched commits (spec 0086, response to spec 0075's
+  three-of-four silent ADR drop).
 
 ## Links
 
