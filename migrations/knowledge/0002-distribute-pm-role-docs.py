@@ -59,10 +59,33 @@ _PM_DOC_LAYOUT: dict[str, Path] = {
 }
 
 
+_ROLES_REGISTRY_PATH = "system/roles/registry.yaml"
+
+_PM_REGISTRY_ENTRY = """  - id: product-manager
+    name: Product Manager
+    status: defined
+    owner: ro
+    seniority: senior
+    dir: product-manager
+    file: product-manager/role.md
+    tasks:
+      - draft
+      - accept
+      - ship
+      - audit
+"""
+
+
 def migrate(repo: KnowledgeRepoView) -> list[FileChange]:
     """For each PM role-doc path the project is missing, generate a
-    FileChange that creates it with the canonical content."""
+    FileChange that creates it with the canonical content. Also append
+    the PM entry to ``system/roles/registry.yaml`` when absent — the
+    validator treats the registry as source of truth, so a role file
+    without a registry entry would fail validation as an orphan.
+    """
     changes: list[FileChange] = []
+
+    # 1) Role docs themselves.
     for project_path, template_path in sorted(_PM_DOC_LAYOUT.items()):
         if repo.list(project_path):
             # Already exists — idempotent skip.
@@ -77,4 +100,27 @@ def migrate(repo: KnowledgeRepoView) -> list[FileChange]:
             )
         content = template_path.read_text(encoding="utf-8")
         changes.append(FileChange(path=project_path, content=content))
+
+    # 2) Roles registry. The registry is the validator's source of truth
+    # for which roles exist; a role file landed without a corresponding
+    # registry entry would orphan-fail validation. Append the PM entry
+    # only when missing — re-running the migration on an updated repo
+    # must not duplicate it. The registry is a small YAML file; a
+    # naive substring check on ``id: product-manager`` is sufficient
+    # because role ids are unique and the field always appears at
+    # column 2 inside a list item.
+    if repo.list(_ROLES_REGISTRY_PATH):
+        try:
+            current = repo.read(_ROLES_REGISTRY_PATH)
+        except Exception:
+            current = ""
+        if "id: product-manager" not in current:
+            new_content = current.rstrip("\n") + "\n" + _PM_REGISTRY_ENTRY
+            changes.append(FileChange(path=_ROLES_REGISTRY_PATH, content=new_content))
+    # If the registry file itself is missing, we don't synthesise it —
+    # that's a separate bootstrap concern (a project repo without
+    # ``system/roles/registry.yaml`` predates the role-registry contract
+    # entirely, and the operator should surface that as an onboarding
+    # gap rather than have a migration paper over it).
+
     return changes
