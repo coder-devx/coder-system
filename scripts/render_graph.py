@@ -80,7 +80,7 @@ def collect() -> dict[str, dict[str, Any]]:
         base = SYSTEM / folder / "active"
         if not base.is_dir():
             continue
-        for path in base.glob("*.md"):
+        for path in base.rglob("*.md"):
             if path.name in ("README.md", "REGISTRY.md", "INDEX.md", "_TEMPLATE.md"):
                 continue
             fm = parse_frontmatter(path)

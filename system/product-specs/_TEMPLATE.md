@@ -157,12 +157,27 @@ One paragraph — what this component does in the running system.
 ## Interfaces
 APIs, events, CLIs, UI surfaces this component exposes.
 
+## Invariants  <!-- optional -->
+Hard rules the running component maintains — properties that must hold
+on every read/write/transition. Use when the component has explicit
+contracts that aren't obvious from Capabilities (e.g. "every audit row
+is rolled back with its mutation transaction"). Skip when there are no
+non-obvious invariants.
+
+## Configuration  <!-- optional -->
+Live operator knobs — env vars, per-project columns, feature flags,
+weights — that change runtime behaviour without code edits. Use when
+the surface has more than 1-2 knobs worth naming. Skip otherwise;
+single knobs belong inline in Capabilities or Interfaces.
+
 ## Dependencies
 Other components, services, or external systems it relies on.
 
 ## Evolution
-Short log of notable WIPs that shaped this component (commit/PR
-references). Keep terse — git has the detail.
+1-3 lines of notable shipping milestones (date — what changed,
+spec ids). Keep terse — git and design docs have the detail. If
+this section grows past ~10 lines it's a code changelog, not the
+current-state description an active spec is supposed to be.
 
 ## Links
 - Designs: …

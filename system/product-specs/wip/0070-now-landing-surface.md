@@ -165,4 +165,4 @@ Out:
 - ADR: [0031](../../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - Design: [0070](../../designs/wip/0070-now-landing-surface.md)
 - Depends on: [0069](./0069-canonical-project-state.md)
-- Related: [admin-panel](../active/admin-panel.md), [escalations](../active/escalations.md), [self-healing](../active/self-healing.md)
+- Related: [admin-panel](../active/knowledge/admin-panel.md), [escalations](../active/pipeline/escalations.md), [self-healing](../active/pipeline/self-healing.md)

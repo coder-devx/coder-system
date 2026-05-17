@@ -280,20 +280,9 @@ the (already-clean) dogfood project.
 - `self_heal_attempts` rows are pure diagnostic; no downstream
   dependency on the row set. Table can be truncated at will.
 
-## Open questions
-
-- **Remediation that needs more than one pass.** Some patterns
-  (e.g. replay-chain) might require retry with exponential backoff.
-  v1's 1-per-target-per-day cap is too coarse if retry is part of
-  normal operation. Revisit when the second pattern needs it —
-  likely add a per-pattern override to the cap.
-- **Attempt-row retention.** No GC yet; same shape as audit
-  events. 1-year retention stamp is the natural default once the
-  audit-events eviction cron ships.
-
 ## Links
 
-- Spec: [self-healing](../../product-specs/active/self-healing.md)
+- Spec: [self-healing](../../../product-specs/active/self-healing.md)
 - Related designs: [escalations](./escalations.md),
   [worker-communication](./worker-communication.md),
   [worker-roles](../worker-roles.md),

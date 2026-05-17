@@ -177,4 +177,4 @@ Out:
 - ADR: [0031](../../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - Design: [0071](../../designs/wip/0071-failure-mode-grouping-and-runbooks.md)
 - Depends on: [0069](./0069-canonical-project-state.md), [0070](./0070-now-landing-surface.md)
-- Related: [self-healing](../active/self-healing.md), [escalations](../active/escalations.md), [observability](../active/observability.md)
+- Related: [self-healing](../active/pipeline/self-healing.md), [escalations](../active/pipeline/escalations.md), [observability](../active/pipeline/observability.md)

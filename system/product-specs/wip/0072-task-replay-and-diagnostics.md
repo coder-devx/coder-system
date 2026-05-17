@@ -173,4 +173,4 @@ Out:
 - ADR: [0031](../../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - Design: [0072](../../designs/wip/0072-task-replay-and-diagnostics.md)
 - Depends on: [0069](./0069-canonical-project-state.md)
-- Related: [admin-panel](../active/admin-panel.md), [task-orchestration](../active/task-orchestration.md), [observability](../active/observability.md)
+- Related: [admin-panel](../active/knowledge/admin-panel.md), [task-orchestration](../active/pipeline/task-orchestration.md), [observability](../active/pipeline/observability.md)

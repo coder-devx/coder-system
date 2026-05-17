@@ -194,6 +194,6 @@ re-uses the same `PUT` handler from the admin panel.
 ## Links
 
 - Specs: knowledge-api (ship endpoint + orphan-WIP query)
-- ADRs: [0015 — ship gate lives in the Coder pipeline](../../adrs/0015-ship-gate-in-coder-pipeline.md)
+- ADRs: [0015 — ship gate lives in the Coder pipeline](../../../adrs/0015-ship-gate-in-coder-pipeline.md)
 - Designs: knowledge-repo-model, pm-worker, architect-worker
 - Services: `coder-core`

@@ -290,6 +290,150 @@ def validate_section(section_root: Path, section_label: str) -> None:
                 err(f"{md}: not listed in {folder/'registry.yaml'}")
 
 
+def check_active_body_shape(section_root: Path) -> None:
+    """Reject WIP-shape sections and markers in active spec/design bodies.
+
+    Active leaves describe the *running* component (What it is /
+    Capabilities / Interfaces / Dependencies / Evolution / Links).
+    Sections like ``## Problem`` / ``## Acceptance criteria`` /
+    ``## Open questions`` are WIP-spec shape — the *delivery contract*
+    — and have no place in an active file. The same holds for the
+    ``**Phase:** wip`` / ``**Progress:** 0/N`` markers a WIP draft
+    carries.
+
+    See product-manager/role.md §"What a good spec looks like"
+    principle 2; the architect's design contract has the equivalent.
+    """
+    import re
+
+    wip_headers = {
+        "## Problem",
+        "## Users",
+        "## Users / personas",
+        "## Goals",
+        "## Non-goals",
+        "## Scope",
+        "## Acceptance",
+        "## Acceptance criteria",
+        "## Metrics",
+        "## Open questions",
+        "## Decisions",
+    }
+    wip_marker_prefixes = ("**Phase:**", "**Progress:**")
+
+    for folder_name in ("designs", "product-specs"):
+        active = section_root / folder_name / "active"
+        if not active.is_dir():
+            continue
+        for md in active.rglob("*.md"):
+            if md.name in SKIP_FILENAMES:
+                continue
+            text = md.read_text(encoding="utf-8")
+            # Strip frontmatter so we only inspect the body.
+            if text.startswith("---\n"):
+                try:
+                    end = text.index("\n---\n", 4)
+                    body = text[end + 5 :]
+                except ValueError:
+                    body = text
+            else:
+                body = text
+            # Strip fenced code blocks — section markers inside
+            # ```...``` aren't real sections.
+            body_no_fences = re.sub(
+                r"^```.*?^```", "", body, flags=re.MULTILINE | re.DOTALL
+            )
+            for line in body_no_fences.splitlines():
+                stripped = line.strip()
+                if stripped in wip_headers:
+                    err(
+                        f"{md}: WIP-shape header {stripped!r} in active "
+                        "body — active leaves describe current state "
+                        "(What it is / Capabilities / Interfaces / "
+                        "Dependencies / Evolution / Links), not the "
+                        "delivery contract. Drop or rewrite per "
+                        "product-manager/role.md."
+                    )
+                if any(stripped.startswith(m) for m in wip_marker_prefixes):
+                    err(
+                        f"{md}: WIP marker {stripped!r} in active body — "
+                        "'**Phase:**' / '**Progress:**' belong only in "
+                        "wip/ drafts."
+                    )
+
+
+def check_active_body_size(section_root: Path) -> None:
+    """Reject active bodies past 300 lines.
+
+    Per product-manager/role.md (and the architect's equivalent),
+    smell test is ~150 body lines, split at ~250. Past 300 is almost
+    certainly two specs in one — the validator hard-caps at 300 to
+    catch drift, leaving operator judgment for the 150–300 band.
+    """
+    HARD_CAP = 300
+    for folder_name in ("designs", "product-specs"):
+        active = section_root / folder_name / "active"
+        if not active.is_dir():
+            continue
+        for md in active.rglob("*.md"):
+            if md.name in SKIP_FILENAMES:
+                continue
+            text = md.read_text(encoding="utf-8")
+            if text.startswith("---\n"):
+                try:
+                    end = text.index("\n---\n", 4)
+                    body = text[end + 5 :]
+                except ValueError:
+                    body = text
+            else:
+                body = text
+            n = len(body.splitlines())
+            if n > HARD_CAP:
+                err(
+                    f"{md}: active body {n} lines exceeds hard cap "
+                    f"{HARD_CAP} — almost certainly two specs in one. "
+                    "Split per product-manager/role.md §'Tight by "
+                    "purpose, not by line count'."
+                )
+
+
+def check_evolution_section_length(section_root: Path) -> None:
+    """Reject ``## Evolution`` sections past 25 non-blank lines.
+
+    Evolution is current-state context (load-bearing prior shipping
+    milestones), not a code changelog. 1–3 lines per the template;
+    past 25 is a changelog wearing the wrong hat — trim to milestone
+    summaries with PR/design references.
+    """
+    import re
+
+    HARD_CAP = 25
+    section_re = re.compile(
+        r"^## Evolution\s*$\n(.*?)(?=^## |\Z)", re.MULTILINE | re.DOTALL
+    )
+    for folder_name in ("designs", "product-specs"):
+        active = section_root / folder_name / "active"
+        if not active.is_dir():
+            continue
+        for md in active.rglob("*.md"):
+            if md.name in SKIP_FILENAMES:
+                continue
+            text = md.read_text(encoding="utf-8")
+            m = section_re.search(text)
+            if m is None:
+                continue
+            non_blank = [
+                line for line in m.group(1).splitlines() if line.strip()
+            ]
+            if len(non_blank) > HARD_CAP:
+                err(
+                    f"{md}: ## Evolution {len(non_blank)} non-blank "
+                    f"lines exceeds hard cap {HARD_CAP} — that's a code "
+                    "changelog, not current-state context. Trim to "
+                    "1–3 milestone bullets per product-manager/role.md."
+                )
+
+
 def check_active_not_numbered(section_root: Path) -> None:
     """AGENTS.md rule 6: active designs and specs are subject-named.
     A filename like ``active/0051-foo.md`` is a lifecycle violation —
@@ -798,6 +942,9 @@ def main() -> int:
     for root in (REPO_ROOT / "system", REPO_ROOT / "template"):
         if root.is_dir():
             check_active_not_numbered(root)
+            check_active_body_shape(root)
+            check_active_body_size(root)
+            check_evolution_section_length(root)
             check_wip_duplicate_titles(root)
             check_shared_id_parents_match(root)
             check_lifecycle_consistency(root)

@@ -345,9 +345,9 @@ For setting expectations on dispatch wall-clock:
 
 ## Links
 
-- [developer-worker active spec](../product-specs/active/developer-worker.md)
-- [task-orchestration active spec](../product-specs/active/task-orchestration.md)
-- [self-healing active spec](../product-specs/active/self-healing.md)
+- [developer-worker active spec](../product-specs/active/workers/developer-worker.md)
+- [task-orchestration active spec](../product-specs/active/pipeline/task-orchestration.md)
+- [self-healing active spec](../product-specs/active/pipeline/self-healing.md)
 - [worker-transient-failure runbook](./worker-transient-failure.md)
 - [worker-schema-failure runbook](./worker-schema-failure.md)
 - [pipeline-run-blocked runbook](./pipeline-run-blocked.md)

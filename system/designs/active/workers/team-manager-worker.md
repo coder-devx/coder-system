@@ -185,8 +185,8 @@ pre-population is skipped.
 
 ## Links
 
-- Specs: [`0013`](../../product-specs/wip/0013-team-manager-worker-v1.md),
-  [`0010`](../../product-specs/active/0010-task-orchestration-v1.md),
-  [`0012`](../../product-specs/active/0012-admin-auth-and-mutations.md)
+- Specs: [`0013`](../../../product-specs/wip/0013-team-manager-worker-v1.md),
+  [`0010`](../../../product-specs/active/0010-task-orchestration-v1.md),
+  [`0012`](../../../product-specs/active/0012-admin-auth-and-mutations.md)
 - Designs: system-overview, worker-roles, architect-worker, pm-worker
 - Services: `coder-core`, `coder-admin`

@@ -120,39 +120,18 @@ flowchart TB
 
 ## Evolution
 
-- Token capture predates this component (already on `TaskRow` via
-  `parse_claude_json_envelope()`).
-- `0011-observability-and-cost-tracking` (spec 0018) — added
-  migration 0014, the orchestrator duration hook, the metrics API,
-  Slack alerts, and the admin dashboard in a single deploy cycle.
-- `0037` — audit log as an adjacent operator surface (shipped
-  2026-04-19): the audit log sits alongside `/metrics` and the
-  Slack alert stream as the third operator surface. Distinction:
-  observability answers "is the pipeline healthy?" and "what did
-  it cost?"; the audit log answers "who mutated what, when?".
-  No coupling on the write side; both read through the same
-  structured-log feed but write to separate tables
-  (`task_stage_durations`, `regression_events`, `gc_events` here;
-  `audit_events` there). See [audit-log](../tenancy/audit-log.md).
-- `0065` — per-role daily cache hit rate trend (shipped
-  2026-05-04): `daily_cache_stats` field on the metrics endpoint
-  exposes a (date × role) breakdown so operators can spot the day
-  a cache-hit-rate regression landed instead of seeing only the
-  period aggregate. Backed by an at-request-time SQL groupby; no
-  new table. The admin panel renders a colour-coded grid with a
-  ▼ marker on day-over-day drops ≥ 30pp.
-- `0063` — compliance-gate retry visibility (shipped 2026-05-04):
-  new `compliance_retry_events` table (migration 0060) records
-  one row per gate invocation (gate_role, attempt_count, outcome,
-  failure_kind). New `GET /v1/projects/{id}/compliance-metrics?period`
-  returns a rolling-window rollup keyed by gate_role. Admin panel
-  adds a ComplianceMetrics page (per-role gate-retry rate + recent
-  failures table) so operators can spot a sudden surge in compliance
-  retries — typically a worker-prompt regression that's burning
-  budget on schema fixes. Behind `VITE_COMPLIANCE_METRICS_ENABLED`.
+- 2026-04 — Initial ship (spec 0018): orchestrator duration hook,
+  `/metrics` endpoint, Slack alerts, admin dashboard. Token capture
+  predates this component (already on `TaskRow`).
+- 2026-04-19 — Audit log adjoins as a third operator surface (spec
+  0037) — distinct write path (`audit_events` vs metrics tables);
+  see [audit-log](../tenancy/audit-log.md).
+- 2026-05-04 — Per-role daily cache-hit-rate trend + compliance-gate
+  retry visibility (specs 0065, 0063): catches cache-rate regressions
+  by day and worker-prompt regressions by gate-retry surge.
 
 ## Links
 
-- Specs: [`0018`](../../product-specs/wip/0018-observability-and-cost-tracking.md)
+- Specs: [`0018`](../../../product-specs/wip/0018-observability-and-cost-tracking.md)
 - Designs: system-overview
 - Services: `coder-core`, `coder-admin`

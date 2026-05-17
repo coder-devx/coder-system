@@ -9,7 +9,7 @@ updated: 2026-05-06
 last_verified_at: 2026-05-06
 summary: How one Coder deployment serves many projects without crossing wires and attributes every action to a real actor.
 served_by_designs: [impersonation, audit-log, tenant-isolation]
-related_specs: [pipeline-operations, worker-roles, knowledge-and-admin]
+related_specs: [audit-log, delivery-and-infra, impersonation, knowledge-and-admin, multi-tenancy, oauth-mcp, pipeline-operations, secret-rotation, service-accounts, tenant-isolation, worker-roles]
 parent: ~
 ---
 
@@ -28,19 +28,19 @@ did what.
 
 ## Components
 
-- [multi-tenancy](./multi-tenancy.md) — `project_id` everywhere
+- [multi-tenancy](./tenancy/multi-tenancy.md) — `project_id` everywhere
   invariant: API request scope, DB row scope, log scope, secret-store
   prefix scope.
-- [impersonation](./impersonation.md) — short-lived role-scoped
+- [impersonation](./tenancy/impersonation.md) — short-lived role-scoped
   bearer tokens minted for local agents (or workers) acting on a
   project's behalf.
-- [service-accounts](./service-accounts.md) — per-role GCP service
+- [service-accounts](./tenancy/service-accounts.md) — per-role GCP service
   accounts with minimum permissions; the System Admin worker brokers
   time-bounded access escalations.
-- [audit-log](./audit-log.md) — every mutation is recorded with
+- [audit-log](./tenancy/audit-log.md) — every mutation is recorded with
   actor, method, action, before/after, project_id, correlation_id;
   retained for compliance review.
-- [oauth-mcp](./oauth-mcp.md) — OAuth 2.1 + PKCE authorisation-server
+- [oauth-mcp](./tenancy/oauth-mcp.md) — OAuth 2.1 + PKCE authorisation-server
   layer that lets MCP clients (e.g. claude.ai web) authenticate as
   admin users via a standard code flow; admin-only client registration,
   session storage, and revocation.
@@ -53,7 +53,7 @@ did what.
 - **Cross-project reads**: returning a row from a different project
   is a 403, not a silent leak. The single canonical row-scope check
   is `coder_core.access.load_in_project`.
-- **Test harness**: [tenant-isolation](./tenant-isolation.md) (in
+- **Test harness**: [tenant-isolation](./delivery/tenant-isolation.md) (in
   [delivery-and-infra](./delivery-and-infra.md)) is the regression
   guard.
 

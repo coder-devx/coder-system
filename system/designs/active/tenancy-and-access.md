@@ -53,7 +53,7 @@ and that record who did what.
 ## Links
 
 - Specs: [tenancy-and-access](../../product-specs/active/tenancy-and-access.md),
-  [multi-tenancy](../../product-specs/active/multi-tenancy.md),
-  [service-accounts](../../product-specs/active/service-accounts.md)
+  [multi-tenancy](../../product-specs/active/tenancy/multi-tenancy.md),
+  [service-accounts](../../product-specs/active/tenancy/service-accounts.md)
 - ADRs: [0005](../../adrs/0005-multi-tenant-coder-core.md),
   [0006](../../adrs/0006-per-role-service-accounts.md)

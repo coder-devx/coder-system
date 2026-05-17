@@ -211,6 +211,6 @@ per the existing Phase-4 path.
 
 ## Links
 
-- Specs: [worker-roles](../../product-specs/active/worker-roles.md), [architect-worker](../../product-specs/active/architect-worker.md)
+- Specs: [worker-roles](../../product-specs/active/worker-roles.md), [architect-worker](../../product-specs/active/workers/architect-worker.md)
 - Designs: [role-prompt-knowledge-layout](../active/workers/role-prompt-knowledge-layout.md), [graph-aware-retrieval](../active/knowledge/graph-aware-retrieval.md), [knowledge-freshness](../active/knowledge/knowledge-freshness.md), [prompt-caching-architecture](../active/pipeline/prompt-caching-architecture.md), [architect-worker](../active/workers/architect-worker.md), [pm-worker](../active/workers/pm-worker.md), [mcp-agent-interface-design](../active/knowledge/mcp-agent-interface-design.md), [dispatcher](../active/pipeline/dispatcher.md), [task-lifecycle](../active/pipeline/task-lifecycle.md), [worker-auth-env](../active/workers/worker-auth-env.md)
 - Repos: coder-core, coder-system

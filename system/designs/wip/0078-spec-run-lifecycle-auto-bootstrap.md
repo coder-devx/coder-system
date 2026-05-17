@@ -8,7 +8,8 @@ created: '2026-05-15'
 updated: '2026-05-15'
 last_verified_at: '2026-05-15'
 implements_specs:
-- 0078
+- spec-lifecycle-coordinator
+- pm-worker
 decided_by: []
 related_designs:
 - worker-communication

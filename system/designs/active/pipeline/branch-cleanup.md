@@ -110,8 +110,8 @@ flowchart TB
 
 ## Links
 
-- Spec: [branch-cleanup](../../product-specs/active/branch-cleanup.md)
-- Runbook: [branch-gc](../../runbooks/branch-gc.md)
+- Spec: [branch-cleanup](../../../product-specs/active/branch-cleanup.md)
+- Runbook: [branch-gc](../../../runbooks/branch-gc.md)
 - Related components:
   [worker-roles](../worker-roles.md),
   [observability-and-cost-tracking](./observability-and-cost-tracking.md)

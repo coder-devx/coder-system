@@ -8,55 +8,55 @@ Logical components of the Coder system as it exists today.
 
 | Slug | Title | Owner | Implements specs | Decided by |
 |---|---|---|---|---|
-| [admin-panel](./active/knowledge/admin-panel.md) | Admin Panel | ro | [admin-panel](../product-specs/active/admin-panel.md) | — |
-| [architect-worker](./active/workers/architect-worker.md) | Architect Worker | ro | [architect-worker](../product-specs/active/architect-worker.md) | — |
-| [audit-log](./active/tenancy/audit-log.md) | Audit log | ro | [audit-log](../product-specs/active/audit-log.md) | — |
+| [admin-panel](./active/knowledge/admin-panel.md) | Admin Panel | ro | admin-panel | — |
+| [architect-worker](./active/workers/architect-worker.md) | Architect Worker | ro | architect-worker | — |
+| [audit-log](./active/tenancy/audit-log.md) | Audit log | ro | audit-log | — |
 | [automated-secret-rotation](./active/tenancy/automated-secret-rotation.md) | Automated secret rotation | ro | — | — |
-| [branch-cleanup](./active/pipeline/branch-cleanup.md) | Branch cleanup | ro | [branch-cleanup](../product-specs/active/branch-cleanup.md) | — |
+| [branch-cleanup](./active/pipeline/branch-cleanup.md) | Branch cleanup | ro | branch-cleanup | — |
 | [coder-core-modular-monolith](./active/delivery/coder-core-modular-monolith.md) | coder-core modular monolith hardening | ro | [delivery-and-infra](../product-specs/active/delivery-and-infra.md) | — |
 | [cold-start-ingestion](./active/knowledge/cold-start-ingestion.md) | Cold-start knowledge ingestion | ro | — | — |
 | [confidence-auto-approval](./active/pipeline/confidence-auto-approval.md) | Confidence-scored auto-approval | ro | — | — |
-| [continuous-deployment](./active/delivery/continuous-deployment.md) | Continuous Deployment | ro | [continuous-deployment](../product-specs/active/continuous-deployment.md) | — |
+| [continuous-deployment](./active/delivery/continuous-deployment.md) | Continuous Deployment | ro | continuous-deployment | — |
 | [cost-regression-alerts](./active/pipeline/cost-regression-alerts.md) | Prompt & cost regression alerts | ro | — | — |
 | [cross-project-patterns](./active/knowledge/cross-project-patterns.md) | Cross-project pattern surfacing | ro | — | [0022](../adrs/0022-structural-jaccard-for-pattern-discovery.md), [0023](../adrs/0023-admin-api-and-consult-endpoint-as-pattern-surfaces.md), [0024](../adrs/0024-share-patterns-column-as-enforcement-boundary.md) |
 | [delivery-and-infra](./active/delivery-and-infra.md) | Delivery & infra | ro | [delivery-and-infra](../product-specs/active/delivery-and-infra.md) | — |
-| [developer-worker](./active/workers/developer-worker.md) | Developer Worker | ro | [developer-worker](../product-specs/active/developer-worker.md) | — |
+| [developer-worker](./active/workers/developer-worker.md) | Developer Worker | ro | developer-worker | — |
 | [dispatcher](./active/pipeline/dispatcher.md) | Task dispatcher | ro | [pipeline-operations](../product-specs/active/pipeline-operations.md) | — |
-| [escalations](./active/pipeline/escalations.md) | Escalations & on-call routing | ro | [escalations](../product-specs/active/escalations.md) | — |
+| [escalations](./active/pipeline/escalations.md) | Escalations & on-call routing | ro | escalations | — |
 | [graph-aware-retrieval](./active/knowledge/graph-aware-retrieval.md) | Graph-aware knowledge retrieval | ro | — | — |
 | [impersonation](./active/tenancy/impersonation.md) | Impersonation | ro | — | [0006](../adrs/0006-per-role-service-accounts.md) |
 | [knowledge-and-admin](./active/knowledge-and-admin.md) | Knowledge & admin | ro | [knowledge-and-admin](../product-specs/active/knowledge-and-admin.md) | — |
-| [knowledge-freshness](./active/knowledge/knowledge-freshness.md) | Knowledge Freshness | ro | [knowledge-freshness](../product-specs/active/knowledge-freshness.md) | [0014](../adrs/0014-freshness-from-declared-affects.md) |
+| [knowledge-freshness](./active/knowledge/knowledge-freshness.md) | Knowledge Freshness | ro | knowledge-freshness | [0014](../adrs/0014-freshness-from-declared-affects.md) |
 | [knowledge-repo-model](./active/knowledge/knowledge-repo-model.md) | Knowledge Repo Model | ro | — | [0001](../adrs/0001-knowledge-repo-layout.md), [0002](../adrs/0002-yaml-registries.md), [0003](../adrs/0003-mermaid-for-diagrams.md), [0004](../adrs/0004-agents-md-cross-agent-contract.md), [0008](../adrs/0008-ci-validation-of-knowledge-repo.md) |
 | [knowledge-stack](./active/knowledge/knowledge-stack.md) | Knowledge stack | ro | [knowledge-and-admin](../product-specs/active/knowledge-and-admin.md) | — |
-| [knowledge-write-api](./active/knowledge/knowledge-write-api.md) | Knowledge Write API | ro | [knowledge-api](../product-specs/active/knowledge-api.md) | — |
+| [knowledge-write-api](./active/knowledge/knowledge-write-api.md) | Knowledge Write API | ro | knowledge-api | — |
 | [managed-repo-action-distribution](./active/knowledge/managed-repo-action-distribution.md) | Managed-repo GitHub Action distribution | ro | — | [0018](../adrs/0018-managed-workflows-divergent-file-policy.md) |
 | [mcp-agent-interface-design](./active/knowledge/mcp-agent-interface-design.md) | MCP agent interface — let external agents connect, impersonate, and drive Coder | ro | — | — |
 | [model-tier-routing](./active/pipeline/model-tier-routing.md) | Model tier routing | ro | — | — |
-| [multi-tenancy](./active/tenancy/multi-tenancy.md) | Multi-tenancy | ro | [multi-tenancy](../product-specs/active/multi-tenancy.md) | [0005](../adrs/0005-multi-tenant-coder-core.md) |
+| [multi-tenancy](./active/tenancy/multi-tenancy.md) | Multi-tenancy | ro | multi-tenancy | [0005](../adrs/0005-multi-tenant-coder-core.md) |
 | [navigation-tree-pattern](./active/knowledge/navigation-tree-pattern.md) | Navigation tree pattern for specs, designs, and ADRs | ro | — | — |
 | [oauth-mcp-clients](./active/tenancy/oauth-mcp-clients.md) | OAuth 2.1 for MCP clients — auth-code+PKCE+DCR over Google as upstream IdP | ro | — | — |
-| [observability-and-cost-tracking](./active/pipeline/observability-and-cost-tracking.md) | Observability and Cost Tracking | ro | [observability](../product-specs/active/observability.md) | — |
-| [onboarding](./active/knowledge/onboarding.md) | Project Onboarding | ro | [onboarding](../product-specs/active/onboarding.md) | — |
+| [observability-and-cost-tracking](./active/pipeline/observability-and-cost-tracking.md) | Observability and Cost Tracking | ro | observability | — |
+| [onboarding](./active/knowledge/onboarding.md) | Project Onboarding | ro | onboarding | — |
 | [orchestrator-github-state-reconciliation](./active/pipeline/orchestrator-github-state-reconciliation.md) | Orchestrator GitHub-state reconciliation | ro | — | [0016](../adrs/0016-bot-identity-via-user-type.md) |
 | [pipeline-operations](./active/pipeline-operations.md) | Pipeline operations | ro | [pipeline-operations](../product-specs/active/pipeline-operations.md) | — |
-| [pm-worker](./active/workers/pm-worker.md) | PM Worker | ro | [pm-worker](../product-specs/active/pm-worker.md) | — |
+| [pm-worker](./active/workers/pm-worker.md) | PM Worker | ro | pm-worker | — |
 | [post-pr-ci-fix-loop](./active/pipeline/post-pr-ci-fix-loop.md) | Post-PR CI fix loop | ro | — | [0017](../adrs/0017-ci-fixup-one-per-sha.md) |
 | [prompt-caching-architecture](./active/pipeline/prompt-caching-architecture.md) | Prompt caching & shared context reuse | ro | — | — |
-| [reviewer-worker](./active/workers/reviewer-worker.md) | Reviewer Worker | ro | [reviewer-worker](../product-specs/active/reviewer-worker.md) | — |
+| [reviewer-worker](./active/workers/reviewer-worker.md) | Reviewer Worker | ro | reviewer-worker | — |
 | [role-prompt-knowledge-layout](./active/workers/role-prompt-knowledge-layout.md) | Role prompt knowledge layout — move per-role and per-mode worker prompts into the knowledge repo | ro | — | — |
-| [self-healing](./active/pipeline/self-healing.md) | Self-healing stuck pipelines | ro | [self-healing](../product-specs/active/self-healing.md) | — |
-| [service-accounts](./active/tenancy/service-accounts.md) | Service Accounts | ro | [service-accounts](../product-specs/active/service-accounts.md) | [0006](../adrs/0006-per-role-service-accounts.md) |
+| [self-healing](./active/pipeline/self-healing.md) | Self-healing stuck pipelines | ro | self-healing | — |
+| [service-accounts](./active/tenancy/service-accounts.md) | Service Accounts | ro | service-accounts | [0006](../adrs/0006-per-role-service-accounts.md) |
 | [stuck-pipeline-slack-paging](./active/pipeline/stuck-pipeline-slack-paging.md) | Enable stuck-pipeline Slack paging at 15-minute threshold | ro | — | — |
 | [system-overview](./active/system-overview.md) | System Overview | ro | — | [0001](../adrs/0001-knowledge-repo-layout.md), [0005](../adrs/0005-multi-tenant-coder-core.md), [0006](../adrs/0006-per-role-service-accounts.md), [0007](../adrs/0007-reviewer-separated-from-pm.md), [0008](../adrs/0008-ci-validation-of-knowledge-repo.md) |
 | [task-lifecycle](./active/pipeline/task-lifecycle.md) | Task lifecycle and overrides | ro | [pipeline-operations](../product-specs/active/pipeline-operations.md) | — |
-| [team-manager-worker](./active/workers/team-manager-worker.md) | Team Manager Worker | ro | [team-manager-worker](../product-specs/active/team-manager-worker.md) | — |
+| [team-manager-worker](./active/workers/team-manager-worker.md) | Team Manager Worker | ro | team-manager-worker | — |
 | [template-schema-migration](./active/knowledge/template-schema-migration.md) | Template schema migration | ro | — | [0019](../adrs/0019-alias-tolerance-fleet-completion-gate.md), [0020](../adrs/0020-worker-dispatched-migration-runner.md), [0021](../adrs/0021-deprecate-then-remove-two-migrations.md) |
 | [tenancy-and-access](./active/tenancy-and-access.md) | Tenancy & access | ro | [tenancy-and-access](../product-specs/active/tenancy-and-access.md) | — |
-| [tenant-isolation](./active/delivery/tenant-isolation.md) | Tenant isolation test harness | ro | [tenant-isolation](../product-specs/active/tenant-isolation.md) | — |
+| [tenant-isolation](./active/delivery/tenant-isolation.md) | Tenant isolation test harness | ro | tenant-isolation | — |
 | [token-budgets-and-cost-gates](./active/pipeline/token-budgets-and-cost-gates.md) | Per-project token budgets & cost gates | ro | — | — |
 | [worker-auth-env](./active/workers/worker-auth-env.md) | Worker auth env wiring | ro | [worker-roles](../product-specs/active/worker-roles.md) | — |
-| [worker-communication](./active/pipeline/worker-communication.md) | Worker Communication | ro | [task-orchestration](../product-specs/active/task-orchestration.md) | — |
+| [worker-communication](./active/pipeline/worker-communication.md) | Worker Communication | ro | task-orchestration | — |
 | [worker-dispatch-durability](./active/pipeline/worker-dispatch-durability.md) | Worker dispatch durability — move worker subprocesses out of the HTTP service | ro | — | — |
 | [worker-roles](./active/worker-roles.md) | Worker Roles | ro | — | [0006](../adrs/0006-per-role-service-accounts.md), [0007](../adrs/0007-reviewer-separated-from-pm.md) |
 

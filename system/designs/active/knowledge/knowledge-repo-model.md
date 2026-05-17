@@ -82,7 +82,7 @@ coder-system/
 4. Writes flow through the knowledge-write-api design, which updates
    the artifact and its `registry.yaml` entry atomically (per file)
    and validates cross-links before commit.
-5. CI ([ADR 0008](../../adrs/0008-ci-validation-of-knowledge-repo.md))
+5. CI ([ADR 0008](../../../adrs/0008-ci-validation-of-knowledge-repo.md))
    re-validates frontmatter, registries, and cross-link integrity on
    every PR.
 

@@ -28,7 +28,7 @@ parent: pipeline-operations
 
 ## Context
 
-See [spec 0056](../../product-specs/wip/0056-worker-dispatch-durability.md)
+See [spec 0056](../../../product-specs/wip/0056-worker-dispatch-durability.md)
 for the empirical signal that surfaced this. Short version: today's
 worker dispatch path runs the role-specific worker subprocess
 (`claude` CLI) as a child of the `coder-core` HTTP service instance
@@ -198,17 +198,6 @@ admission latency is acceptable for tasks that take 5–30 min.
   complete in ≤2× the largest single-task duration.
 - **AC7 — Cost within 20 %.** Cost-per-worker-minute back-of-envelope
   shows ±20 %.
-
-## Open questions
-
-- Cold-start latency: do we need pre-warmed Job executions for
-  user-visible-latency-sensitive tasks? Probably not — TM/dev tasks
-  take 5–30 min; 5–10 s of cold start is noise.
-- Admission tick cadence: 30 s vs 60 s. 30 s for snappier promotion;
-  60 s aligns with self-heal-tick.
-- Backpressure: when the admission tick can't keep up (huge dispatch
-  burst), how do queued tasks signal lag? Probably reuse `stuck_queued`
-  pattern with a higher threshold.
 
 ## References
 

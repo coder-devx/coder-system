@@ -16,12 +16,12 @@ applies_to_integrations: [github]
 Operational guide for the ship gate — the step that folds a shipping
 WIP into `active/` atomically, attested by the Reviewer worker. The
 ship endpoint lives in
-[knowledge-api](../product-specs/active/knowledge-api.md) /
+[knowledge-api](../product-specs/active/knowledge/knowledge-api.md) /
 [knowledge-write-api](../designs/active/knowledge/knowledge-write-api.md); the
 close-cycle backstop lives in
-[team-manager-worker](../product-specs/active/team-manager-worker.md);
+[team-manager-worker](../product-specs/active/workers/team-manager-worker.md);
 the admin ship-gate panel is described in
-[admin-panel](../product-specs/active/admin-panel.md). ADR
+[admin-panel](../product-specs/active/knowledge/admin-panel.md). ADR
 [0015](../adrs/0015-ship-gate-in-coder-pipeline.md) records the
 decision to keep the gate inside the Coder pipeline rather than
 GitHub branch protection.
@@ -191,15 +191,15 @@ to apply directly (typo, clearer section title).
 
 ## Related
 
-- Specs: [knowledge-api](../product-specs/active/knowledge-api.md)
+- Specs: [knowledge-api](../product-specs/active/knowledge/knowledge-api.md)
   (ship endpoint + orphan-WIP query),
-  [reviewer-worker](../product-specs/active/reviewer-worker.md)
+  [reviewer-worker](../product-specs/active/workers/reviewer-worker.md)
   (ship-mode schema + `ship_attestation`),
-  [team-manager-worker](../product-specs/active/team-manager-worker.md)
+  [team-manager-worker](../product-specs/active/workers/team-manager-worker.md)
   (close-cycle backstop),
-  [architect-worker](../product-specs/active/architect-worker.md)
+  [architect-worker](../product-specs/active/workers/architect-worker.md)
   (ship-draft mode),
-  [admin-panel](../product-specs/active/admin-panel.md)
+  [admin-panel](../product-specs/active/knowledge/admin-panel.md)
   (Ship gate panel).
 - Designs: [knowledge-write-api](../designs/active/knowledge/knowledge-write-api.md)
   (atomic Git Trees commit path),

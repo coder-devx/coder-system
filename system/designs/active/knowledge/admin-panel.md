@@ -156,9 +156,9 @@ flowchart TB
 
 ## Links
 
-- Specs: [admin-panel](../../product-specs/active/admin-panel.md),
-  [audit-log](../../product-specs/active/audit-log.md),
-  [observability](../../product-specs/active/observability.md)
+- Specs: [admin-panel](../../../product-specs/active/admin-panel.md),
+  [audit-log](../../../product-specs/active/audit-log.md),
+  [observability](../../../product-specs/active/observability.md)
 - Designs: [system-overview](../system-overview.md),
   [worker-communication](../pipeline/worker-communication.md),
   [audit-log](../tenancy/audit-log.md),

@@ -15,7 +15,7 @@ applies_to_integrations: [anthropic]
 
 Operational guide for tasks that fail with
 ``failure_kind = "transient"``. The retry loop lives in
-[task-orchestration](../product-specs/active/task-orchestration.md)
+[task-orchestration](../product-specs/active/pipeline/task-orchestration.md)
 and the per-worker integrations in
 [pm-worker](../designs/active/workers/pm-worker.md),
 [architect-worker](../designs/active/workers/architect-worker.md),
@@ -160,7 +160,7 @@ in a way the classifier substring table doesn't recognise.
 
 ## Related
 
-- Spec: [task-orchestration](../product-specs/active/task-orchestration.md)
+- Spec: [task-orchestration](../product-specs/active/pipeline/task-orchestration.md)
   (retry capability lives in the orchestrator's Worker transient-failure
   retry section).
 - Designs: [pm-worker](../designs/active/workers/pm-worker.md),

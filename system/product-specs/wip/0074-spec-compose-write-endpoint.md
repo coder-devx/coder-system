@@ -161,4 +161,4 @@ Out:
 
 - ADR: [0031](../../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - Depends on: [0069](./0069-canonical-project-state.md), [0070](./0070-now-landing-surface.md)
-- Related: [admin-panel](../active/admin-panel.md), [knowledge-api](../active/knowledge-api.md)
+- Related: [admin-panel](../active/knowledge/admin-panel.md), [knowledge-api](../active/knowledge/knowledge-api.md)

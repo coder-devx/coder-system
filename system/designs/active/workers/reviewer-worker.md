@@ -30,7 +30,7 @@ emits a structured `ship_attestation` payload that drives the
 ship-gate panel and the orchestrator's `/knowledge/ship` POST.
 
 Decoupling the reviewer from the PM was decided in
-ADR [0007](../../adrs/0007-reviewer-separated-from-pm.md).
+ADR [0007](../../../adrs/0007-reviewer-separated-from-pm.md).
 
 ## Architecture
 
@@ -84,7 +84,7 @@ flowchart TB
   gate entirely** (the reviewer has no schema to enforce on a
   free-form approve / request-changes verdict).
 - **Transient retry** — same wrapper as the developer worker; ADR
-  [0013](../../adrs/0013-worker-level-transient-retry.md).
+  [0013](../../../adrs/0013-worker-level-transient-retry.md).
 - **Dispatcher registration.** `_RUNNERS["reviewer"] =
   run_reviewer_task` alongside the other roles.
 
@@ -156,12 +156,12 @@ flowchart TB
 
 ## Links
 
-- Specs: [reviewer-worker](../../product-specs/active/reviewer-worker.md),
-  [task-orchestration](../../product-specs/active/task-orchestration.md)
+- Specs: [reviewer-worker](../../../product-specs/active/reviewer-worker.md),
+  [task-orchestration](../../../product-specs/active/task-orchestration.md)
 - Designs: [worker-roles](../worker-roles.md),
   [worker-communication](../pipeline/worker-communication.md),
   [developer-worker](./developer-worker.md),
   [knowledge-write-api](../knowledge/knowledge-write-api.md)
-- ADRs: [0007](../../adrs/0007-reviewer-separated-from-pm.md),
-  [0013](../../adrs/0013-worker-level-transient-retry.md)
+- ADRs: [0007](../../../adrs/0007-reviewer-separated-from-pm.md),
+  [0013](../../../adrs/0013-worker-level-transient-retry.md)
 - Services: `coder-core`

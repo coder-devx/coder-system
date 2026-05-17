@@ -14,7 +14,7 @@ applies_to_integrations: [github]
 # Branch cleanup GC
 
 Operational guide for the ``task/*`` branch cleanup GC in
-``coder-core`` (component: [branch-cleanup](../product-specs/active/branch-cleanup.md)).
+``coder-core`` (component: [branch-cleanup](../product-specs/active/pipeline/branch-cleanup.md)).
 Cloud Scheduler invokes ``POST /v1/_admin/gc/branches`` hourly; this
 runbook covers the operator-facing actions around it.
 

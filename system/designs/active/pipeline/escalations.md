@@ -240,7 +240,7 @@ watchdog: auto-resolutions call `.../resolve` with `actor=self_healing`.
 
 ## Links
 
-- Spec: [escalations](../../product-specs/active/escalations.md)
+- Spec: [escalations](../../../product-specs/active/escalations.md)
 - Related designs: [system-overview](../system-overview.md),
   [worker-communication](./worker-communication.md),
   [audit-log](../tenancy/audit-log.md),

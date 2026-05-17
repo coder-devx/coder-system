@@ -148,7 +148,7 @@ write API.
 
 ## Links
 
-- Specs: [`0016`](../../product-specs/wip/0016-pm-worker-v1.md)
+- Specs: [`0016`](../../../product-specs/wip/0016-pm-worker-v1.md)
 - Designs: team-manager-worker, knowledge-write-api,
   worker-communication, worker-roles
 - Services: `coder-core`
