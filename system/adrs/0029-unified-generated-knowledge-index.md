@@ -14,7 +14,7 @@ relates_to_designs: [navigation-tree-pattern]
 
 ## Context
 
-Design [navigation-tree-pattern](../designs/active/navigation-tree-pattern.md)
+Design [navigation-tree-pattern](../designs/active/knowledge/navigation-tree-pattern.md)
 introduced a curated `INDEX.md` per artifact-type folder
 (`product-specs/INDEX.md` and `designs/INDEX.md`) and a `parent:`
 field on every spec and design. Workers (PM, Architect, Reviewer)
