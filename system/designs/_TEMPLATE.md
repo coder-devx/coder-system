@@ -12,6 +12,21 @@ Three templates — use the one matching the file you're writing.
 
 See [`README.md`](./README.md) for the two-lifecycle model.
 
+## Discipline (the bar, not a line cap)
+
+Active designs target **one component each, current state only**.
+Length follows content: every section earns its place; rollout /
+history / decisions live in `## Evolution` (terse) or in ADRs. Smell
+test at ~200 body lines (look hard for fused topics or padding); past
+~300 is almost certainly two designs in one. A genuinely complex
+component can sit in the 100–200 range and still be tight. See the
+[architect role doc](../roles/software-architect/role.md)
+§"What a good design looks like" for the full discipline.
+
+Every leaf active design ends with a `## Where in code` section
+citing 3–6 **symbols** (not line numbers) — `scripts/validate.py`
+rejects `path.ext:N` patterns in that section.
+
 ---
 
 ## Template for `wip/` (numbered, roadmap-aligned)
@@ -173,6 +188,16 @@ What must always hold. Edge cases the design handles.
 
 ## Interfaces
 APIs, events, schemas, CLI surfaces this component exposes to others.
+
+## Where in code
+3–6 symbol anchors pointing into the source repos. **Cite by symbol,
+not by line number** — lines shift on every refactor in `coder-core`;
+designs live in `coder-system`, and no commit touches both atomically,
+so a `path.ext:N` anchor silently rots on every unrelated PR. Symbol
+names only change on rename — a much rarer event that's a natural
+trigger to revisit the doc. Format: ``- `<path>` — `<symbol>` (note)``.
+`scripts/validate.py` (per design 0095) rejects line-numbered anchors
+in this section.
 
 ## Evolution
 Short log of notable WIPs that shaped this component (commit/PR

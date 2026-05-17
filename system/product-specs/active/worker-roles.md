@@ -70,6 +70,6 @@ PM (draft spec)  →  Architect (design)  →  Team Manager (decompose)
 
 - Roles registry: [`../../roles/REGISTRY.md`](../../roles/REGISTRY.md)
 - Designs: [worker-roles](../../designs/active/worker-roles.md),
-  [architect-worker](../../designs/active/architect-worker.md),
-  [pm-worker](../../designs/active/pm-worker.md),
-  [team-manager-worker](../../designs/active/team-manager-worker.md)
+  [architect-worker](../../designs/active/workers/architect-worker.md),
+  [pm-worker](../../designs/active/workers/pm-worker.md),
+  [team-manager-worker](../../designs/active/workers/team-manager-worker.md)

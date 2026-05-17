@@ -181,7 +181,7 @@ without SSH.
 
 ## Links
 
-- Designs: [observability-and-cost-tracking](../../designs/active/observability-and-cost-tracking.md)
+- Designs: [observability-and-cost-tracking](../../designs/active/pipeline/observability-and-cost-tracking.md)
 - Related components: [task-orchestration](./task-orchestration.md),
   [knowledge-freshness](./knowledge-freshness.md),
   [branch-cleanup](./branch-cleanup.md),

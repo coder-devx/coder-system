@@ -163,7 +163,7 @@ cause.
 
 ## Links
 
-- Design: [knowledge-freshness](../../designs/active/knowledge-freshness.md).
+- Design: [knowledge-freshness](../../designs/active/knowledge/knowledge-freshness.md).
 - Related specs:
   [knowledge-api](./knowledge-api.md),
   [architect-worker](./architect-worker.md),

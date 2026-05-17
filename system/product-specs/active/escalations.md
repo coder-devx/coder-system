@@ -187,6 +187,6 @@ a stall no longer waits for someone to open the admin panel.
 
 ## Links
 
-- Designs: [escalations](../../designs/active/escalations.md)
+- Designs: [escalations](../../designs/active/pipeline/escalations.md)
 - Related components: task-orchestration, observability, audit-log,
   admin-panel, multi-tenancy, self-healing, continuous-deployment

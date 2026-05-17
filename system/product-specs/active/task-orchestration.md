@@ -75,7 +75,7 @@ and `/pipeline-runs` endpoints in `coder-core`.
   truncated raw snippet. The admin task detail view renders these
   inline — no log dive required. Retry lifecycle events
   (`worker_output_compliance.{ok,retry,failed}`) flow through the
-  structured log stream ([observability-and-cost-tracking](../../designs/active/observability-and-cost-tracking.md))
+  structured log stream ([observability-and-cost-tracking](../../designs/active/pipeline/observability-and-cost-tracking.md))
   so operators can see which prompts are drifting. Runbook:
   [`worker-schema-failure`](../../runbooks/worker-schema-failure.md).
 - **Worker transient-failure retry.** Every role worker (all five —
@@ -527,7 +527,7 @@ and `/pipeline-runs` endpoints in `coder-core`.
 
 ## Links
 
-- Designs: [worker-communication](../../designs/active/worker-communication.md),
+- Designs: [worker-communication](../../designs/active/pipeline/worker-communication.md),
   [pipeline-operations](../../designs/active/pipeline-operations.md)
 - Related components: [audit-log](./audit-log.md),
   [observability](./observability.md), [escalations](./escalations.md),

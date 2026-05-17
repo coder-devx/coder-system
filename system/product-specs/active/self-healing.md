@@ -189,6 +189,6 @@ each remediator's worst case is no change — never a wrong change.
 
 ## Links
 
-- Designs: [self-healing](../../designs/active/self-healing.md)
+- Designs: [self-healing](../../designs/active/pipeline/self-healing.md)
 - Related components: task-orchestration, escalations,
   observability, audit-log, admin-panel

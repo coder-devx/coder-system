@@ -69,26 +69,37 @@ Sonnet 4.6's per-message output cap is ~32K tokens, including
 extended-thinking blocks. When your total output (thinking + text)
 exceeds it, Claude CLI splits the response into multiple assistant
 turns — task latency doubles and the dispatched ``result`` field
-captures only the last fragment. **Aim for total output under 25K
-tokens.** Concretely:
+captures only the last fragment. **Hard ceiling: total output ≤ 25K
+tokens.**
 
-- Body 30–80 lines, not 200. Long bodies are usually two designs
-  fused or one design padded with restated context.
-- One Mermaid that *adds information* (data flow, sequence,
+Inside that budget, length follows content discipline — not an
+arbitrary line cap:
+
+- **One component per design.** If you find yourself writing about two
+  distinct components, split. This is the most common cause of bloat,
+  not "too much detail."
+- **Current state only.** Rollout / history / decisions live in
+  `## Evolution` (terse) or in ADRs. The body describes what runs
+  *now*; readers consult git or ADRs for *why*.
+- **Every section earns its place.** A `## Data flow` that just
+  restates `## Architecture` should be dropped. A `## Parts` list
+  that just enumerates the diagram boxes is dead weight.
+- **One Mermaid that adds information** (data flow, sequence,
   boundary). Three sprawling diagrams of boxes and arrows are not
   three times better.
-- Each section is paragraph-length, not page-length. If a section is
-  getting long, summarize and link to the relevant active design or
-  ADR.
-- ADRs only when the rationale doesn't fit in one in-band sentence.
+- **ADRs only when the rationale doesn't fit in one in-band sentence.**
   If you're drafting an ADR per design, recalibrate.
+- **Smell test: ~200 body lines.** Past that, look hard for fused
+  topics or padding. Past ~300 is almost certainly two designs in one.
+  A genuinely complex component (multiple endpoints + invariants +
+  edge cases) can sit in the 100–200 range and still be tight.
 
 ## Principles (the contract a good design satisfies)
 
 These are the principles your role doc names, restated as a checklist
 for *this* run. Hit every box.
 
-- [ ] Body 30–80 lines. Past 100 → split or trim.
+- [ ] One component, current state only. Past ~200 body lines → look hard for a split or for content belonging in ADRs / `## Evolution`.
 - [ ] One Mermaid that shows data flow / sequence / boundary, not just
       a box-and-line component list.
 - [ ] `affects_services` and `affects_repos` are concrete (running

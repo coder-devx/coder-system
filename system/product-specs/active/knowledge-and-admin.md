@@ -61,6 +61,6 @@ of knowledge repos is kept in sync with expected workflow primitives.
 
 ## Links
 
-- Designs: [knowledge-repo-model](../../designs/active/knowledge-repo-model.md),
-  [knowledge-write-api](../../designs/active/knowledge-write-api.md),
-  [knowledge-freshness](../../designs/active/knowledge-freshness.md)
+- Designs: [knowledge-repo-model](../../designs/active/knowledge/knowledge-repo-model.md),
+  [knowledge-write-api](../../designs/active/knowledge/knowledge-write-api.md),
+  [knowledge-freshness](../../designs/active/knowledge/knowledge-freshness.md)

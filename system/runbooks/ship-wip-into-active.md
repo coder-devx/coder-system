@@ -17,7 +17,7 @@ Operational guide for the ship gate — the step that folds a shipping
 WIP into `active/` atomically, attested by the Reviewer worker. The
 ship endpoint lives in
 [knowledge-api](../product-specs/active/knowledge-api.md) /
-[knowledge-write-api](../designs/active/knowledge-write-api.md); the
+[knowledge-write-api](../designs/active/knowledge/knowledge-write-api.md); the
 close-cycle backstop lives in
 [team-manager-worker](../product-specs/active/team-manager-worker.md);
 the admin ship-gate panel is described in
@@ -201,11 +201,11 @@ to apply directly (typo, clearer section title).
   (ship-draft mode),
   [admin-panel](../product-specs/active/admin-panel.md)
   (Ship gate panel).
-- Designs: [knowledge-write-api](../designs/active/knowledge-write-api.md)
+- Designs: [knowledge-write-api](../designs/active/knowledge/knowledge-write-api.md)
   (atomic Git Trees commit path),
-  [team-manager-worker](../designs/active/team-manager-worker.md)
+  [team-manager-worker](../designs/active/workers/team-manager-worker.md)
   (close-cycle mechanics),
-  [architect-worker](../designs/active/architect-worker.md)
+  [architect-worker](../designs/active/workers/architect-worker.md)
   (ship-draft prompt-prefix detection).
 - ADRs: [0015 — ship gate in the Coder pipeline](../adrs/0015-ship-gate-in-coder-pipeline.md),
   [0012 — re-prompt-only remediation](../adrs/0012-re-prompt-only-worker-output-remediation.md)

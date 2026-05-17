@@ -31,7 +31,7 @@ parent: ~
 Spec [0073](../../product-specs/wip/0073-drive-mode-in-browser.md)
 asks for an in-browser surface that lets the operator take over a
 role using the same impersonation token machinery the CLI already
-uses. The active design [`impersonation.md`](../active/impersonation.md)
+uses. The active design [`impersonation.md`](../active/tenancy/impersonation.md)
 already defines token issuance, scopes, expiry, and audit; this
 design connects a browser surface to it.
 
@@ -189,6 +189,6 @@ Conversation turn:
 
 - Spec: [0073](../../product-specs/wip/0073-drive-mode-in-browser.md)
 - ADR: [0031](../../adrs/0031-canonical-project-state-for-operator-surfaces.md)
-- Active design: [impersonation](../active/impersonation.md)
+- Active design: [impersonation](../active/tenancy/impersonation.md)
 - Depends on design: [0069](./0069-canonical-project-state.md)
 - Services: [coder-core](../../services/coder-core.md), [coder-admin](../../services/coder-admin.md)

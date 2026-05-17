@@ -28,13 +28,13 @@ and that record who did what.
 
 ## Components
 
-- [impersonation](./impersonation.md) — short-lived role-scoped
+- [impersonation](./tenancy/impersonation.md) — short-lived role-scoped
   bearer tokens minted via `/v1/projects/{id}/impersonate/{role}`;
   used by local agents (Claude Code, Cursor) and the dispatcher.
-- [audit-log](./audit-log.md) — single-writer
+- [audit-log](./tenancy/audit-log.md) — single-writer
   `record_audit_event` helper; phase-1 mutation-handler coverage;
   `audit_events` table; per-project + fleet read endpoints.
-- [tenant-isolation](./tenant-isolation.md) — test-suite harness
+- [tenant-isolation](./delivery/tenant-isolation.md) — test-suite harness
   that asserts cross-project reads return 403 and pipeline state
   doesn't leak.
 

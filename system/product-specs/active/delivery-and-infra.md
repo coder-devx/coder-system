@@ -128,7 +128,7 @@ fails the build on contract drift.
 ## Links
 
 - Designs: [system-overview](../../designs/active/system-overview.md),
-  [coder-core-modular-monolith](../../designs/active/coder-core-modular-monolith.md)
+  [coder-core-modular-monolith](../../designs/active/delivery/coder-core-modular-monolith.md)
 - Repos: [coder-core](../../repos/coder-core.md),
   [coder-admin](../../repos/coder-admin.md),
   [coder-system](../../repos/coder-system.md)
