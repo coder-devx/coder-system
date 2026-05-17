@@ -144,6 +144,6 @@ planner gets a concrete architecture to decompose.
   [worker-roles](../../designs/active/worker-roles.md)
 - Related components: [pm-worker](./pm-worker.md),
   [team-manager-worker](./team-manager-worker.md),
-  [knowledge-api](./knowledge-api.md),
-  [task-orchestration](./task-orchestration.md),
-  [service-accounts](./service-accounts.md)
+  [knowledge-api](../knowledge/knowledge-api.md),
+  [task-orchestration](../pipeline/task-orchestration.md),
+  [service-accounts](../tenancy/service-accounts.md)

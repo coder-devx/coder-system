@@ -33,16 +33,16 @@ roles compose into the pipeline.
 
 ## Components
 
-- [pm-worker](./pm-worker.md) — Product Manager: owns specs and
+- [pm-worker](./workers/pm-worker.md) — Product Manager: owns specs and
   acceptance. Bookends the pipeline (drafts at the start, judges at
   the end).
-- [architect-worker](./architect-worker.md) — Software Architect:
+- [architect-worker](./workers/architect-worker.md) — Software Architect:
   designs, ADRs, system shape.
-- [team-manager-worker](./team-manager-worker.md) — Team Manager:
+- [team-manager-worker](./workers/team-manager-worker.md) — Team Manager:
   decomposes specs/designs into sequenced developer tasks.
-- [developer-worker](./developer-worker.md) — Developer: writes code,
+- [developer-worker](./workers/developer-worker.md) — Developer: writes code,
   writes tests, opens PRs.
-- [reviewer-worker](./reviewer-worker.md) — Reviewer: technical-quality
+- [reviewer-worker](./workers/reviewer-worker.md) — Reviewer: technical-quality
   gate before PM acceptance.
 
 ## Pipeline shape
@@ -59,12 +59,12 @@ PM (draft spec)  →  Architect (design)  →  Team Manager (decompose)
 
 - **Identity & impersonation**: every worker runs under a
   short-lived role-scoped credential — see
-  [impersonation](./impersonation.md), [service-accounts](./service-accounts.md).
+  [impersonation](./tenancy/impersonation.md), [service-accounts](./tenancy/service-accounts.md).
 - **Observability**: per-worker token costs and turn counts surface
-  through [observability](./observability.md).
+  through [observability](./pipeline/observability.md).
 - **Communication**: workers don't talk to each other in real time;
   the orchestrator sequences them — see
-  [task-orchestration](./task-orchestration.md).
+  [task-orchestration](./pipeline/task-orchestration.md).
 
 ## Links
 

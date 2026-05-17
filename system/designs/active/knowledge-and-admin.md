@@ -70,5 +70,5 @@ spec. Groups the designs that govern:
 
 ## Links
 
-- Specs: [knowledge-and-admin](../../product-specs/active/knowledge-and-admin.md), [knowledge-api](../../product-specs/active/knowledge-api.md), [knowledge-freshness](../../product-specs/active/knowledge-freshness.md), [admin-panel](../../product-specs/active/admin-panel.md), [onboarding](../../product-specs/active/onboarding.md)
+- Specs: [knowledge-and-admin](../../product-specs/active/knowledge-and-admin.md), [knowledge-api](../../product-specs/active/knowledge/knowledge-api.md), [knowledge-freshness](../../product-specs/active/knowledge/knowledge-freshness.md), [admin-panel](../../product-specs/active/knowledge/admin-panel.md), [onboarding](../../product-specs/active/knowledge/onboarding.md)
 - ADRs: [0026](../../adrs/0026-share-numeric-id-pool-between-specs-and-designs.md) (shared id pool), [0029](../../adrs/0029-unified-knowledge-index.md) (unified INDEX), [0030](../../adrs/0030-best-effort-preload.md) (preload pattern)

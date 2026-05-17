@@ -92,6 +92,33 @@ file and updates the registry from your structured output. Don't run
 `git`, don't push commits, don't `mkdir`. Just read what you need
 and emit the JSON below.
 
+## Output verbosity (avoid multi-turn wrap)
+
+Sonnet 4.6's per-message output cap is ~32K tokens, including
+extended-thinking blocks. When your total output exceeds it, Claude
+CLI splits the response across assistant turns — latency doubles and
+the dispatched ``result`` field captures only the last fragment.
+**Hard ceiling: total output ≤ 25K tokens.**
+
+Inside that budget, length follows content discipline — not an
+arbitrary line cap:
+
+- **One feature per spec.** If the problem statement bundles two
+  user-facing features, split into two WIP drafts. This is the most
+  common cause of bloat, not "too much detail."
+- **Delivery contract only.** Implementation strategy ("how we'll
+  build it"), rollout phasing, decision rationale — none of that
+  belongs in a spec body. The architect owns the design; you own the
+  *what* and the *for whom*.
+- **Every section earns its place.** A `## Scope` that just restates
+  the goals is dead weight. A `## Metrics` of *"users like it"* is
+  worse than no metrics — drop it or make it concrete.
+- **4–7 ACs.** Fewer means under-specified; more usually means the
+  spec is two specs in one.
+- **Smell test: ~150 body lines.** Past that, look hard for a split
+  or for content that belongs to the architect. Past ~250 is almost
+  certainly two specs in one.
+
 ## Principles (the contract a good draft satisfies)
 
 These are the principles your role doc names, restated as a checklist
@@ -107,7 +134,17 @@ for *this* run.
       30 seconds of grounding here** — observed today: spec 0063
       shipped Tuesday, audit returned `needs_rewrite` Tuesday
       because PR #81 had already moved the system underneath.
-- [ ] Body 30–80 lines. Past 100 → split or trim.
+- [ ] **One feature, delivery contract only.** ~150 body lines is
+      the smell test; past ~250 → split or trim. Implementation
+      strategy and rollout phasing belong in the design, not here.
+- [ ] **WIP body shape.** Sections (in order): `## Problem` ·
+      `## Users / personas` · `## Goals` · `## Non-goals` · `## Scope` ·
+      `## Acceptance criteria` · `## Metrics` · `## Open questions` ·
+      `## Links`. The `**Phase:** wip` and `**Progress:** 0 / N
+      acceptance criteria` header lines come right after the title.
+      **Never** include active-shape sections (`## What it is`,
+      `## Capabilities`, `## Interfaces`) — that's the post-ship shape
+      the ship contract translates to.
 - [ ] **Real problem statement.** Name the user, the pain, the
       current state, the success picture. *"Add foo support"* fails.
 - [ ] **4–7 acceptance criteria, each observable.** Each AC must
@@ -117,7 +154,10 @@ for *this* run.
 - [ ] **Concrete surfaces.** Name the running pages / endpoints /
       services / channels. Not *"a new dashboard"* — *"a new card on
       `/projects/{id}/health`"*.
-- [ ] `parent:` is a real category from the preloaded INDEX.
+- [ ] `parent:` is a real category from the preloaded INDEX. The
+      ship contract uses it to route the active body into
+      `product-specs/active/<category>/<slug>.md` per design 0095;
+      get it right at draft time and the ship is mechanical.
 - [ ] `related_specs` ids resolve to existing specs in the registry.
 - [ ] Coder-system framing: you're PM **of the Coder System**
       running on this project. Operators of the admin panel,

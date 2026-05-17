@@ -105,7 +105,7 @@ each remediator's worst case is no change — never a wrong change.
   re-invoke existing override paths (`/tasks/{id}/retry` clone etc).
 - [escalations](./escalations.md) — peer consumer of the trigger
   surface; resolver endpoint is the integration seam.
-- [audit-log](./audit-log.md) — `self_heal.remediated` /
+- [audit-log](../tenancy/audit-log.md) — `self_heal.remediated` /
   `self_heal.failed` actions, one per successful or errored
   attempt.
 - [observability](./observability.md) — `/metrics` grows a

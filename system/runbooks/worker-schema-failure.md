@@ -15,7 +15,7 @@ applies_to_integrations: []
 
 Operational guide for tasks that fail with
 ``failure_kind = "schema"``. The schema gate lives in
-[task-orchestration](../product-specs/active/task-orchestration.md)
+[task-orchestration](../product-specs/active/pipeline/task-orchestration.md)
 and the per-worker schemas in [pm-worker](../designs/active/workers/pm-worker.md),
 [architect-worker](../designs/active/workers/architect-worker.md), and
 [team-manager-worker](../designs/active/workers/team-manager-worker.md).
@@ -152,7 +152,7 @@ missing, etc.).
 
 ## Related
 
-- Spec: [task-orchestration](../product-specs/active/task-orchestration.md)
+- Spec: [task-orchestration](../product-specs/active/pipeline/task-orchestration.md)
   (schema gate lives in the orchestrator's Phase 4).
 - Designs: [pm-worker](../designs/active/workers/pm-worker.md),
   [architect-worker](../designs/active/workers/architect-worker.md),

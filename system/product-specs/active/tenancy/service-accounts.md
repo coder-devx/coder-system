@@ -98,5 +98,5 @@ into every token) and in IAM (per-secret bindings on
   [tenancy-and-access](../../designs/active/tenancy-and-access.md)
 - Related components: [impersonation](./impersonation.md),
   [multi-tenancy](./multi-tenancy.md),
-  [tenant-isolation](./tenant-isolation.md),
-  [audit-log](./audit-log.md), [admin-panel](./admin-panel.md)
+  [tenant-isolation](../delivery/tenant-isolation.md),
+  [audit-log](./audit-log.md), [admin-panel](../knowledge/admin-panel.md)

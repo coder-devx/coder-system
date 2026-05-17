@@ -27,21 +27,6 @@ The `last_verified_at` backfill (spec 0043, 2026-04-18) was the last
 hand-curated schema change — that coordination cost motivates this
 system.
 
-## Users
-
-- **Schema author** — writes one `00NN-<slug>.py` or `.yaml` file in
-  `coder-system/migrations/knowledge/`, commits it; never touches any
-  project repo directly.
-- **Per-project reviewer** — receives one PR per project per migration
-  titled `template-migration: 00NN-<slug>`; reviews the diff, approves
-  or requests revision via the normal PR flow. Not eligible for
-  auto-approval (spec 0040).
-- **Onboarding operator** — new projects are seeded with
-  `template_version: <current>` so no prior migrations are pending on
-  day one.
-- **Operator** — monitors the admin fleet matrix to triage stuck
-  migrations and per-project drift.
-
 ## Capabilities
 
 - **Migration files.** `coder-system/migrations/knowledge/00NN-<slug>.py`
@@ -102,32 +87,6 @@ system.
   first deploy). Per-project tri-state
   `projects.template_migrations_enabled` (NULL = inherit fleet).
 
-## Non-goals
-
-- Body rewrites — migration touches frontmatter fields and folder/file
-  shape only; markdown bodies are unchanged.
-- ADR rewrites — ADRs are append-only; existing ADRs are exempt; new
-  ADRs inherit updated fields via `template/adrs/_TEMPLATE.md`.
-- Auto-merging migration PRs — human merge required even for
-  pure-rename migrations.
-- `coder-system` self-migration — the schema author hand-curates
-  `coder-system/` in the same PR that adds the migration file.
-- Live on-read transformation — 409 SCHEMA_DRIFT is the explicit
-  signal; no on-the-fly shape coercion at read time.
-- Cross-project migrations (moving an artifact between projects).
-
-## Metrics
-
-- **Mean time to fleet adoption** — migration merged in `coder-system`
-  to all project PRs merged. Target: ≤ 1 week median.
-- **Migration failure rate** — `status='failed'` rows per migration
-  number; > 0 is a code-quality signal.
-- **PR-open age** — > 14 days flags an abandoned migration PR.
-- **Per-project pending count** — visible on the admin matrix;
-  persistently high signals reviewer-availability issues.
-- **Schema-drift 409 rate** — `?min_schema_version=` caller 409s per
-  project per week; high rate signals urgent PR backlog.
-
 ## Interfaces
 
 - Cloud Run Job: `coder-core-template-migrate`.
@@ -159,11 +118,19 @@ system.
 - audit-log — `template_migration.*` action namespace.
 - Postgres — `template_migrations` table (DB migration 0055).
 
+## Evolution
+
+- 2026-05-06 — Initial ship (spec 0047): numbered migration files,
+  KnowledgeRepoView SDK, `coder-core-template-migrate` Cloud Run Job,
+  per-project PR per migration, `template_version` tracking, batching
+  with `ALLOW_BATCHING`, sequential per-project ordering,
+  `min_schema_version` 409 SCHEMA_DRIFT signal, alias-tolerance hook.
+
 ## Links
 
 - Design: [0047-template-schema-migration](../../designs/wip/0047-template-schema-migration.md)
   (WIP; link to active once design ships).
 - Related specs: [knowledge-api](./knowledge-api.md),
   [onboarding](./onboarding.md), [admin-panel](./admin-panel.md),
-  [audit-log](./audit-log.md),
+  [audit-log](../tenancy/audit-log.md),
   [knowledge-freshness](./knowledge-freshness.md).

@@ -56,6 +56,6 @@ cross-tenant-leak detection harness.
 
 ## Links
 
-- Specs: [delivery-and-infra](../../product-specs/active/delivery-and-infra.md), [continuous-deployment](../../product-specs/active/continuous-deployment.md), [tenant-isolation](../../product-specs/active/tenant-isolation.md)
+- Specs: [delivery-and-infra](../../product-specs/active/delivery-and-infra.md), [continuous-deployment](../../product-specs/active/delivery/continuous-deployment.md), [tenant-isolation](../../product-specs/active/delivery/tenant-isolation.md)
 - ADRs: [0005](../../adrs/0005-multi-tenant-coder-core.md) (multi-tenant invariant)
 - Repos: [coder-core](../../repos/coder-core.md), [coder-admin](../../repos/coder-admin.md)

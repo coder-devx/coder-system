@@ -122,6 +122,6 @@ dependency order.
 - Related components: [pm-worker](./pm-worker.md),
   [architect-worker](./architect-worker.md),
   [developer-worker](./developer-worker.md),
-  [task-orchestration](./task-orchestration.md),
-  [knowledge-api](./knowledge-api.md),
-  [service-accounts](./service-accounts.md)
+  [task-orchestration](../pipeline/task-orchestration.md),
+  [knowledge-api](../knowledge/knowledge-api.md),
+  [service-accounts](../tenancy/service-accounts.md)

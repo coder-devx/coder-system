@@ -69,8 +69,8 @@ the API boundary, not bolted on later.
 
 - Designs: [system-overview](../../designs/active/system-overview.md),
   [tenancy-and-access](../../designs/active/tenancy-and-access.md)
-- Related components: [knowledge-api](./knowledge-api.md),
-  [admin-panel](./admin-panel.md), [audit-log](./audit-log.md),
+- Related components: [knowledge-api](../knowledge/knowledge-api.md),
+  [admin-panel](../knowledge/admin-panel.md), [audit-log](./audit-log.md),
   [impersonation](./impersonation.md),
   [service-accounts](./service-accounts.md),
-  [tenant-isolation](./tenant-isolation.md)
+  [tenant-isolation](../delivery/tenant-isolation.md)

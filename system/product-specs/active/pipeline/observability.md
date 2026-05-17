@@ -183,7 +183,7 @@ without SSH.
 
 - Designs: [observability-and-cost-tracking](../../designs/active/pipeline/observability-and-cost-tracking.md)
 - Related components: [task-orchestration](./task-orchestration.md),
-  [knowledge-freshness](./knowledge-freshness.md),
+  [knowledge-freshness](../knowledge/knowledge-freshness.md),
   [branch-cleanup](./branch-cleanup.md),
   [self-healing](./self-healing.md), [escalations](./escalations.md),
-  [admin-panel](./admin-panel.md)
+  [admin-panel](../knowledge/admin-panel.md)

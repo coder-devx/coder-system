@@ -135,12 +135,12 @@ a stall no longer waits for someone to open the admin panel.
 - [observability](./observability.md) — `/metrics` grows an
   `escalations` block (open count, mean-ack, rung-2 rate,
   false-positive rate, by-trigger counts).
-- [audit-log](./audit-log.md) — the five `escalation.*` actions
+- [audit-log](../tenancy/audit-log.md) — the five `escalation.*` actions
   are registered there; every state transition lands a row.
-- [admin-panel](./admin-panel.md) — hosts the two admin pages.
-- [multi-tenancy](./multi-tenancy.md) — the per-project tri-state
+- [admin-panel](../knowledge/admin-panel.md) — hosts the two admin pages.
+- [multi-tenancy](../tenancy/multi-tenancy.md) — the per-project tri-state
   flags + Slack/PD configuration sit on the `projects` row.
-- [continuous-deployment](./continuous-deployment.md) — the deploy
+- [continuous-deployment](../delivery/continuous-deployment.md) — the deploy
   workflow fires `migrate_failure` escalations directly via
   `open_escalation` when the migrate step exits non-zero.
 

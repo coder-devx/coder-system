@@ -4,7 +4,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/admin-panel.md
+  file: active/knowledge/admin-panel.md
   served_by_designs:
   - admin-panel
   related_specs:
@@ -15,7 +15,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/audit-log.md
+  file: active/tenancy/audit-log.md
   served_by_designs:
   - audit-log
   related_specs:
@@ -30,7 +30,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/architect-worker.md
+  file: active/workers/architect-worker.md
   served_by_designs:
   - architect-worker
   parent: worker-roles
@@ -39,7 +39,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/branch-cleanup.md
+  file: active/pipeline/branch-cleanup.md
   served_by_designs:
   - branch-cleanup
   related_specs:
@@ -52,7 +52,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/continuous-deployment.md
+  file: active/delivery/continuous-deployment.md
   served_by_designs:
   - continuous-deployment
   parent: delivery-and-infra
@@ -61,7 +61,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/developer-worker.md
+  file: active/workers/developer-worker.md
   served_by_designs:
   - developer-worker
   parent: worker-roles
@@ -70,7 +70,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/escalations.md
+  file: active/pipeline/escalations.md
   served_by_designs:
   - escalations
   related_specs:
@@ -85,7 +85,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/impersonation.md
+  file: active/tenancy/impersonation.md
   served_by_designs:
   - impersonation
   related_specs:
@@ -96,7 +96,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/knowledge-api.md
+  file: active/knowledge/knowledge-api.md
   served_by_designs:
   - knowledge-write-api
   - knowledge-repo-model
@@ -108,7 +108,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/knowledge-freshness.md
+  file: active/knowledge/knowledge-freshness.md
   served_by_designs:
   - knowledge-freshness
   related_specs:
@@ -123,7 +123,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/multi-tenancy.md
+  file: active/tenancy/multi-tenancy.md
   served_by_designs:
   - multi-tenancy
   parent: tenancy-and-access
@@ -132,7 +132,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/observability.md
+  file: active/pipeline/observability.md
   served_by_designs:
   - observability-and-cost-tracking
   related_specs:
@@ -143,7 +143,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/onboarding.md
+  file: active/knowledge/onboarding.md
   served_by_designs:
   - onboarding
   parent: knowledge-and-admin
@@ -152,7 +152,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/pm-worker.md
+  file: active/workers/pm-worker.md
   served_by_designs:
   - pm-worker
   parent: worker-roles
@@ -161,7 +161,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/reviewer-worker.md
+  file: active/workers/reviewer-worker.md
   served_by_designs:
   - reviewer-worker
   parent: worker-roles
@@ -170,7 +170,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/self-healing.md
+  file: active/pipeline/self-healing.md
   served_by_designs:
   - self-healing
   related_specs:
@@ -185,7 +185,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/service-accounts.md
+  file: active/tenancy/service-accounts.md
   served_by_designs:
   - service-accounts
   parent: tenancy-and-access
@@ -194,7 +194,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/task-orchestration.md
+  file: active/pipeline/task-orchestration.md
   served_by_designs:
   - worker-communication
   related_specs:
@@ -205,7 +205,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/team-manager-worker.md
+  file: active/workers/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
   parent: worker-roles
@@ -214,7 +214,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/tenant-isolation.md
+  file: active/delivery/tenant-isolation.md
   served_by_designs:
   - tenant-isolation
   related_specs:
@@ -309,7 +309,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/secret-rotation.md
+  file: active/tenancy/secret-rotation.md
   related_specs:
   - service-accounts
   - audit-log
@@ -322,7 +322,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/cold-start-ingestion.md
+  file: active/knowledge/cold-start-ingestion.md
   related_specs:
   - onboarding
   - architect-worker
@@ -333,7 +333,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/knowledge-schema-migration.md
+  file: active/knowledge/knowledge-schema-migration.md
   related_specs:
   - knowledge-api
   - onboarding
@@ -345,7 +345,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/fleet-patterns.md
+  file: active/knowledge/fleet-patterns.md
   related_specs:
   - knowledge-api
   - admin-panel
@@ -359,7 +359,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/mcp-agent-interface.md
+  file: active/tenancy/mcp-agent-interface.md
   related_specs:
   - impersonation
   - service-accounts
@@ -373,7 +373,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/oauth-mcp.md
+  file: active/tenancy/oauth-mcp.md
   served_by_designs:
   - '0050'
   related_specs:
@@ -385,7 +385,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/managed-workflows.md
+  file: active/knowledge/managed-workflows.md
   related_specs:
   - knowledge-api
   - onboarding
@@ -473,13 +473,6 @@ specs:
   folder: wip
   file: wip/0075-coder-studio-b2c-product-portfolio-operator-contract.md
   parent: knowledge-and-admin
-- id: '0076'
-  title: Spec-bound architect dispatch from admin UI
-  status: active
-  owner: ro
-  folder: active
-  file: active/0076-spec-bound-architect-dispatch-from-admin-ui.md
-  parent: pipeline-operations
 - id: '0077'
   title: "Coder Studio \u2014 Founder role Phase A"
   status: wip
@@ -487,13 +480,6 @@ specs:
   folder: wip
   file: wip/0077-coder-studio-founder-role-phase-a.md
   parent: knowledge-and-admin
-- id: 0078
-  title: Spec-run lifecycle auto-bootstrap for fresh WIP specs
-  status: active
-  owner: ro
-  folder: active
-  file: active/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md
-  parent: pipeline-operations
 - id: 0079
   title: "Coder Studio \u2014 coder-product-template repo contract"
   status: wip

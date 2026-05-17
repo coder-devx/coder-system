@@ -123,12 +123,12 @@ an incident timeline, review a peer's actions, or answer a customer's
   `actor_id='escalation-watch'`. Slack-button acks from external
   users that don't resolve to an internal `user` land
   `actor_type='slack_external'` with the raw Slack handle captured
-  in the row for traceability. See [escalations](./escalations.md).
+  in the row for traceability. See [escalations](../pipeline/escalations.md).
 - 0042 Self-heal action namespace (shipped 2026-04-22) — two new
   actions: `self_heal.remediated`, `self_heal.failed`. The 5-minute
   watchdog writes a row per successful or errored remediation;
   `skipped_cap` and `dry_run` outcomes are attempt-row only (no
-  audit event, to avoid noise). See [self-healing](./self-healing.md).
+  audit event, to avoid noise). See [self-healing](../pipeline/self-healing.md).
 - Claude OAuth auth-mode action (shipped 2026-04-22) — new
   `project.set_auth_mode` action registered with `Actions` and
   emitted from the admin `PATCH /v1/_admin/projects/{id}/auth-mode`
@@ -145,7 +145,7 @@ an incident timeline, review a peer's actions, or answer a customer's
   audit row + return None, never blocks the STUCK path). Observable
   via `/audit-events` filtered to these action strings; headline KPIs:
   reconciliation hit rate and failure rate per week. See
-  [task-orchestration](./task-orchestration.md).
+  [task-orchestration](../pipeline/task-orchestration.md).
 
 ## Links
 

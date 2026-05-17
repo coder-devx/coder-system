@@ -112,64 +112,54 @@ cause.
   same artifact within that window shares one GitHub list-commits
   round trip per `(repo, path, since_date)` tuple.
 
-## Acceptance
+## Interfaces
 
-- [x] Every non-ADR artifact under `system/` carries `last_verified_at`;
-      `scripts/validate.py` enforces presence, parseability, and
-      `<= today`.
-- [x] `FreshnessService.score` is a pure function with unit coverage
-      for the AC matrix: verified today → 100; 30 days old no
-      activity → ≥ 70; one commit on `affects_*` → ≤ 60; dep at 20 →
-      ≤ 40.
-- [x] Every typed Knowledge API read response carries a `freshness`
-      block matching the documented shape.
-- [x] `GET .../knowledge/{type}/{id}?min_freshness=N` returns
-      `409 STALE` below threshold with the body still in the 409
-      detail, `200` above.
-- [x] `POST .../verify` bumps `last_verified_at` to today, writes
-      `verified_by`, and commits with a structured message including
-      the supplied `summary`.
-- [x] A nightly audit pass per project dispatches at most
-      `DEFAULT_LIMIT` architect tasks against the below-floor
-      artifacts, records per-artifact item rows, and captures each
-      architect decision on the item.
-- [x] Admin panel renders the score histogram, stale count, and
-      Needs-attention table with one-click Verify.
-- [x] Stale-read, audit-outcome, and per-(project,type) freshness
-      score metrics are surfaced on `/v1/_admin/ops/freshness/metrics`.
+- `GET /v1/projects/{id}/knowledge/{type}/{id}` — response envelope
+  carries `freshness: {score, last_verified_at, verified_by, reasons}`.
+- `GET .../knowledge/{type}/{id}?min_freshness=N` — returns
+  `409 STALE` with the body still in the 409 detail when below
+  threshold; `200` above.
+- `POST .../knowledge/{type}/{id}/verify` — bumps `last_verified_at`
+  to today, requires a `summary`, records `verified_by`, returns the
+  commit SHA. ADRs are refused (400 `adrs_not_verifiable`).
+- `POST /v1/_admin/knowledge-audit/run` — fires the nightly audit
+  pass for a project (Cloud Scheduler calls this once per 24 h).
+- `GET /v1/_admin/ops/freshness/metrics` —
+  `knowledge_stale_reads_total{project,type,threshold}`,
+  `knowledge_audit_outcome_total{project,outcome}`,
+  `knowledge_freshness_score{project,type}` as scrape-ready rows.
+- Frontmatter: `last_verified_at` required on every non-ADR artifact;
+  optional `verified_by`. `scripts/validate.py` enforces shape.
 
-## Users
+## Dependencies
 
-- **Workers** (Architect, PM, Reviewer) reading artifacts during
-  planning and review. Pass `min_freshness=N` when they must refuse
-  to act on content below a threshold; treat 409 body as an
-  explicit "use at your own risk" signal otherwise.
-- **Operators** watching the admin Freshness view. Sort by score,
-  click Verify when an artifact is still current, triage
-  needs-rewrite reports from the audit queue.
-- **Cloud Scheduler** firing the nightly audit trigger endpoint
-  `POST /v1/_admin/knowledge-audit/run` once per 24 h per project.
+- [knowledge-api](./knowledge-api.md) — the read envelope this spec
+  extends; the `verify` endpoint is part of that surface.
+- [architect-worker](../workers/architect-worker.md) — the audit pass
+  dispatches one architect task per below-floor artifact for the
+  three-way verdict.
+- [reviewer-worker](../workers/reviewer-worker.md) — also reads freshness on
+  knowledge fetches during review.
+- [admin-panel](./admin-panel.md) — renders the Freshness tab,
+  histogram, stale-count tile, and one-click Verify.
+- [observability](../pipeline/observability.md) — the audit-outcome and
+  stale-read metric channel.
 
-## Non-goals
+## Evolution
 
-- Sub-artifact (per-section) freshness.
-- Real-time tripwires on target-code commits. Derivation at read time
-  and on the nightly pass is the design's ceiling.
-- Semantic similarity between doc and code — deliberately rejected in
-  [ADR 0014](../../adrs/0014-freshness-from-declared-affects.md).
-- Automating the rewrite itself. The audit loop flags and dispatches;
-  a human triages `needs_rewrite` verdicts. See spec 0044 for
-  enforcement at write time.
+- 2026-04 — initial ship: deterministic score, per-read envelope,
+  `min_freshness` 409, attestation endpoint, nightly audit loop,
+  admin Freshness tab.
 
 ## Links
 
 - Design: [knowledge-freshness](../../designs/active/knowledge/knowledge-freshness.md).
 - Related specs:
   [knowledge-api](./knowledge-api.md),
-  [architect-worker](./architect-worker.md),
-  [reviewer-worker](./reviewer-worker.md),
+  [architect-worker](../workers/architect-worker.md),
+  [reviewer-worker](../workers/reviewer-worker.md),
   [admin-panel](./admin-panel.md),
-  [observability](./observability.md).
+  [observability](../pipeline/observability.md).
 - ADRs:
   [0008 — CI validation of the knowledge repo](../../adrs/0008-ci-validation-of-knowledge-repo.md),
   [0014 — freshness from declared affects, not semantic similarity](../../adrs/0014-freshness-from-declared-affects.md).

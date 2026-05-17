@@ -9,39 +9,37 @@ in each component's `## Evolution` section and in git.
 
 | Slug | Title | Owner | Served by designs |
 |---|---|---|---|
-| [0076-spec-bound-architect-dispatch-from-admin-ui](./active/0076-spec-bound-architect-dispatch-from-admin-ui.md) | Spec-bound architect dispatch from admin UI | ro | — |
-| [0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs](./active/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md) | Spec-run lifecycle auto-bootstrap for fresh WIP specs | ro | — |
-| [admin-panel](./active/admin-panel.md) | Admin Panel | ro | admin-panel |
-| [architect-worker](./active/architect-worker.md) | Architect Worker | ro | architect-worker |
-| [audit-log](./active/audit-log.md) | Audit log | ro | audit-log |
-| [branch-cleanup](./active/branch-cleanup.md) | Branch cleanup | ro | branch-cleanup |
-| [cold-start-ingestion](./active/cold-start-ingestion.md) | Cold-start knowledge ingestion | ro | — |
-| [continuous-deployment](./active/continuous-deployment.md) | Continuous Deployment | ro | continuous-deployment |
+| [admin-panel](./active/knowledge/admin-panel.md) | Admin Panel | ro | admin-panel |
+| [architect-worker](./active/workers/architect-worker.md) | Architect Worker | ro | architect-worker |
+| [audit-log](./active/tenancy/audit-log.md) | Audit log | ro | audit-log |
+| [branch-cleanup](./active/pipeline/branch-cleanup.md) | Branch cleanup | ro | branch-cleanup |
+| [cold-start-ingestion](./active/knowledge/cold-start-ingestion.md) | Cold-start knowledge ingestion | ro | — |
+| [continuous-deployment](./active/delivery/continuous-deployment.md) | Continuous Deployment | ro | continuous-deployment |
 | [delivery-and-infra](./active/delivery-and-infra.md) | Delivery & infra | ro | [system-overview](../designs/active/system-overview.md), 0051 |
-| [developer-worker](./active/developer-worker.md) | Developer Worker | ro | developer-worker |
-| [escalations](./active/escalations.md) | Escalations & on-call routing | ro | escalations |
-| [fleet-patterns](./active/fleet-patterns.md) | Fleet pattern surfacing | ro | — |
-| [impersonation](./active/impersonation.md) | Impersonation | ro | impersonation |
+| [developer-worker](./active/workers/developer-worker.md) | Developer Worker | ro | developer-worker |
+| [escalations](./active/pipeline/escalations.md) | Escalations & on-call routing | ro | escalations |
+| [fleet-patterns](./active/knowledge/fleet-patterns.md) | Fleet pattern surfacing | ro | — |
+| [impersonation](./active/tenancy/impersonation.md) | Impersonation | ro | impersonation |
 | [knowledge-and-admin](./active/knowledge-and-admin.md) | Knowledge & admin | ro | knowledge-repo-model, knowledge-write-api, knowledge-freshness |
-| [knowledge-api](./active/knowledge-api.md) | Knowledge API | ro | knowledge-write-api, knowledge-repo-model |
-| [knowledge-freshness](./active/knowledge-freshness.md) | Knowledge Freshness | ro | knowledge-freshness |
-| [knowledge-schema-migration](./active/knowledge-schema-migration.md) | Knowledge schema migration | ro | — |
-| [managed-workflows](./active/managed-workflows.md) | Managed-repo workflow distribution | ro | — |
-| [mcp-agent-interface](./active/mcp-agent-interface.md) | MCP agent interface | ro | — |
-| [multi-tenancy](./active/multi-tenancy.md) | Multi-tenancy | ro | multi-tenancy |
-| [oauth-mcp](./active/oauth-mcp.md) | OAuth 2.1 for MCP clients | ro | 0050 |
-| [observability](./active/observability.md) | Observability | ro | observability-and-cost-tracking |
-| [onboarding](./active/onboarding.md) | Onboarding | ro | onboarding |
+| [knowledge-api](./active/knowledge/knowledge-api.md) | Knowledge API | ro | knowledge-write-api, knowledge-repo-model |
+| [knowledge-freshness](./active/knowledge/knowledge-freshness.md) | Knowledge Freshness | ro | knowledge-freshness |
+| [knowledge-schema-migration](./active/knowledge/knowledge-schema-migration.md) | Knowledge schema migration | ro | — |
+| [managed-workflows](./active/knowledge/managed-workflows.md) | Managed-repo workflow distribution | ro | — |
+| [mcp-agent-interface](./active/tenancy/mcp-agent-interface.md) | MCP agent interface | ro | — |
+| [multi-tenancy](./active/tenancy/multi-tenancy.md) | Multi-tenancy | ro | multi-tenancy |
+| [oauth-mcp](./active/tenancy/oauth-mcp.md) | OAuth 2.1 for MCP clients | ro | 0050 |
+| [observability](./active/pipeline/observability.md) | Observability | ro | observability-and-cost-tracking |
+| [onboarding](./active/knowledge/onboarding.md) | Onboarding | ro | onboarding |
 | [pipeline-operations](./active/pipeline-operations.md) | Pipeline operations | ro | worker-communication, observability-and-cost-tracking, escalations, self-healing, branch-cleanup |
-| [pm-worker](./active/pm-worker.md) | PM Worker | ro | pm-worker |
-| [reviewer-worker](./active/reviewer-worker.md) | Reviewer Worker | ro | reviewer-worker |
-| [secret-rotation](./active/secret-rotation.md) | Automated secret rotation | ro | — |
-| [self-healing](./active/self-healing.md) | Self-healing stuck pipelines | ro | self-healing |
-| [service-accounts](./active/service-accounts.md) | Service Accounts | ro | service-accounts |
-| [task-orchestration](./active/task-orchestration.md) | Task Orchestration | ro | worker-communication |
-| [team-manager-worker](./active/team-manager-worker.md) | Team Manager Worker | ro | team-manager-worker |
+| [pm-worker](./active/workers/pm-worker.md) | PM Worker | ro | pm-worker |
+| [reviewer-worker](./active/workers/reviewer-worker.md) | Reviewer Worker | ro | reviewer-worker |
+| [secret-rotation](./active/tenancy/secret-rotation.md) | Automated secret rotation | ro | — |
+| [self-healing](./active/pipeline/self-healing.md) | Self-healing stuck pipelines | ro | self-healing |
+| [service-accounts](./active/tenancy/service-accounts.md) | Service Accounts | ro | service-accounts |
+| [task-orchestration](./active/pipeline/task-orchestration.md) | Task Orchestration | ro | worker-communication |
+| [team-manager-worker](./active/workers/team-manager-worker.md) | Team Manager Worker | ro | team-manager-worker |
 | [tenancy-and-access](./active/tenancy-and-access.md) | Tenancy & access | ro | impersonation, audit-log, tenant-isolation |
-| [tenant-isolation](./active/tenant-isolation.md) | Tenant isolation test harness | ro | tenant-isolation |
+| [tenant-isolation](./active/delivery/tenant-isolation.md) | Tenant isolation test harness | ro | tenant-isolation |
 | [worker-roles](./active/worker-roles.md) | Worker roles | ro | [worker-roles](../designs/active/worker-roles.md), architect-worker, pm-worker, team-manager-worker |
 
 ## WIP — numbered, roadmap-aligned

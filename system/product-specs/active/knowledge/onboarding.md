@@ -85,10 +85,10 @@ the two live projects running in parallel today.
 ## Links
 
 - Designs: [system-overview](../../designs/active/system-overview.md)
-- Related components: [multi-tenancy](./multi-tenancy.md),
+- Related components: [multi-tenancy](../tenancy/multi-tenancy.md),
   [knowledge-api](./knowledge-api.md),
   [knowledge-schema-migration](./knowledge-schema-migration.md),
-  [service-accounts](./service-accounts.md),
-  [impersonation](./impersonation.md),
+  [service-accounts](../tenancy/service-accounts.md),
+  [impersonation](../tenancy/impersonation.md),
   [admin-panel](./admin-panel.md),
-  [continuous-deployment](./continuous-deployment.md)
+  [continuous-deployment](../delivery/continuous-deployment.md)

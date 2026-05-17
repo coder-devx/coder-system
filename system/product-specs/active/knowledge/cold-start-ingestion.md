@@ -109,63 +109,47 @@ docstrings → designs, commit rationale → ADRs, repeated domain nouns
 - A single `coder project ingest` call ingests one code repo; multi-
   repo projects need multiple calls and produce multiple PRs.
 
-## Acceptance criteria
+## Interfaces
 
-- **AC1.** Architect worker recognises `# Knowledge cold start` prompt
-  header; swaps in `architect_cold_start.json`; schema failures
-  re-prompt via `validate_and_retry`; exhaustion lands
-  `failure_kind="schema"`.
-- **AC2.** `coder_core/workers/schemas/architect_cold_start.json`
-  defines `artifacts[]` with required fields per `artifact_type`.
-- **AC3.** Cloud Run Job `coder-core-cold-start-ingest` takes
-  `{project_id, code_repo_url, code_repo_ref}`; runs the full
-  clone → scan → batch → aggregate → PR pipeline.
-- **AC4.** `ingestion_provenance` block on every cold-started artifact;
-  optional in all four knowledge-repo templates.
-- **AC5.** `flip-cold-start-provenance.yml` distributed via `template/`
-  and seeded into existing managed repos at release; sweep ordering
-  documented in runbook.
-- **AC6.** Re-run skips `human_edited: true` and provenance-absent
-  artifacts; PR body lists skipped artifacts with reason.
-- **AC7.** Low-confidence filter at default 60; per-project override
-  via migration 0051 column; PR body summarises drops per category.
-- **AC8.** `coder project ingest` enqueues and waits; `--status`
-  reports run state, batch progress, artifact counts, and PR URL.
-- **AC9.** `system/runbooks/onboard-project.md` gains Step 11; new
-  `system/runbooks/cold-start-review.md` documents the review
-  workflow, provenance reading, and empty-category interpretation.
-- **AC10.** Hard token ceiling per run; breach fails with a structured
-  error rather than continuing.
-- **AC11.** `CODER_COLD_START_ENABLED` fleet flag (default off) + per-
-  project `projects.cold_start_enabled` escape hatch.
+- Cloud Run Job: `coder-core-cold-start-ingest` (oneshot, not
+  scheduled).
+- CLI: `coder project ingest <slug> --from <repo-url> [--ref <sha|branch>]`
+  (enqueue + wait + print PR URL); `coder project ingest <slug> --status`
+  (latest run state, batch progress, counts, PR URL).
+- Env: `CODER_COLD_START_ENABLED` fleet flag, per-project
+  `projects.cold_start_enabled` (NULL = inherit), per-project
+  `projects.cold_start_min_confidence` (migration 0051).
+- Templates: `ingestion_provenance` block optional on
+  `template/services/_TEMPLATE.md`, `template/designs/_TEMPLATE.md`,
+  `template/adrs/_TEMPLATE.md`, `template/glossary.md`.
+- Workflow distribution: `flip-cold-start-provenance.yml` shipped via
+  the [managed-workflows](./managed-workflows.md) registry.
+- Runbooks: `system/runbooks/cold-start-review.md`,
+  `system/runbooks/onboard-project.md` (Step 11).
 
-## Metrics
+## Dependencies
 
-- **Time-to-populated** — `coder project ingest` invocation → PR
-  opened. Target: ≤ 90 min for < 50 kLoC repo.
-- **Per-category artifact counts** — {services, designs, ADRs,
-  glossary entries} per run post-filter. Sustained zero count in a
-  category signals a prompt or scope problem.
-- **Low-confidence drop rate** — `dropped / proposed` per category.
-  > 30% sustained → filter too strict or confidence calibration off.
-- **Re-run overwrite collisions** — artifacts a re-run wanted to
-  overwrite but skipped (`human_edited: true`). Zero on a long-lived
-  project is suspicious.
-- **Token spend per run** — total input + output against
-  `cold_start_max_tokens` ceiling.
+- [architect-worker](../workers/architect-worker.md) — runs the cold-start
+  task with the swapped `architect_cold_start.json` schema.
+- [knowledge-api](./knowledge-api.md) — receives the assembled PR.
+- [onboarding](./onboarding.md) — `coder project onboard` is the
+  prerequisite for `coder project ingest`.
+- [managed-workflows](./managed-workflows.md) — distributes the
+  `human_edited` flip workflow into every managed repo.
+- [knowledge-freshness](./knowledge-freshness.md) — takes over once
+  the cold-start PR merges; cold-start sets initial `last_verified_at`.
 
-## Non-goals
+## Evolution
 
-- Inferring product specs or runbooks from code.
-- Auto-merging the cold-start PR.
-- Cross-repo ingestion in v1.
-- Live-syncing inferred state to ongoing code changes (that's 0043/0044).
-- Migrating a project between knowledge repos.
+- 2026-05-06 — Initial ship: architect cold-start mode, oneshot
+  Cloud Run Job, PR-per-run with per-category counts, provenance
+  block, `human_edited` flip workflow, re-run skip-on-edited, low-
+  confidence filter, token ceiling.
 
 ## Links
 
 - Design: [cold-start-ingestion](../../designs/wip/0045-cold-start-ingestion.md)
 - Related specs: [onboarding](./onboarding.md),
-  [architect-worker](./architect-worker.md),
+  [architect-worker](../workers/architect-worker.md),
   [knowledge-api](./knowledge-api.md),
   [knowledge-freshness](./knowledge-freshness.md)

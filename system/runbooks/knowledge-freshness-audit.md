@@ -21,7 +21,7 @@ Two things in one runbook:
    nightly pass produces.
 
 See
-[knowledge-freshness](../product-specs/active/knowledge-freshness.md)
+[knowledge-freshness](../product-specs/active/knowledge/knowledge-freshness.md)
 for the product view and the
 [design](../designs/active/knowledge/knowledge-freshness.md) for the technical
 one; ADR
@@ -256,7 +256,7 @@ and should be escalated rather than left to rot the queue.
 
 ## Related
 
-- Spec: [knowledge-freshness](../product-specs/active/knowledge-freshness.md)
+- Spec: [knowledge-freshness](../product-specs/active/knowledge/knowledge-freshness.md)
 - Design: [knowledge-freshness](../designs/active/knowledge/knowledge-freshness.md)
 - ADRs: [0014 — freshness from declared affects](../adrs/0014-freshness-from-declared-affects.md),
   [0008 — CI validation of the knowledge repo](../adrs/0008-ci-validation-of-knowledge-repo.md)

@@ -17,7 +17,7 @@ The escalations component (shipped coder-core `c992a7b`, 2026-04-22) opens
 a row and walks a three-rung paging ladder whenever a pipeline run stalls,
 fails repeatedly, or breaches SLA. This runbook covers operator day-2 tasks:
 tuning thresholds, reading the admin pages, rolling out the flag, and
-handling failures. Product view: [escalations spec](../product-specs/active/escalations.md).
+handling failures. Product view: [escalations spec](../product-specs/active/pipeline/escalations.md).
 Technical design: [escalations design](../designs/active/pipeline/escalations.md).
 
 ## What fires an escalation

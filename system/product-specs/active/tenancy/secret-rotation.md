@@ -94,7 +94,7 @@ in-flight request fails because of rotation.
 - Cloud Run Job: `coder-core-rotate-secrets` (Cloud Scheduler, 15 min).
 - Break-glass: `POST /v1/_admin/secrets/{canonical_name}/rotate-now`
   — 202 on accepted / 503 when disabled / 403 on non-admin.
-- Admin page: `/admin/secrets` — see [admin-panel](./admin-panel.md).
+- Admin page: `/admin/secrets` — see [admin-panel](../knowledge/admin-panel.md).
 - Env: `SECRET_ROTATION_ENABLED`.
 - DB: `secret_rotations` (migration 0042),
   `projects.api_key_hash_previous TEXT NULL` (migration 0043).
@@ -114,16 +114,6 @@ in-flight request fails because of rotation.
 - Postgres (`secret_rotations` migration 0042; `projects` column
   migration 0043).
 
-## Metrics
-
-- **Primary:** zero past-due rows (`next_due_at > now()` across the
-  fleet). Admin page red-chip count is the live dashboard.
-- **Secondary:** `secret_rotation.failed` weekly rate. Two consecutive
-  failures on the same canonical name page the on-call operator.
-- **Guardrail:** per-project auth-4xx rate. A +2σ spike within 1 h of
-  a `secret.rotate` audit row signals a window that is too short or
-  readers caching stale credentials.
-
 ## Evolution
 
 - 0038 Automated secret rotation (shipped 2026-05-06, migrations
@@ -137,7 +127,7 @@ in-flight request fails because of rotation.
 
 - Designs: [secret-rotation](../../designs/wip/0038-secret-rotation.md)
 - Related components: [service-accounts](./service-accounts.md),
-  [audit-log](./audit-log.md), [admin-panel](./admin-panel.md),
+  [audit-log](./audit-log.md), [admin-panel](../knowledge/admin-panel.md),
   [multi-tenancy](./multi-tenancy.md),
   [impersonation](./impersonation.md),
-  [continuous-deployment](./continuous-deployment.md)
+  [continuous-deployment](../delivery/continuous-deployment.md)

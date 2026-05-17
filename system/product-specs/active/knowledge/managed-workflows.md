@@ -100,18 +100,6 @@ middleware — so future features inherit it at no per-feature cost.
 - admin-panel — `/admin/managed-workflows` matrix page renders the
   fleet × workflow grid (see [admin-panel](./admin-panel.md)).
 
-## Non-goals
-
-- Workflow content — owned by the consuming spec (0045, 0047, etc.).
-- GitHub App management, per-repo grants, scope auditing — operator
-  work; this spec consumes the existing App.
-- Cross-org distribution — single-org fleet for v1.
-- Workflow execution monitoring beyond install-state — per-feature
-  handlers surface their own success/failure metrics.
-- Auto-removing workflows that fall off the manifest — admin matrix
-  flags "installed but not in manifest" as drift; operator closes
-  the loop manually per project.
-
 ## Evolution
 
 - 0052 Initial ship (2026-05-06) — extracted from 0045/0047 which
@@ -122,7 +110,7 @@ middleware — so future features inherit it at no per-feature cost.
 ## Links
 
 - Related specs: [knowledge-api](./knowledge-api.md),
-  [onboarding](./onboarding.md), [audit-log](./audit-log.md),
+  [onboarding](./onboarding.md), [audit-log](../tenancy/audit-log.md),
   [admin-panel](./admin-panel.md)
 - Consumed by: 0045 (flip-cold-start-provenance workflow),
   0047 (record-template-migration workflow)

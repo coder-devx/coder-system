@@ -135,15 +135,15 @@ browsing and optional worker consultation.
   `consultations` tables; `informed_by_patterns` frontmatter field;
   `CODER_FLEET_PATTERNS_ENABLED` fleet flag; per-project opt-in and
   fleet-enabled columns; architect worker consultation step (see
-  [architect-worker](./architect-worker.md)).
+  [architect-worker](../workers/architect-worker.md)).
 
 ## Links
 
 - Designs: [fleet-patterns](../../designs/wip/0048-cross-project-patterns.md)
 - Related components: [knowledge-api](./knowledge-api.md),
   [admin-panel](./admin-panel.md),
-  [architect-worker](./architect-worker.md),
-  [pm-worker](./pm-worker.md),
-  [reviewer-worker](./reviewer-worker.md),
-  [multi-tenancy](./multi-tenancy.md),
+  [architect-worker](../workers/architect-worker.md),
+  [pm-worker](../workers/pm-worker.md),
+  [reviewer-worker](../workers/reviewer-worker.md),
+  [multi-tenancy](../tenancy/multi-tenancy.md),
   [knowledge-freshness](./knowledge-freshness.md)

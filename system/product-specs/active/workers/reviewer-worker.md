@@ -152,6 +152,6 @@ developer-produced PR and a human-facing merge decision.
 
 - Designs: [worker-roles](../../designs/active/worker-roles.md)
 - Related components: [developer-worker](./developer-worker.md),
-  [pm-worker](./pm-worker.md), [knowledge-api](./knowledge-api.md),
-  [task-orchestration](./task-orchestration.md),
-  [service-accounts](./service-accounts.md)
+  [pm-worker](./pm-worker.md), [knowledge-api](../knowledge/knowledge-api.md),
+  [task-orchestration](../pipeline/task-orchestration.md),
+  [service-accounts](../tenancy/service-accounts.md)

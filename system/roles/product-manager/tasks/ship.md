@@ -107,6 +107,36 @@ is required and must point at a real category id from
 [`system/INDEX.md`](../../../INDEX.md). Same `parent:` on the spec
 side and the design side for shared-id pairs (ADR 0029).
 
+Per design 0095 Phase 7, the orchestrator routes the active write to
+`product-specs/active/<category>/<slug>.md` based on the patched
+`parent:`. Getting `parent:` right is what makes the file land at the
+right path; mis-setting it puts the spec under the wrong category
+folder. The 5 category rollups themselves stay flat at
+`product-specs/active/<rollup>.md`.
+
+### Active body shape
+
+A WIP body uses the delivery-contract sections (`## Problem` ·
+`## Users / personas` · `## Goals` · `## Non-goals` · `## Scope` ·
+`## Acceptance criteria` · `## Metrics` · `## Open questions` ·
+`## Links`). An active body uses the running-surface sections
+(`## What it is` · `## Capabilities` · `## Interfaces` ·
+`## Dependencies` · `## Evolution` (1–3 lines max) · `## Links`).
+The fold *translates* — it does not just rename the file.
+
+When folding a WIP into an existing active leaf, distill the WIP
+body into 1–4 new `## Capabilities` bullets (or amended `## Interfaces`
+entries) on the active file. **Never** carry over `## Problem` /
+`## Acceptance criteria` / `## Open questions` / `**Phase:**` /
+`**Progress:**` into the active patch. Those are WIP-shape; they
+make the active leaf un-readable as a current-state document.
+
+Body length follows content discipline, not a fixed cap: smell
+test at ~150 body lines, split at ~250. If folding a WIP would push
+an active leaf past ~250, consider whether the WIP genuinely
+belongs in a new active component (`action: "create"`) rather than
+extending the existing one.
+
 ## Output verbosity (avoid multi-turn wrap)
 
 Sonnet 4.6's per-message output cap is ~32K tokens, including

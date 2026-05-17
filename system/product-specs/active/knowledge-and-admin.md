@@ -30,18 +30,18 @@ of knowledge repos is kept in sync with expected workflow primitives.
 
 ## Components
 
-- [knowledge-api](./knowledge-api.md) — read-through layer over the
+- [knowledge-api](./knowledge/knowledge-api.md) — read-through layer over the
   knowledge repo with a per-project cache. Files, registries, graph
   queries.
-- [knowledge-freshness](./knowledge-freshness.md) — automatic
+- [knowledge-freshness](./knowledge/knowledge-freshness.md) — automatic
   freshness audit that flags stale artifacts and schedules
   Architect-led rewrites.
-- [admin-panel](./admin-panel.md) — user-facing SPA: pipeline view,
+- [admin-panel](./knowledge/admin-panel.md) — user-facing SPA: pipeline view,
   knowledge browser, plan review, metrics dashboard, drive-mode
   override.
-- [onboarding](./onboarding.md) — how a new project gets wired into
+- [onboarding](./knowledge/onboarding.md) — how a new project gets wired into
   Coder for the first time.
-- [managed-workflows](./managed-workflows.md) — shared primitive for
+- [managed-workflows](./knowledge/managed-workflows.md) — shared primitive for
   installing, verifying, and receiving callbacks from GitHub Action
   workflows across the fleet of managed knowledge repos.
 
@@ -54,7 +54,7 @@ of knowledge repos is kept in sync with expected workflow primitives.
   Knowledge API write path or the dispatcher's
   `_commit_artifact_with_registry` helper (see design 0057).
 - **Audit**: every knowledge write emits a `knowledge.create` /
-  `knowledge.update` event in [audit-log](./audit-log.md).
+  `knowledge.update` event in [audit-log](./tenancy/audit-log.md).
 - **Pipeline integration**: PM acceptance promotes specs from `wip/`
   to `active/`; design 0057 establishes the per-role/per-mode prompt
   layout that drives this.

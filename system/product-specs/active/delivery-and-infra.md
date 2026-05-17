@@ -31,9 +31,9 @@ keep scaling, and how the test harness pins the multi-tenancy contract.
 
 ## Components
 
-- [continuous-deployment](./continuous-deployment.md) — push-to-main
+- [continuous-deployment](./delivery/continuous-deployment.md) — push-to-main
   CD with health-check, migration job, and traffic shift.
-- [tenant-isolation](./tenant-isolation.md) — pytest harness +
+- [tenant-isolation](./delivery/tenant-isolation.md) — pytest harness +
   manifest drift checks that prove cross-project reads return 4xx,
   secrets aren't exfiltrated, and pipeline state doesn't leak.
 
@@ -73,7 +73,7 @@ rotate-api-key, audit recording.
 `load_in_project()` is the single canonical row-scope check; every
 mutation/read workflow touched by the modular-monolith hardening
 goes through it instead of ad-hoc `project_id` filters. The
-[tenant-isolation](./tenant-isolation.md) harness asserts the
+[tenant-isolation](./delivery/tenant-isolation.md) harness asserts the
 property continuously.
 
 **Atomic mutation + audit.** `record_audit_event()` writes into the
@@ -109,7 +109,7 @@ fails the build on contract drift.
 - **Pipeline observability** (in [pipeline-operations](./pipeline-operations.md))
   surfaces deploy and migration status to the admin panel.
 - **Audit log** records every deploy action — see
-  [audit-log](./audit-log.md).
+  [audit-log](./tenancy/audit-log.md).
 - **Secret rotation** (separate WIP track, see roadmap) feeds the
   service-accounts surface in [tenancy-and-access](./tenancy-and-access.md).
 
@@ -132,6 +132,6 @@ fails the build on contract drift.
 - Repos: [coder-core](../../repos/coder-core.md),
   [coder-admin](../../repos/coder-admin.md),
   [coder-system](../../repos/coder-system.md)
-- Related components: [tenant-isolation](./tenant-isolation.md),
-  [continuous-deployment](./continuous-deployment.md),
-  [audit-log](./audit-log.md), [observability](./observability.md)
+- Related components: [tenant-isolation](./delivery/tenant-isolation.md),
+  [continuous-deployment](./delivery/continuous-deployment.md),
+  [audit-log](./tenancy/audit-log.md), [observability](./pipeline/observability.md)

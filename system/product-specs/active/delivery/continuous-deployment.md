@@ -46,7 +46,7 @@ commands by hand.
   conflicts that bypass or pre-date the developer-worker gate.
 - **Deploy-step migrate failure paging.** When the `coder-core-migrate`
   Cloud Run Job step exits non-zero, the deploy workflow fires the
-  [escalations](./escalations.md) surface with trigger kind
+  [escalations](../pipeline/escalations.md) surface with trigger kind
   `migrate_failure`, severity `high`, and a structured payload carrying
   the Cloud Run Job execution name and the Alembic error output. The
   existing Slack failure notification still fires; paging is additive.
@@ -73,7 +73,7 @@ commands by hand.
 - GitHub Actions runners with deploy-time GCP credentials.
 - Slack webhook (optional).
 - Onboarded projects model — deploys are global, projects are tenants.
-- [escalations](./escalations.md) — migrate-failure paging uses the
+- [escalations](../pipeline/escalations.md) — migrate-failure paging uses the
   `migrate_failure` trigger kind on the escalation surface.
 
 ## Evolution
@@ -91,6 +91,6 @@ commands by hand.
 ## Links
 
 - Designs: [system-overview](../../designs/active/system-overview.md)
-- Related components: [observability](./observability.md),
-  [audit-log](./audit-log.md), [onboarding](./onboarding.md),
-  [escalations](./escalations.md)
+- Related components: [observability](../pipeline/observability.md),
+  [audit-log](../tenancy/audit-log.md), [onboarding](../knowledge/onboarding.md),
+  [escalations](../pipeline/escalations.md)

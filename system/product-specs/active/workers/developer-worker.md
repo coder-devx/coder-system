@@ -133,7 +133,7 @@ produces.
 - 0020 — branch/commit/push/PR flow, `pr_url` column (migration 0016),
   reviewer prompt receives the PR URL, hard failure on missing PR.
 - 0023 — capture `tasks.branch_name` (migration 0019) on push so the
-  [branch-cleanup](./branch-cleanup.md) GC can resolve remote
+  [branch-cleanup](../pipeline/branch-cleanup.md) GC can resolve remote
   `task/*` branches back to their task rows.
 - 0027 — worker transient-failure retry: `_transient.classify` +
   `run_with_transient_retry` wrap the claude spawn. Migration 0021
@@ -149,7 +149,7 @@ produces.
   PRs only (`pr.user.type == 'Bot'`, per ADR 0016); fail-soft to the
   existing STUCK path on any GitHub API error. Flag-gated via
   `coder_orchestrator_pr_url_reconcile_enabled`. See
-  [task-orchestration](./task-orchestration.md) Evolution for the
+  [task-orchestration](../pipeline/task-orchestration.md) Evolution for the
   full implementation detail.
 - 0055 — `GH_TOKEN` injection refactored through the shared
   `_github_env.apply_github_token_env` helper (no behaviour change).
@@ -190,7 +190,7 @@ produces.
 
 - Designs: [worker-roles](../../designs/active/worker-roles.md)
 - Related components: [reviewer-worker](./reviewer-worker.md),
-  [task-orchestration](./task-orchestration.md),
-  [branch-cleanup](./branch-cleanup.md),
-  [service-accounts](./service-accounts.md),
-  [tenant-isolation](./tenant-isolation.md)
+  [task-orchestration](../pipeline/task-orchestration.md),
+  [branch-cleanup](../pipeline/branch-cleanup.md),
+  [service-accounts](../tenancy/service-accounts.md),
+  [tenant-isolation](../delivery/tenant-isolation.md)

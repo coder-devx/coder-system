@@ -29,24 +29,24 @@ paged when automation can't continue.
 
 ## Components
 
-- [task-orchestration](./task-orchestration.md) — task lifecycle
+- [task-orchestration](./pipeline/task-orchestration.md) — task lifecycle
   state machine, dispatcher leasing, stage transitions.
-- [observability](./observability.md) — per-task telemetry, token
+- [observability](./pipeline/observability.md) — per-task telemetry, token
   costs, pipeline metrics surfaced to the admin panel.
-- [self-healing](./self-healing.md) — reaper that re-queues stuck
+- [self-healing](./pipeline/self-healing.md) — reaper that re-queues stuck
   pipelines and tasks past their timeout.
-- [escalations](./escalations.md) — three-rung on-call ladder
+- [escalations](./pipeline/escalations.md) — three-rung on-call ladder
   (developer → on-call → user) with quiet hours and consolidation.
-- [branch-cleanup](./branch-cleanup.md) — automatic GC of stale
+- [branch-cleanup](./pipeline/branch-cleanup.md) — automatic GC of stale
   feature branches the Developer worker created.
 
 ## Cross-cutting concerns
 
 - **Audit trail**: every state transition surfaces through
-  [audit-log](./audit-log.md) (in [tenancy-and-access](./tenancy-and-access.md)).
+  [audit-log](./tenancy/audit-log.md) (in [tenancy-and-access](./tenancy-and-access.md)).
 - **Tenant isolation**: pipeline state is project-scoped; see
-  [multi-tenancy](./multi-tenancy.md).
-- **Visibility**: the [admin-panel](./admin-panel.md) is the human
+  [multi-tenancy](./tenancy/multi-tenancy.md).
+- **Visibility**: the [admin-panel](./knowledge/admin-panel.md) is the human
   surface for everything in this category.
 
 ## Links
