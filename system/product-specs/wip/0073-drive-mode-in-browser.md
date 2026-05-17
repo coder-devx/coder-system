@@ -178,4 +178,4 @@ Out:
 - ADR: [0031](../../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - Design: [0073](../../designs/wip/0073-drive-mode-in-browser.md)
 - Depends on: [0069](./0069-canonical-project-state.md)
-- Related: [impersonation](../active/tenancy/impersonation.md), [admin-panel](../active/knowledge/admin-panel.md), [mcp-agent-interface](../active/tenancy/mcp-agent-interface.md)
+- Related: [impersonation](../active/tenancy/impersonation.md), [admin-panel](../active/knowledge/admin-panel.md), [mcp-agent-interface](../active/knowledge/mcp-agent-interface.md)

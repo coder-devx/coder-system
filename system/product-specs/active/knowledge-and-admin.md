@@ -44,6 +44,14 @@ of knowledge repos is kept in sync with expected workflow primitives.
 - [managed-workflows](./knowledge/managed-workflows.md) — shared primitive for
   installing, verifying, and receiving callbacks from GitHub Action
   workflows across the fleet of managed knowledge repos.
+- [mcp-agent-interface](./knowledge/mcp-agent-interface.md) — `/mcp`
+  endpoint that lets external MCP-speaking agents drive Coder over
+  streamable HTTP, with bearer auth + admin / project / broker JWT
+  resolution, caller-filtered tool surface, and audit parity with
+  the REST path. The matching browser-OAuth auth-server layer for
+  clients that can't use bearer headers ships separately as
+  [oauth-mcp](./tenancy/oauth-mcp.md) (in tenancy because it's an
+  auth-server, not a tool surface).
 
 ## Cross-cutting concerns
 

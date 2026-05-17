@@ -26,7 +26,7 @@ in each component's `## Evolution` section and in git.
 | [knowledge-freshness](./active/knowledge/knowledge-freshness.md) | Knowledge Freshness | ro | knowledge-freshness |
 | [knowledge-schema-migration](./active/knowledge/knowledge-schema-migration.md) | Knowledge schema migration | ro | — |
 | [managed-workflows](./active/knowledge/managed-workflows.md) | Managed-repo workflow distribution | ro | — |
-| [mcp-agent-interface](./active/tenancy/mcp-agent-interface.md) | MCP agent interface | ro | — |
+| [mcp-agent-interface](./active/knowledge/mcp-agent-interface.md) | MCP agent interface | ro | mcp-agent-interface-design |
 | [multi-tenancy](./active/tenancy/multi-tenancy.md) | Multi-tenancy | ro | multi-tenancy |
 | [oauth-mcp](./active/tenancy/oauth-mcp.md) | OAuth 2.1 for MCP clients | ro | 0050 |
 | [observability](./active/pipeline/observability.md) | Observability | ro | observability-and-cost-tracking |

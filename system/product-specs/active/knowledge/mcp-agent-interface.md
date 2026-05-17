@@ -10,7 +10,7 @@ last_verified_at: 2026-05-17
 summary: Let external agents connect, impersonate, and drive Coder via MCP.
 served_by_designs: [mcp-agent-interface-design]
 related_specs: [admin-panel, audit-log, impersonation, knowledge-api, multi-tenancy, oauth-mcp, service-accounts, task-orchestration]
-parent: tenancy-and-access
+parent: knowledge-and-admin
 ---
 
 # MCP agent interface
@@ -99,20 +99,20 @@ under an admin token for fleet-wide work.
 
 ## Dependencies
 
-- [impersonation](./impersonation.md) — the broker mints role-scoped
-  JWTs that MCP returns from the `impersonate` tool.
-- [service-accounts](./service-accounts.md) — admin JWT issuance and
-  per-role identity carry through to MCP auth.
-- [audit-log](./audit-log.md) — every mutation lands here with
-  `actor_method='mcp'`.
-- [multi-tenancy](./multi-tenancy.md) — project scoping middleware
-  gates both HTTP and MCP paths.
+- [impersonation](../tenancy/impersonation.md) — the broker mints
+  role-scoped JWTs that MCP returns from the `impersonate` tool.
+- [service-accounts](../tenancy/service-accounts.md) — admin JWT
+  issuance and per-role identity carry through to MCP auth.
+- [audit-log](../tenancy/audit-log.md) — every mutation lands here
+  with `actor_method='mcp'`.
+- [multi-tenancy](../tenancy/multi-tenancy.md) — project scoping
+  middleware gates both HTTP and MCP paths.
 - [task-orchestration](../pipeline/task-orchestration.md),
-  [knowledge-api](../knowledge/knowledge-api.md) — the underlying read/write
+  [knowledge-api](./knowledge-api.md) — the underlying read/write
   surfaces the tools wrap.
 - The OAuth 2.1 auth-server for clients that can't use bearer headers
   (claude.ai web custom connectors) ships separately —
-  see [oauth-mcp](./oauth-mcp.md).
+  see [oauth-mcp](../tenancy/oauth-mcp.md).
 
 ## Evolution
 
@@ -125,9 +125,12 @@ under an admin token for fleet-wide work.
 ## Links
 
 - Designs: [mcp-agent-interface-design](../../../designs/active/knowledge/mcp-agent-interface-design.md)
-- Related components: [impersonation](./impersonation.md),
-  [service-accounts](./service-accounts.md), [audit-log](./audit-log.md),
-  [admin-panel](../knowledge/admin-panel.md), [multi-tenancy](./multi-tenancy.md),
+- Related components: [impersonation](../tenancy/impersonation.md),
+  [service-accounts](../tenancy/service-accounts.md),
+  [audit-log](../tenancy/audit-log.md),
+  [admin-panel](./admin-panel.md),
+  [multi-tenancy](../tenancy/multi-tenancy.md),
   [task-orchestration](../pipeline/task-orchestration.md),
-  [knowledge-api](../knowledge/knowledge-api.md), [oauth-mcp](./oauth-mcp.md)
+  [knowledge-api](./knowledge-api.md),
+  [oauth-mcp](../tenancy/oauth-mcp.md)
 - Runbook: [mcp-agent-interface-rollout](../../../runbooks/mcp-agent-interface-rollout.md)

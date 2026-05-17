@@ -194,65 +194,58 @@ flowchart LR
   n006("design<br/>tenancy-and-access")
   n007["spec<br/>audit-log"]
   n008["spec<br/>impersonation"]
-  n009["spec<br/>mcp-agent-interface"]
-  n010["spec<br/>multi-tenancy"]
-  n011["spec<br/>oauth-mcp"]
-  n012["spec<br/>secret-rotation"]
-  n013["spec<br/>service-accounts"]
-  n014["spec<br/>tenancy-and-access"]
+  n009["spec<br/>multi-tenancy"]
+  n010["spec<br/>oauth-mcp"]
+  n011["spec<br/>secret-rotation"]
+  n012["spec<br/>service-accounts"]
+  n013["spec<br/>tenancy-and-access"]
   n007 -->|served by| n000
   n000 -.->|related| n002
   n001 -.->|related| n002
   n001 -.->|related| n000
   n002 -.->|related| n000
-  n010 -->|served by| n003
+  n009 -->|served by| n003
   n003 -.->|related| n006
   n003 -.->|related| n002
   n003 -.->|related| n000
   n004 -.->|related| n002
   n004 -.->|related| n000
-  n013 -->|served by| n005
+  n012 -->|served by| n005
   n005 -.->|related| n006
   n005 -.->|related| n002
   n005 -.->|related| n003
   n005 -.->|related| n000
-  n014 -->|served by| n006
+  n013 -->|served by| n006
   n006 -.->|related| n002
   n006 -.->|related| n000
   n007 -->|served by| n000
   n007 -.->|related| n008
-  n007 -.->|related| n013
+  n007 -.->|related| n012
   n008 -->|served by| n002
   n008 -.->|related| n007
-  n008 -.->|related| n010
-  n008 -.->|related| n013
+  n008 -.->|related| n009
+  n008 -.->|related| n012
   n009 -.->|related| n007
   n009 -.->|related| n008
-  n009 -.->|related| n010
-  n009 -.->|related| n011
-  n009 -.->|related| n013
-  n010 -.->|related| n007
+  n009 -.->|related| n012
+  n010 -->|served by| n004
   n010 -.->|related| n008
-  n010 -.->|related| n013
-  n011 -->|served by| n004
-  n011 -.->|related| n008
+  n010 -.->|related| n007
+  n011 -.->|related| n012
   n011 -.->|related| n007
-  n012 -.->|related| n013
+  n011 -.->|related| n009
+  n011 -.->|related| n008
   n012 -.->|related| n007
-  n012 -.->|related| n010
   n012 -.->|related| n008
+  n012 -.->|related| n009
+  n013 -->|served by| n002
+  n013 -->|served by| n000
   n013 -.->|related| n007
   n013 -.->|related| n008
+  n013 -.->|related| n009
   n013 -.->|related| n010
-  n014 -->|served by| n002
-  n014 -->|served by| n000
-  n014 -.->|related| n007
-  n014 -.->|related| n008
-  n014 -.->|related| n009
-  n014 -.->|related| n010
-  n014 -.->|related| n011
-  n014 -.->|related| n012
-  n014 -.->|related| n013
+  n013 -.->|related| n011
+  n013 -.->|related| n012
 ```
 
 ## Knowledge & admin
@@ -281,7 +274,8 @@ flowchart LR
   n019["spec<br/>knowledge-freshness"]
   n020["spec<br/>knowledge-schema-migration"]
   n021["spec<br/>managed-workflows"]
-  n022["spec<br/>onboarding"]
+  n022["spec<br/>mcp-agent-interface"]
+  n023["spec<br/>onboarding"]
   n014 -->|served by| n000
   n000 -.->|related| n008
   n001 -.->|related| n008
@@ -314,7 +308,7 @@ flowchart LR
   n010 -.->|related| n008
   n011 -.->|related| n006
   n011 -.->|related| n008
-  n022 -->|served by| n012
+  n023 -->|served by| n012
   n012 -.->|related| n006
   n012 -.->|related| n008
   n013 -.->|related| n008
@@ -325,7 +319,7 @@ flowchart LR
   n015 -.->|related| n018
   n015 -.->|related| n019
   n015 -.->|related| n021
-  n015 -.->|related| n022
+  n015 -.->|related| n023
   n016 -.->|related| n018
   n016 -.->|related| n014
   n016 -.->|related| n019
@@ -339,7 +333,7 @@ flowchart LR
   n017 -.->|related| n019
   n017 -.->|related| n020
   n017 -.->|related| n021
-  n017 -.->|related| n022
+  n017 -.->|related| n023
   n018 -->|served by| n006
   n018 -->|served by| n007
   n018 -->|served by| n008
@@ -350,15 +344,18 @@ flowchart LR
   n019 -.->|related| n018
   n019 -.->|related| n014
   n020 -.->|related| n018
-  n020 -.->|related| n022
+  n020 -.->|related| n023
   n020 -.->|related| n014
   n020 -.->|related| n019
   n021 -.->|related| n018
-  n021 -.->|related| n022
+  n021 -.->|related| n023
   n021 -.->|related| n014
+  n022 -->|served by| n010
   n022 -.->|related| n014
   n022 -.->|related| n018
-  n022 -.->|related| n020
+  n023 -.->|related| n014
+  n023 -.->|related| n018
+  n023 -.->|related| n020
 ```
 
 ## Delivery & infra

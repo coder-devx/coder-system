@@ -62,7 +62,6 @@ How one Coder deployment serves many projects without crossing wires and attribu
 - [audit-log](./product-specs/active/tenancy/audit-log.md) (spec) · [audit-log](./designs/active/tenancy/audit-log.md) (design) — Every mutation recorded with actor, action, before, after.
 - [automated-secret-rotation](./designs/active/tenancy/automated-secret-rotation.md) (design) — Scheduled, audited rotation of project secrets.
 - [impersonation](./product-specs/active/tenancy/impersonation.md) (spec) · [impersonation](./designs/active/tenancy/impersonation.md) (design) — Short-lived role-scoped bearer tokens for worker actions.
-- [mcp-agent-interface](./product-specs/active/tenancy/mcp-agent-interface.md) (spec) — Let external agents connect, impersonate, and drive Coder via MCP.
 - [multi-tenancy](./product-specs/active/tenancy/multi-tenancy.md) (spec) · [multi-tenancy](./designs/active/tenancy/multi-tenancy.md) (design) — project_id everywhere invariant — no cross-tenant data access.
 - [oauth-mcp](./product-specs/active/tenancy/oauth-mcp.md) (spec) — OAuth 2.1 (auth-code + PKCE + DCR) for MCP clients.
 - [oauth-mcp-clients](./designs/active/tenancy/oauth-mcp-clients.md) (design) — OAuth 2.1 (auth-code + PKCE + DCR) for MCP clients over Google as upstream IdP.
@@ -90,6 +89,7 @@ How a project's knowledge is read, written, kept current, and surfaced to operat
   - [knowledge-write-api](./designs/active/knowledge/knowledge-write-api.md) (design) — HTTP write surface for the knowledge repo.
 - [managed-repo-action-distribution](./designs/active/knowledge/managed-repo-action-distribution.md) (design) — Distribute and verify managed GitHub Actions across the fleet.
 - [managed-workflows](./product-specs/active/knowledge/managed-workflows.md) (spec) — Distribute and version managed GitHub Actions across the fleet.
+- [mcp-agent-interface](./product-specs/active/knowledge/mcp-agent-interface.md) (spec) — Let external agents connect, impersonate, and drive Coder via MCP.
 - [mcp-agent-interface-design](./designs/active/knowledge/mcp-agent-interface-design.md) (design) — MCP surface — let external agents connect, impersonate, and drive Coder.
 - [onboarding](./product-specs/active/knowledge/onboarding.md) (spec) · [onboarding](./designs/active/knowledge/onboarding.md) (design) — How a new project gets wired into Coder.
 - [template-schema-migration](./designs/active/knowledge/template-schema-migration.md) (design) — Migrate managed-project knowledge repos when the template schema changes.

@@ -91,7 +91,12 @@ Team Manager, Developer, and Reviewer all read against them.
    `## Acceptance criteria` · `## Metrics` · `## Open questions` ·
    `## Links`. An active body uses `## What it is` · `## Capabilities` ·
    `## Interfaces` · `## Dependencies` · `## Evolution` (1–3 lines max) ·
-   `## Links` — or, for a category rollup, the `type: index` shape
+   `## Links`. Two optional active sections sit between `Interfaces`
+   and `Dependencies`: `## Invariants` (hard contracts the running
+   component maintains — use when not obvious from Capabilities) and
+   `## Configuration` (live operator knobs — env vars, per-project
+   columns, weights — use when there are more than 1-2 knobs worth
+   naming). For a category rollup use the `type: index` shape instead
    (`## What this category covers` · `## Components` · `## Cross-cutting
    concerns` · `## Links`). A WIP-shape section sitting in an active
    file (a stray `## Problem` or `## Acceptance criteria`) is the

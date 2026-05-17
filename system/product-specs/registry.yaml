@@ -391,15 +391,19 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/tenancy/mcp-agent-interface.md
+  file: active/knowledge/mcp-agent-interface.md
+  served_by_designs:
+  - mcp-agent-interface-design
   related_specs:
-  - impersonation
-  - service-accounts
-  - audit-log
   - admin-panel
-  - multi-tenancy
-  - task-orchestration
+  - audit-log
+  - impersonation
   - knowledge-api
+  - multi-tenancy
+  - oauth-mcp
+  - service-accounts
+  - task-orchestration
+  parent: knowledge-and-admin
 - id: oauth-mcp
   title: OAuth 2.1 for MCP clients
   status: active
