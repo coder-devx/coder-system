@@ -299,7 +299,11 @@ def check_active_not_numbered(section_root: Path) -> None:
         active = section_root / folder_name / "active"
         if not active.is_dir():
             continue
-        for md in active.glob("*.md"):
+        # Recurse: per design 0095 Phase 7, active designs live in
+        # category subfolders (active/<category>/<slug>.md). Top-level
+        # rollups stay flat. The "no numeric prefix" rule applies to
+        # every active design regardless of nesting.
+        for md in active.rglob("*.md"):
             if md.name in SKIP_FILENAMES:
                 continue
             stem = md.stem
@@ -750,6 +754,44 @@ def check_template_optional_fields() -> None:
                 )
 
 
+def check_active_design_code_anchors(section_root: Path) -> None:
+    """Active designs that include a ``## Where in code`` section must
+    cite code by symbol, not by line number.
+
+    Lines shift on every refactor in ``coder-core``; designs live in
+    ``coder-system``. No commit touches both atomically, so a
+    ``path.ext:N`` anchor silently rots on every unrelated PR over
+    there. Symbol names only change on rename — a much rarer event
+    that's a natural trigger to revisit the doc.
+
+    The check fires only inside a ``## Where in code`` section and
+    only against backticked spans, so unrelated prose elsewhere in a
+    design (rollout dates, references to other docs) is unaffected.
+    """
+    import re as _re
+
+    designs_active = section_root / "designs" / "active"
+    if not designs_active.is_dir():
+        return
+    bad = _re.compile(r"`[^`]*\.(?:py|ts|tsx|sql|yaml|yml|json|md):\d+[^`]*`")
+    for path in designs_active.rglob("*.md"):
+        if path.name in SKIP_FILENAMES:
+            continue
+        in_anchors = False
+        for lineno, line in enumerate(
+            path.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            stripped = line.strip()
+            if stripped.startswith("## "):
+                in_anchors = stripped.lower() == "## where in code"
+                continue
+            if in_anchors and bad.search(line):
+                err(
+                    f"{path}:{lineno}: code anchors must cite by symbol, "
+                    "not by line number (see designs/_TEMPLATE.md)"
+                )
+
+
 def main() -> int:
     validate_section(REPO_ROOT / "system",   "system")
     validate_section(REPO_ROOT / "template", "template")
@@ -760,6 +802,7 @@ def main() -> int:
             check_shared_id_parents_match(root)
             check_lifecycle_consistency(root)
             check_parent_resolves(root)
+            check_active_design_code_anchors(root)
     check_registry_md_synced()
     check_index_md_synced()
     check_graph_md_synced()

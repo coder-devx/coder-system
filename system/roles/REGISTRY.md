@@ -38,7 +38,7 @@
 
 Every role lives at `<role-id>/role.md`. The dispatcher assembles
 worker prompts as `_common.md + <role>/role.md + <role>/tasks/<mode>.md`
-(design [role-prompt-knowledge-layout](../designs/active/role-prompt-knowledge-layout.md)).
+(design [role-prompt-knowledge-layout](../designs/active/workers/role-prompt-knowledge-layout.md)).
 
 A shared `_common.md` is prepended to every worker prompt at runtime,
 establishing the Coder System mission and where the role sits on the

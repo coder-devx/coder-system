@@ -143,9 +143,9 @@ checks, and actor attribution.
 
 ## Links
 
-- Designs: [knowledge-write-api](../../designs/active/knowledge-write-api.md),
-  [knowledge-repo-model](../../designs/active/knowledge-repo-model.md),
-  [knowledge-stack](../../designs/active/knowledge-stack.md)
+- Designs: [knowledge-write-api](../../designs/active/knowledge/knowledge-write-api.md),
+  [knowledge-repo-model](../../designs/active/knowledge/knowledge-repo-model.md),
+  [knowledge-stack](../../designs/active/knowledge/knowledge-stack.md)
 - Related components: [multi-tenancy](./multi-tenancy.md),
   [admin-panel](./admin-panel.md),
   [knowledge-freshness](./knowledge-freshness.md),

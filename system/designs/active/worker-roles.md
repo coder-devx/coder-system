@@ -61,6 +61,22 @@ Reviewer is a distinct role from Product Manager per
 [ADR 0007](../../adrs/0007-reviewer-separated-from-pm.md): code review
 (technical quality) is separated from product acceptance (product fit).
 
+### Per-role designs
+
+Each role has its own design covering what it produces, what it reads,
+and how it composes with the others:
+
+- [architect-worker](./workers/architect-worker.md) — produces designs + ADRs from approved specs.
+- [pm-worker](./workers/pm-worker.md) — owns spec drafts and acceptance verdicts.
+- [team-manager-worker](./workers/team-manager-worker.md) — decomposes design + spec into developer tasks.
+- [developer-worker](./workers/developer-worker.md) — implements tasks; runs the test → fix → PR loop.
+- [reviewer-worker](./workers/reviewer-worker.md) — technical-quality gate before PM acceptance.
+
+### Cross-role infrastructure
+
+- [worker-auth-env](./workers/worker-auth-env.md) — per-task Claude credential resolution; explicit clear-other env hygiene.
+- [role-prompt-knowledge-layout](./workers/role-prompt-knowledge-layout.md) — per-role system prompts live in the knowledge repo at `roles/{role}/tasks/{mode}.md`; cached prefix per (role, mode).
+
 ### Data flow
 
 1. A task arrives carrying `role` and `project_id`.

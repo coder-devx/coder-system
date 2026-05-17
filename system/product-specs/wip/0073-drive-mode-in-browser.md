@@ -20,7 +20,7 @@ parent: ~
 
 ## Problem
 
-The active design [`impersonation.md`](../../designs/active/impersonation.md)
+The active design [`impersonation.md`](../../designs/active/tenancy/impersonation.md)
 describes a system where the operator can take over any role in any
 project. In practice today, taking over a role requires the
 `coder impersonate <role> --project=X` CLI plus a local Claude Code

@@ -29,15 +29,27 @@ ever emit `artifact_type: "design"` (the schema enforces this).
   ship draft`.
 
 The active bodies are *not* preloaded. Fetch the ones the WIP's
-content actually overlaps with:
+content actually overlaps with. **Per design 0095 Phase 7, active
+designs live in `active/<category>/<slug>.md`** — rollups stay flat
+at `active/`, leaves are nested under one of `pipeline/`, `workers/`,
+`tenancy/`, `knowledge/`, `delivery/`.
 
 ```bash
-# enumerate active designs (titles + slugs)
+# enumerate active design rollups (flat)
 gh api "repos/{org}/{repo}/contents/system/designs/active" --jq '.[].name'
 
+# enumerate leaves under one category
+gh api "repos/{org}/{repo}/contents/system/designs/active/pipeline" --jq '.[].name'
+
 # read the body of one whose surface this WIP extends
-gh api "repos/{org}/{repo}/contents/system/designs/active/{slug}.md" --jq '.content' | base64 -d
+gh api "repos/{org}/{repo}/contents/system/designs/active/pipeline/{slug}.md" --jq '.content' | base64 -d
 ```
+
+The ship workflow routes each merged active file into its category
+folder based on `parent:` in the WIP frontmatter (e.g. `parent:
+pipeline-operations` → `active/pipeline/<slug>.md`). You only need
+to set `parent:` correctly on `action: "create"` merges — the
+workflow handles the path.
 
 ## How to merge a WIP design into active/
 

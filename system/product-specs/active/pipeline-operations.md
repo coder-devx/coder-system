@@ -51,8 +51,8 @@ paged when automation can't continue.
 
 ## Links
 
-- Designs: [worker-communication](../../designs/active/worker-communication.md),
-  [observability-and-cost-tracking](../../designs/active/observability-and-cost-tracking.md),
-  [self-healing](../../designs/active/self-healing.md),
-  [escalations](../../designs/active/escalations.md),
-  [branch-cleanup](../../designs/active/branch-cleanup.md)
+- Designs: [worker-communication](../../designs/active/pipeline/worker-communication.md),
+  [observability-and-cost-tracking](../../designs/active/pipeline/observability-and-cost-tracking.md),
+  [self-healing](../../designs/active/pipeline/self-healing.md),
+  [escalations](../../designs/active/pipeline/escalations.md),
+  [branch-cleanup](../../designs/active/pipeline/branch-cleanup.md)

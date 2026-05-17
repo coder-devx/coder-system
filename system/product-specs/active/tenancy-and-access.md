@@ -59,8 +59,8 @@ did what.
 
 ## Links
 
-- Designs: [impersonation](../../designs/active/impersonation.md),
-  [audit-log](../../designs/active/audit-log.md),
-  [tenant-isolation](../../designs/active/tenant-isolation.md)
+- Designs: [impersonation](../../designs/active/tenancy/impersonation.md),
+  [audit-log](../../designs/active/tenancy/audit-log.md),
+  [tenant-isolation](../../designs/active/delivery/tenant-isolation.md)
 - ADRs: [0005](../../adrs/0005-multi-tenant-coder-core.md),
   [0006](../../adrs/0006-per-role-service-accounts.md)
