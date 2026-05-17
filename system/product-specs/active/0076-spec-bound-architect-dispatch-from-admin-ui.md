@@ -2,7 +2,7 @@
 id: '0076'
 title: Spec-bound architect dispatch from admin UI
 type: spec
-status: wip
+status: active
 owner: ro
 created: '2026-05-10'
 updated: '2026-05-10'

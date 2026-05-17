@@ -17,6 +17,8 @@ How tasks flow reliably through a project's pipeline, stay observable, and recov
 - Spec: [pipeline-operations](./product-specs/active/pipeline-operations.md)
 - Design: [pipeline-operations](./designs/active/pipeline-operations.md)
 
+- [0076](./product-specs/active/0076-spec-bound-architect-dispatch-from-admin-ui.md) (spec)
+- [0078](./product-specs/active/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md) (spec)
 - [branch-cleanup](./product-specs/active/branch-cleanup.md) (spec) · [branch-cleanup](./designs/active/pipeline/branch-cleanup.md) (design) — Automatic GC of stale Developer feature branches.
 - [confidence-auto-approval](./designs/active/pipeline/confidence-auto-approval.md) (design) — Confidence-scored auto-approval for low-risk worker outputs.
 - [cost-regression-alerts](./designs/active/pipeline/cost-regression-alerts.md) (design) — Alerts for prompt and per-task cost regressions.

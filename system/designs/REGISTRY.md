@@ -70,7 +70,9 @@ Logical components of the Coder system as it exists today.
 | [0072](./wip/0072-task-replay-and-diagnostics.md) | Task replay and diagnostic surface | ro | [0072](../product-specs/wip/0072-task-replay-and-diagnostics.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
 | [0073](./wip/0073-drive-mode-in-browser.md) | Drive mode — operator role takeover in the browser | ro | [0073](../product-specs/wip/0073-drive-mode-in-browser.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
 | [0075](./wip/0075-studio-architecture.md) | Studio Architecture | ro | — | — |
+| [0076](./wip/0076-spec-bound-architect-dispatch.md) | Spec-bound Architect Dispatch | ro | — | — |
 | [0077](./wip/0077-coder-studio-founder-role-phase-a.md) | Coder Studio — Founder Role Phase A | ro | — | — |
+| [0078](./wip/0078-spec-run-lifecycle-auto-bootstrap.md) | Spec-Run Lifecycle Auto-Bootstrap | ro | — | — |
 | [0079](./wip/0079-coder-product-template-repo-contract.md) | Coder Product Template Repo Contract | ro | — | — |
 | [0080](./wip/0080-studio-stripe-posthog-integration.md) | Studio Stripe Connect and PostHog Integration | ro | — | — |
 | [0081](./wip/0081-dispatcher-re-kick-for-tasks-stuck-at-queued-executing.md) | Dispatcher re-kick for tasks stuck at queued/executing | ro | — | — |

@@ -9,20 +9,25 @@ Mermaid notation: `[spec]` rectangle, `(design)` rounded. Solid `-->` is `served
 ```mermaid
 flowchart LR
   n000("design<br/>pipeline-operations")
-  n001["spec<br/>branch-cleanup"]
-  n002["spec<br/>escalations"]
-  n003["spec<br/>observability"]
-  n004["spec<br/>pipeline-operations"]
-  n005["spec<br/>self-healing"]
-  n006["spec<br/>task-orchestration"]
-  n004 -->|served by| n000
-  n001 -.->|related| n006
-  n001 -.->|related| n003
-  n002 -.->|related| n006
-  n002 -.->|related| n003
-  n005 -.->|related| n006
-  n005 -.->|related| n003
-  n005 -.->|related| n002
+  n001["spec<br/>0076"]
+  n002["spec<br/>0078"]
+  n003["spec<br/>branch-cleanup"]
+  n004["spec<br/>escalations"]
+  n005["spec<br/>observability"]
+  n006["spec<br/>pipeline-operations"]
+  n007["spec<br/>self-healing"]
+  n008["spec<br/>task-orchestration"]
+  n006 -->|served by| n000
+  n001 -.->|related| n008
+  n002 -.->|related| n001
+  n002 -.->|related| n008
+  n003 -.->|related| n008
+  n003 -.->|related| n005
+  n004 -.->|related| n008
+  n004 -.->|related| n005
+  n007 -.->|related| n008
+  n007 -.->|related| n005
+  n007 -.->|related| n004
 ```
 
 ## Worker roles

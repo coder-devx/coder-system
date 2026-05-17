@@ -2,7 +2,7 @@
 id: 0078
 title: Spec-run lifecycle auto-bootstrap for fresh WIP specs
 type: spec
-status: wip
+status: active
 owner: ro
 created: '2026-05-10'
 updated: '2026-05-10'

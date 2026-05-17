@@ -9,6 +9,8 @@ in each component's `## Evolution` section and in git.
 
 | Slug | Title | Owner | Served by designs |
 |---|---|---|---|
+| [0076-spec-bound-architect-dispatch-from-admin-ui](./active/0076-spec-bound-architect-dispatch-from-admin-ui.md) | Spec-bound architect dispatch from admin UI | ro | — |
+| [0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs](./active/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md) | Spec-run lifecycle auto-bootstrap for fresh WIP specs | ro | — |
 | [admin-panel](./active/admin-panel.md) | Admin Panel | ro | admin-panel |
 | [architect-worker](./active/architect-worker.md) | Architect Worker | ro | architect-worker |
 | [audit-log](./active/audit-log.md) | Audit log | ro | audit-log |
@@ -53,9 +55,7 @@ in each component's `## Evolution` section and in git.
 | [0073](./wip/0073-drive-mode-in-browser.md) | Drive mode — operator role takeover in the browser | ro | [0073](../designs/wip/0073-drive-mode-in-browser.md) |
 | [0074](./wip/0074-spec-compose-write-endpoint.md) | SpecCompose write endpoint and draft hand-off to Now | ro | — |
 | [0075](./wip/0075-coder-studio-b2c-product-portfolio-operator-contract.md) | Coder Studio — B2C product portfolio operator contract | ro | — |
-| [0076](./wip/0076-spec-bound-architect-dispatch-from-admin-ui.md) | Spec-bound architect dispatch from admin UI | ro | — |
 | [0077](./wip/0077-coder-studio-founder-role-phase-a.md) | Coder Studio — Founder role Phase A | ro | — |
-| [0078](./wip/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md) | Spec-run lifecycle auto-bootstrap for fresh WIP specs | ro | — |
 | [0079](./wip/0079-coder-studio-coder-product-template-repo-contract.md) | Coder Studio — coder-product-template repo contract | ro | — |
 | [0080](./wip/0080-coder-studio-stripe-connect-and-posthog-integration-in-coder-core.md) | Coder Studio — Stripe Connect and PostHog integration in coder-core | ro | — |
 | [0083](./wip/0083-plan-unblock-checks-retry-chain.md) | Plan-unblock check accounts for retry chain, not just original task's stage | ro | — |
