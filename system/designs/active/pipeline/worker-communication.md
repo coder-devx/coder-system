@@ -197,6 +197,6 @@ Endpoints:
 
 ## Links
 
-- Specs: [`0015`](../../product-specs/wip/0015-worker-communication.md)
+- Specs: [`0015`](../../../product-specs/wip/0015-worker-communication.md)
 - Designs: system-overview, team-manager-worker, pm-worker
 - Services: `coder-core`, `coder-admin`

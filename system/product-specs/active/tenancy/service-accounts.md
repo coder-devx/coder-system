@@ -94,8 +94,8 @@ into every token) and in IAM (per-secret bindings on
 
 ## Links
 
-- Designs: [worker-roles](../../designs/active/worker-roles.md),
-  [tenancy-and-access](../../designs/active/tenancy-and-access.md)
+- Designs: [worker-roles](../../../designs/active/worker-roles.md),
+  [tenancy-and-access](../../../designs/active/tenancy-and-access.md)
 - Related components: [impersonation](./impersonation.md),
   [multi-tenancy](./multi-tenancy.md),
   [tenant-isolation](../delivery/tenant-isolation.md),

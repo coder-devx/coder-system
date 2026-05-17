@@ -77,8 +77,8 @@ Coder-generated noise without an operator ever reaching for
 
 ## Links
 
-- Design: [branch-cleanup](../../designs/active/pipeline/branch-cleanup.md)
-- Runbook: [branch-gc](../../runbooks/branch-gc.md)
+- Design: [branch-cleanup](../../../designs/active/pipeline/branch-cleanup.md)
+- Runbook: [branch-gc](../../../runbooks/branch-gc.md)
 - Related components: [developer-worker](../workers/developer-worker.md),
   [task-orchestration](./task-orchestration.md),
   [observability](./observability.md)

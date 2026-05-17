@@ -28,7 +28,7 @@ parent: pipeline-operations
 
 ## Context
 
-See [spec 0056](../../product-specs/wip/0056-worker-dispatch-durability.md)
+See [spec 0056](../../../product-specs/wip/0056-worker-dispatch-durability.md)
 for the empirical signal that surfaced this. Short version: today's
 worker dispatch path runs the role-specific worker subprocess
 (`claude` CLI) as a child of the `coder-core` HTTP service instance

@@ -75,14 +75,14 @@ flowchart TB
   `tasks.transient_retry_history` (migration 0021) so the admin
   panel renders a "recovered after N transient retries" chip. The
   per-task deadline path (`TaskStatus.TIMED_OUT`) is distinct and
-  not retried — see ADR [0013](../../adrs/0013-worker-level-transient-retry.md).
+  not retried — see ADR [0013](../../../adrs/0013-worker-level-transient-retry.md).
 - **PR URL reconcile (orchestrator-side, spec 0054).** When the
   worker stdout omits the PR URL but the developer task otherwise
   succeeded, the orchestrator queries GitHub for the just-pushed
   branch's PR and patches `tasks.pr_url` itself — gated by
   `CODER_ORCHESTRATOR_PR_URL_RECONCILE_ENABLED`. The bot-identity
   check uses `pr.user.type == 'Bot'`, not login-match, per
-  ADR [0016](../../adrs/0016-bot-identity-via-user-type.md).
+  ADR [0016](../../../adrs/0016-bot-identity-via-user-type.md).
 - **Dispatcher registration.** `_RUNNERS["developer"] =
   run_developer_task` in the dispatcher; the
   `WorkerDispatcher` protocol (`coder_core/contracts.py`) is the
@@ -155,12 +155,12 @@ flowchart TB
 
 ## Links
 
-- Specs: [developer-worker](../../product-specs/active/developer-worker.md),
-  [task-orchestration](../../product-specs/active/task-orchestration.md),
-  [branch-cleanup](../../product-specs/active/branch-cleanup.md)
+- Specs: [developer-worker](../../../product-specs/active/developer-worker.md),
+  [task-orchestration](../../../product-specs/active/task-orchestration.md),
+  [branch-cleanup](../../../product-specs/active/branch-cleanup.md)
 - Designs: [worker-roles](../worker-roles.md),
   [worker-communication](../pipeline/worker-communication.md),
   [branch-cleanup](../pipeline/branch-cleanup.md)
-- ADRs: [0013](../../adrs/0013-worker-level-transient-retry.md),
-  [0016](../../adrs/0016-bot-identity-via-user-type.md)
+- ADRs: [0013](../../../adrs/0013-worker-level-transient-retry.md),
+  [0016](../../../adrs/0016-bot-identity-via-user-type.md)
 - Services: `coder-core`

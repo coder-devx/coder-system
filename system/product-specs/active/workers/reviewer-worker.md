@@ -150,7 +150,7 @@ developer-produced PR and a human-facing merge decision.
 
 ## Links
 
-- Designs: [worker-roles](../../designs/active/worker-roles.md)
+- Designs: [worker-roles](../../../designs/active/worker-roles.md)
 - Related components: [developer-worker](./developer-worker.md),
   [pm-worker](./pm-worker.md), [knowledge-api](../knowledge/knowledge-api.md),
   [task-orchestration](../pipeline/task-orchestration.md),

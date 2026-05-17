@@ -144,7 +144,7 @@ flowchart TB
 
 ## Links
 
-- Specs: [continuous-deployment](../../product-specs/active/continuous-deployment.md)
+- Specs: [continuous-deployment](../../../product-specs/active/continuous-deployment.md)
 - Designs: [system-overview](../system-overview.md),
   [observability-and-cost-tracking](../pipeline/observability-and-cost-tracking.md),
   [audit-log](../tenancy/audit-log.md)

@@ -117,8 +117,8 @@ dependency order.
 
 ## Links
 
-- Designs: [team-manager-worker](../../designs/active/workers/team-manager-worker.md),
-  [worker-roles](../../designs/active/worker-roles.md)
+- Designs: [team-manager-worker](../../../designs/active/workers/team-manager-worker.md),
+  [worker-roles](../../../designs/active/worker-roles.md)
 - Related components: [pm-worker](./pm-worker.md),
   [architect-worker](./architect-worker.md),
   [developer-worker](./developer-worker.md),

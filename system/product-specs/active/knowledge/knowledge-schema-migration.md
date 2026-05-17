@@ -128,7 +128,7 @@ system.
 
 ## Links
 
-- Design: [0047-template-schema-migration](../../designs/wip/0047-template-schema-migration.md)
+- Design: [0047-template-schema-migration](../../../designs/wip/0047-template-schema-migration.md)
   (WIP; link to active once design ships).
 - Related specs: [knowledge-api](./knowledge-api.md),
   [onboarding](./onboarding.md), [admin-panel](./admin-panel.md),

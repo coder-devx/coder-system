@@ -124,10 +124,10 @@ under an admin token for fleet-wide work.
 
 ## Links
 
-- Designs: [mcp-agent-interface-design](../../designs/active/knowledge/mcp-agent-interface-design.md)
+- Designs: [mcp-agent-interface-design](../../../designs/active/knowledge/mcp-agent-interface-design.md)
 - Related components: [impersonation](./impersonation.md),
   [service-accounts](./service-accounts.md), [audit-log](./audit-log.md),
   [admin-panel](../knowledge/admin-panel.md), [multi-tenancy](./multi-tenancy.md),
   [task-orchestration](../pipeline/task-orchestration.md),
   [knowledge-api](../knowledge/knowledge-api.md), [oauth-mcp](./oauth-mcp.md)
-- Runbook: [mcp-agent-interface-rollout](../../runbooks/mcp-agent-interface-rollout.md)
+- Runbook: [mcp-agent-interface-rollout](../../../runbooks/mcp-agent-interface-rollout.md)

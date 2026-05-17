@@ -63,7 +63,7 @@ without SSH.
   other. The budget-soft alert
   (`alert_type=f"budget_soft_{project}_{yyyymm}"`) dedups per
   calendar month. Runbook:
-  [`cache-hit-drop`](../../runbooks/cache-hit-drop.md).
+  [`cache-hit-drop`](../../../runbooks/cache-hit-drop.md).
 - **Admin dashboard.** `/metrics` route with a period selector, summary
   cards, CSS bar charts for daily cost and success rate, and a per-spec
   cost table.
@@ -181,7 +181,7 @@ without SSH.
 
 ## Links
 
-- Designs: [observability-and-cost-tracking](../../designs/active/pipeline/observability-and-cost-tracking.md)
+- Designs: [observability-and-cost-tracking](../../../designs/active/pipeline/observability-and-cost-tracking.md)
 - Related components: [task-orchestration](./task-orchestration.md),
   [knowledge-freshness](../knowledge/knowledge-freshness.md),
   [branch-cleanup](./branch-cleanup.md),

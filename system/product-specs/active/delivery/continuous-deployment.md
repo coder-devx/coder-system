@@ -90,7 +90,7 @@ commands by hand.
 
 ## Links
 
-- Designs: [system-overview](../../designs/active/system-overview.md)
+- Designs: [system-overview](../../../designs/active/system-overview.md)
 - Related components: [observability](../pipeline/observability.md),
   [audit-log](../tenancy/audit-log.md), [onboarding](../knowledge/onboarding.md),
   [escalations](../pipeline/escalations.md)

@@ -204,7 +204,7 @@ flowchart TB
 
 ## Links
 
-- Specs: [audit-log](../../product-specs/active/audit-log.md)
+- Specs: [audit-log](../../../product-specs/active/audit-log.md)
 - Designs: system-overview (middleware slot),
   impersonation (actor chain captured),
   worker-communication (worker-initiated writes reuse

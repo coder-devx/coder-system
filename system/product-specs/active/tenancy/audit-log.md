@@ -149,6 +149,6 @@ an incident timeline, review a peer's actions, or answer a customer's
 
 ## Links
 
-- Designs: [audit-log](../../designs/active/tenancy/audit-log.md)
+- Designs: [audit-log](../../../designs/active/tenancy/audit-log.md)
 - Related components: admin-panel, impersonation, service-accounts,
   task-orchestration, knowledge-api, escalations, self-healing

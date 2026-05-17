@@ -125,7 +125,7 @@ in-flight request fails because of rotation.
 
 ## Links
 
-- Designs: [secret-rotation](../../designs/wip/0038-secret-rotation.md)
+- Designs: [secret-rotation](../../../designs/wip/0038-secret-rotation.md)
 - Related components: [service-accounts](./service-accounts.md),
   [audit-log](./audit-log.md), [admin-panel](../knowledge/admin-panel.md),
   [multi-tenancy](./multi-tenancy.md),

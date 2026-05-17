@@ -176,8 +176,8 @@ Ten steps, in order:
 
 ## Links
 
-- Specs: [onboarding](../../product-specs/active/onboarding.md),
-  [multi-tenancy](../../product-specs/active/multi-tenancy.md)
+- Specs: [onboarding](../../../product-specs/active/onboarding.md),
+  [multi-tenancy](../../../product-specs/active/multi-tenancy.md)
 - Designs: [multi-tenancy](../tenancy/multi-tenancy.md),
   [service-accounts](../tenancy/service-accounts.md),
   [knowledge-repo-model](./knowledge-repo-model.md),

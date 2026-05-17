@@ -29,7 +29,7 @@ and a nightly audit loop that together answer "is this artifact
 still true?" without asking a human to re-read the repo. The scoring
 input set is strictly information artifacts already declare —
 `last_verified_at`, `affects_*` targets, and cross-link fields — per
-[ADR 0014](../../adrs/0014-freshness-from-declared-affects.md).
+[ADR 0014](../../../adrs/0014-freshness-from-declared-affects.md).
 
 ## Architecture
 
@@ -145,7 +145,7 @@ flowchart TB
   `knowledge_freshness_score` gauge that the audit runner refreshes
   at end-of-run per `(project, type)`. A scraper polling the
   metrics endpoint synthesises Prom samples from the JSON.
-- **Runbook.** [`runbooks/knowledge-freshness-audit`](../../runbooks/knowledge-freshness-audit.md)
+- **Runbook.** [`runbooks/knowledge-freshness-audit`](../../../runbooks/knowledge-freshness-audit.md)
   describes the weekly operator pass over the `Needs attention`
   queue and the `uncertain` path.
 
@@ -227,10 +227,10 @@ flowchart TB
 
 ## Links
 
-- Spec: [knowledge-freshness](../../product-specs/active/knowledge-freshness.md).
+- Spec: [knowledge-freshness](../../../product-specs/active/knowledge-freshness.md).
 - ADRs:
-  [0008 — CI validation of the knowledge repo](../../adrs/0008-ci-validation-of-knowledge-repo.md),
-  [0014 — freshness from declared affects, not semantic similarity](../../adrs/0014-freshness-from-declared-affects.md).
+  [0008 — CI validation of the knowledge repo](../../../adrs/0008-ci-validation-of-knowledge-repo.md),
+  [0014 — freshness from declared affects, not semantic similarity](../../../adrs/0014-freshness-from-declared-affects.md).
 - Related designs:
   [knowledge-repo-model](./knowledge-repo-model.md),
   [knowledge-write-api](./knowledge-write-api.md),

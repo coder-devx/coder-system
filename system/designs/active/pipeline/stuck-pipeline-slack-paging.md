@@ -144,4 +144,4 @@ CODER_ADMIN_PANEL_URL=https://coder-admin-<hash>-ew.a.run.app
 
 - Active infra: [escalations](./escalations.md), [self-healing](./self-healing.md),
   [pipeline-operations](../pipeline-operations.md)
-- Spec: [0060](../../product-specs/wip/0060-stuck-pipeline-slack-page-for-on-call-engineers.md)
+- Spec: [0060](../../../product-specs/wip/0060-stuck-pipeline-slack-page-for-on-call-engineers.md)

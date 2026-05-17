@@ -84,7 +84,7 @@ the two live projects running in parallel today.
 
 ## Links
 
-- Designs: [system-overview](../../designs/active/system-overview.md)
+- Designs: [system-overview](../../../designs/active/system-overview.md)
 - Related components: [multi-tenancy](../tenancy/multi-tenancy.md),
   [knowledge-api](./knowledge-api.md),
   [knowledge-schema-migration](./knowledge-schema-migration.md),

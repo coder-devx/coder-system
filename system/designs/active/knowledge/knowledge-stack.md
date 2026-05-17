@@ -22,7 +22,7 @@ served, written, and kept fresh.
 ## What this category covers
 
 Engineering counterpart of the
-[knowledge-and-admin](../../product-specs/active/knowledge-and-admin.md)
+[knowledge-and-admin](../../../product-specs/active/knowledge-and-admin.md)
 spec. Groups the designs that govern knowledge-repo IO from
 coder-core to GitHub and back to workers.
 
@@ -64,7 +64,7 @@ for the tree pattern this organisation follows.
 
 ## Links
 
-- Specs: [knowledge-and-admin](../../product-specs/active/knowledge-and-admin.md),
-  [knowledge-api](../../product-specs/active/knowledge-api.md),
-  [knowledge-freshness](../../product-specs/active/knowledge-freshness.md),
-  [admin-panel](../../product-specs/active/admin-panel.md)
+- Specs: [knowledge-and-admin](../../../product-specs/active/knowledge-and-admin.md),
+  [knowledge-api](../../../product-specs/active/knowledge-api.md),
+  [knowledge-freshness](../../../product-specs/active/knowledge-freshness.md),
+  [admin-panel](../../../product-specs/active/admin-panel.md)

@@ -188,7 +188,7 @@ produces.
 
 ## Links
 
-- Designs: [worker-roles](../../designs/active/worker-roles.md)
+- Designs: [worker-roles](../../../designs/active/worker-roles.md)
 - Related components: [reviewer-worker](./reviewer-worker.md),
   [task-orchestration](../pipeline/task-orchestration.md),
   [branch-cleanup](../pipeline/branch-cleanup.md),

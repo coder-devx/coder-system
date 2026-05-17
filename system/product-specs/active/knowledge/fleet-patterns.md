@@ -139,7 +139,7 @@ browsing and optional worker consultation.
 
 ## Links
 
-- Designs: [fleet-patterns](../../designs/wip/0048-cross-project-patterns.md)
+- Designs: [fleet-patterns](../../../designs/wip/0048-cross-project-patterns.md)
 - Related components: [knowledge-api](./knowledge-api.md),
   [admin-panel](./admin-panel.md),
   [architect-worker](../workers/architect-worker.md),

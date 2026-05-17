@@ -26,7 +26,7 @@ parent: pipeline-operations
 
 ## Context
 
-See [spec 0054](../../product-specs/wip/0054-orchestrator-github-state-reconciliation.md)
+See [spec 0054](../../../product-specs/wip/0054-orchestrator-github-state-reconciliation.md)
 for the problem framing. This design covers the technical shape of the
 reconciliation path. All components are implemented in `coder-core` behind the
 `coder_orchestrator_pr_url_reconcile_enabled` flag (default `False`).
@@ -87,7 +87,7 @@ All components are implemented in `coder-core`:
    `GET /repos/{org}/{repo}/pulls`. Returns a list of open PR dicts.
 6. Filter to worker-authored PRs via `pr["user"]["type"] == "Bot"` — a stable GitHub
    API invariant: `True` for all GitHub App (bot) PRs, `False` for human accounts.
-   See [ADR 0016](../../adrs/0016-bot-identity-via-user-type.md) for why a login-name
+   See [ADR 0016](../../../adrs/0016-bot-identity-via-user-type.md) for why a login-name
    match was rejected (no `bot_login` field in settings; misconfiguration risk;
    `type=Bot` is more robust).
 7. Pick the most recently created from the bot-authored list (sort by `created_at` desc,
@@ -151,7 +151,7 @@ All components are implemented in `coder-core`:
 
 ## Open questions
 
-Inherited from spec — see [spec 0054 § Open questions](../../product-specs/wip/0054-orchestrator-github-state-reconciliation.md#open-questions).
+Inherited from spec — see [spec 0054 § Open questions](../../../product-specs/wip/0054-orchestrator-github-state-reconciliation.md#open-questions).
 
 ## Rollout
 
@@ -179,8 +179,8 @@ Inherited from spec — see [spec 0054 § Open questions](../../product-specs/wi
 
 ## Links
 
-- Spec: [0054](../../product-specs/wip/0054-orchestrator-github-state-reconciliation.md)
-- ADR: [0016 — bot-identity-via-user-type](../../adrs/0016-bot-identity-via-user-type.md)
+- Spec: [0054](../../../product-specs/wip/0054-orchestrator-github-state-reconciliation.md)
+- ADR: [0016 — bot-identity-via-user-type](../../../adrs/0016-bot-identity-via-user-type.md)
 - Related designs:
   [worker-roles](../worker-roles.md),
   [worker-communication](./worker-communication.md)

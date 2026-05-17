@@ -153,6 +153,6 @@ flowchart TB
 
 ## Links
 
-- Specs: [`0018`](../../product-specs/wip/0018-observability-and-cost-tracking.md)
+- Specs: [`0018`](../../../product-specs/wip/0018-observability-and-cost-tracking.md)
 - Designs: system-overview
 - Services: `coder-core`, `coder-admin`

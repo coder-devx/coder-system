@@ -148,7 +148,7 @@ docstrings → designs, commit rationale → ADRs, repeated domain nouns
 
 ## Links
 
-- Design: [cold-start-ingestion](../../designs/wip/0045-cold-start-ingestion.md)
+- Design: [cold-start-ingestion](../../../designs/wip/0045-cold-start-ingestion.md)
 - Related specs: [onboarding](./onboarding.md),
   [architect-worker](../workers/architect-worker.md),
   [knowledge-api](./knowledge-api.md),

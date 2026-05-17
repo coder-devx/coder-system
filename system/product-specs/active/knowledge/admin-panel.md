@@ -126,7 +126,7 @@ views, per-feature `VITE_*_ENABLED` flags for hotfix rollback.
 
 ## Links
 
-- Designs: [system-overview](../../designs/active/system-overview.md)
+- Designs: [system-overview](../../../designs/active/system-overview.md)
 - Related components: [multi-tenancy](../tenancy/multi-tenancy.md),
   [knowledge-api](./knowledge-api.md), [audit-log](../tenancy/audit-log.md),
   [escalations](../pipeline/escalations.md), [observability](../pipeline/observability.md),

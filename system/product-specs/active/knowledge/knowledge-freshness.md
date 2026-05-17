@@ -29,7 +29,7 @@ for a three-way verdict; a visible "Needs attention" queue surfaces
 the verdicts operators should triage.
 
 Freshness is distinct from schema integrity (validated by CI,
-[ADR 0008](../../adrs/0008-ci-validation-of-knowledge-repo.md)) and
+[ADR 0008](../../../adrs/0008-ci-validation-of-knowledge-repo.md)) and
 from write-through enforcement (spec 0044). Integrity answers "does
 the file parse?"; write-through prevents one specific cause of rot at
 ship time; freshness answers "is the file still true?" regardless of
@@ -153,7 +153,7 @@ cause.
 
 ## Links
 
-- Design: [knowledge-freshness](../../designs/active/knowledge/knowledge-freshness.md).
+- Design: [knowledge-freshness](../../../designs/active/knowledge/knowledge-freshness.md).
 - Related specs:
   [knowledge-api](./knowledge-api.md),
   [architect-worker](../workers/architect-worker.md),
@@ -161,6 +161,6 @@ cause.
   [admin-panel](./admin-panel.md),
   [observability](../pipeline/observability.md).
 - ADRs:
-  [0008 — CI validation of the knowledge repo](../../adrs/0008-ci-validation-of-knowledge-repo.md),
-  [0014 — freshness from declared affects, not semantic similarity](../../adrs/0014-freshness-from-declared-affects.md).
-- Runbook: [knowledge-freshness-audit](../../runbooks/knowledge-freshness-audit.md).
+  [0008 — CI validation of the knowledge repo](../../../adrs/0008-ci-validation-of-knowledge-repo.md),
+  [0014 — freshness from declared affects, not semantic similarity](../../../adrs/0014-freshness-from-declared-affects.md).
+- Runbook: [knowledge-freshness-audit](../../../runbooks/knowledge-freshness-audit.md).

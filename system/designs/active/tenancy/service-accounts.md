@@ -23,7 +23,7 @@ parent: tenancy-and-access
 Every worker role in Coder runs under a dedicated GCP service account
 provisioned by Terraform. The SA-per-role split (architect, developer,
 pm, reviewer, team-manager, sysadmin, escalation-watcher) was decided
-in ADR [0006](../../adrs/0006-per-role-service-accounts.md). Workers
+in ADR [0006](../../../adrs/0006-per-role-service-accounts.md). Workers
 never read static keys: at dispatch time they call the
 [impersonation](./impersonation.md) broker and receive a short-lived
 JWT plus, when running in GCP, an OAuth2 access token minted via the
@@ -96,7 +96,7 @@ flowchart TB
   per-project secret. Hard-fails on `SecretReadError`; a worker
   with no key cannot proceed.
 - **CI capability-matrix gate.** ADR
-  [0008](../../adrs/0008-ci-validation-of-knowledge-repo.md) runs
+  [0008](../../../adrs/0008-ci-validation-of-knowledge-repo.md) runs
   `capability_matrix.py --check` alongside `tofu fmt -check` and
   `tofu validate` on every PR. Drift between `roles.yaml` and
   `CAPABILITY_MATRIX.md` blocks merge.
@@ -151,7 +151,7 @@ flowchart TB
 
 ## Evolution
 
-- ADR [0006](../../adrs/0006-per-role-service-accounts.md) — split
+- ADR [0006](../../../adrs/0006-per-role-service-accounts.md) — split
   into one SA per role rather than one for all workers.
 - 0006 — Terraform module shape (`roles.tf`, `secrets.tf`),
   per-secret IAM bindings, `var.projects`.
@@ -162,13 +162,13 @@ flowchart TB
 
 ## Links
 
-- Specs: [service-accounts](../../product-specs/active/service-accounts.md),
-  [tenancy-and-access](../../product-specs/active/tenancy-and-access.md)
+- Specs: [service-accounts](../../../product-specs/active/service-accounts.md),
+  [tenancy-and-access](../../../product-specs/active/tenancy-and-access.md)
 - Designs: [impersonation](./impersonation.md),
   [tenancy-and-access](../tenancy-and-access.md),
   [multi-tenancy](./multi-tenancy.md),
   [worker-roles](../worker-roles.md),
   [audit-log](./audit-log.md)
-- ADRs: [0006](../../adrs/0006-per-role-service-accounts.md),
-  [0008](../../adrs/0008-ci-validation-of-knowledge-repo.md)
+- ADRs: [0006](../../../adrs/0006-per-role-service-accounts.md),
+  [0008](../../../adrs/0008-ci-validation-of-knowledge-repo.md)
 - Services: `coder-core`

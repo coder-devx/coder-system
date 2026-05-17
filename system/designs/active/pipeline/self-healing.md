@@ -293,7 +293,7 @@ the (already-clean) dogfood project.
 
 ## Links
 
-- Spec: [self-healing](../../product-specs/active/self-healing.md)
+- Spec: [self-healing](../../../product-specs/active/self-healing.md)
 - Related designs: [escalations](./escalations.md),
   [worker-communication](./worker-communication.md),
   [worker-roles](../worker-roles.md),

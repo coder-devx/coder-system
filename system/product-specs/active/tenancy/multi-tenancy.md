@@ -67,8 +67,8 @@ the API boundary, not bolted on later.
 
 ## Links
 
-- Designs: [system-overview](../../designs/active/system-overview.md),
-  [tenancy-and-access](../../designs/active/tenancy-and-access.md)
+- Designs: [system-overview](../../../designs/active/system-overview.md),
+  [tenancy-and-access](../../../designs/active/tenancy-and-access.md)
 - Related components: [knowledge-api](../knowledge/knowledge-api.md),
   [admin-panel](../knowledge/admin-panel.md), [audit-log](./audit-log.md),
   [impersonation](./impersonation.md),

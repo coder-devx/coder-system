@@ -162,5 +162,5 @@ flowchart TB
 
 - Specs: architect-worker, knowledge-api (ship endpoint)
 - Designs: team-manager-worker, pm-worker, knowledge-write-api
-- ADRs: [0015 — ship gate in the Coder pipeline](../../adrs/0015-ship-gate-in-coder-pipeline.md)
+- ADRs: [0015 — ship gate in the Coder pipeline](../../../adrs/0015-ship-gate-in-coder-pipeline.md)
 - Services: `coder-core`

@@ -105,8 +105,8 @@ spec is promoted.
 
 ## Links
 
-- Designs: [pm-worker](../../designs/active/workers/pm-worker.md),
-  [worker-roles](../../designs/active/worker-roles.md)
+- Designs: [pm-worker](../../../designs/active/workers/pm-worker.md),
+  [worker-roles](../../../designs/active/worker-roles.md)
 - Related components: [architect-worker](./architect-worker.md),
   [team-manager-worker](./team-manager-worker.md),
   [knowledge-api](../knowledge/knowledge-api.md),

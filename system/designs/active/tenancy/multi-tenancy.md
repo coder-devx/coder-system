@@ -25,7 +25,7 @@ Every API call, worker run, log line, audit row, SSE event, secret read,
 and database row carries a `project_id`; the system assumes nothing is
 global. Cross-project reads return `404` (not `403`) so a probe in one
 project cannot even confirm a resource exists in another.
-ADR [0005](../../adrs/0005-multi-tenant-coder-core.md) decided this
+ADR [0005](../../../adrs/0005-multi-tenant-coder-core.md) decided this
 shape.
 
 ## Architecture
@@ -79,7 +79,7 @@ flowchart TB
 - **`projects` service — `coder_core/projects/service.py`.**
   Application-service layer that owns project create / update /
   archive / rotate-api-key transactions. Routers are thin per
-  ADR [0005](../../adrs/0005-multi-tenant-coder-core.md) and the
+  ADR [0005](../../../adrs/0005-multi-tenant-coder-core.md) and the
   modular-monolith design.
 - **Per-project API keys.** Hashed in `api_key_hash`; rotation
   preserves the previous value in `api_key_hash_previous` for a
@@ -143,7 +143,7 @@ flowchart TB
 
 ## Evolution
 
-- ADR [0005](../../adrs/0005-multi-tenant-coder-core.md) — single
+- ADR [0005](../../../adrs/0005-multi-tenant-coder-core.md) — single
   multi-tenant `coder-core`, not a service-per-project fleet.
 - 0007 — `projects` table, per-project API keys, project-aware
   CRUD.
@@ -157,13 +157,13 @@ flowchart TB
 
 ## Links
 
-- Specs: [multi-tenancy](../../product-specs/active/multi-tenancy.md),
-  [tenant-isolation](../../product-specs/active/tenant-isolation.md),
-  [tenancy-and-access](../../product-specs/active/tenancy-and-access.md)
+- Specs: [multi-tenancy](../../../product-specs/active/multi-tenancy.md),
+  [tenant-isolation](../../../product-specs/active/tenant-isolation.md),
+  [tenancy-and-access](../../../product-specs/active/tenancy-and-access.md)
 - Designs: [tenancy-and-access](../tenancy-and-access.md),
   [impersonation](./impersonation.md),
   [tenant-isolation](../delivery/tenant-isolation.md),
   [audit-log](./audit-log.md),
   [coder-core-modular-monolith](../delivery/coder-core-modular-monolith.md)
-- ADRs: [0005](../../adrs/0005-multi-tenant-coder-core.md)
+- ADRs: [0005](../../../adrs/0005-multi-tenant-coder-core.md)
 - Services: `coder-core`

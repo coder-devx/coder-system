@@ -130,7 +130,7 @@ token paths (admin JWT, broker JWT, project API key).
 
 ## Links
 
-- Design: [0050](../../designs/wip/0050-oauth-for-mcp-clients.md)
+- Design: [0050](../../../designs/wip/0050-oauth-for-mcp-clients.md)
 - Related: [impersonation](./impersonation.md),
   [audit-log](./audit-log.md), [admin-panel](../knowledge/admin-panel.md)
-- Runbook: [oauth-mcp-clients-rollout](../../runbooks/oauth-mcp-clients-rollout.md)
+- Runbook: [oauth-mcp-clients-rollout](../../../runbooks/oauth-mcp-clients-rollout.md)

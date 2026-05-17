@@ -125,7 +125,7 @@ a stall no longer waits for someone to open the admin panel.
 - **Env flags:** `CODER_ESCALATIONS_ENABLED` (default false),
   `VITE_ESCALATIONS_ENABLED`, `SLACK_SIGNING_SECRET` (reused),
   `PAGERDUTY_EVENTS_API_URL` (defaults to standard endpoint).
-- **Runbook:** [escalations-firing](../../runbooks/escalations-firing.md).
+- **Runbook:** [escalations-firing](../../../runbooks/escalations-firing.md).
 
 ## Dependencies
 
@@ -187,6 +187,6 @@ a stall no longer waits for someone to open the admin panel.
 
 ## Links
 
-- Designs: [escalations](../../designs/active/pipeline/escalations.md)
+- Designs: [escalations](../../../designs/active/pipeline/escalations.md)
 - Related components: task-orchestration, observability, audit-log,
   admin-panel, multi-tenancy, self-healing, continuous-deployment

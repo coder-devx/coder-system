@@ -221,8 +221,8 @@ and `/pipeline-runs` endpoints in `coder-core`.
 
 ## Links
 
-- Designs: [worker-communication](../../designs/active/pipeline/worker-communication.md),
-  [pipeline-operations](../../designs/active/pipeline-operations.md)
+- Designs: [worker-communication](../../../designs/active/pipeline/worker-communication.md),
+  [pipeline-operations](../../../designs/active/pipeline-operations.md)
 - Related components: [audit-log](../tenancy/audit-log.md),
   [observability](./observability.md), [escalations](./escalations.md),
   [self-healing](./self-healing.md),
