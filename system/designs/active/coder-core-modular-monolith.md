@@ -6,7 +6,8 @@ status: active
 owner: ro
 created: 2026-04-25
 updated: 2026-05-03
-last_verified_at: 2026-05-03
+last_verified_at: 2026-05-17
+verified_by: knowledge-audit
 summary: Module boundaries enforced by import-linter contracts.
 implements_specs: [delivery-and-infra]
 related_designs:
