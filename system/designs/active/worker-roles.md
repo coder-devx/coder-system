@@ -112,32 +112,15 @@ and how it composes with the others:
 
 ## Evolution
 
-- `0002-worker-roles-and-impersonation` — introduced the role/worker
-  split, the fleet, and per-role service accounts.
-- Build plan step 5 (spec 0005) — provisioned the seven role SAs and
-  the System Admin broker pattern.
-- `0027` — worker transient-failure retry: every role worker (PM,
-  Architect, TM, Developer, Reviewer) wraps its `claude` spawn in
-  the shared `run_with_transient_retry` helper. Classification
-  taxonomy + retry budget are shared across roles; ADR 0013 pins the
-  retry loop inside the worker, not the dispatcher.
-- `0055` — shared `GH_TOKEN` injection for every role worker.
-  `workers/_github_env.apply_github_token_env(env, project_id,
-  settings, *, github_token)` sets `GH_TOKEN` in the subprocess
-  env independent of `task.workspace`; every role worker
-  (architect, TM, PM, reviewer, developer) calls it before
-  spawning `claude`. The dispatcher resolves the per-project
-  installation token at dispatch time — workspace-bearing roles
-  reuse `workspace.github_token`, non-workspace roles receive a
-  knowledge-repo-scoped token via
-  `tokens.get_token_for_repo(github_org, knowledge_repo)` on
-  `WorkerInput.github_token`. Closes the manual-dispatch failure
-  where architect / TM / PM tasks ran productively but couldn't
-  open PRs (realised pain: task `62e0c95e`, 2026-04-27).
-  Token-mint failures fall through with a warning so local-dev
-  paths without a GitHub App still work. Shipped via
-  [coder-core#41](https://github.com/coder-devx/coder-core/pull/41)
-  on 2026-04-28; covered by `tests/workers/test_github_env.py`.
+- Initial ship (specs 0002, 0005) — role/worker split, seven role
+  service accounts, System Admin broker pattern.
+- 2026-04 — shared transient-failure retry across all five role
+  workers (spec 0027); retry loop lives inside the worker per
+  ADR 0013, not the dispatcher.
+- 2026-04-28 — shared `GH_TOKEN` injection via `_github_env`
+  (spec 0055): non-workspace roles receive a knowledge-repo-scoped
+  installation token on `WorkerInput.github_token`, closing the
+  manual-dispatch `gh is unauthenticated` failure.
 
 ## Links
 

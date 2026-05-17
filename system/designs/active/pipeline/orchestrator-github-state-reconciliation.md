@@ -149,10 +149,6 @@ All components are implemented in `coder-core`:
 - **Settings:** `coder_orchestrator_pr_url_reconcile_enabled: bool = False` in
   `coder_core/config.py`.
 
-## Open questions
-
-Inherited from spec — see [spec 0054 § Open questions](../../../product-specs/wip/0054-orchestrator-github-state-reconciliation.md#open-questions).
-
 ## Rollout
 
 - **Stage 0 — code lands behind flag.** All components are shipped with

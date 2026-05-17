@@ -119,81 +119,16 @@ Endpoints:
 
 ## Evolution
 
-- Pre-0015 — reviewer wrote a single `review_verdict` column; the
-  orchestrator polled it. Opaque and un-auditable.
-- `0008-worker-communication` (spec 0015) — introduced the
-  `task_messages` table, the endpoints, orchestrator integration,
-  and the admin thread UI.
-- `0024` — added the
-  `GET /v1/projects/{id}/tasks/{task_id}/stage-runs` read endpoint
-  (`api/task_stage_runs.py`) over the existing `task_stage_runs`
-  archive (migration 0018). Ordered by `recorded_at` ascending;
-  `stage` / `status` / `limit` filters; no schema change.
-- `0025` — worker output compliance: migration 0020 adds
-  `tasks.failure_kind`, `failure_detail`, `output_schema_version`;
-  the task-detail admin panel renders schema-failed tasks inline
-  (validator errors + raw snippet up to 4 KB) via the
-  `failure_kind="schema"` branch. `worker_output_compliance.*`
-  structured log events flow through the existing observability
-  feed; no new counter table per design 0018.
-- `0027` — worker transient-failure retry: migration 0021 adds
-  `tasks.transient_retry_history` for recovered runs. The admin
-  task-detail grows a yellow "recovered after N transient retries"
-  chip (recovered) and a yellow panel sibling to 0025's schema panel
-  (budget-exhausted). `worker_transient_retry.*` events ride the
-  same structured log feed. The pre-0027 dispatcher-level retry was
-  removed on ship per ADR 0013.
-- `0028` — concurrent pipelines with per-project fairness:
-  `workers/_dispatcher_queue.py` sits in front of the existing
-  `orchestrate_task` concurrency gate. Migration 0027 adds
-  `projects.worker_concurrency_soft` for the optional soft cap;
-  `dispatcher_queue.{enqueued,dequeued,starved_yield}` events
-  ride the structured-log feed. Two new queue-depth endpoints
-  (`api/ops.py`) power the admin panel's per-project Queue strip
-  and Fleet queue widget.
-- `0026` — pipeline-run dashboard: migration 0028 adds
-  `pipeline_runs.step_started_at` and `blocked_since` (the second
-  indexed for the blocked-longest-first sort); migration 0029 adds
-  the `pipeline_step_stats` rollup table. The
-  `advance_step(row, step)` helper on
-  `domain/pipeline_run.py` centralises the timing-column writes
-  across the six existing transition sites. Two new SSE event types
-  (`pipeline_run.changed`, `pipeline_run.gate_blocked`) fire through
-  the existing `events.py` publisher so the admin dashboard can stay
-  live without polling. `api/ops.py` gains two endpoints for the
-  step-stats rollup and its admin-triggered recompute.
-- `0033` — live pipeline-run timeline: new
-  `GET /v1/projects/{id}/pipeline-runs/{run_id}/timeline` in
-  `api/pipeline_runs.py` reconstructs per-run step timings from the
-  existing `task_stage_runs` archive, joined via the run's four
-  per-role task ids, enriched with `pipeline_step_stats` median/p75
-  per lane. A synthetic striped "blocked" bar is appended when
-  `pipeline_runs.blocked_since` is non-null and the run is in the
-  current lane's step. No new tables, no new events — the admin
-  `RunTimeline.tsx` subscribes to the same `pipeline_run.changed`
-  feed from 0026 and refetches the payload on change. Message-heavy
-  events (`message_created`, `task_updated`, `stage_changed`) are
-  filtered out of the refetch trigger.
-- `0034` — in-panel PR diff viewer: new
-  `GET /v1/projects/{id}/tasks/{task_id}/pr` in `api/tasks.py` parses
-  `tasks.pr_url` via `parse_pr_url` and fans out two concurrent
-  GitHub API calls — `GitHubClient.fetch_pr` (metadata) and
-  `fetch_pr_diff` (unified-diff text, `Accept: application/vnd.github.diff`)
-  — then stitches the reviewer's existing `review_verdict` /
-  `review_body` into a single envelope. Tasks without a PR return
-  `{pr_url: null}` instead of 404. Reuses the same installation-token
-  path the Knowledge API depends on; no new auth surface. Admin
-  `PrViewer.tsx` lazy-loads on toggle and renders with a custom
-  Tailwind-only diff renderer.
-- `0037` — audit log wiring for task mutations:
-  `tasks.retry` / `override` / `merge`, `task_plans.approve` /
-  `reject`, and `pipeline_runs.override` each call
-  `record_audit_event(...)` inside their existing transaction.
-  Worker-initiated writes (service-account callers) pass the task's
-  `pipeline_run_id` as `correlation_id` so a run's mutations cluster
-  on one ID without an inbound HTTP correlation header. No schema
-  change on the task side — actor/before/after land on
-  `audit_events` via the new audit-log component.
+- 2026-04 — Initial ship (spec 0015): `task_messages` table,
+  endpoints, orchestrator integration, admin thread UI. Replaced the
+  pre-0015 single `review_verdict` poll.
+- 2026-04-19 — observability + control week: stage-runs read endpoint,
+  worker output compliance gate, transient-failure retry,
+  per-project fairness queue, pipeline-run dashboard, in-panel PR
+  diff viewer (specs 0024–0028, 0033, 0034).
+- 2026-04-19 — audit-log wiring for task / plan / pipeline-run
+  mutations through `record_audit_event` (spec 0037), atomic with
+  the underlying transaction.
 
 ## Links
 

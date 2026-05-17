@@ -121,12 +121,6 @@ CODER_ADMIN_PANEL_URL=https://coder-admin-<hash>-ew.a.run.app
   `(project_id, trigger_kind, pipeline_run_id) WHERE status='open'` blocks second insert;
   watcher catches `IntegrityError`, bumps `last_observed_at`, no re-page (AC3).
 
-## Open questions
-
-- **Admin-panel run-detail route**: spec assumes `/projects/{id}/tasks/{id}`; the stall
-  trigger keys on `pipeline_run_id` — likely correct route is `/projects/{id}/runs/{run_id}`.
-  Confirm from `coder-admin/src/App.tsx` before shipping the URL construction.
-
 ## Rollout
 
 1. **Soak baseline** (current): watcher logs `would_open` without inserting rows. Confirm
