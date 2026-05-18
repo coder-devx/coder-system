@@ -912,3 +912,11 @@ designs:
   file: wip/0096-timeout-stall-visibility.md
   parent: pipeline-operations
   target_slug: timeout-stall-visibility
+- id: 0097
+  title: Worker knowledge-pull visibility
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0097-worker-knowledge-pull-visibility.md
+  parent: pipeline-operations
+  target_slug: worker-knowledge-pull-visibility
