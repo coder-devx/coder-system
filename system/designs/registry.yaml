@@ -904,3 +904,11 @@ designs:
   file: wip/0095-role-scoped-knowledge-layout-and-cached-workspace-context.md
   parent: worker-roles
   target_slug: role-scoped-knowledge-layout
+- id: 0096
+  title: Timeout stall visibility
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0096-timeout-stall-visibility.md
+  parent: pipeline-operations
+  target_slug: timeout-stall-visibility
