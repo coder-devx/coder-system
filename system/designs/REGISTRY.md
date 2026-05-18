@@ -90,6 +90,8 @@ Logical components of the Coder system as it exists today.
 | [0093](./wip/0093-broken-cross-link-failure-detail.md) | broken_cross_link Failure Detail | ro | — | — |
 | [0094](./wip/0094-reviewer-security-and-performance-analysis.md) | Reviewer Security and Performance Analysis | ro | — | — |
 | [0095](./wip/0095-role-scoped-knowledge-layout-and-cached-workspace-context.md) | Role-Scoped Knowledge Layout and Cached Workspace Context | ro | — | — |
+| [0096](./wip/0096-timeout-stall-visibility.md) | Timeout stall visibility | ro | — | — |
+| [0097](./wip/0097-worker-knowledge-pull-visibility.md) | Worker knowledge-pull visibility | ro | — | — |
 
 ## Deprecated
 
