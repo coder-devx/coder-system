@@ -71,11 +71,18 @@ work and the spec body should not carry it. **Rule of thumb: at
 most two `gh api repos/{org}/{repo}/contents/src/...` body reads
 total, and never include source file paths, line numbers, migration
 filenames, or table column names in the spec body** — those are
-architect inputs. Reading more than two source files, *or* surfacing
+architect inputs. **The most common leak is a parenthetical pointer
+in `## Open questions`** of the form *"(see
+src/coder_core/workers/transcript_parser)"* — strip it. The
+architect re-derives the right path; your spec only describes the
+user-observable outcome. The Open Questions section is for questions
+the architect should answer, not breadcrumbs to where the architect
+should look. Reading more than two source files, *or* surfacing
 source-shape detail in the spec (e.g. `## Links` pinned to
 `api/tasks.py:322-349`, body mentions of `0025_knowledge_lookups.py`,
-references to specific column names), signals you have crossed from
-drafting the spec into drafting the design. If you find yourself
+parenthetical pointers, references to specific column names),
+signals you have crossed from drafting the spec into drafting the
+design. If you find yourself
 opening migration files or reading database schemas to choose a
 column name, stop and emit — the architect's task contract owns
 those choices, and your spec's ACs should describe the *outcome*,
@@ -347,6 +354,15 @@ The `pm_draft.json` schema strict-rejects drafts that fail any of:
   `- \[ \]` pattern rejects.
 - **`parent:` missing or pointing at a category not in the INDEX.**
   The audit pipeline will flag the spec as orphaned.
+- **Partial `related_specs[]` fetches.** Listing 4 names in
+  `related_specs[]` but only fetching 3 bodies is the most common
+  gate trip on otherwise-clean drafts — the unfetched name is a
+  surface-name guess from the INDEX, not a verified link.
+  **Either fetch the missing body or drop the name.** The dispatcher
+  records every `gh api` call in your transcript; the consultant
+  evaluates against the *actual fetch set*, not the count. A 3-of-4
+  hit rate looks like a 4-name spec to a human skim but is a
+  1-name-surface-match to the audit pipeline.
 - **ACs that read like implementation notes** (*"function X emits
   bytes Y"*). PM accept can't verify these without source-grepping,
   which the accept schema's evidence pattern explicitly discourages.
