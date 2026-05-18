@@ -594,3 +594,10 @@ specs:
   folder: wip
   file: wip/0097-worker-knowledge-pull-visibility-on-task-detail.md
   parent: pipeline-operations
+- id: 0098
+  title: Worker Knowledge Read Log in Task Detail
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0098-worker-knowledge-read-log-in-task-detail.md
+  parent: knowledge-and-admin
