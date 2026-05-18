@@ -960,3 +960,11 @@ designs:
   file: wip/0102-knowledge-read-trace-on-task-detail.md
   parent: knowledge-and-admin
   target_slug: knowledge-read-trace-on-task-detail
+- id: '0103'
+  title: Knowledge reads panel on task detail
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0103-knowledge-reads-panel-on-task-detail.md
+  parent: knowledge-and-admin
+  target_slug: knowledge-reads-panel
