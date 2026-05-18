@@ -936,3 +936,11 @@ designs:
   file: wip/0099-worker-knowledge-read-transparency.md
   parent: knowledge-and-admin
   target_slug: worker-knowledge-read-transparency
+- id: '0100'
+  title: Worker Knowledge Reads Inline on Task Detail
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0100-worker-knowledge-reads-inline-on-task-detail.md
+  parent: knowledge-and-admin
+  target_slug: worker-knowledge-reads-inline-on-task-detail
