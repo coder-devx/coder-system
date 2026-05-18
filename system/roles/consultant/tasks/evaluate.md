@@ -30,12 +30,21 @@ header line) is a single JSON object:
       "mode": "draft",                                 # task mode
       "task_prompt": "draft: ...",                     # the role's task prompt verbatim
       "assembled_system_prompt": "<full text>",        # what the role saw
-      "knowledge_refs": [                              # files pulled at runtime
+      "knowledge_refs": [                              # files the dispatcher preloaded into the prompt
         {"path": "system/INDEX.md",      "preloaded": true,  "bytes": 4231},
-        {"path": "system/product-specs/active/foo.md", "preloaded": false, "bytes": 1820}
+        {"path": "system/roles/.../INDEX.md", "preloaded": true, "bytes": 1820}
       ],
-      "result": {<role's parsed JSON output>},        # what the role returned
-      "transcript_excerpt": "<last N turns, optional>" # may be absent or truncated
+      "transcript_summary": {                          # extracted from session JSONL (NEW: spec 0043 follow-up)
+        "turn_count": 42,
+        "tool_calls": [                                # every tool_use block in turn order
+          {"turn_index": 1, "tool": "Bash", "input": "{\"command\":\"gh pr list --state merged ...\"}"},
+          {"turn_index": 3, "tool": "Bash", "input": "{\"command\":\"gh api repos/.../contents/system/product-specs/active/pipeline-operations.md ...\"}"}
+        ],
+        "tool_calls_truncated": false,                 # true when more than 80 tool calls were dropped
+        "last_assistant_text": "<the role's final reasoning before emitting JSON, ≤4000 bytes>",
+        "last_assistant_text_truncated": false
+      },
+      "result": {<role's parsed JSON output>}         # what the role returned
     }
 
 `assembled_system_prompt` is the full text the role's prompt was
@@ -43,15 +52,31 @@ built from — `_common.md` + `role.md` + `tasks/<mode>.md` + preloaded
 indexes + run context. Treat it as the single source of what the
 role *could see* before acting.
 
-`knowledge_refs` lists every file the role pulled, including the
-ones the dispatcher preloaded (`preloaded: true`). Files marked
-preloaded are inside `assembled_system_prompt`; files with
-`preloaded: false` were fetched mid-run via `gh api`.
+`knowledge_refs` lists every file the **dispatcher preloaded into**
+``assembled_system_prompt``. It does **not** track mid-run fetches —
+those live in ``transcript_summary.tool_calls`` (see below). The
+absence of a path from ``knowledge_refs`` does not mean the role
+didn't read it; the dispatcher only knows about its own preloads.
 
-`transcript_excerpt` is best-effort. When present, scan it for tool
-calls that pulled knowledge (`gh api .../contents/system/...`) and
-the last assistant turn before the final JSON envelope. When absent,
-infer from `result` alone — say so in your `confidence`.
+`transcript_summary` (added in the spec 0043 follow-up) is the
+authoritative record of what the role *did* during the run:
+
+- ``tool_calls[]`` — every ``tool_use`` block emitted by the role,
+  in turn order. To verify whether the role made a required
+  knowledge-repo fetch, scan this list for ``"tool": "Bash"`` entries
+  whose ``input`` JSON contains the expected ``gh api`` URL. This is
+  the **only place** mid-run reads show up; ``knowledge_refs`` will
+  not include them even if they happened.
+- ``last_assistant_text`` — the role's final assistant turn before
+  the JSON envelope. Justification preambles and reasoning leaks
+  surface here, separate from the ``result`` field that captures
+  the structured output. Use it to ground prompt findings about
+  *what the role thought it was doing* vs. what it actually emitted.
+
+Both fields may be truncated; check the matching ``_truncated``
+booleans. When ``transcript_summary`` is empty (older captures, or
+a worker that didn't write a transcript), say so in ``confidence``
+and infer from ``result`` + ``knowledge_refs`` alone.
 
 ## What you're evaluating, on three axes
 
