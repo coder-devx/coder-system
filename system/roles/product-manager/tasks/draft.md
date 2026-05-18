@@ -65,10 +65,16 @@ The knowledge repo is **not** on the local filesystem. `Read`,
 `Bash`, `ls`, `find`, `Glob` against `/app` or any local path will
 not find spec templates or registries. Use `gh api`.
 
-Bullets 1–3 below are **required** before emitting JSON — the
-preloaded INDEX is a *map*, not the *bodies* it points at; cross-link
-quality depends on actually reading the linked artifacts. Bullet 4
-is optional.
+> **Before emitting JSON you must have invoked `gh api .../contents/system/product-specs/active/<parent>.md`
+> and at least one `.../active/<routed-sibling>.md` from your topic-routed
+> PM INDEX entry.** The dispatcher records these fetches; the consultant
+> evaluates against them. **A draft that emits with zero non-preloaded
+> fetches will be marked `bad` regardless of the spec's substantive quality** —
+> verdict-tracked in the off-pipeline `consultant evaluate` loop. The
+> preloaded INDEX is a *map*, not the *bodies* it points at; cross-link
+> quality depends on actually reading the linked artifacts.
+
+Bullets 1–3 below are required steps, not a menu. Bullet 4 is optional.
 
 ```bash
 # 1. REQUIRED — The spec template, so your section shape matches exactly.
@@ -201,6 +207,25 @@ for *this* run.
       workers in the pipeline, project owners — frame user pain in
       those terms, not generically.
 
+## Pre-emit gate
+
+> **Before you emit JSON, verify two things in your transcript:**
+> **(a) Source-grounded** — at least one `gh pr list --state merged --search "merged:>${date_7d_ago}"`
+> against a source repo (or `gh api search/code?q=...+repo:{org}/{repo}` for
+> the surface). The bullet under §Principles is the rule; *this* is
+> the gate.
+> **(b) Cross-link-grounded** — at least one `gh api .../contents/system/product-specs/active/<parent>.md`
+> fetch (the parent body, not just the INDEX line), and at least one
+> `.../active/<routed-sibling>.md` fetch for any name you plan to put
+> in `related_specs[]`.
+>
+> **If either is missing, run them now and re-check before emitting.**
+> Re-emitting after grounding costs ~30 seconds. The rewrite cycle a
+> stale or surface-name-only spec triggers costs a full pipeline. The
+> consultant `evaluate` loop checks these signals against your captured
+> tool-call log; a draft that satisfies the schema but trips this gate
+> is verdict `bad`, not `mixed`.
+
 ## Output format
 
 **Single JSON object, bare to stdout. No code fence, no prose, no
@@ -269,6 +294,16 @@ The `pm_draft.json` schema strict-rejects drafts that fail any of:
   prose plus a fence still fails.
 - **Prose preface like *"Now I have full context"* or *"Here is the
   output:"* before the `{`.** Strict parser, first byte must be `{`.
+- **Justification preambles** of the form *"All cross-links verified.
+  Ready to emit:"*, *"Both category specs confirm pipeline-operations
+  is the right parent — proceeding."*, *"Grounding complete."* before
+  the `{`. These narrate the work you did rather than the reasoning
+  you're about to do, so they feel different from the *"Now I have
+  full context"* anti-example — but the strict-JSON gate doesn't
+  distinguish; any non-`{` first byte fails. **Do not narrate the
+  Pre-emit gate's outcome** — emit the JSON. The validator doesn't
+  need a sign-off line; the dispatcher already records the fetch
+  log it needs to verify your grounding.
 - **Numeric ids without zero-padding (`23` instead of `"0023"`)** or
   as integers instead of strings.
 - **A body with zero acceptance criteria.** The schema's
