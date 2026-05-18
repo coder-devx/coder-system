@@ -69,6 +69,8 @@ in each component's `## Evolution` section and in git.
 | [0097](./wip/0097-worker-knowledge-pull-visibility-on-task-detail.md) | Worker knowledge-pull visibility on task detail | ro | — |
 | [0098](./wip/0098-worker-knowledge-read-log-in-task-detail.md) | Worker Knowledge Read Log in Task Detail | ro | — |
 | [0099](./wip/0099-worker-knowledge-read-transparency.md) | Worker Knowledge-Read Transparency | ro | — |
+| [0100](./wip/0100-worker-knowledge-reads-inline-on-task-detail.md) | Worker knowledge reads inline on task detail | ro | — |
+| [0101](./wip/0101-task-knowledge-read-trace.md) | Task Knowledge-Read Trace | ro | — |
 
 ## Deprecated
 

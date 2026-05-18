@@ -94,6 +94,8 @@ Logical components of the Coder system as it exists today.
 | [0097](./wip/0097-worker-knowledge-pull-visibility.md) | Worker knowledge-pull visibility | ro | — | — |
 | [0098](./wip/0098-task-knowledge-reads-panel.md) | Task Knowledge Reads Panel | ro | — | — |
 | [0099](./wip/0099-worker-knowledge-read-transparency.md) | Worker Knowledge-Read Transparency | ro | — | — |
+| [0100](./wip/0100-worker-knowledge-reads-inline-on-task-detail.md) | Worker Knowledge Reads Inline on Task Detail | ro | — | — |
+| [0101](./wip/0101-task-knowledge-read-trace.md) | Task Knowledge-Read Trace | ro | — | — |
 
 ## Deprecated
 
