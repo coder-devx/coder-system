@@ -129,7 +129,8 @@ The `audit.json` schema strict-validates the three shapes below
 
     {
       "decision": "verified",
-      "summary": "One-line commit message explaining why the spec is still accurate."
+      "summary": "One-line commit message explaining why the spec is still accurate.",
+      "evidence": "Concrete grounding: PR numbers + spec section/AC each touches. E.g. 'Scanned 14 merged PRs in coder-core/pipelines/ since 2026-03-01; PRs #303/#305 touch worker dispatch and align with Capabilities §Worker dispatch via Cloud Run Job; the remaining 12 are internal refactors not affecting public surfaces.' Use the literal phrase 'no merged PRs touched the user-observable surface' if the scan returned nothing relevant."
     }
 
 or
@@ -156,6 +157,14 @@ or
 
 - `summary` (verified): `minLength 10`, `maxLength 500`. Generic
   strings (*"looks fine"*) fail.
+- `evidence` (verified): `minLength 80`, `maxLength 2000`. **Required**
+  on the `verified` shape (spec 0043 follow-up). The string must
+  match a pattern requiring either a PR reference (`PR #N`, `pull/N`)
+  or the literal escape hatch `"no merged PRs touched the
+  user-observable surface"`. Evidence without either string fails
+  the gate; this is the structural lockdown for the
+  *verified-without-PR-scan* failure mode that prose alone couldn't
+  prevent.
 - `gaps` (needs_rewrite): `minItems 1`, `maxItems 20`, each ≥ 20
   chars. Terse gaps (*"outdated"*) fail.
 - `questions` (uncertain): `minItems 1`, `maxItems 10`, each ≥ 15
