@@ -59,6 +59,23 @@ remaining gap X."* Don't draft a spec for a problem that just got
 solved — the audit will catch it within hours and the rewrite cycle
 costs a full pipeline.
 
+**Source-grounding scope — verify the gap, do not design the
+implementation.** `gh pr list` + `gh api search/code` to confirm
+*whether* a surface exists is in-scope. Reading `src/.../*.py` bodies
+to inspect table shapes, endpoint signatures, or function internals
+is appropriate **only when the answer materially changes the spec's
+scope** (e.g. *"this surface already exists, narrow to the admin
+gap"*). It is over-reach when used to choose the design (table
+columns, endpoint URLs, response field names) — that's Architect
+work and the spec body should not carry it. **Rule of thumb:** one
+or two `gh api repos/{org}/{repo}/contents/src/...` body reads to
+confirm the gap is fine; more than three signals you've crossed
+from drafting the spec into drafting the design. If you find
+yourself opening migration files or reading database schemas to
+choose a column name, stop and emit — the architect's task
+contract owns those choices, and your spec's ACs should describe
+the *outcome*, not the storage shape.
+
 ## Reading the knowledge repo (required pulls)
 
 The knowledge repo is **not** on the local filesystem. `Read`,
@@ -304,6 +321,19 @@ The `pm_draft.json` schema strict-rejects drafts that fail any of:
   Pre-emit gate's outcome** — emit the JSON. The validator doesn't
   need a sign-off line; the dispatcher already records the fetch
   log it needs to verify your grounding.
+- **Multi-line investigative-findings summaries** before the JSON,
+  e.g. *"I have everything I need. The backend already has:\n-
+  `knowledge_lookups` table + endpoint\n- `task_tool_uses` table +
+  endpoint\n\nThe spec's job is to close that gap in the admin
+  panel.\n\n{...}"*. These read like a working-memory dump rather
+  than the short single-line sign-off the bullets above catch, so
+  the model doesn't pattern-match them to those anti-examples — but
+  the strict-JSON gate rejects on the first non-`{` byte regardless.
+  **Multi-line bullets, narrative recaps of what your fetches
+  returned, and *"the spec's job is X"* framing all belong inside
+  the spec's `## Problem` section, not before the envelope.** If
+  you find yourself writing a summary of your investigation,
+  *that summary is the Problem section* — write it there.
 - **Numeric ids without zero-padding (`23` instead of `"0023"`)** or
   as integers instead of strings.
 - **A body with zero acceptance criteria.** The schema's
