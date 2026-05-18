@@ -587,3 +587,10 @@ specs:
   folder: wip
   file: wip/0096-timed-out-task-stall-visibility-in-admin-panel.md
   parent: pipeline-operations
+- id: 0097
+  title: Worker knowledge-pull visibility on task detail
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0097-worker-knowledge-pull-visibility-on-task-detail.md
+  parent: pipeline-operations
