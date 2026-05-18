@@ -401,8 +401,23 @@ to spot ADRs whose decisions ripple into multiple components.
 
 | ADR | Cited by |
 |---|---|
-| [0001](./adrs/0001-*.md) | [design/system-overview](./designs/active/system-overview.md) |
-| [0005](./adrs/0005-*.md) | [design/system-overview](./designs/active/system-overview.md) |
-| [0006](./adrs/0006-*.md) | [design/system-overview](./designs/active/system-overview.md), [design/worker-roles](./designs/active/worker-roles.md) |
+| [0001](./adrs/0001-*.md) | [design/knowledge-repo-model](./designs/active/knowledge-repo-model.md), [design/system-overview](./designs/active/system-overview.md) |
+| [0002](./adrs/0002-*.md) | [design/knowledge-repo-model](./designs/active/knowledge-repo-model.md) |
+| [0003](./adrs/0003-*.md) | [design/knowledge-repo-model](./designs/active/knowledge-repo-model.md) |
+| [0004](./adrs/0004-*.md) | [design/knowledge-repo-model](./designs/active/knowledge-repo-model.md) |
+| [0005](./adrs/0005-*.md) | [design/multi-tenancy](./designs/active/multi-tenancy.md), [design/system-overview](./designs/active/system-overview.md) |
+| [0006](./adrs/0006-*.md) | [design/impersonation](./designs/active/impersonation.md), [design/service-accounts](./designs/active/service-accounts.md), [design/system-overview](./designs/active/system-overview.md), [design/worker-roles](./designs/active/worker-roles.md) |
 | [0007](./adrs/0007-*.md) | [design/system-overview](./designs/active/system-overview.md), [design/worker-roles](./designs/active/worker-roles.md) |
-| [0008](./adrs/0008-*.md) | [design/system-overview](./designs/active/system-overview.md) |
+| [0008](./adrs/0008-*.md) | [design/knowledge-repo-model](./designs/active/knowledge-repo-model.md), [design/system-overview](./designs/active/system-overview.md) |
+| [0014](./adrs/0014-*.md) | [design/knowledge-freshness](./designs/active/knowledge-freshness.md) |
+| [0016](./adrs/0016-*.md) | [design/orchestrator-github-state-reconciliation](./designs/active/orchestrator-github-state-reconciliation.md) |
+| [0017](./adrs/0017-*.md) | [design/post-pr-ci-fix-loop](./designs/active/post-pr-ci-fix-loop.md) |
+| [0018](./adrs/0018-*.md) | [design/managed-repo-action-distribution](./designs/active/managed-repo-action-distribution.md) |
+| [0019](./adrs/0019-*.md) | [design/template-schema-migration](./designs/active/template-schema-migration.md) |
+| [0020](./adrs/0020-*.md) | [design/template-schema-migration](./designs/active/template-schema-migration.md) |
+| [0021](./adrs/0021-*.md) | [design/template-schema-migration](./designs/active/template-schema-migration.md) |
+| [0022](./adrs/0022-*.md) | [design/cross-project-patterns](./designs/active/cross-project-patterns.md) |
+| [0023](./adrs/0023-*.md) | [design/cross-project-patterns](./designs/active/cross-project-patterns.md) |
+| [0024](./adrs/0024-*.md) | [design/cross-project-patterns](./designs/active/cross-project-patterns.md) |
+| [0027](./adrs/0027-*.md) | [design/role-prompt-knowledge-layout](./designs/active/role-prompt-knowledge-layout.md) |
+| [0029](./adrs/0029-*.md) | [design/navigation-tree-pattern](./designs/active/navigation-tree-pattern.md) |
