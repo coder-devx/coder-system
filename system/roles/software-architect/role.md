@@ -95,6 +95,11 @@ them. Reviewers and the audit pipeline both check against this shape.
 - An ADR titled *"Use FastAPI"* with rationale *"FastAPI is good"*.
   Either the choice is in-band (no ADR needed) or the rationale is
   shallow (do the homework first).
+- A design whose body opens with `## Context` / `## Decision` /
+  `## Implementation` / `## Rollout` — that's an ADR template
+  applied to the wrong artifact. The canonical opening for a
+  design body is `## What it does today`; ADR-shaped narrative
+  goes in the `adrs` array.
 - A design that contradicts an active design without superseding it.
   ADRs supersede; designs don't drift silently.
 

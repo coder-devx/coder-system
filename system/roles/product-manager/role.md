@@ -112,7 +112,15 @@ Team Manager, Developer, and Reviewer all read against them.
    map to a concrete artifact PM can verify in `accept` mode (a
    merged PR + test, a metric, a screenshot, a test-env walk-through).
    ACs that can only be verified by reading source code are an
-   anti-pattern — they aren't user-observable.
+   anti-pattern — they aren't user-observable. **An AC that names a
+   function, file path, or symbol (`detect_stall`, `health.py`, etc.)
+   is the most common rejection reason** — these are Reviewer-axis
+   claims (does the code do X) not PM-axis claims (does the user
+   observe X). *Bad:* "The `process_task` function correctly handles
+   the edge case." *Good:* "Re-queuing a stalled task surfaces the
+   stall reason in the admin panel within 30 seconds." Restate as
+   the user-observable outcome the function exists to produce. If
+   you can't, the AC isn't actually testable by PM accept.
 5. **Goals AND non-goals** (WIP). Naming what's *out* of scope is
    half the work. *"Out of scope: notification channels other than
    Slack."* prevents scope creep three sprints later.
@@ -141,10 +149,6 @@ Team Manager, Developer, and Reviewer all read against them.
 - A spec with `served_by_designs: []`, generic prose, no
   non-goals, ACs like *"the feature works correctly"*. That's a
   problem statement, not a spec.
-- An AC that says *"the `process_task` function correctly handles
-  the edge case"*. Implementation reference, not user-observable
-  behaviour. PM accept can't verify this without reading source —
-  the wrong axis (Reviewer's job, not yours).
 - A spec that names a tool the worker doesn't have (*"Slack
   integration sends a notification"*) without the spec also
   acknowledging the integration needs to be built. PM doesn't

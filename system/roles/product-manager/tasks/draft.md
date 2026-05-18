@@ -70,13 +70,21 @@ not find spec templates or registries. Use `gh api`:
 gh api "repos/{org}/{repo}/contents/system/product-specs/_TEMPLATE.md" \
   --jq '.content' | base64 -d
 
-# 2. The category spec for your draft's parent (e.g. pipeline-operations).
+# 2. Walk the PM INDEX route table for your problem topic and fetch
+#    the bodies of every spec it names. These populate `related_specs[]`
+#    and ground the AC surfaces in artifacts that already exist.
+#    Empty `related_specs: []` is a smell on any spec whose topic
+#    appears in the route table.
+gh api "repos/{org}/{repo}/contents/system/product-specs/active/{routed-sibling}.md" \
+  --jq '.content' | base64 -d
+
+# 3. The category spec for your draft's parent (e.g. pipeline-operations).
 #    Read it to understand the category's scope and pick `parent:` /
 #    `related_specs` that actually exist.
 gh api "repos/{org}/{repo}/contents/system/product-specs/active/{category}.md" \
   --jq '.content' | base64 -d
 
-# 3. (optional) A recent shipped spec or two to match tone.
+# 4. (optional) A recent shipped spec or two to match tone.
 gh api "repos/{org}/{repo}/contents/system/product-specs/wip" --jq '.[].name'
 ```
 
@@ -113,8 +121,11 @@ arbitrary line cap:
 - **Every section earns its place.** A `## Scope` that just restates
   the goals is dead weight. A `## Metrics` of *"users like it"* is
   worse than no metrics — drop it or make it concrete.
-- **4–7 ACs.** Fewer means under-specified; more usually means the
-  spec is two specs in one.
+- **4–7 ACs.** Fewer than 4 means under-specified — if you can
+  only think of 3, you are missing the surfaces (the affected admin
+  page, the telemetry, the rollout artifact); re-read the
+  topic-routed specs from the PM INDEX before committing. More
+  than 7 usually means the spec is two specs in one.
 - **Smell test: ~150 body lines.** Past that, look hard for a split
   or for content that belongs to the architect. Past ~250 is almost
   certainly two specs in one.
@@ -134,6 +145,11 @@ for *this* run.
       30 seconds of grounding here** — observed today: spec 0063
       shipped Tuesday, audit returned `needs_rewrite` Tuesday
       because PR #81 had already moved the system underneath.
+      **Self-check before emitting:** if your transcript contains
+      zero `gh pr list` and zero `gh api search/code` calls before
+      the JSON, you have not grounded — go back and run them. The
+      30 seconds are non-optional even when the problem statement
+      looks obvious.
 - [ ] **One feature, delivery contract only.** ~150 body lines is
       the smell test; past ~250 → split or trim. Implementation
       strategy and rollout phasing belong in the design, not here.
@@ -159,6 +175,11 @@ for *this* run.
       `product-specs/active/<category>/<slug>.md` per design 0095;
       get it right at draft time and the ship is mechanical.
 - [ ] `related_specs` ids resolve to existing specs in the registry.
+      **Before emitting `related_specs: []`,** scan the preloaded
+      INDEX section your `parent:` lives under. If any sibling
+      entry's title overlaps your problem's surface, link it. An
+      empty `related_specs` on a parent with 10+ siblings is almost
+      always a missed-link, not a true zero.
 - [ ] Coder-system framing: you're PM **of the Coder System**
       running on this project. Operators of the admin panel,
       workers in the pipeline, project owners — frame user pain in

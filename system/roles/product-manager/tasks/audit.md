@@ -106,6 +106,13 @@ gh api "repos/{org}/{repo}/contents/system/designs/active/{slug}.md" \
 
 1. Read the preloaded `## Audit target` body. Note what it claims
    about user-observable behaviour: features, flows, metrics, ACs.
+   **Signal-vs-artifact mismatch check.** If the preloaded audit
+   target's `last_verified_at` frontmatter is *newer* than the
+   `Last verified` line in the task prompt header, that's a
+   signal-vs-artifact mismatch — the freshness scorer and the
+   committed artifact disagree about when verification last
+   happened. Emit `uncertain` with a question naming both dates
+   rather than trusting either side.
 2. Scan recent merged PRs in the project's source repos since
    `last_verified_at`. Focus on user-facing changes (new features,
    deprecations, surface changes, metric churn).
@@ -159,6 +166,16 @@ or
 - **`verified` as a default.** The audit floor exists *because* the
   spec might be stale. Skipping the PR scan and verifying anyway
   is the verdict equivalent of *"LGTM"* on a code review.
+  *Bad summary:* `"The spec still accurately describes the
+  user-observable pipeline behaviour as exposed in the admin panel."`
+  — no PR-scan citation, no AC mapping; could be written without
+  opening the audit target.
+  *Good summary:* `"Scanned 14 merged PRs in coder-core/pipelines/
+  since 2026-03-01; PRs #303/#305 touch worker dispatch and align
+  with Capabilities §'Worker dispatch via Cloud Run Job'; remaining
+  12 are internal refactors not affecting public surfaces."`
+  If you can't produce something in the Good shape, the verdict
+  isn't `verified`.
 - **`needs_rewrite` with vague gaps** (*"could be clearer"*,
   *"might be outdated"*). The schema's 20-char floor catches some;
   the operational standard is one citable artifact per gap.

@@ -100,13 +100,18 @@ These are the principles your role doc names, restated as a checklist
 for *this* run. Hit every box.
 
 - [ ] One component, current state only. Past ~200 body lines → look hard for a split or for content belonging in ADRs / `## Evolution`.
-- [ ] Body sections (in order): `## What it does today` · `## Architecture` (with Mermaid) · `### Parts` · `### Data flow` · `### Invariants` · `## Interfaces` · `## Where in code` · `## Evolution` (1–3 lines max) · `## Links`. **Not** `## Context` / `## Goals` / `## Rollout` / `## Open questions` — those belong in ADRs or git history.
+- [ ] Body sections (in order): `## What it does today` · `## Architecture` (with Mermaid) · `### Parts` · `### Data flow` · `### Invariants` · `## Interfaces` · `## Where in code` · `## Evolution` (1–3 lines max) · `## Links`. **Not** `## Context` / `## Goals` / `## Rollout` / `## Open questions` — those belong in ADRs or git history. **Anti-example.** If your design body opens with `## Context` / `## Decision` / `## Implementation` / `## Rollout`, you have written an ADR-shaped document, not a design. ADRs live in the separate `adrs` array; the design `body` always opens with `## What it does today`.
 - [ ] One Mermaid that shows data flow / sequence / boundary, not just
       a box-and-line component list.
 - [ ] **`## Where in code` lists 3–6 symbol anchors** of the form
       `` `path` — `Symbol` (note) `` — **never line numbers**
       (lines shift on every refactor; symbols only change on rename).
       `scripts/validate.py` rejects `path.ext:N` patterns in this section.
+- [ ] **`target_slug` is set** to a meaningful kebab-case slug (3–60
+      chars, derived from the title) — *not* a numeric placeholder.
+      Per ADR 0026 this is what the ship workflow uses to route the
+      active file. Missing-slug WIPs get the 2026-05-06 cleanup
+      treatment after the fact; set it correctly at draft time.
 - [ ] `affects_services` and `affects_repos` are concrete (running
       services + existing repos). Empty arrays are a *design smell*,
       not the default.
@@ -129,6 +134,13 @@ for *this* run. Hit every box.
       body) in the same change. Don't drift past 200 body lines.
 - [ ] ADR(s) drafted **only** for genuinely non-obvious decisions
       (3+ reasonable options, rationale wouldn't fit in-band).
+- [ ] **Source-grounded.** Before drafting, at least one
+      `gh api search/code?q=...+repo:{org}/coder-core` call against
+      the symbols, endpoints, or surfaces named in the spec. A
+      design that names no existing function, endpoint, table, or
+      job is almost always reinventing rather than fitting — and
+      the rebuild cost compounds across the Team Manager and
+      Developer stages.
 
 ## Output format
 
@@ -196,6 +208,15 @@ ADRs go in the `adrs` array (omit when none warranted):
         }
       ]
     }
+
+**ADR `frontmatter` must include all of:** `id` (4-digit zero-padded
+string), `title`, `type: "adr"`, `status` (`proposed` for fresh
+drafts), `date` (`YYYY-MM-DD`), `deciders` (array of usernames),
+`supersedes` (null or ADR id), `superseded_by` (null or ADR id), and
+`relates_to_designs` (array of design ids). Omitting any of these
+fails the ADR schema. The example block above shows the canonical
+shape; do not strip fields you think look optional — `null` is
+right for `supersedes` / `superseded_by` on a fresh ADR.
 
 ### Schema-enforced fields
 
