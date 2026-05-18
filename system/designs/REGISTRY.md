@@ -92,6 +92,8 @@ Logical components of the Coder system as it exists today.
 | [0095](./wip/0095-role-scoped-knowledge-layout-and-cached-workspace-context.md) | Role-Scoped Knowledge Layout and Cached Workspace Context | ro | — | — |
 | [0096](./wip/0096-timeout-stall-visibility.md) | Timeout stall visibility | ro | — | — |
 | [0097](./wip/0097-worker-knowledge-pull-visibility.md) | Worker knowledge-pull visibility | ro | — | — |
+| [0098](./wip/0098-task-knowledge-reads-panel.md) | Task Knowledge Reads Panel | ro | — | — |
+| [0099](./wip/0099-worker-knowledge-read-transparency.md) | Worker Knowledge-Read Transparency | ro | — | — |
 
 ## Deprecated
 

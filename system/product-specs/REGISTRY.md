@@ -67,6 +67,8 @@ in each component's `## Evolution` section and in git.
 | [0095](./wip/0095-cache-and-cost-observability-correctness.md) | Cache-hit and cost-regression observability is wrong or absent | ro | — |
 | [0096](./wip/0096-timed-out-task-stall-visibility-in-admin-panel.md) | Timed-out task stall visibility in admin panel | ro | — |
 | [0097](./wip/0097-worker-knowledge-pull-visibility-on-task-detail.md) | Worker knowledge-pull visibility on task detail | ro | — |
+| [0098](./wip/0098-worker-knowledge-read-log-in-task-detail.md) | Worker Knowledge Read Log in Task Detail | ro | — |
+| [0099](./wip/0099-worker-knowledge-read-transparency.md) | Worker Knowledge-Read Transparency | ro | — |
 
 ## Deprecated
 
