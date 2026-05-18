@@ -928,3 +928,11 @@ designs:
   file: wip/0098-task-knowledge-reads-panel.md
   parent: knowledge-and-admin
   target_slug: task-knowledge-reads-panel
+- id: 0099
+  title: Worker Knowledge-Read Transparency
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0099-worker-knowledge-read-transparency.md
+  parent: knowledge-and-admin
+  target_slug: worker-knowledge-read-transparency
