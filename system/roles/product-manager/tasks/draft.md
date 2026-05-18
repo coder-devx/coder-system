@@ -67,14 +67,19 @@ is appropriate **only when the answer materially changes the spec's
 scope** (e.g. *"this surface already exists, narrow to the admin
 gap"*). It is over-reach when used to choose the design (table
 columns, endpoint URLs, response field names) — that's Architect
-work and the spec body should not carry it. **Rule of thumb:** one
-or two `gh api repos/{org}/{repo}/contents/src/...` body reads to
-confirm the gap is fine; more than three signals you've crossed
-from drafting the spec into drafting the design. If you find
-yourself opening migration files or reading database schemas to
-choose a column name, stop and emit — the architect's task
-contract owns those choices, and your spec's ACs should describe
-the *outcome*, not the storage shape.
+work and the spec body should not carry it. **Rule of thumb: at
+most two `gh api repos/{org}/{repo}/contents/src/...` body reads
+total, and never include source file paths, line numbers, migration
+filenames, or table column names in the spec body** — those are
+architect inputs. Reading more than two source files, *or* surfacing
+source-shape detail in the spec (e.g. `## Links` pinned to
+`api/tasks.py:322-349`, body mentions of `0025_knowledge_lookups.py`,
+references to specific column names), signals you have crossed from
+drafting the spec into drafting the design. If you find yourself
+opening migration files or reading database schemas to choose a
+column name, stop and emit — the architect's task contract owns
+those choices, and your spec's ACs should describe the *outcome*,
+not the storage shape.
 
 ## Reading the knowledge repo (required pulls)
 
@@ -232,9 +237,11 @@ for *this* run.
 > the surface). The bullet under §Principles is the rule; *this* is
 > the gate.
 > **(b) Cross-link-grounded** — at least one `gh api .../contents/system/product-specs/active/<parent>.md`
-> fetch (the parent body, not just the INDEX line), and at least one
-> `.../active/<routed-sibling>.md` fetch for any name you plan to put
-> in `related_specs[]`.
+> fetch (the parent body, not just the INDEX line), **and a fetch for
+> *every* name you plan to put in `related_specs[]`**. One verified
+> link is the floor; a list of three names with one fetch is a
+> surface-name match for the other two — exactly the failure mode
+> this gate exists to catch.
 >
 > **If either is missing, run them now and re-check before emitting.**
 > Re-emitting after grounding costs ~30 seconds. The rewrite cycle a
