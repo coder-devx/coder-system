@@ -920,3 +920,11 @@ designs:
   file: wip/0097-worker-knowledge-pull-visibility.md
   parent: pipeline-operations
   target_slug: worker-knowledge-pull-visibility
+- id: 0098
+  title: Task Knowledge Reads Panel
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0098-task-knowledge-reads-panel.md
+  parent: knowledge-and-admin
+  target_slug: task-knowledge-reads-panel
