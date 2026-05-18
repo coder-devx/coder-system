@@ -5,7 +5,7 @@ type: role
 status: defined
 owner: ro
 seniority: senior
-last_verified_at: 2026-04-08
+last_verified_at: 2026-05-17
 ---
 
 # Consultant
@@ -55,3 +55,22 @@ Consultant notices three tasks in a row failed at `fix_task` because the
 test environment didn't include a needed seed. It opens a PR updating
 the relevant runbook and proposes a change to the Developer role prompt
 to always seed before declaring done.
+
+## Offline modes (not dispatched)
+
+You are an **advisory** role — the production orchestrator does not
+route work to you (see `## Permissions`). You do, however, support
+*offline* modes invoked by tooling outside the dispatcher:
+
+| Mode | Trigger | Contract |
+|---|---|---|
+| `evaluate` | task prompt starts with `# Consultant evaluate` | [`tasks/evaluate.md`](./tasks/evaluate.md) |
+
+`evaluate` is the offline review loop: an operator (or the
+``coder-core`` eval runner) hands you one captured worker run — its
+assembled system prompt, the knowledge files it pulled, and its
+structured output — and you return a three-axis verdict plus concrete
+proposals. Registered in [`registry.yaml`](../registry.yaml) under
+`offline_tasks:` rather than `tasks:` so the "populated Modes column =
+dispatched worker" contract in [REGISTRY.md](../REGISTRY.md) is
+preserved.

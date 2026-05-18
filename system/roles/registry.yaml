@@ -6,6 +6,10 @@
 #   <role-id>/tasks/<mode>.md    — per-mode task contract (worker roles only)
 #
 # Worker roles populate `tasks:`; non-worker roles omit it.
+# A non-worker role may also populate `offline_tasks:` — modes the
+# role supports that are invoked by tooling *outside* the dispatcher
+# (e.g. an eval runner). These do not turn the role into a worker;
+# the dispatcher still doesn't route to them.
 # A common preamble at `_common.md` is prepended to every worker prompt
 # at runtime by the coder-core dispatcher (design 0057,
 # `role-prompt-knowledge-layout`).
@@ -75,6 +79,14 @@ roles:
     owner: ro
     dir: consultant
     file: consultant/role.md
+    # ``offline_tasks`` (vs ``tasks``) signals modes the role supports
+    # but the dispatcher does NOT route to. They're invoked by tooling
+    # outside the production pipeline — currently the coder-core
+    # ``evals.consultant_replay`` runner. Keeping these out of
+    # ``tasks:`` preserves the contract that a populated Modes column
+    # in REGISTRY.md means the role is dispatched.
+    offline_tasks:
+      - evaluate
 
   - id: founder
     name: Founder

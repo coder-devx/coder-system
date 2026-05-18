@@ -4,7 +4,10 @@
 > Every role uses the folder shape `<role-id>/role.md`
 > (ADR [0027](../adrs/0027-uniform-role-folder-shape.md)).
 > A populated `Modes` column means the role is dispatched as a worker;
-> an empty one means the role is advisory.
+> an empty one means the role is advisory. Some advisory roles also
+> support **offline modes** invoked by tooling outside the dispatcher
+> — see `offline_tasks:` in [`registry.yaml`](./registry.yaml) (currently
+> only `consultant` uses this; see Notes below).
 
 ## Defined
 
@@ -51,3 +54,8 @@ project's team.
 - **Consultant vs QA vs SRE.** Consultant watches *the development process
   itself*. QA watches *test coverage and regressions*. SRE watches
   *production behavior*. Open question in design 0002.
+- **Consultant offline modes.** The consultant has one `offline_tasks`
+  entry — `evaluate` — invoked by the coder-core
+  ``evals.consultant_replay`` tool against captured worker runs.
+  The dispatcher does not route to it; it stays off the production
+  pipeline by design (role.md §Permissions).
