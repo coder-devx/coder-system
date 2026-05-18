@@ -601,3 +601,10 @@ specs:
   folder: wip
   file: wip/0098-worker-knowledge-read-log-in-task-detail.md
   parent: knowledge-and-admin
+- id: 0099
+  title: Worker Knowledge-Read Transparency
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0099-worker-knowledge-read-transparency.md
+  parent: knowledge-and-admin
