@@ -59,32 +59,39 @@ remaining gap X."* Don't draft a spec for a problem that just got
 solved — the audit will catch it within hours and the rewrite cycle
 costs a full pipeline.
 
-## Reading the knowledge repo (when needed)
+## Reading the knowledge repo (required pulls)
 
 The knowledge repo is **not** on the local filesystem. `Read`,
 `Bash`, `ls`, `find`, `Glob` against `/app` or any local path will
-not find spec templates or registries. Use `gh api`:
+not find spec templates or registries. Use `gh api`.
+
+Bullets 1–3 below are **required** before emitting JSON — the
+preloaded INDEX is a *map*, not the *bodies* it points at; cross-link
+quality depends on actually reading the linked artifacts. Bullet 4
+is optional.
 
 ```bash
-# 1. The spec template — match its section shape exactly.
+# 1. REQUIRED — The spec template, so your section shape matches exactly.
 gh api "repos/{org}/{repo}/contents/system/product-specs/_TEMPLATE.md" \
   --jq '.content' | base64 -d
 
-# 2. Walk the PM INDEX route table for your problem topic and fetch
-#    the bodies of every spec it names. These populate `related_specs[]`
-#    and ground the AC surfaces in artifacts that already exist.
-#    Empty `related_specs: []` is a smell on any spec whose topic
-#    appears in the route table.
+# 2. REQUIRED — Walk the PM INDEX route table for your problem topic
+#    and fetch the bodies of every spec it names. These populate
+#    `related_specs[]` and ground the AC surfaces in artifacts that
+#    already exist. A populated `related_specs[]` whose bodies you
+#    never fetched is a surface-name match against INDEX titles, not
+#    a verified cross-link.
 gh api "repos/{org}/{repo}/contents/system/product-specs/active/{routed-sibling}.md" \
   --jq '.content' | base64 -d
 
-# 3. The category spec for your draft's parent (e.g. pipeline-operations).
-#    Read it to understand the category's scope and pick `parent:` /
-#    `related_specs` that actually exist.
+# 3. REQUIRED — The category spec for your draft's parent (e.g.
+#    pipeline-operations). Its scope statement tells you whether the
+#    feature belongs under this parent or a different one, and what
+#    sibling surfaces already exist that your ACs should compose with.
 gh api "repos/{org}/{repo}/contents/system/product-specs/active/{category}.md" \
   --jq '.content' | base64 -d
 
-# 4. (optional) A recent shipped spec or two to match tone.
+# 4. (optional, for tone) A recent shipped spec or two to match wording.
 gh api "repos/{org}/{repo}/contents/system/product-specs/wip" --jq '.[].name'
 ```
 
@@ -150,6 +157,15 @@ for *this* run.
       the JSON, you have not grounded — go back and run them. The
       30 seconds are non-optional even when the problem statement
       looks obvious.
+- [ ] **Grounded in related knowledge artifacts.** Symmetric to the
+      source-grounding self-check above, but for the cross-link
+      surface. **Self-check before emitting:** if your transcript
+      contains zero `gh api repos/.../contents/system/product-specs/active/<parent>.md`
+      call AND zero fetches of any `related_specs[]` body, you have
+      not grounded the cross-links — go back and fetch the parent
+      category body plus at least one routed sibling. A populated
+      `related_specs[]` whose bodies you never read is a surface-name
+      match against INDEX titles, not a verified link.
 - [ ] **One feature, delivery contract only.** ~150 body lines is
       the smell test; past ~250 → split or trim. Implementation
       strategy and rollout phasing belong in the design, not here.

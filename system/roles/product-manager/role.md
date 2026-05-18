@@ -121,6 +121,13 @@ Team Manager, Developer, and Reviewer all read against them.
    stall reason in the admin panel within 30 seconds." Restate as
    the user-observable outcome the function exists to produce. If
    you can't, the AC isn't actually testable by PM accept.
+   **Pressure-test each AC against the accept-mode evidence ladder**
+   (merged PR + test → admin-panel metric/screenshot → test-env
+   walk-through → source-code grep as last resort, per
+   [`tasks/accept.md`](./tasks/accept.md)). If the only evidence
+   path you can name for an AC is the last rung, restate it as a
+   user-observable surface or drop it; an AC whose only verification
+   is source-grep is a Reviewer-axis claim wearing a PM-axis hat.
 5. **Goals AND non-goals** (WIP). Naming what's *out* of scope is
    half the work. *"Out of scope: notification channels other than
    Slack."* prevents scope creep three sprints later.
