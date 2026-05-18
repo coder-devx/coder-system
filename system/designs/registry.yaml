@@ -944,3 +944,11 @@ designs:
   file: wip/0100-worker-knowledge-reads-inline-on-task-detail.md
   parent: knowledge-and-admin
   target_slug: worker-knowledge-reads-inline-on-task-detail
+- id: '0101'
+  title: Task Knowledge-Read Trace
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0101-task-knowledge-read-trace.md
+  parent: knowledge-and-admin
+  target_slug: task-knowledge-read-trace
