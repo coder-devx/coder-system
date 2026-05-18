@@ -952,3 +952,11 @@ designs:
   file: wip/0101-task-knowledge-read-trace.md
   parent: knowledge-and-admin
   target_slug: task-knowledge-read-trace
+- id: '0102'
+  title: Knowledge-read trace on task detail
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0102-knowledge-read-trace-on-task-detail.md
+  parent: knowledge-and-admin
+  target_slug: knowledge-read-trace-on-task-detail
