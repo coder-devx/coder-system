@@ -502,13 +502,6 @@ specs:
   - admin-panel
   - knowledge-api
   parent: null
-- id: 0080
-  title: "Coder Studio \u2014 Stripe Connect and PostHog integration in coder-core"
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0080-coder-studio-stripe-connect-and-posthog-integration-in-coder-core.md
-  parent: knowledge-and-admin
 - id: 0083
   title: Plan-unblock check accounts for retry chain, not just original task's stage
   status: wip
@@ -657,3 +650,12 @@ specs:
   - worker-roles
   - task-orchestration
   - self-healing
+- id: studio-product-integrations
+  title: "Studio \u2014 Stripe Connect and PostHog integration"
+  status: active
+  owner: ro
+  folder: active
+  file: active/knowledge/studio-product-integrations.md
+  related_specs:
+  - admin-panel
+  - secret-rotation
