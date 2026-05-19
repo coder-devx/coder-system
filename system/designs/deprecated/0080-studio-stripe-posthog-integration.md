@@ -2,13 +2,12 @@
 id: '0080'
 title: Studio Stripe Connect and PostHog Integration
 type: design
-status: wip
+status: deprecated
 owner: ro
 created: '2026-05-10'
-updated: '2026-05-10'
-last_verified_at: '2026-05-10'
-implements_specs:
-- '0080'
+updated: '2026-05-19'
+last_verified_at: '2026-05-19'
+implements_specs: []
 decided_by: []
 related_designs:
 - '0075'
@@ -23,6 +22,12 @@ affects_repos:
 - coder-core
 - coder-admin
 parent: knowledge-and-admin
+deprecated_at: '2026-05-19'
+deprecated_reason: >-
+  Architect re-authoring needed: parent spec 0080 shipped 2026-05-19 to
+  subject-slug active spec studio-product-integrations in WIP-shape
+  body (post-ship cleanup). The architect should author a fresh design
+  against the new active subject-slug spec when needed.
 ---
 
 # Studio Stripe Connect and PostHog Integration

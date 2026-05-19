@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-05-15
-updated: 2026-05-15
-last_verified_at: 2026-05-15
+updated: 2026-05-19
+last_verified_at: 2026-05-19
 summary: Stripe Connect Express OAuth, webhook MRR pipeline, and PostHog funnel polling for b2c_product projects in coder-core.
 served_by_designs: []
 related_specs: [admin-panel, secret-rotation]
@@ -28,15 +28,6 @@ the `b2c_product` project-detail page in the admin SPA (see
 Both integrations ship together because they share the same operator
 surface (per-product chips on the same card) and the same
 OAuth-or-API-key + webhook-or-poll credential pattern.
-
-## Users
-
-- **Portfolio operator.** Monitors Stripe state and MRR/cost delta from
-  the Studio panel; expects chips to settle within 60 seconds of any
-  configuration action.
-- **Founder recurring job.** Reads per-product MRR when scoring kill
-  criteria (charter: cost-exceeds-MRR is a kill signal); no operator
-  involvement in the poll loop.
 
 ## Capabilities
 
@@ -111,18 +102,6 @@ OAuth-or-API-key + webhook-or-poll credential pattern.
   column on the existing project budget row (additive; no existing
   columns altered).
 
-## Non-goals
-
-- Resend / broadcast email — Phase C (Marketer role).
-- PostHog cohort analysis or experiment tracking — Phase C (Analyst).
-- Stripe Connect Standard — charter commits to Express only.
-- Self-hosted PostHog — cloud only in Phase A; revisit if cloud costs
-  exceed budget envelope.
-- Cross-product MRR rollup — Phase C portfolio P&L surface.
-- Refund initiation from the panel — `kill_pipeline` owns refunds
-  during sunset.
-- Tax handling (Stripe Tax wiring) — operator-decided per-product.
-
 ## Dependencies
 
 - `secret-rotation` — webhook secret rotation aligns with the
@@ -136,15 +115,6 @@ OAuth-or-API-key + webhook-or-poll credential pattern.
 - ADR 0009 — per-managed-project cloud account isolation; Secret
   Manager paths are project-scoped.
 
-## Open questions (deferred to Architect)
-
-- Stripe Connect OAuth callback URL: per-deploy-environment (prod vs
-  staging) or single prod-only.
-- Webhook secret rotation cadence alignment with design
-  `automated-secret-rotation`.
-- PostHog snapshot storage: full per-day rows or upsert-latest
-  (depends on funnel-detail card data needs).
-
 ## Evolution
 
 - 0080 Phase A ship (2026-05-15) — initial spec: Stripe Connect
@@ -155,8 +125,8 @@ OAuth-or-API-key + webhook-or-poll credential pattern.
 ## Links
 
 - Related specs: [admin-panel](./admin-panel.md),
-  [secret-rotation](./secret-rotation.md)
-- Phase A parent context: WIP 0075 — Coder Studio b2c product
-  portfolio operator contract
-- Phase A sibling: WIP 0079 — Coder Studio product template repo
-  contract (product-side env vars and `/api/internal/stripe-status`)
+  [secret-rotation](./secret-rotation.md),
+  [studio-b2c-portfolio](../studio-b2c-portfolio.md),
+  [coder-product-template](./coder-product-template.md)
+- Studio index: [studio](./studio.md)
+- Charter: `system/STUDIO_CHARTER.md`

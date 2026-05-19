@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-05-15
-last_verified_at: 2026-05-15
+updated: 2026-05-19
+last_verified_at: 2026-05-19
 summary: User-facing SPA for status, debug, override.
 served_by_designs: [system-overview]
 related_specs: [audit-log, studio-b2c-portfolio]
@@ -204,7 +204,7 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   Portfolio table (name, MRR, spend, status), and per-product detail
   (`[flag for sunset]`, `[pause Founder reviews]`,
   `[view build artifacts]`). Behind `VITE_STUDIO_ENABLED`. Full
-  contract: see [studio-b2c-portfolio](./studio-b2c-portfolio.md).
+  contract: see [studio-b2c-portfolio](../studio-b2c-portfolio.md).
 
 ## Interfaces
 
@@ -257,140 +257,25 @@ email allowlist; sessions carry an admin JWT with cross-project access.
 
 ## Evolution
 
-- 0003 Admin panel v0 (shipped 2026-04) — Vite/React SPA, project
-  switcher, knowledge browser with Mermaid + cross-link rewriting,
-  read-only, local dev auth shim.
-- 0006 Pipeline UI in admin (shipped 2026-04) — pipeline tab with live
-  task list, filters, streamed logs, commit deep-links; added
-  `?role=`/`?status=` filters on `GET /tasks`.
-- 0012 Admin auth and mutations (shipped 2026-04) — Google OAuth +
-  email allowlist, admin JWT, task creation form, override and
-  approve-merge actions, SSE-driven real-time pipeline, checkbox editing
-  of knowledge.
-- 0026 Pipeline run dashboard (shipped 2026-04-17) — Runs list sorts
-  blocked-longest-first with a red "blocked Nm" badge per row;
-  RunDetail renders an inline Gate card for spec/design approvals
-  (approve / request-changes / reject, all from the run view) with a
-  drill-through for plan approval; the step chip + blocked badge is
-  the primary what-needs-me-now signal. Reads
-  `pipeline_runs.step_started_at` / `blocked_since` (spec 0026
-  migrations 0028/0029) and the new
-  `GET /v1/projects/{id}/ops/step-stats` rollup.
-- 0044 Write-through enforcement on ship (shipped 2026-04-18) — new
-  Ship gate panel on RunDetail fires off `wips_pending_merge`;
-  two-column layout renders the architect-drafted `merges[]` beside
-  the reviewer's `ship_attestation`. Approve posts to
-  `/knowledge/ship` (atomic Git Trees commit); Reject records an
-  audit entry and leaves the WIP in flight. Gate lives entirely in
-  the admin panel — no branch-protection integration per ADR 0015.
-- 0033 Live pipeline-run timeline (shipped 2026-04-19) — `RunTimeline`
-  component renders the per-run swim-lane view on
-  `/projects/:id/runs/:runId`. Backed by the new
-  `GET /v1/projects/{id}/pipeline-runs/{run_id}/timeline` endpoint that
-  reassembles `task_stage_runs` into a lane-per-step payload with
-  `pipeline_step_stats` medians; no new storage. `useLiveTick` drives
-  sub-second tick on open bars; refetch is `pipeline_run.changed`-SSE
-  triggered (chattier events are ignored). Behind
-  `VITE_RUN_TIMELINE_ENABLED` (default on).
-- 0034 In-panel diff & PR viewer (shipped 2026-04-19) — new
-  `PrViewer` panel on TaskDetail renders unified diffs inline. Backed
-  by `GET /v1/projects/{id}/tasks/{task_id}/pr` which parses `pr_url`
-  and fans out concurrent `fetch_pr` / `fetch_pr_diff` GitHubClient
-  calls. Verdict/body come from the existing `review_verdict` /
-  `review_body` columns — no new storage, no GitHub writes. Custom
-  Tailwind-only diff renderer handles +/-/@@ colouring. Empty,
-  error, and loading states all graceful. Behind
-  `VITE_PR_VIEWER_ENABLED` (default on).
-- 0035 Inline knowledge editor with approvals (shipped 2026-04-19,
-  body-only) — new `ArtifactEditor` component on the artifact page
-  with a state machine (`viewing → editing → saving → ok|conflict|error`).
-  Save calls the existing `PUT /v1/projects/{pid}/knowledge/{type}/{id}`
-  endpoint; no backend changes. Live preview reuses the same
-  `MarkdownBody` renderer as the read view — no render drift.
-  `beforeunload` guard on unsaved edits; approval buttons disabled
-  while dirty. `knowledge_edited` structured log event at save.
-  Frontmatter form deferred to phase 2. Behind
-  `VITE_KNOWLEDGE_EDITOR_ENABLED` (default on).
-- 0036 Command palette & keyboard-first navigation (shipped 2026-04-19)
-  — new `CommandPalette.tsx` portal-mounted at the App shell,
-  accessible from every route. `useCommandPalette()` hook binds
-  `⌘K` / `Ctrl+K` globally (inert inside focused text inputs unless
-  opted in). Entry sources are pluggable providers: `navProvider`,
-  `projectsProvider`, `projectTasksProvider`, `projectArtifactsProvider`,
-  `projectRunsProvider`, `actionsProvider`. Recent-activation history
-  (localStorage, 20 entries) boosts fuzzy-rank score; project-scoped
-  URL boosts per-project entries. Pure frontend — no backend changes.
-  Hand-rolled ranker, no new runtime dep. Behind
-  `VITE_COMMAND_PALETTE_ENABLED` (default on).
-- 0037 Audit log viewer (shipped 2026-04-19) — new `AuditLog.tsx`
-  page at `/projects/:projectId/audit` and `/admin/audit`, backed by
-  the new `GET /v1/projects/{id}/audit-events` (tenant-scoped) and
-  `GET /v1/_admin/audit-events` (fleet). Table + filter bar + expand-
-  for-payload + correlation-chip deep link. `listProjectAuditEvents`
-  / `listFleetAuditEvents` client bindings; keyset pagination on the
-  ULID cursor. Disabled-banner surfaces the
-  `CODER_AUDIT_LOG_ENABLED=false` state. Full component lives in
-  `pages/AuditLog.tsx`; no new runtime deps. Behind
-  `VITE_AUDIT_LOG_ENABLED` (default on).
-- 0041 Escalations admin pages (shipped 2026-05-03) — backend
-  shipped 2026-04-22 alongside the watcher; the admin UI half landed
-  today. New `/admin/escalations` fleet view +
-  `/projects/:projectId/escalations` per-project tab list open /
-  acknowledged / resolved / expired escalations with age, current
-  rung, trigger kind, target run/task deep-link, and on-call ack/
-  resolve identity. Status filter on both views; trigger filter on
-  the fleet view. `Ack` and `Resolve` buttons POST to the existing
-  project endpoints; the table updates the affected row in place.
-  Backed by `listProjectEscalations` / `listFleetEscalations` /
-  `acknowledgeEscalation` / `resolveEscalation` client bindings on
-  the existing backend (`GET /v1/projects/{id}/escalations`,
-  `GET /v1/_admin/escalations`,
-  `POST /v1/projects/{id}/escalations/{id}/acknowledge`,
-  `POST /v1/projects/{id}/escalations/{id}/resolve`). Behind
-  `VITE_ESCALATIONS_ENABLED` (default on); the project sub-nav grows
-  an Escalations tab when the flag is on. Page +
-  6 vitest cases land in `pages/Escalations.tsx`. See
-  [escalations](./escalations.md).
-- Claude OAuth auth-mode toggle (shipped 2026-04-22) — `ProjectDetail`
-  gains a per-project auth-mode selector (`api_key` default /
-  `oauth`) backed by `PATCH /v1/_admin/projects/{id}/auth-mode`.
-  Selects which credential the dispatcher hands to a worker's
-  `claude` process. See [service-accounts](./service-accounts.md)
-  Evolution for the server-side wiring.
-- 0053 CI Fix Loop card — new `CiFixLoopCard` component on RunDetail
-  and TaskDetail renders the CI fix-up history for a PR: original
-  task id, list of fix-up attempts (each with task id + outcome),
-  current attempt counter, last failure excerpt if escalated.
-  Backed by the `pr_to_task_map` row surfaced through the task detail
-  endpoint; deep-links to each attempt task. Behind
-  `VITE_CI_FIX_LOOP_ENABLED` (default off, mirrors fleet flag
-  default). No new routes.
-- 0086 ADR-collision chip (shipped 2026-05-12) — the Pipeline list's
-  `StatusChip` label map gains `adr_collision` → "ADR collision",
-  styled consistently with the existing `spec_collision` chip. The
-  task-detail `failure_detail` block already renders structured JSON;
-  for `adr_collision` tasks it surfaces `collided_adr_ids` and
-  `committed_adr_ids` inline so operators see exactly which ADRs need
-  hand-recovery without inspecting the preserved task output.
-- 0094 Reviewer security and performance chips (shipped 2026-05-14) —
-  TaskDetail for reviewer-role tasks gains a "Security" count chip and
-  a "Performance" count chip alongside the existing verdict chip,
-  reading `security_finding_count` and `performance_finding_count` from
-  task metadata written by the orchestrator on task completion. Counts
-  of 0 render normally; non-zero counts use a distinct colour. Behind
-  `VITE_REVIEWER_FINDINGS_ENABLED` (default on).
-- 0075 Studio sidebar and `b2c_product` project kind (Phase A) —
-  project list and switcher gain `internal_tool` / `b2c_product` type
-  badges; `b2c_product` project-detail view replaces the pipeline tab
-  with a Studio-flavoured view (Stripe connected-account chip, monthly
-  cost meter with $100/$300 threshold lines, PostHog funnel snapshot,
-  kill-criteria tracker). Studio sidebar: Idea Queue with
-  approve/reject/ask-Founder actions (each writing `audit_event`),
-  Portfolio table, per-product detail with sunset and pause actions.
-  Kill-workflow confirmation dialog shows criteria met, revenue-to-date,
-  and downstream cascade before operator confirms. Behind
-  `VITE_STUDIO_ENABLED`. See
-  [studio-b2c-portfolio](./studio-b2c-portfolio.md).
+- 2026-04 — v0 through pipeline mutations (specs 0003, 0006, 0012):
+  Vite/React SPA shell, project switcher, knowledge browser
+  (Mermaid + cross-link rewrite), pipeline tab with streamed logs and
+  filters, Google OAuth + admin JWT, task creation, override and
+  approve-merge actions, SSE-driven real-time pipeline, checkbox
+  editing of knowledge.
+- 2026-04-17 through 2026-05-03 — RunDetail surfaces (specs 0026, 0044,
+  0033, 0034, 0035, 0036, 0037, 0041): blocked-longest-first runs
+  list, inline Gate card, ship-gate panel for `wips_pending_merge`,
+  swim-lane `RunTimeline`, in-panel `PrViewer`, `ArtifactEditor`
+  inline knowledge editor, `CommandPalette` (⌘K), audit log viewer,
+  escalations admin pages, Claude OAuth auth-mode toggle.
+- 2026-05-12 through 2026-05-15 — Failure-mode chips and Studio
+  surfaces (specs 0086, 0094, 0075): `adr_collision` chip with inline
+  collided/committed ADR ids; reviewer "Security" / "Performance"
+  count chips on TaskDetail; `b2c_product` type badge, Studio sidebar
+  (Idea Queue / Portfolio / per-product detail), and Studio-flavoured
+  project-detail replacement behind `VITE_STUDIO_ENABLED`. Full
+  Studio contract: see [studio-b2c-portfolio](../studio-b2c-portfolio.md).
 
 ## Links
 
@@ -400,4 +285,4 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   [escalations](./escalations.md), [observability](./observability.md),
   [task-orchestration](./task-orchestration.md),
   [reviewer-worker](./reviewer-worker.md),
-  [studio-b2c-portfolio](./studio-b2c-portfolio.md)
+  [studio-b2c-portfolio](../studio-b2c-portfolio.md)

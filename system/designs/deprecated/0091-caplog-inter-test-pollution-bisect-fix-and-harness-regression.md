@@ -2,13 +2,12 @@
 id: 0091
 title: 'Caplog inter-test pollution: bisect, fix, and harness regression'
 type: design
-status: wip
+status: deprecated
 owner: ro
 created: '2026-05-13'
-updated: '2026-05-13'
-last_verified_at: '2026-05-13'
-implements_specs:
-- 0091
+updated: '2026-05-19'
+last_verified_at: '2026-05-19'
+implements_specs: []
 decided_by: []
 related_designs:
 - post-pr-ci-fix-loop
@@ -18,6 +17,12 @@ affects_services:
 affects_repos:
 - coder-core
 parent: pipeline-operations
+deprecated_at: '2026-05-19'
+deprecated_reason: >-
+  Architect re-authoring needed: parent spec 0091 shipped 2026-05-19 to
+  subject-slug active spec test-harness-reliability in WIP-shape body
+  (post-ship cleanup). The architect should author a fresh design
+  against the new active subject-slug spec when needed.
 ---
 
 # 0091 — Caplog inter-test pollution: bisect, fix, and harness regression

@@ -5,8 +5,8 @@ type: index
 status: active
 owner: ro
 created: 2026-05-15
-updated: 2026-05-15
-last_verified_at: 2026-05-15
+updated: 2026-05-19
+last_verified_at: 2026-05-19
 summary: "B2C product portfolio built and operated autonomously by the Coder fleet."
 served_by_designs: []
 related_specs: [admin-panel, worker-roles, task-orchestration, self-healing]
@@ -34,13 +34,20 @@ and transparency invariants are enforced.
   sidebar, Founder recurring job, kill workflow, scaffolding, and
   Stripe/PostHog wiring. Phase A: Foundations and Founder.
 
-## Charter
+## Cross-cutting concerns
 
-The Studio operates under invariants defined in
-`system/STUDIO_CHARTER.md`: quality bar, transparency, build-in-public
-posture, and kill criteria. These are enforced via the admin panel's
-Studio sidebar and the Founder's weekly review — not aspirational notes
-in a README.
+- **Charter invariants.** The Studio operates under invariants defined
+  in `system/STUDIO_CHARTER.md`: quality bar, transparency,
+  build-in-public posture, and kill criteria. These span every Studio
+  component and are enforced via the admin panel's Studio sidebar and
+  the Founder's weekly review — not aspirational notes in a README.
+- **Operator surface.** Every Studio component renders into the admin
+  panel's Studio sidebar (Idea Queue, Portfolio, per-product detail)
+  and the `b2c_product` project-detail view. Workers do not have a
+  separate Studio UI.
+- **Audit.** Every Studio mutation (idea approve / reject, founder
+  pause / resume, kill workflow, Stripe / PostHog connect) emits an
+  `audit_event` correlated to the originating cycle or operator action.
 
 ## Links
 

@@ -267,15 +267,20 @@ flowchart LR
   n012("design<br/>onboarding")
   n013("design<br/>template-schema-migration")
   n014["spec<br/>admin-panel"]
-  n015["spec<br/>cold-start-ingestion"]
-  n016["spec<br/>fleet-patterns"]
-  n017["spec<br/>knowledge-and-admin"]
-  n018["spec<br/>knowledge-api"]
-  n019["spec<br/>knowledge-freshness"]
-  n020["spec<br/>knowledge-schema-migration"]
-  n021["spec<br/>managed-workflows"]
-  n022["spec<br/>mcp-agent-interface"]
-  n023["spec<br/>onboarding"]
+  n015["spec<br/>coder-product-template"]
+  n016["spec<br/>coder-studio-founder"]
+  n017["spec<br/>cold-start-ingestion"]
+  n018["spec<br/>fleet-patterns"]
+  n019["spec<br/>knowledge-and-admin"]
+  n020["spec<br/>knowledge-api"]
+  n021["spec<br/>knowledge-freshness"]
+  n022["spec<br/>knowledge-schema-migration"]
+  n023["spec<br/>managed-workflows"]
+  n024["spec<br/>mcp-agent-interface"]
+  n025["spec<br/>onboarding"]
+  n026["spec<br/>studio"]
+  n027["spec<br/>studio-b2c-portfolio"]
+  n028["spec<br/>studio-product-integrations"]
   n014 -->|served by| n000
   n000 -.->|related| n008
   n001 -.->|related| n008
@@ -288,19 +293,19 @@ flowchart LR
   n003 -.->|related| n008
   n003 -.->|related| n006
   n003 -.->|related| n005
-  n017 -->|served by| n004
+  n019 -->|served by| n004
   n004 -.->|related| n007
   n004 -.->|related| n000
   n004 -.->|related| n010
-  n019 -->|served by| n005
+  n021 -->|served by| n005
   n005 -.->|related| n006
   n005 -.->|related| n008
   n006 -.->|related| n008
-  n017 -->|served by| n007
+  n019 -->|served by| n007
   n007 -.->|related| n006
   n007 -.->|related| n008
   n007 -.->|related| n005
-  n018 -->|served by| n008
+  n020 -->|served by| n008
   n008 -.->|related| n006
   n009 -.->|related| n001
   n009 -.->|related| n013
@@ -308,54 +313,60 @@ flowchart LR
   n010 -.->|related| n008
   n011 -.->|related| n006
   n011 -.->|related| n008
-  n023 -->|served by| n012
+  n025 -->|served by| n012
   n012 -.->|related| n006
   n012 -.->|related| n008
   n013 -.->|related| n008
   n013 -.->|related| n006
   n013 -.->|related| n009
-  n014 -->|served by| n000
-  n014 -.->|related| n018
-  n015 -.->|related| n018
-  n015 -.->|related| n019
-  n015 -.->|related| n021
-  n015 -.->|related| n023
-  n016 -.->|related| n018
+  n014 -.->|related| n027
+  n015 -.->|related| n027
+  n015 -.->|related| n028
+  n015 -.->|related| n014
   n016 -.->|related| n014
-  n016 -.->|related| n019
-  n017 -->|served by| n006
-  n017 -->|served by| n008
-  n017 -->|served by| n005
-  n017 -.->|related| n014
-  n017 -.->|related| n015
-  n017 -.->|related| n016
-  n017 -.->|related| n018
-  n017 -.->|related| n019
   n017 -.->|related| n020
   n017 -.->|related| n021
   n017 -.->|related| n023
-  n018 -->|served by| n006
-  n018 -->|served by| n007
-  n018 -->|served by| n008
-  n018 -.->|related| n014
-  n018 -.->|related| n019
+  n017 -.->|related| n025
   n018 -.->|related| n020
+  n018 -.->|related| n014
+  n018 -.->|related| n021
+  n019 -->|served by| n006
+  n019 -->|served by| n008
   n019 -->|served by| n005
-  n019 -.->|related| n018
   n019 -.->|related| n014
-  n020 -.->|related| n018
-  n020 -.->|related| n023
+  n019 -.->|related| n017
+  n019 -.->|related| n018
+  n019 -.->|related| n020
+  n019 -.->|related| n021
+  n019 -.->|related| n022
+  n019 -.->|related| n023
+  n019 -.->|related| n025
+  n020 -->|served by| n006
+  n020 -->|served by| n007
+  n020 -->|served by| n008
   n020 -.->|related| n014
-  n020 -.->|related| n019
-  n021 -.->|related| n018
-  n021 -.->|related| n023
+  n020 -.->|related| n021
+  n020 -.->|related| n022
+  n021 -->|served by| n005
+  n021 -.->|related| n020
   n021 -.->|related| n014
-  n022 -->|served by| n010
+  n022 -.->|related| n020
+  n022 -.->|related| n025
   n022 -.->|related| n014
-  n022 -.->|related| n018
-  n023 -.->|related| n014
-  n023 -.->|related| n018
+  n022 -.->|related| n021
   n023 -.->|related| n020
+  n023 -.->|related| n025
+  n023 -.->|related| n014
+  n024 -->|served by| n010
+  n024 -.->|related| n014
+  n024 -.->|related| n020
+  n025 -.->|related| n014
+  n025 -.->|related| n020
+  n025 -.->|related| n022
+  n026 -.->|related| n014
+  n027 -.->|related| n014
+  n028 -.->|related| n014
 ```
 
 ## Delivery & infra
@@ -370,6 +381,7 @@ flowchart LR
   n005["spec<br/>continuous-deployment"]
   n006["spec<br/>delivery-and-infra"]
   n007["spec<br/>tenant-isolation"]
+  n008["spec<br/>test-harness-reliability"]
   n006 -->|served by| n000
   n000 -.->|related| n003
   n005 -->|served by| n001
@@ -381,8 +393,8 @@ flowchart LR
   n004 -.->|related| n005
   n004 -.->|related| n007
   n006 -->|served by| n000
-  n006 -.->|related| n005
-  n006 -.->|related| n007
+  n008 -.->|related| n005
+  n008 -.->|related| n007
 ```
 
 ## Other

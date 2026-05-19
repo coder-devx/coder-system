@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-05-15
-updated: 2026-05-15
-last_verified_at: 2026-05-15
+updated: 2026-05-19
+last_verified_at: 2026-05-19
 summary: Founder Cloud Run Job — idea cycles, portfolio reviews, pause/resume, and Phase A calibration dogfood.
 served_by_designs: []
 related_specs:
@@ -19,51 +19,103 @@ parent: knowledge-and-admin
 
 # Coder Studio — Founder Role Phase A
 
-## Problem
+## What it is
 
-The Studio needs a Founder agent that selects ideas, reviews live products, and earns operator trust before any other Studio role ships. Without a focused spec naming exactly what ships in Phase A, the Developer has no contract and the PM has no ACs to close Phase A against.
+The Founder is the first Studio role: a Cloud Run Job that selects and
+ranks product ideas, reviews live products against the charter on a
+weekly cadence, and earns operator trust before any other Studio role
+ships. The Studio admin panel is the operator's entire Founder
+interface — there is no separate Founder CLI or surface. Phase A
+hardcodes the idea-source list and ships the operator-visible loop end
+to end; later phases will plug in additional sources, designer /
+marketer / analyst / researcher roles, and a production deployment
+path.
 
-## Users
+## Capabilities
 
-**Portfolio operator.** Reviews the Founder's idea pipeline, approves bets, and reads live-product status roughly one day per week. The Studio admin panel is their entire Founder interface.
+- **Idea cycle.** A Cloud Scheduler trigger (`coder-founder-idea-tick`,
+  daily) invokes the `coder-core-founder` Cloud Run Job in
+  `mode=idea_cycle`. The Job scores candidates against charter category
+  constraints and appends ranked ideas to the Idea Queue. Idempotent
+  via `UNIQUE(project_id, idea_hash)` — duplicate retries record the
+  `founder_cycles` row as `no_candidate` without inflating the queue.
+- **Weekly portfolio review.** A second Cloud Scheduler trigger
+  (`coder-founder-review-tick`, Sunday 18:00 UTC) runs the Job in
+  `mode=review`. It produces a Markdown report card — one `##` section
+  per live `b2c_product` project, with MRR, month-to-date cost,
+  PostHog funnel snapshot, and kill-criteria status — and surfaces it
+  in the operator's Now feed as a `FOUNDER_REVIEW` required-review
+  item within 15 minutes of completion. Acknowledging the Now item
+  sets `founder_cycles.outcome = 'reviewed'` and clears the badge.
+- **Studio sidebar header surface.** Shows `Last idea cycle` (ISO,
+  human-relative), `Next scheduled`, and `[Run idea cycle now]` (calls
+  the on-demand run endpoint). A **Founder activity** panel renders
+  the last 10 `founder_cycles` rows of `cycle_type=idea_cycle`:
+  timestamp, outcome (`emitted` / `no_candidate` / `paused` / `failed`
+  / `reviewed`), ideas-scored count, and a one-line reason for
+  `failed` rows.
+- **Idea Queue affordances.** Each row carries a clickable `cycle`
+  chip (short `founder_cycles.id`) linking to its activity row.
+  `[approve]` emits a PM draft task with
+  `repo = studio-{slugified-title}` (placeholder) and writes an
+  `idea_approved` audit event correlated by cycle id.
+- **Pause / resume.** Operator-controlled. While paused, a yellow
+  banner across Studio mode shows "Founder paused since {timestamp} by
+  {actor}". Scheduled `idea-tick` and `review-tick` runs during a
+  paused window write a `founder_cycles` row with `outcome = 'paused'`
+  and exit without scoring or dispatching.
+- **Calibration dogfood.** Phase A runs against the Coder project
+  itself as test bed. A sidebar header calibration card shows
+  `Cycle N of 12 · Top pick matched operator: K of N`. After cycle 12
+  a `FOUNDER_CALIBRATION_COMPLETE` required-review Now item appears;
+  acknowledging it marks Phase A complete.
+- **Audit attribution.** All Founder side effects (cycle outcomes,
+  idea approve, pause / resume) flow through `record_audit_event` —
+  every operator-visible mutation has a row recoverable from the audit
+  log page.
 
-## Goals
+## Interfaces
 
-- See the last idea cycle timestamp, next scheduled run, and trigger a cycle on demand.
-- Read the weekly portfolio review as a required-review Now item within 15 minutes of completion.
-- Act on Idea Queue rows that link to the cycle that produced them; approve an idea and see a PM draft task emitted with a repo placeholder.
-- Pause and resume the Founder from the sidebar, with a visible banner and audit trail.
-- Track calibration progress (N of 12 cycles, top-pick match rate) and mark Phase A complete after cycle 12.
+- **Cloud Run Job:** `coder-core-founder` (reuses the coder-core
+  image; entry module `coder_core.workers.founder`; concurrency=1,
+  max-retries=0).
+- **Cloud Scheduler triggers:** `coder-founder-idea-tick` (daily),
+  `coder-founder-review-tick` (weekly, Sunday 18:00 UTC). The existing
+  `coder-core-self-heal-tick` and `coder-core-auto-approve-tick` jobs
+  continue on their existing schedules unchanged.
+- **On-demand run:** `POST /v1/projects/{id}/founder/run?mode=idea_cycle`.
+- **Pause / resume:** `POST /v1/projects/{id}/founder/pause` and
+  `POST /v1/projects/{id}/founder/resume`. Pause sets
+  `projects.founder_paused = TRUE` and writes a `founder_paused` audit
+  event (actor from admin JWT); resume clears the flag and writes
+  `founder_resumed`.
+- **Now feed:** `FOUNDER_REVIEW` and `FOUNDER_CALIBRATION_COMPLETE`
+  required-review items.
 
-## Non-goals
+## Dependencies
 
-- Idea-source plugin architecture (Phase B+; Phase A hardcodes the source list).
-- Scoring algorithm (Founder prompt's concern, not this spec).
-- `coder-product-template` instantiation (separate Phase A spec covers repo scaffolding).
-- Designer, Marketer, Analyst, Researcher roles (later phases).
-- Terraform for production deployment of the Founder Cloud Run Job.
+- [admin-panel](./admin-panel.md) — Studio sidebar header, Founder
+  activity panel, Idea Queue, calibration card, pause / resume toggle,
+  and Now feed rendering all live in the admin SPA.
+- [self-healing](./self-healing.md) — reuses the Cloud Run Job +
+  Scheduler tick pattern (`coder-core-self-heal-tick`).
+- [task-orchestration](../pipeline-operations.md) — `[approve]`
+  dispatches a PM draft task through the standard pipeline.
+- [audit-log](../tenancy-and-access.md) — every Founder side effect
+  emits an `audit_event` recoverable from the audit log page.
+- `projects.founder_paused` column — checked at Job entry.
 
-## Scope
+## Evolution
 
-**Job infrastructure.** Cloud Run Job `coder-core-founder` (reuses coder-core image, entry module `coder_core.workers.founder`). Two Cloud Scheduler triggers: `coder-founder-idea-tick` (daily) and `coder-founder-review-tick` (weekly, Sunday 18:00 UTC). Job concurrency=1, max-retries=0. Idempotency via `UNIQUE(project_id, idea_hash)` on the idea queue. `projects.founder_paused` checked at Job entry; all side effects flow through `record_audit_event`.
+- 2026-05-15 — Phase A ship (spec 0077): Cloud Run Job, daily idea
+  tick + weekly review tick, sidebar header + activity panel, Idea
+  Queue cycle chip + approve audit event, pause / resume with banner,
+  twelve-cycle calibration dogfood against the Coder project.
 
-**Idea cycle surface.** Studio sidebar header: `Last idea cycle` (ISO, human-relative), `Next scheduled`, `[Run idea cycle now]` (calls `POST /v1/projects/{id}/founder/run?mode=idea_cycle`). A **Founder activity** panel renders the last 10 `founder_cycles` rows of `cycle_type=idea_cycle`: timestamp, outcome (`emitted` / `no_candidate` / `paused` / `failed`), ideas-scored count, one-line reason for `failed` rows.
+## Links
 
-**Portfolio review.** Weekly Job run produces a Markdown report card — one `##` section per live `b2c_product` project: MRR, month-to-date cost, PostHog funnel snapshot (visitors → signups → activations → paying), kill-criteria status. A `FOUNDER_REVIEW` Now item appears within 15 minutes of Job completion. Acknowledging sets `founder_cycles.outcome = 'reviewed'` and clears the required-review badge.
-
-**Idea queue affordances.** Each row carries a clickable `cycle` chip (short `founder_cycles.id`) linking to its activity row. `[approve]` emits a PM draft task with `repo = studio-{slugified-title}` (placeholder) and writes an `idea_approved` audit event correlated by cycle id.
-
-**Pause / resume.** `POST /v1/projects/{id}/founder/pause` sets `projects.founder_paused = TRUE` and writes a `founder_paused` audit event (actor from admin JWT). Yellow banner across Studio mode: Founder paused since {timestamp} by {actor}. `POST /v1/projects/{id}/founder/resume` clears the flag, writes `founder_resumed`, removes the banner.
-
-**Calibration dogfood.** Runs against the Coder project. Sidebar header calibration card: `Cycle N of 12 · Top pick matched operator: K of N`. After cycle 12, a `FOUNDER_CALIBRATION_COMPLETE` required-review Now item appears; acknowledging marks Phase A complete.
-
-## Acceptance criteria
-
-- **AC1.** The Studio sidebar header shows `Last idea cycle` (human-relative), `Next scheduled`, and `[Run idea cycle now]`. The Founder activity panel shows the last 10 idea-cycle rows: timestamp, outcome, ideas-scored count; `failed` rows include a one-line reason.
-- **AC2.** The weekly portfolio review appears in the Now feed as a required-review `FOUNDER_REVIEW` item within 15 minutes of Job completion, with one `##` section per live `b2c_product` project. Acknowledging sets `founder_cycles.outcome = 'reviewed'` and clears the required-review badge.
-- **AC3.** Each Idea Queue row carries a clickable `cycle` chip (short `founder_cycles.id`). `[approve]` emits a PM draft task with `repo = studio-{slugified-title}` (placeholder) and writes an `idea_approved` audit event recoverable by cycle id from the audit log page.
-- **AC4.** The `[Pause Founder]` / `[Resume Founder]` toggle calls the pause/resume endpoints. While paused, a yellow banner displays: Founder paused since {timestamp} by {actor}. Both actions produce `founder_paused` / `founder_resumed` audit events with actor visible on the audit log page.
-- **AC5.** The calibration card in the Studio sidebar header shows `Cycle N of 12 · Top pick matched operator: K of N` after each idea cycle against the Coder dogfood context. After cycle 12, a `FOUNDER_CALIBRATION_COMPLETE` required-review Now item appears; acknowledging marks Phase A complete.
-- **AC6.** After `coder-core-founder` is added, the `coder-core-self-heal-tick` and `coder-core-auto-approve-tick` Cloud Scheduler jobs continue to execute on their existing schedules and produce `succeeded` outcomes without changes to their invocation targets, schedules, or retry policies.
-- **AC7.** If Cloud Scheduler retries the same `idea-tick` execution after a transient failure, the Idea Queue entry count does not increase. The `UNIQUE(project_id, idea_hash)` constraint absorbs the duplicate; the retry's `founder_cycles` row records `no_candidate`.
-- **AC8.** When `projects.founder_paused = TRUE`, the next scheduled `idea-tick` and `review-tick` each write a `founder_cycles` row with `outcome = 'paused'` and exit without scoring sources or emitting PM draft tasks.
+- Charter: `system/STUDIO_CHARTER.md`
+- Portfolio contract: [studio-b2c-portfolio](../studio-b2c-portfolio.md)
+- Studio index: [studio](./studio.md)
+- Related: [admin-panel](./admin-panel.md),
+  [self-healing](./self-healing.md)

@@ -2,13 +2,12 @@
 id: '0079'
 title: Coder Product Template Repo Contract
 type: design
-status: wip
+status: deprecated
 owner: ro
 created: '2026-05-10'
-updated: '2026-05-10'
-last_verified_at: '2026-05-10'
-implements_specs:
-- '0079'
+updated: '2026-05-19'
+last_verified_at: '2026-05-19'
+implements_specs: []
 decided_by:
 - '0032'
 - '0036'
@@ -19,6 +18,12 @@ affects_services:
 affects_repos:
 - coder-core
 parent: system-overview
+deprecated_at: '2026-05-19'
+deprecated_reason: >-
+  Architect re-authoring needed: parent spec 0079 shipped 2026-05-19 to
+  subject-slug active spec coder-product-template in WIP-shape body
+  (post-ship cleanup). The architect should author a fresh design
+  against the new active subject-slug spec when needed.
 ---
 
 # Coder Product Template Repo Contract

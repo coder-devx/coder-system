@@ -2,13 +2,12 @@
 id: '0077'
 title: Coder Studio — Founder Role Phase A
 type: design
-status: wip
+status: deprecated
 owner: ro
 created: '2026-05-10'
-updated: '2026-05-10'
-last_verified_at: '2026-05-10'
-implements_specs:
-- '0077'
+updated: '2026-05-19'
+last_verified_at: '2026-05-19'
+implements_specs: []
 decided_by: []
 related_designs:
 - '0075'
@@ -19,6 +18,12 @@ affects_repos:
 - coder-core
 - coder-admin
 parent: knowledge-and-admin
+deprecated_at: '2026-05-19'
+deprecated_reason: >-
+  Architect re-authoring needed: parent spec 0077 shipped 2026-05-19 to
+  subject-slug active spec coder-studio-founder in WIP-shape body
+  (post-ship cleanup). The architect should author a fresh design
+  against the new active subject-slug spec when needed.
 ---
 
 # Coder Studio — Founder Role Phase A

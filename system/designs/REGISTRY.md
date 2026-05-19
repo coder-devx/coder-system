@@ -69,12 +69,8 @@ Logical components of the Coder system as it exists today.
 | [0071](./wip/0071-failure-mode-grouping-and-runbooks.md) | Failure-mode grouping and operator runbooks | ro | [0071](../product-specs/wip/0071-failure-mode-grouping-and-runbooks.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
 | [0072](./wip/0072-task-replay-and-diagnostics.md) | Task replay and diagnostic surface | ro | [0072](../product-specs/wip/0072-task-replay-and-diagnostics.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
 | [0073](./wip/0073-drive-mode-in-browser.md) | Drive mode — operator role takeover in the browser | ro | [0073](../product-specs/wip/0073-drive-mode-in-browser.md) | [0031](../adrs/0031-canonical-project-state-for-operator-surfaces.md) |
-| [0075](./wip/0075-studio-architecture.md) | Studio Architecture | ro | — | — |
 | [0076](./wip/0076-spec-bound-architect-dispatch.md) | Spec-bound Architect Dispatch | ro | — | — |
-| [0077](./wip/0077-coder-studio-founder-role-phase-a.md) | Coder Studio — Founder Role Phase A | ro | — | — |
 | [0078](./wip/0078-spec-run-lifecycle-auto-bootstrap.md) | Spec-Run Lifecycle Auto-Bootstrap | ro | — | — |
-| [0079](./wip/0079-coder-product-template-repo-contract.md) | Coder Product Template Repo Contract | ro | — | — |
-| [0080](./wip/0080-studio-stripe-posthog-integration.md) | Studio Stripe Connect and PostHog Integration | ro | — | — |
 | [0081](./wip/0081-dispatcher-re-kick-for-tasks-stuck-at-queued-executing.md) | Dispatcher re-kick for tasks stuck at queued/executing | ro | — | — |
 | [0082](./wip/0082-alembic-head-conflict-detection-and-deploy-migrate-paging.md) | Alembic Head-Conflict Detection and Deploy-Migrate Paging | ro | — | — |
 | [0083](./wip/0083-plan-unblock-retry-chain-awareness.md) | Plan-unblock retry-chain awareness | ro | — | — |
@@ -85,7 +81,6 @@ Logical components of the Coder system as it exists today.
 | [0088](./wip/0088-worker-prod-credentials-isolation.md) | Worker Prod-Credentials Isolation | ro | — | — |
 | [0089](./wip/0089-branch-protection-enforcement.md) | Branch Protection Enforcement for Orchestrator-Managed Repos | ro | — | — |
 | [0090](./wip/0090-deploy-chain-flake-resilience.md) | Deploy-chain flake resilience | ro | — | — |
-| [0091](./wip/0091-caplog-inter-test-pollution-bisect-fix-and-harness-regression.md) | Caplog inter-test pollution: bisect, fix, and harness regression | ro | — | — |
 | [0092](./wip/0092-pm-retry-via-override.md) | PM retry via override | ro | — | — |
 | [0093](./wip/0093-broken-cross-link-failure-detail.md) | broken_cross_link Failure Detail | ro | — | — |
 | [0094](./wip/0094-reviewer-security-and-performance-analysis.md) | Reviewer Security and Performance Analysis | ro | — | — |
@@ -97,6 +92,11 @@ Logical components of the Coder system as it exists today.
 
 | ID | Title | Deprecated at | Reason |
 |---|---|---|---|
+| [0075](./deprecated/0075-studio-architecture.md) | Studio Architecture | — | — |
+| [0077](./deprecated/0077-coder-studio-founder-role-phase-a.md) | Coder Studio — Founder Role Phase A | — | — |
+| [0079](./deprecated/0079-coder-product-template-repo-contract.md) | Coder Product Template Repo Contract | — | — |
+| [0080](./deprecated/0080-studio-stripe-posthog-integration.md) | Studio Stripe Connect and PostHog Integration | — | — |
+| [0091](./deprecated/0091-caplog-inter-test-pollution-bisect-fix-and-harness-regression.md) | Caplog inter-test pollution: bisect, fix, and harness regression | — | — |
 | [0097](./deprecated/0097-worker-knowledge-pull-visibility.md) | Worker knowledge-pull visibility | — | — |
 | [0098](./deprecated/0098-task-knowledge-reads-panel.md) | Task Knowledge Reads Panel | — | — |
 | [0100](./deprecated/0100-worker-knowledge-reads-inline-on-task-detail.md) | Worker Knowledge Reads Inline on Task Detail | — | — |

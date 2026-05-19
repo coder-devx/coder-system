@@ -2,13 +2,12 @@
 id: '0075'
 title: Studio Architecture
 type: design
-status: wip
+status: deprecated
 owner: ro
 created: '2026-05-10'
-updated: '2026-05-10'
-last_verified_at: '2026-05-10'
-implements_specs:
-- '0075'
+updated: '2026-05-19'
+last_verified_at: '2026-05-19'
+implements_specs: []
 decided_by:
 - '0032'
 - '0033'
@@ -28,6 +27,12 @@ affects_repos:
 - coder-admin
 - coder-system
 parent: system-overview
+deprecated_at: '2026-05-19'
+deprecated_reason: >-
+  Architect re-authoring needed: parent spec 0075 shipped 2026-05-19 to
+  subject-slug active spec studio-b2c-portfolio in WIP-shape body
+  (post-ship cleanup). The architect should author a fresh design
+  against the new active subject-slug spec when needed.
 ---
 
 # Studio Architecture
