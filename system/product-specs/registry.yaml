@@ -502,13 +502,6 @@ specs:
   - admin-panel
   - knowledge-api
   parent: null
-- id: '0075'
-  title: "Coder Studio \u2014 B2C product portfolio operator contract"
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0075-coder-studio-b2c-product-portfolio-operator-contract.md
-  parent: knowledge-and-admin
 - id: 0080
   title: "Coder Studio \u2014 Stripe Connect and PostHog integration in coder-core"
   status: wip
@@ -641,3 +634,26 @@ specs:
   owner: ro
   folder: active
   file: active/knowledge/coder-product-template.md
+- id: studio
+  title: Studio
+  status: active
+  owner: ro
+  folder: active
+  file: active/knowledge/studio.md
+  related_specs:
+  - admin-panel
+  - worker-roles
+  - task-orchestration
+  - self-healing
+- id: studio-b2c-portfolio
+  title: "Studio \u2014 B2C product portfolio operator contract"
+  status: active
+  owner: ro
+  folder: active
+  file: active/studio-b2c-portfolio.md
+  related_specs:
+  - studio
+  - admin-panel
+  - worker-roles
+  - task-orchestration
+  - self-healing
