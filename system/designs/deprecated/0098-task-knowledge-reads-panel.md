@@ -2,11 +2,11 @@
 id: 0098
 title: Task Knowledge Reads Panel
 type: design
-status: wip
+status: deprecated
 owner: ro
 created: '2026-05-18'
-updated: '2026-05-18'
-last_verified_at: '2026-05-18'
+updated: '2026-05-19'
+last_verified_at: '2026-05-19'
 implements_specs:
 - 0098
 decided_by: []
@@ -19,6 +19,14 @@ affects_services:
 affects_repos:
 - coder-admin
 parent: knowledge-and-admin
+deprecated_at: '2026-05-19'
+deprecated_reason: >-
+  Superseded by canonical design 0099 (Worker Knowledge-Read
+  Transparency). One of seven near-duplicate design pairs from the
+  2026-05-18 calibration burst; consolidated into 0099 on 2026-05-19.
+  Distinct ideas (dual-source capture, deep-link, tenant isolation,
+  pipeline-row badge) folded into spec 0099 ACs and re-dispatched to
+  architect.
 ---
 
 # Task Knowledge Reads Panel

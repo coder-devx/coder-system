@@ -2,13 +2,18 @@
 id: '0103'
 title: Knowledge reads panel on task detail
 type: spec
-status: wip
+status: deprecated
 owner: ro
 created: '2026-05-18'
-updated: '2026-05-18'
-last_verified_at: '2026-05-18'
-deprecated_at: null
-reason: null
+updated: '2026-05-19'
+last_verified_at: '2026-05-19'
+deprecated_at: '2026-05-19'
+reason: >-
+  Superseded by canonical spec 0099 (Worker Knowledge-Read
+  Transparency). This was one of seven near-duplicate specs the
+  founder/PM calibration loop emitted on 2026-05-18 for the same idea
+  (surface worker knowledge-repo fetches on the task detail page).
+  Consolidated 2026-05-19; distinct contributions folded into 0099.
 served_by_designs: []
 related_specs:
 - admin-panel

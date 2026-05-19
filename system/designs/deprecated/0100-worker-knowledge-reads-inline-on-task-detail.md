@@ -2,11 +2,11 @@
 id: '0100'
 title: Worker Knowledge Reads Inline on Task Detail
 type: design
-status: wip
+status: deprecated
 owner: ro
 created: '2026-05-18'
-updated: '2026-05-18'
-last_verified_at: '2026-05-18'
+updated: '2026-05-19'
+last_verified_at: '2026-05-19'
 implements_specs:
 - '0100'
 decided_by: []
@@ -21,6 +21,14 @@ affects_repos:
 - coder-core
 - coder-admin
 parent: knowledge-and-admin
+deprecated_at: '2026-05-19'
+deprecated_reason: >-
+  Superseded by canonical design 0099 (Worker Knowledge-Read
+  Transparency). One of seven near-duplicate design pairs from the
+  2026-05-18 calibration burst; consolidated into 0099 on 2026-05-19.
+  Distinct ideas (dual-source capture, deep-link, tenant isolation,
+  pipeline-row badge) folded into spec 0099 ACs and re-dispatched to
+  architect.
 ---
 
 # Worker Knowledge Reads Inline on Task Detail

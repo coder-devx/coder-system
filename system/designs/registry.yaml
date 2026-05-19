@@ -914,18 +914,18 @@ designs:
   target_slug: timeout-stall-visibility
 - id: 0097
   title: Worker knowledge-pull visibility
-  status: wip
+  status: deprecated
   owner: ro
-  folder: wip
-  file: wip/0097-worker-knowledge-pull-visibility.md
+  folder: deprecated
+  file: deprecated/0097-worker-knowledge-pull-visibility.md
   parent: pipeline-operations
   target_slug: worker-knowledge-pull-visibility
 - id: 0098
   title: Task Knowledge Reads Panel
-  status: wip
+  status: deprecated
   owner: ro
-  folder: wip
-  file: wip/0098-task-knowledge-reads-panel.md
+  folder: deprecated
+  file: deprecated/0098-task-knowledge-reads-panel.md
   parent: knowledge-and-admin
   target_slug: task-knowledge-reads-panel
 - id: 0099
@@ -938,33 +938,33 @@ designs:
   target_slug: worker-knowledge-read-transparency
 - id: '0100'
   title: Worker Knowledge Reads Inline on Task Detail
-  status: wip
+  status: deprecated
   owner: ro
-  folder: wip
-  file: wip/0100-worker-knowledge-reads-inline-on-task-detail.md
+  folder: deprecated
+  file: deprecated/0100-worker-knowledge-reads-inline-on-task-detail.md
   parent: knowledge-and-admin
   target_slug: worker-knowledge-reads-inline-on-task-detail
 - id: '0101'
   title: Task Knowledge-Read Trace
-  status: wip
+  status: deprecated
   owner: ro
-  folder: wip
-  file: wip/0101-task-knowledge-read-trace.md
+  folder: deprecated
+  file: deprecated/0101-task-knowledge-read-trace.md
   parent: knowledge-and-admin
   target_slug: task-knowledge-read-trace
 - id: '0102'
   title: Knowledge-read trace on task detail
-  status: wip
+  status: deprecated
   owner: ro
-  folder: wip
-  file: wip/0102-knowledge-read-trace-on-task-detail.md
+  folder: deprecated
+  file: deprecated/0102-knowledge-read-trace-on-task-detail.md
   parent: knowledge-and-admin
   target_slug: knowledge-read-trace-on-task-detail
 - id: '0103'
   title: Knowledge reads panel on task detail
-  status: wip
+  status: deprecated
   owner: ro
-  folder: wip
-  file: wip/0103-knowledge-reads-panel-on-task-detail.md
+  folder: deprecated
+  file: deprecated/0103-knowledge-reads-panel-on-task-detail.md
   parent: knowledge-and-admin
   target_slug: knowledge-reads-panel

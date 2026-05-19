@@ -66,14 +66,15 @@ in each component's `## Evolution` section and in git.
 | [0093](./wip/0093-architect-broken-cross-link-recovery.md) | Architect broken_cross_link should surface the specific field/target instead of silent-dropping | ro | — |
 | [0095](./wip/0095-cache-and-cost-observability-correctness.md) | Cache-hit and cost-regression observability is wrong or absent | ro | — |
 | [0096](./wip/0096-timed-out-task-stall-visibility-in-admin-panel.md) | Timed-out task stall visibility in admin panel | ro | — |
-| [0097](./wip/0097-worker-knowledge-pull-visibility-on-task-detail.md) | Worker knowledge-pull visibility on task detail | ro | — |
-| [0098](./wip/0098-worker-knowledge-read-log-in-task-detail.md) | Worker Knowledge Read Log in Task Detail | ro | — |
 | [0099](./wip/0099-worker-knowledge-read-transparency.md) | Worker Knowledge-Read Transparency | ro | — |
-| [0100](./wip/0100-worker-knowledge-reads-inline-on-task-detail.md) | Worker knowledge reads inline on task detail | ro | — |
-| [0101](./wip/0101-task-knowledge-read-trace.md) | Task Knowledge-Read Trace | ro | — |
-| [0102](./wip/0102-knowledge-read-trace-on-task-detail.md) | Knowledge-read trace on task detail | ro | — |
-| [0103](./wip/0103-knowledge-reads-panel-on-task-detail.md) | Knowledge reads panel on task detail | ro | — |
 
 ## Deprecated
 
-_None yet._
+| ID | Title | Reason |
+|---|---|---|
+| [0097](./deprecated/0097-worker-knowledge-pull-visibility-on-task-detail.md) | Worker knowledge-pull visibility on task detail | — |
+| [0098](./deprecated/0098-worker-knowledge-read-log-in-task-detail.md) | Worker Knowledge Read Log in Task Detail | — |
+| [0100](./deprecated/0100-worker-knowledge-reads-inline-on-task-detail.md) | Worker knowledge reads inline on task detail | — |
+| [0101](./deprecated/0101-task-knowledge-read-trace.md) | Task Knowledge-Read Trace | — |
+| [0102](./deprecated/0102-knowledge-read-trace-on-task-detail.md) | Knowledge-read trace on task detail | — |
+| [0103](./deprecated/0103-knowledge-reads-panel-on-task-detail.md) | Knowledge reads panel on task detail | — |
