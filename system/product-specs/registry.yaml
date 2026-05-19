@@ -509,13 +509,6 @@ specs:
   folder: wip
   file: wip/0075-coder-studio-b2c-product-portfolio-operator-contract.md
   parent: knowledge-and-admin
-- id: '0077'
-  title: "Coder Studio \u2014 Founder role Phase A"
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0077-coder-studio-founder-role-phase-a.md
-  parent: knowledge-and-admin
 - id: 0079
   title: "Coder Studio \u2014 coder-product-template repo contract"
   status: wip
@@ -638,3 +631,14 @@ specs:
   related_specs:
   - continuous-deployment
   - tenant-isolation
+- id: coder-studio-founder
+  title: "Coder Studio \u2014 Founder Role Phase A"
+  status: active
+  owner: ro
+  folder: active
+  file: active/knowledge/coder-studio-founder.md
+  related_specs:
+  - admin-panel
+  - self-healing
+  - task-orchestration
+  - audit-log
