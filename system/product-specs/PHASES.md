@@ -20,8 +20,8 @@
 Hourly job deletes stale `task/*` branches older than 24h with no open PR.
 Prevents branch proliferation from failed developer tasks.
 
-- **Status:** shipped → [`active/branch-cleanup`](./active/branch-cleanup.md) /
-  [`designs/active/branch-cleanup`](../designs/active/branch-cleanup.md)
+- **Status:** shipped → [`active/branch-cleanup`](./active/pipeline/branch-cleanup.md) /
+  [`designs/active/branch-cleanup`](../designs/active/pipeline/branch-cleanup.md)
 - **Extends:** `task-orchestration`, `developer-worker`, `observability`
 
 ### 0024 — Task Stage Runs API (shipped 2026-04-15)
@@ -31,8 +31,8 @@ returning the archived `TaskStageRunRow` rows for a task, ordered by
 `recorded_at` ascending. Debugging-oriented, no admin UI.
 
 - **Status:** shipped → merged into
-  [`task-orchestration`](./active/task-orchestration.md) /
-  [`worker-communication`](../designs/active/worker-communication.md)
+  [`task-orchestration`](./active/pipeline/task-orchestration.md) /
+  [`worker-communication`](../designs/active/pipeline/worker-communication.md)
 - **Extends:** `task-orchestration`, `observability`
 
 ### 0025 — Worker output compliance (shipped 2026-04-17)
@@ -44,14 +44,14 @@ schema failure up to a budget; exhaustion lands
 after a 48 h shadow soak from the 2026-04-15 deploy.
 
 - **Status:** shipped → merged into
-  [`pm-worker`](./active/pm-worker.md),
-  [`architect-worker`](./active/architect-worker.md),
-  [`team-manager-worker`](./active/team-manager-worker.md),
-  [`task-orchestration`](./active/task-orchestration.md) /
-  [`pm-worker`](../designs/active/pm-worker.md),
-  [`architect-worker`](../designs/active/architect-worker.md),
-  [`team-manager-worker`](../designs/active/team-manager-worker.md),
-  [`worker-communication`](../designs/active/worker-communication.md).
+  [`pm-worker`](./active/workers/pm-worker.md),
+  [`architect-worker`](./active/workers/architect-worker.md),
+  [`team-manager-worker`](./active/workers/team-manager-worker.md),
+  [`task-orchestration`](./active/pipeline/task-orchestration.md) /
+  [`pm-worker`](../designs/active/workers/pm-worker.md),
+  [`architect-worker`](../designs/active/workers/architect-worker.md),
+  [`team-manager-worker`](../designs/active/workers/team-manager-worker.md),
+  [`worker-communication`](../designs/active/pipeline/worker-communication.md).
 - **ADR:** [0012 — re-prompt only, no programmatic repair](../adrs/0012-re-prompt-only-worker-output-remediation.md).
 
 ### 0026 — Pipeline run dashboard (shipped 2026-04-17)
@@ -65,9 +65,9 @@ red `blocked Nm` badge per row. Two new timestamp columns on
 (`pipeline_run.changed` + `.gate_blocked`) back the UX.
 
 - **Status:** shipped → merged into
-  [`task-orchestration`](./active/task-orchestration.md),
-  [`admin-panel`](./active/admin-panel.md) /
-  [`worker-communication`](../designs/active/worker-communication.md).
+  [`task-orchestration`](./active/pipeline/task-orchestration.md),
+  [`admin-panel`](./active/knowledge/admin-panel.md) /
+  [`worker-communication`](../designs/active/pipeline/worker-communication.md).
 - **Runbook:** [pipeline-run-blocked](../runbooks/pipeline-run-blocked.md).
 
 ### 0027 — Automatic retry on transient failures (shipped 2026-04-17)
@@ -85,17 +85,17 @@ doesn't retry our own task-deadline hits as transient (collision
 found during the 2026-04-17 trial flip).
 
 - **Status:** shipped → merged into
-  [`pm-worker`](./active/pm-worker.md),
-  [`architect-worker`](./active/architect-worker.md),
-  [`team-manager-worker`](./active/team-manager-worker.md),
-  [`developer-worker`](./active/developer-worker.md),
-  [`reviewer-worker`](./active/reviewer-worker.md),
-  [`task-orchestration`](./active/task-orchestration.md) /
-  [`pm-worker`](../designs/active/pm-worker.md),
-  [`architect-worker`](../designs/active/architect-worker.md),
-  [`team-manager-worker`](../designs/active/team-manager-worker.md),
+  [`pm-worker`](./active/workers/pm-worker.md),
+  [`architect-worker`](./active/workers/architect-worker.md),
+  [`team-manager-worker`](./active/workers/team-manager-worker.md),
+  [`developer-worker`](./active/workers/developer-worker.md),
+  [`reviewer-worker`](./active/workers/reviewer-worker.md),
+  [`task-orchestration`](./active/pipeline/task-orchestration.md) /
+  [`pm-worker`](../designs/active/workers/pm-worker.md),
+  [`architect-worker`](../designs/active/workers/architect-worker.md),
+  [`team-manager-worker`](../designs/active/workers/team-manager-worker.md),
   [`worker-roles`](../designs/active/worker-roles.md),
-  [`worker-communication`](../designs/active/worker-communication.md).
+  [`worker-communication`](../designs/active/pipeline/worker-communication.md).
 - **ADR:** [0013 — worker-level transient retry](../adrs/0013-worker-level-transient-retry.md).
 
 ### 0028 — Concurrent pipeline execution & queue fairness (shipped 2026-04-17)
@@ -110,8 +110,8 @@ and two admin surfaces (per-project Queue strip + Fleet queue
 widget) surface the dispatcher state.
 
 - **Status:** shipped → merged into
-  [`task-orchestration`](./active/task-orchestration.md) /
-  [`worker-communication`](../designs/active/worker-communication.md).
+  [`task-orchestration`](./active/pipeline/task-orchestration.md) /
+  [`worker-communication`](../designs/active/pipeline/worker-communication.md).
 - **Runbook:** [concurrency-overflow](../runbooks/concurrency-overflow.md).
 
 ### 0051 — coder-core modular monolith hardening (shipped)
@@ -142,7 +142,7 @@ extraction is an implementation swap, not a service rewrite.
   All 11 in-scope ACs done; 1 deferred (freshness-test calendar drift,
   pre-existing concern).
 - **Spec:** folded into [delivery-and-infra](./active/delivery-and-infra.md) (PR #54, 2026-05-03) ·
-  **Design:** [coder-core-modular-monolith](../designs/active/coder-core-modular-monolith.md)
+  **Design:** [coder-core-modular-monolith](../designs/active/delivery/coder-core-modular-monolith.md)
 - **Extends:** `task-orchestration`, `knowledge-api`, `multi-tenancy`,
   `audit-log`, `observability`, role-worker components
 
@@ -242,9 +242,9 @@ New endpoint `GET /v1/projects/{id}/pipeline-runs/{run_id}/timeline`;
 no new storage. Admin component behind `VITE_RUN_TIMELINE_ENABLED`.
 
 - **Status:** shipped → merged into
-  [`admin-panel`](./active/admin-panel.md),
-  [`task-orchestration`](./active/task-orchestration.md) /
-  [`worker-communication`](../designs/active/worker-communication.md).
+  [`admin-panel`](./active/knowledge/admin-panel.md),
+  [`task-orchestration`](./active/pipeline/task-orchestration.md) /
+  [`worker-communication`](../designs/active/pipeline/worker-communication.md).
 
 ### 0034 — In-panel diff & PR viewer (shipped 2026-04-19)
 
@@ -255,9 +255,9 @@ panel. New `/tasks/{id}/pr` endpoint parses `pr_url` and fans out
 Admin component behind `VITE_PR_VIEWER_ENABLED`.
 
 - **Status:** shipped → merged into
-  [`admin-panel`](./active/admin-panel.md),
-  [`task-orchestration`](./active/task-orchestration.md) /
-  [`worker-communication`](../designs/active/worker-communication.md).
+  [`admin-panel`](./active/knowledge/admin-panel.md),
+  [`task-orchestration`](./active/pipeline/task-orchestration.md) /
+  [`worker-communication`](../designs/active/pipeline/worker-communication.md).
 
 ### 0035 — Inline knowledge editor with approvals (shipped 2026-04-19)
 
@@ -269,9 +269,9 @@ the original WIP's non-goals. Admin component behind
 `VITE_KNOWLEDGE_EDITOR_ENABLED`.
 
 - **Status:** shipped → merged into
-  [`admin-panel`](./active/admin-panel.md),
-  [`knowledge-api`](./active/knowledge-api.md) /
-  [`knowledge-write-api`](../designs/active/knowledge-write-api.md).
+  [`admin-panel`](./active/knowledge/admin-panel.md),
+  [`knowledge-api`](./active/knowledge/knowledge-api.md) /
+  [`knowledge-write-api`](../designs/active/knowledge/knowledge-write-api.md).
 
 ### 0036 — Command palette & keyboard-first navigation (shipped 2026-04-19)
 
@@ -282,7 +282,7 @@ match and recent-activation boost. Pure frontend — no backend changes.
 Behind `VITE_COMMAND_PALETTE_ENABLED`.
 
 - **Status:** shipped → merged into
-  [`admin-panel`](./active/admin-panel.md) /
+  [`admin-panel`](./active/knowledge/admin-panel.md) /
   [`system-overview`](../designs/active/system-overview.md).
 
 ---
@@ -308,22 +308,22 @@ Migration 0041 (downgrade raises by design). Retention stamp at
 component owns the shape; existing components grow Evolution entries
 for their mutation-endpoint wirings.
 
-- **Status:** shipped → new [`audit-log`](./active/audit-log.md)
-  component / [`audit-log` design](../designs/active/audit-log.md);
+- **Status:** shipped → new [`audit-log`](./active/tenancy/audit-log.md)
+  component / [`audit-log` design](../designs/active/tenancy/audit-log.md);
   evolution entries added to
-  [`admin-panel`](./active/admin-panel.md) (viewer page),
-  [`task-orchestration`](./active/task-orchestration.md) (mutation
-  wirings), [`impersonation`](./active/impersonation.md) (actor chain
+  [`admin-panel`](./active/knowledge/admin-panel.md) (viewer page),
+  [`task-orchestration`](./active/pipeline/task-orchestration.md) (mutation
+  wirings), [`impersonation`](./active/tenancy/impersonation.md) (actor chain
   + issue-token/revoke audits) /
   [`system-overview`](../designs/active/system-overview.md)
   (middleware slot),
-  [`worker-communication`](../designs/active/worker-communication.md)
+  [`worker-communication`](../designs/active/pipeline/worker-communication.md)
   (task-mutation wirings, worker-initiated correlation fallback),
-  [`knowledge-write-api`](../designs/active/knowledge-write-api.md)
+  [`knowledge-write-api`](../designs/active/knowledge/knowledge-write-api.md)
   (knowledge-mutation wirings),
-  [`impersonation`](../designs/active/impersonation.md) (actor chain
+  [`impersonation`](../designs/active/tenancy/impersonation.md) (actor chain
   captured),
-  [`observability-and-cost-tracking`](../designs/active/observability-and-cost-tracking.md)
+  [`observability-and-cost-tracking`](../designs/active/pipeline/observability-and-cost-tracking.md)
   (adjacent operator surface).
 
 ### 0038 — Automated secret rotation (LIVE, first rotation 2026-05-20)
@@ -386,8 +386,8 @@ fires for new additions. The harness was stricter than the spec's
 `CI_ISOLATION_SUITE_BLOCKING` was never needed — every PR has been
 blocking since ship day.
 
-- **Status:** shipped → new [`tenant-isolation`](./active/tenant-isolation.md)
-  component / [`tenant-isolation` design](../designs/active/tenant-isolation.md)
+- **Status:** shipped → new [`tenant-isolation`](./active/delivery/tenant-isolation.md)
+  component / [`tenant-isolation` design](../designs/active/delivery/tenant-isolation.md)
 
 ---
 
@@ -453,13 +453,13 @@ is reused by 0042 self-healing as `actor='system'`. Every state
 change writes an `escalation.*` audit row. Admin pages live behind
 `VITE_ESCALATIONS_ENABLED`.
 
-- **Status:** shipped → new [`escalations`](./active/escalations.md)
-  component / [`escalations` design](../designs/active/escalations.md).
+- **Status:** shipped → new [`escalations`](./active/pipeline/escalations.md)
+  component / [`escalations` design](../designs/active/pipeline/escalations.md).
   Evolution entries added to
-  [`task-orchestration`](./active/task-orchestration.md) (observation
+  [`task-orchestration`](./active/pipeline/task-orchestration.md) (observation
   surface),
-  [`admin-panel`](./active/admin-panel.md) (two admin pages),
-  [`audit-log`](./active/audit-log.md) (five new actions +
+  [`admin-panel`](./active/knowledge/admin-panel.md) (two admin pages),
+  [`audit-log`](./active/tenancy/audit-log.md) (five new actions +
   `slack_external` actor type).
 - **Flag:** `CODER_ESCALATIONS_ENABLED` default off; rollout is
   shadow → L0-only fleet → per-project full ladder opt-in. `coder`
@@ -491,12 +491,12 @@ until the fleet flag flips on and there's attempt data worth
 surfacing.
 
 - **Status:** shipped (v1) → new
-  [`self-healing`](./active/self-healing.md) component /
-  [`self-healing` design](../designs/active/self-healing.md).
+  [`self-healing`](./active/pipeline/self-healing.md) component /
+  [`self-healing` design](../designs/active/pipeline/self-healing.md).
   Evolution entries added to
-  [`task-orchestration`](./active/task-orchestration.md) (reads the
+  [`task-orchestration`](./active/pipeline/task-orchestration.md) (reads the
   same observation surface),
-  [`audit-log`](./active/audit-log.md)
+  [`audit-log`](./active/tenancy/audit-log.md)
   (`self_heal.remediated`, `self_heal.failed` actions).
 - **Flag:** `CODER_SELF_HEALING_ENABLED` default off; pattern modes
   start in `dry_run` per the rollout stages in the active design.
@@ -604,7 +604,7 @@ external agent is onboarded.
 ### 0043 — Knowledge freshness signals (shipped 2026-04-18)
 
 Shipped into `active/` as
-[knowledge-freshness](./active/knowledge-freshness.md). Every non-ADR
+[knowledge-freshness](./active/knowledge/knowledge-freshness.md). Every non-ADR
 artifact now carries `last_verified_at`; the Knowledge API envelope
 includes `freshness: {score, reasons, …}` on every read;
 `min_freshness=N` returns 409 STALE with the body; `POST .../verify`
@@ -614,8 +614,8 @@ artifacts to the Architect worker, which emits verified / needs_rewrite
 report. The admin Freshness tab renders the score histogram and
 Needs-attention table with one-click Verify.
 
-- **Status:** shipped → [`active/knowledge-freshness`](./active/knowledge-freshness.md)
-- **Design:** [`designs/active/knowledge-freshness`](../designs/active/knowledge-freshness.md)
+- **Status:** shipped → [`active/knowledge-freshness`](./active/knowledge/knowledge-freshness.md)
+- **Design:** [`designs/active/knowledge-freshness`](../designs/active/knowledge/knowledge-freshness.md)
 
 ### 0044 — Write-through enforcement on ship (shipped 2026-04-18)
 
@@ -634,17 +634,17 @@ when `settings.ship_draft_dispatch_enabled` is on.
 `--open-audit` dispatch modes for the one-time fleet sweep.
 
 - **Status:** shipped → folded into
-  [`knowledge-api`](./active/knowledge-api.md),
-  [`reviewer-worker`](./active/reviewer-worker.md),
-  [`team-manager-worker`](./active/team-manager-worker.md),
-  [`architect-worker`](./active/architect-worker.md),
-  [`admin-panel`](./active/admin-panel.md), and
-  [`task-orchestration`](./active/task-orchestration.md)
-- **Design:** [`knowledge-write-api`](../designs/active/knowledge-write-api.md)
+  [`knowledge-api`](./active/knowledge/knowledge-api.md),
+  [`reviewer-worker`](./active/workers/reviewer-worker.md),
+  [`team-manager-worker`](./active/workers/team-manager-worker.md),
+  [`architect-worker`](./active/workers/architect-worker.md),
+  [`admin-panel`](./active/knowledge/admin-panel.md), and
+  [`task-orchestration`](./active/pipeline/task-orchestration.md)
+- **Design:** [`knowledge-write-api`](../designs/active/knowledge/knowledge-write-api.md)
   (ship endpoint + orphan-WIP query),
-  [`team-manager-worker`](../designs/active/team-manager-worker.md)
+  [`team-manager-worker`](../designs/active/workers/team-manager-worker.md)
   (close-cycle backstop),
-  [`architect-worker`](../designs/active/architect-worker.md)
+  [`architect-worker`](../designs/active/workers/architect-worker.md)
   (ship-draft mode)
 - **ADR:** [`0015 — ship gate lives in the Coder pipeline`](../adrs/0015-ship-gate-in-coder-pipeline.md)
 
@@ -1013,7 +1013,7 @@ worker re-prompt.
   `(task_id, head_sha)`, dispatches a fix-up developer task up to
   `MAX_CI_FIX_ATTEMPTS = 3`, and escalates via 0041 on exhaustion.
   **Stage 0b is not a separate stage:** the active design
-  ([`post-pr-ci-fix-loop`](../designs/active/post-pr-ci-fix-loop.md))
+  ([`post-pr-ci-fix-loop`](../designs/active/pipeline/post-pr-ci-fix-loop.md))
   folds the re-prompt path into spec 0025's `validate_and_retry`
   pattern on TESTING-stage failures (already shipped). Preflight
   surviving failures fall through to a PR-body comment without

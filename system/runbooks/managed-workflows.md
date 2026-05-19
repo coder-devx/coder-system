@@ -173,7 +173,7 @@ opens a removal PR per project. Workflow:
 
 ## Links
 
-- **Active design:** [managed-repo-action-distribution](../designs/active/managed-repo-action-distribution.md)
+- **Active design:** [managed-repo-action-distribution](../designs/active/knowledge/managed-repo-action-distribution.md)
 - **ADR:** [0018](../adrs/0018-managed-workflows-divergent-file-policy.md)
 - **PHASES.md entry:** spec 0052
 - **Manifest:** [`system/managed-workflows.yaml`](../managed-workflows.yaml)

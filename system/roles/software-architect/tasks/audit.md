@@ -100,7 +100,8 @@ strict-validates the three shapes below.
 
     {
       "decision": "verified",
-      "summary": "One-line commit message explaining why the design is still accurate."
+      "summary": "One-line commit message explaining why the design is still accurate.",
+      "evidence": "Concrete grounding: which source files / endpoints / tables / jobs you read against the design's affects_services and affects_repos, with PR references where the system has changed since last_verified_at. E.g. 'Read coder-core/src/coder_core/workers/dispatcher.py and confirmed _load_assembled_prompt still matches §Architecture §Parts; PRs #303/#305 since 2026-03-01 only touch internal refactors below the Interfaces line.' Use the literal phrase 'no merged PRs touched the user-observable surface' if the affects_repos scan returned nothing relevant."
     }
 
 or
@@ -127,6 +128,12 @@ or
 
 - `summary` (verified): minLength 10. Generic strings ("looks fine")
   fail.
+- `evidence` (verified): minLength 80, maxLength 2000. **Required**
+  on the `verified` shape (spec 0043 follow-up). Must match a
+  pattern requiring either a PR reference (`PR #N`, `pull/N`) or
+  the literal escape hatch `"no merged PRs touched the
+  user-observable surface"`. Locks down the
+  verified-without-grounding failure mode structurally.
 - `gaps` (needs_rewrite): minItems 1, each ≥ 20 chars. Terse gaps
   ("outdated") fail.
 - `questions` (uncertain): minItems 1, each ≥ 15 chars.

@@ -14,7 +14,7 @@ relates_to_designs: [role-prompt-knowledge-layout]
 
 ## Context
 
-Design 0057 ([role-prompt-knowledge-layout](../designs/active/role-prompt-knowledge-layout.md))
+Design 0057 ([role-prompt-knowledge-layout](../designs/active/workers/role-prompt-knowledge-layout.md))
 introduced a folder shape for **worker** roles —
 `<role-id>/role.md` plus `<role-id>/tasks/<mode>.md` — so the
 `coder-core` dispatcher could fetch the per-role identity and the

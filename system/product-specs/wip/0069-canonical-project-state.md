@@ -163,4 +163,4 @@ Out:
 
 - ADR: [0031](../../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - Design: [0069](../../designs/wip/0069-canonical-project-state.md)
-- Related: [admin-panel](../active/admin-panel.md), [observability](../active/observability.md)
+- Related: [admin-panel](../active/knowledge/admin-panel.md), [observability](../active/pipeline/observability.md)

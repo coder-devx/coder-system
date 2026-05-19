@@ -272,3 +272,16 @@ adrs:
     deciders:
     - ro
     file: 0039-enable-compliance-gate-for-normal-reviewer-runs-over-free-text-verdict-protocol.md
+  - id: '0040'
+    title: Union co-emitted artifact IDs into cross-link validation set over deferred
+      validation or sequential write ordering
+    status: proposed
+    deciders:
+    - ro
+    file: 0040-union-co-emitted-artifact-ids-into-cross-link-validation-set-over-deferred-validation-or-sequential-write-ordering.md
+  - id: '0041'
+    title: Derive knowledge pulls at query time from task_tool_uses
+    status: proposed
+    deciders:
+    - ro
+    file: 0041-derive-knowledge-pulls-at-query-time-from-task-tool-uses.md

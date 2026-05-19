@@ -12,7 +12,7 @@ defined here. See [`../designs/active/worker-roles.md`](../designs/active/worker
 
 Every role uses the same folder shape (ADR
 [0027](../adrs/0027-uniform-role-folder-shape.md), refining design
-[role-prompt-knowledge-layout](../designs/active/role-prompt-knowledge-layout.md)):
+[role-prompt-knowledge-layout](../designs/active/workers/role-prompt-knowledge-layout.md)):
 
 ```
 <role-id>/

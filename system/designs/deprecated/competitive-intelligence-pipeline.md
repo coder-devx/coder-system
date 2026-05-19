@@ -16,7 +16,8 @@ deprecated_reason: >-
   while clearing the active surface. Rehydrate by re-authoring a
   fresh spec with a current WIP number when the roadmap actually
   plans the capability.
-last_verified_at: '2026-05-07'
+last_verified_at: 2026-05-18
+verified_by: knowledge-audit
 summary: Deprecated rehydration placeholder — competitor-moves pipeline (no active spec, no scheduled phase).
 implements_specs: []
 decided_by: []

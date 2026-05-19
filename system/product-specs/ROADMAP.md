@@ -41,25 +41,25 @@ The system today, by logical component. Each links to its active spec
 
 | Component | Spec | Design |
 |---|---|---|
-| Multi-tenancy | [multi-tenancy](./active/multi-tenancy.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
-| Knowledge API (read + write) | [knowledge-api](./active/knowledge-api.md) | [knowledge-write-api](../designs/active/knowledge-write-api.md), [knowledge-repo-model](../designs/active/knowledge-repo-model.md) |
-| Admin Panel | [admin-panel](./active/admin-panel.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
-| Developer Worker | [developer-worker](./active/developer-worker.md) | [worker-roles](../designs/active/worker-roles.md) |
-| Reviewer Worker | [reviewer-worker](./active/reviewer-worker.md) | [worker-roles](../designs/active/worker-roles.md) |
-| PM Worker | [pm-worker](./active/pm-worker.md) | [pm-worker](../designs/active/pm-worker.md) |
-| Architect Worker | [architect-worker](./active/architect-worker.md) | [architect-worker](../designs/active/architect-worker.md) |
-| Team Manager Worker | [team-manager-worker](./active/team-manager-worker.md) | [team-manager-worker](../designs/active/team-manager-worker.md) |
-| Service Accounts | [service-accounts](./active/service-accounts.md) | [worker-roles](../designs/active/worker-roles.md) |
-| Impersonation | [impersonation](./active/impersonation.md) | [impersonation](../designs/active/impersonation.md) |
-| Onboarding | [onboarding](./active/onboarding.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
-| Task Orchestration | [task-orchestration](./active/task-orchestration.md) | [worker-communication](../designs/active/worker-communication.md) |
-| Continuous Deployment | [continuous-deployment](./active/continuous-deployment.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
-| Observability | [observability](./active/observability.md) | [observability-and-cost-tracking](../designs/active/observability-and-cost-tracking.md) |
-| Branch cleanup | [branch-cleanup](./active/branch-cleanup.md) | [branch-cleanup](../designs/active/branch-cleanup.md) |
-| Audit log | [audit-log](./active/audit-log.md) | [audit-log](../designs/active/audit-log.md) |
-| Tenant isolation test harness | [tenant-isolation](./active/tenant-isolation.md) | [tenant-isolation](../designs/active/tenant-isolation.md) |
-| Escalations & on-call routing | [escalations](./active/escalations.md) | [escalations](../designs/active/escalations.md) |
-| Self-healing stuck pipelines | [self-healing](./active/self-healing.md) | [self-healing](../designs/active/self-healing.md) |
+| Multi-tenancy | [multi-tenancy](./active/tenancy/multi-tenancy.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
+| Knowledge API (read + write) | [knowledge-api](./active/knowledge/knowledge-api.md) | [knowledge-write-api](../designs/active/knowledge/knowledge-write-api.md), [knowledge-repo-model](../designs/active/knowledge/knowledge-repo-model.md) |
+| Admin Panel | [admin-panel](./active/knowledge/admin-panel.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
+| Developer Worker | [developer-worker](./active/workers/developer-worker.md) | [worker-roles](../designs/active/worker-roles.md) |
+| Reviewer Worker | [reviewer-worker](./active/workers/reviewer-worker.md) | [worker-roles](../designs/active/worker-roles.md) |
+| PM Worker | [pm-worker](./active/workers/pm-worker.md) | [pm-worker](../designs/active/workers/pm-worker.md) |
+| Architect Worker | [architect-worker](./active/workers/architect-worker.md) | [architect-worker](../designs/active/workers/architect-worker.md) |
+| Team Manager Worker | [team-manager-worker](./active/workers/team-manager-worker.md) | [team-manager-worker](../designs/active/workers/team-manager-worker.md) |
+| Service Accounts | [service-accounts](./active/tenancy/service-accounts.md) | [worker-roles](../designs/active/worker-roles.md) |
+| Impersonation | [impersonation](./active/tenancy/impersonation.md) | [impersonation](../designs/active/tenancy/impersonation.md) |
+| Onboarding | [onboarding](./active/knowledge/onboarding.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
+| Task Orchestration | [task-orchestration](./active/pipeline/task-orchestration.md) | [worker-communication](../designs/active/pipeline/worker-communication.md) |
+| Continuous Deployment | [continuous-deployment](./active/delivery/continuous-deployment.md) | (covered in [system-overview](../designs/active/system-overview.md)) |
+| Observability | [observability](./active/pipeline/observability.md) | [observability-and-cost-tracking](../designs/active/pipeline/observability-and-cost-tracking.md) |
+| Branch cleanup | [branch-cleanup](./active/pipeline/branch-cleanup.md) | [branch-cleanup](../designs/active/pipeline/branch-cleanup.md) |
+| Audit log | [audit-log](./active/tenancy/audit-log.md) | [audit-log](../designs/active/tenancy/audit-log.md) |
+| Tenant isolation test harness | [tenant-isolation](./active/delivery/tenant-isolation.md) | [tenant-isolation](../designs/active/delivery/tenant-isolation.md) |
+| Escalations & on-call routing | [escalations](./active/pipeline/escalations.md) | [escalations](../designs/active/pipeline/escalations.md) |
+| Self-healing stuck pipelines | [self-healing](./active/pipeline/self-healing.md) | [self-healing](../designs/active/pipeline/self-healing.md) |
 
 ---
 

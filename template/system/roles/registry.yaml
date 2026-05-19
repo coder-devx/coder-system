@@ -1,9 +1,22 @@
 # Project-specific roles.
 # The developer role is required for the developer worker to load its
-# system prompt. Add more roles as needed by following the worker-role
-# folder shape (see system/roles/_TEMPLATE.md and design 0057).
+# system prompt; the product-manager role is required for PM draft /
+# accept / ship / audit. Add more roles as needed by following the
+# worker-role folder shape (see system/roles/_TEMPLATE.md and design 0057).
 
 roles:
+  - id: product-manager
+    name: Product Manager
+    status: defined
+    owner: ro
+    seniority: senior
+    dir: product-manager
+    file: product-manager/role.md
+    tasks:
+      - draft
+      - accept
+      - ship
+      - audit
   - id: developer
     name: Developer
     status: defined

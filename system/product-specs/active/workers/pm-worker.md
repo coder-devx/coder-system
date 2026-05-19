@@ -1,0 +1,105 @@
+---
+id: pm-worker
+title: PM worker
+type: spec
+status: active
+owner: ro
+created: 2026-04-11
+updated: 2026-05-06
+last_verified_at: 2026-05-06
+summary: Product Manager worker — owns specs and acceptance.
+served_by_designs: [pm-worker]
+related_specs: [architect-worker, knowledge-api, service-accounts, task-orchestration, team-manager-worker]
+parent: worker-roles
+---
+
+# PM worker
+
+## What it is
+
+The PM worker is the product-management role in `coder-core`. It
+operates in two modes: **draft**, where it turns a natural-language
+problem statement into a product spec in `wip/`, and **accept**,
+where it evaluates a delivered spec's acceptance criteria and produces
+a verdict report. Human approval gates sit on both sides: a drafted
+spec cannot enter the pipeline until approved, and acceptance
+verdicts surface as structured messages for operator review before a
+spec is promoted.
+
+## Capabilities
+
+- **Draft mode:** runs `claude` with a built-in PM prompt, produces a
+  spec following `_TEMPLATE.md` (required frontmatter, Problem / Users
+  / Goals / Scope / ACs / Metrics sections), and writes it to `wip/`
+  via the knowledge write API with a structured commit.
+- **Accept mode:** loads the target spec's subgraph via a single graph
+  fetch (`depth=1, edge_types=related_specs`) to gather the spec and
+  its related specs in one call, evaluates each AC, and emits a per-AC
+  verdict — `pass | fail | partial` — with cited evidence. Falls back
+  to direct spec fetch when `CODER_KNOWLEDGE_GRAPH_ENABLED` is off.
+  Initial conversion ships with `min_freshness` omitted.
+- Acceptance reports are stored as knowledge artifacts linked to the
+  spec and posted as verdict messages via worker-to-worker messaging.
+- Mode is selected by the task prompt prefix (`draft:` vs `accept:`)
+  handled by the dispatcher's Phase 4 writeback.
+- Auto-creates a pipeline run for `draft:` tasks so downstream
+  chaining (architect → TM → developer → PM-accept) is wired from
+  the start.
+- **Output compliance gate.** Draft and accept outputs are validated
+  against the per-mode JSON schemas (`pm_draft`, `pm_accept`) before
+  any Phase 4 side effect. On schema failure the worker re-prompts
+  Claude with the validator errors and last raw output, up to the
+  configured retry budget; on exhaustion the task exits with
+  `failure_kind="schema"` and `failure_detail` holding the errors and
+  a truncated raw snippet — zero partial knowledge writes, zero
+  orphan DB rows.
+- **Transient-failure retry.** The claude spawn is wrapped in
+  `run_with_transient_retry` (spec 0027); 429/529/timeout/DNS blips
+  re-spawn with exponential backoff. Budget exhaustion lands
+  `failure_kind="transient"`; composes with the schema gate above
+  (transient wraps the spawn; schema wraps the output of a
+  successful spawn).
+
+## Interfaces
+
+- **Consumes:** `role=pm` tasks with either a `draft:` problem
+  statement or `accept:` spec reference.
+- **Produces:** spec markdown in `wip/` (draft); acceptance report
+  artifact + verdict messages (accept); file moves on full-pass
+  promotion.
+- **Code:** `src/coder_core/workers/pm.py`.
+
+## Dependencies
+
+- Knowledge write API for spec creation, acceptance reports, and
+  status-change file moves.
+- Knowledge read API (accept mode: spec + related_specs; via graph
+  endpoint when `CODER_KNOWLEDGE_GRAPH_ENABLED`, direct fetch
+  otherwise).
+- Worker-to-worker messaging for verdict delivery.
+- Spec/design approval gates for the human-approval handoff.
+- Pipeline chaining for `draft:` → architect auto-creation.
+- PM-role service account + Anthropic key broker.
+
+## Evolution
+
+- 0016 — `workers/pm.py` with draft and accept modes, dispatcher
+  Phase 4 wires both modes to the knowledge write API and messaging.
+  First self-hosted spec drafted by the PM and shipped end-to-end
+  (0019).
+- 2026-04 — Output compliance gate (`pm_draft`, `pm_accept` schemas),
+  transient-failure retry; first PM-drafted spec shipped end-to-end
+  (specs 0025, 0027, 0019).
+- 2026-04 — `GH_TOKEN` unified via `_github_env`; accept-mode context
+  converted to single graph fetch behind `CODER_KNOWLEDGE_GRAPH_ENABLED`
+  (specs 0046, 0055).
+
+## Links
+
+- Designs: [pm-worker](../../../designs/active/workers/pm-worker.md),
+  [worker-roles](../../../designs/active/worker-roles.md)
+- Related components: [architect-worker](./architect-worker.md),
+  [team-manager-worker](./team-manager-worker.md),
+  [knowledge-api](../knowledge/knowledge-api.md),
+  [task-orchestration](../pipeline/task-orchestration.md),
+  [service-accounts](../tenancy/service-accounts.md)

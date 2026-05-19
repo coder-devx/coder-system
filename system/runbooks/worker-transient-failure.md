@@ -15,11 +15,11 @@ applies_to_integrations: [anthropic]
 
 Operational guide for tasks that fail with
 ``failure_kind = "transient"``. The retry loop lives in
-[task-orchestration](../product-specs/active/task-orchestration.md)
+[task-orchestration](../product-specs/active/pipeline/task-orchestration.md)
 and the per-worker integrations in
-[pm-worker](../designs/active/pm-worker.md),
-[architect-worker](../designs/active/architect-worker.md),
-[team-manager-worker](../designs/active/team-manager-worker.md), and
+[pm-worker](../designs/active/workers/pm-worker.md),
+[architect-worker](../designs/active/workers/architect-worker.md),
+[team-manager-worker](../designs/active/workers/team-manager-worker.md), and
 [worker-roles](../designs/active/worker-roles.md) (Developer +
 Reviewer). Rationale in ADR
 [0013](../adrs/0013-worker-level-transient-retry.md).
@@ -160,15 +160,15 @@ in a way the classifier substring table doesn't recognise.
 
 ## Related
 
-- Spec: [task-orchestration](../product-specs/active/task-orchestration.md)
+- Spec: [task-orchestration](../product-specs/active/pipeline/task-orchestration.md)
   (retry capability lives in the orchestrator's Worker transient-failure
   retry section).
-- Designs: [pm-worker](../designs/active/pm-worker.md),
-  [architect-worker](../designs/active/architect-worker.md),
-  [team-manager-worker](../designs/active/team-manager-worker.md),
+- Designs: [pm-worker](../designs/active/workers/pm-worker.md),
+  [architect-worker](../designs/active/workers/architect-worker.md),
+  [team-manager-worker](../designs/active/workers/team-manager-worker.md),
   [worker-roles](../designs/active/worker-roles.md)
   (Developer + Reviewer),
-  [worker-communication](../designs/active/worker-communication.md)
+  [worker-communication](../designs/active/pipeline/worker-communication.md)
   (`tasks.transient_retry_history` column).
 - ADR: [0013 — worker-level transient retry](../adrs/0013-worker-level-transient-retry.md)
 - Adjacent: [worker-schema-failure](./worker-schema-failure.md) —

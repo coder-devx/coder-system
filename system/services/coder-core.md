@@ -72,7 +72,7 @@ acts across projects without an explicit fan-out.
   Admin JWT (Google OAuth) for admin panel operations (spec 0012).
   MCP OAuth (spec 0050) for agent-to-MCP authentication.
 - Tests: **1369 passing** (route-level + service-level).
-- Architecture: **modular monolith** per [coder-core-modular-monolith](../designs/active/coder-core-modular-monolith.md).
+- Architecture: **modular monolith** per [coder-core-modular-monolith](../designs/active/delivery/coder-core-modular-monolith.md).
   Routers are thin adapters; workflow logic lives in feature-package
   service modules (`coder_core/tasks`, `pipelines`, `metrics`,
   `impersonation`, `projects`, `knowledge`). The dependency graph is

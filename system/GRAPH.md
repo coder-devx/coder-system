@@ -11,78 +11,108 @@ flowchart LR
   n000("design<br/>branch-cleanup")
   n001("design<br/>confidence-auto-approval")
   n002("design<br/>cost-regression-alerts")
-  n003("design<br/>escalations")
-  n004("design<br/>model-tier-routing")
-  n005("design<br/>observability-and-cost-tracking")
-  n006("design<br/>orchestrator-github-state-reconciliation")
-  n007("design<br/>pipeline-operations")
-  n008("design<br/>post-pr-ci-fix-loop")
-  n009("design<br/>prompt-caching-architecture")
-  n010("design<br/>self-healing")
-  n011("design<br/>stuck-pipeline-slack-paging")
-  n012("design<br/>token-budgets-and-cost-gates")
-  n013("design<br/>worker-communication")
-  n014("design<br/>worker-dispatch-durability")
-  n015["spec<br/>branch-cleanup"]
-  n016["spec<br/>escalations"]
-  n017["spec<br/>observability"]
-  n018["spec<br/>pipeline-operations"]
-  n019["spec<br/>self-healing"]
-  n020["spec<br/>task-orchestration"]
-  n015 -->|served by| n000
-  n000 -.->|related| n013
-  n000 -.->|related| n005
-  n001 -.->|related| n013
-  n001 -.->|related| n005
+  n003("design<br/>dispatcher")
+  n004("design<br/>escalations")
+  n005("design<br/>model-tier-routing")
+  n006("design<br/>observability-and-cost-tracking")
+  n007("design<br/>orchestrator-github-state-reconciliation")
+  n008("design<br/>pipeline-operations")
+  n009("design<br/>post-pr-ci-fix-loop")
+  n010("design<br/>prompt-caching-architecture")
+  n011("design<br/>self-healing")
+  n012("design<br/>stuck-pipeline-slack-paging")
+  n013("design<br/>task-lifecycle")
+  n014("design<br/>token-budgets-and-cost-gates")
+  n015("design<br/>worker-communication")
+  n016("design<br/>worker-dispatch-durability")
+  n017["spec<br/>branch-cleanup"]
+  n018["spec<br/>escalations"]
+  n019["spec<br/>observability"]
+  n020["spec<br/>pipeline-operations"]
+  n021["spec<br/>self-healing"]
+  n022["spec<br/>spec-lifecycle-coordinator"]
+  n023["spec<br/>task-orchestration"]
+  n017 -->|served by| n000
+  n000 -.->|related| n015
+  n000 -.->|related| n006
+  n001 -.->|related| n015
+  n001 -.->|related| n006
+  n002 -.->|related| n006
+  n002 -.->|related| n015
+  n002 -.->|related| n010
   n002 -.->|related| n005
-  n002 -.->|related| n013
-  n016 -->|served by| n003
-  n003 -.->|related| n013
-  n003 -.->|related| n005
-  n004 -.->|related| n013
-  n004 -.->|related| n005
-  n017 -->|served by| n005
-  n006 -.->|related| n013
-  n018 -->|served by| n007
-  n007 -.->|related| n013
-  n007 -.->|related| n005
-  n007 -.->|related| n010
-  n007 -.->|related| n003
-  n007 -.->|related| n000
-  n008 -.->|related| n013
-  n008 -.->|related| n003
-  n009 -.->|related| n013
-  n009 -.->|related| n005
-  n019 -->|served by| n010
-  n010 -.->|related| n013
-  n010 -.->|related| n005
-  n010 -.->|related| n003
-  n011 -.->|related| n003
-  n011 -.->|related| n010
-  n011 -.->|related| n007
-  n012 -.->|related| n005
-  n012 -.->|related| n013
+  n002 -.->|related| n014
+  n020 -->|served by| n003
+  n003 -.->|related| n015
+  n003 -.->|related| n016
+  n003 -.->|related| n008
+  n018 -->|served by| n004
+  n004 -.->|related| n015
+  n004 -.->|related| n006
+  n005 -.->|related| n015
+  n005 -.->|related| n006
+  n005 -.->|related| n010
+  n005 -.->|related| n014
+  n019 -->|served by| n006
+  n007 -.->|related| n015
+  n020 -->|served by| n008
+  n008 -.->|related| n015
+  n008 -.->|related| n006
+  n008 -.->|related| n011
+  n008 -.->|related| n004
+  n008 -.->|related| n000
+  n009 -.->|related| n015
+  n009 -.->|related| n004
+  n010 -.->|related| n015
+  n010 -.->|related| n006
+  n021 -->|served by| n011
+  n011 -.->|related| n015
+  n011 -.->|related| n006
+  n011 -.->|related| n004
+  n012 -.->|related| n004
+  n012 -.->|related| n011
+  n012 -.->|related| n008
   n020 -->|served by| n013
-  n014 -.->|related| n013
-  n014 -.->|related| n010
+  n013 -.->|related| n008
+  n013 -.->|related| n015
+  n013 -.->|related| n003
+  n014 -.->|related| n006
+  n014 -.->|related| n015
   n014 -.->|related| n005
-  n015 -->|served by| n000
-  n015 -.->|related| n020
-  n015 -.->|related| n017
-  n016 -->|served by| n003
-  n016 -.->|related| n020
-  n016 -.->|related| n017
-  n017 -->|served by| n005
-  n018 -->|served by| n013
-  n018 -->|served by| n005
-  n018 -->|served by| n003
-  n018 -->|served by| n010
-  n018 -->|served by| n000
-  n019 -->|served by| n010
-  n019 -.->|related| n020
+  n023 -->|served by| n015
+  n016 -.->|related| n015
+  n016 -.->|related| n011
+  n016 -.->|related| n006
+  n017 -->|served by| n000
+  n017 -.->|related| n023
+  n017 -.->|related| n019
+  n018 -->|served by| n004
+  n018 -.->|related| n023
+  n018 -.->|related| n019
+  n019 -->|served by| n006
   n019 -.->|related| n017
-  n019 -.->|related| n016
-  n020 -->|served by| n013
+  n019 -.->|related| n018
+  n019 -.->|related| n021
+  n019 -.->|related| n023
+  n020 -->|served by| n015
+  n020 -->|served by| n006
+  n020 -->|served by| n004
+  n020 -->|served by| n011
+  n020 -->|served by| n000
+  n020 -.->|related| n017
+  n020 -.->|related| n018
+  n020 -.->|related| n019
+  n020 -.->|related| n021
+  n020 -.->|related| n023
+  n021 -->|served by| n011
+  n021 -.->|related| n023
+  n021 -.->|related| n019
+  n021 -.->|related| n018
+  n022 -.->|related| n023
+  n023 -->|served by| n015
+  n023 -.->|related| n018
+  n023 -.->|related| n019
+  n023 -.->|related| n021
 ```
 
 ## Worker roles
@@ -95,45 +125,60 @@ flowchart LR
   n003("design<br/>reviewer-worker")
   n004("design<br/>role-prompt-knowledge-layout")
   n005("design<br/>team-manager-worker")
-  n006("design<br/>worker-roles")
-  n007["spec<br/>architect-worker"]
-  n008["spec<br/>developer-worker"]
-  n009["spec<br/>pm-worker"]
-  n010["spec<br/>reviewer-worker"]
-  n011["spec<br/>team-manager-worker"]
-  n012["spec<br/>worker-roles"]
-  n007 -->|served by| n000
+  n006("design<br/>worker-auth-env")
+  n007("design<br/>worker-roles")
+  n008["spec<br/>architect-worker"]
+  n009["spec<br/>developer-worker"]
+  n010["spec<br/>pm-worker"]
+  n011["spec<br/>reviewer-worker"]
+  n012["spec<br/>team-manager-worker"]
+  n013["spec<br/>worker-roles"]
+  n008 -->|served by| n000
   n000 -.->|related| n005
   n000 -.->|related| n002
-  n000 -.->|related| n006
-  n008 -->|served by| n001
-  n001 -.->|related| n006
+  n000 -.->|related| n007
+  n009 -->|served by| n001
+  n001 -.->|related| n007
   n001 -.->|related| n002
   n001 -.->|related| n000
   n001 -.->|related| n005
-  n009 -->|served by| n002
+  n010 -->|served by| n002
   n002 -.->|related| n005
-  n002 -.->|related| n006
-  n010 -->|served by| n003
-  n003 -.->|related| n006
+  n002 -.->|related| n007
+  n011 -->|served by| n003
+  n003 -.->|related| n007
   n003 -.->|related| n001
-  n004 -.->|related| n006
+  n004 -.->|related| n007
   n004 -.->|related| n002
   n004 -.->|related| n000
   n004 -.->|related| n005
-  n011 -->|served by| n005
-  n005 -.->|related| n006
+  n012 -->|served by| n005
+  n005 -.->|related| n007
   n005 -.->|related| n000
   n005 -.->|related| n002
-  n007 -->|served by| n000
-  n008 -->|served by| n006
-  n009 -->|served by| n002
-  n010 -->|served by| n006
-  n011 -->|served by| n005
-  n012 -->|served by| n006
-  n012 -->|served by| n000
-  n012 -->|served by| n002
+  n013 -->|served by| n006
+  n006 -.->|related| n007
+  n008 -->|served by| n000
+  n008 -.->|related| n010
+  n008 -.->|related| n012
+  n009 -.->|related| n011
+  n010 -->|served by| n002
+  n010 -.->|related| n008
+  n010 -.->|related| n012
+  n011 -.->|related| n009
+  n011 -.->|related| n010
   n012 -->|served by| n005
+  n012 -.->|related| n008
+  n012 -.->|related| n009
+  n012 -.->|related| n010
+  n013 -->|served by| n000
+  n013 -->|served by| n002
+  n013 -->|served by| n005
+  n013 -.->|related| n008
+  n013 -.->|related| n009
+  n013 -.->|related| n010
+  n013 -.->|related| n011
+  n013 -.->|related| n012
 ```
 
 ## Tenancy & access
@@ -149,49 +194,58 @@ flowchart LR
   n006("design<br/>tenancy-and-access")
   n007["spec<br/>audit-log"]
   n008["spec<br/>impersonation"]
-  n009["spec<br/>mcp-agent-interface"]
-  n010["spec<br/>multi-tenancy"]
-  n011["spec<br/>oauth-mcp"]
-  n012["spec<br/>secret-rotation"]
-  n013["spec<br/>service-accounts"]
-  n014["spec<br/>tenancy-and-access"]
+  n009["spec<br/>multi-tenancy"]
+  n010["spec<br/>oauth-mcp"]
+  n011["spec<br/>secret-rotation"]
+  n012["spec<br/>service-accounts"]
+  n013["spec<br/>tenancy-and-access"]
   n007 -->|served by| n000
   n000 -.->|related| n002
   n001 -.->|related| n002
   n001 -.->|related| n000
   n002 -.->|related| n000
-  n010 -->|served by| n003
+  n009 -->|served by| n003
   n003 -.->|related| n006
   n003 -.->|related| n002
   n003 -.->|related| n000
   n004 -.->|related| n002
   n004 -.->|related| n000
-  n013 -->|served by| n005
+  n012 -->|served by| n005
   n005 -.->|related| n006
   n005 -.->|related| n002
   n005 -.->|related| n003
   n005 -.->|related| n000
-  n014 -->|served by| n006
+  n013 -->|served by| n006
   n006 -.->|related| n002
   n006 -.->|related| n000
   n007 -->|served by| n000
   n007 -.->|related| n008
-  n007 -.->|related| n013
+  n007 -.->|related| n012
   n008 -->|served by| n002
   n008 -.->|related| n007
-  n009 -.->|related| n008
-  n009 -.->|related| n013
+  n008 -.->|related| n009
+  n008 -.->|related| n012
   n009 -.->|related| n007
-  n009 -.->|related| n010
-  n011 -->|served by| n004
-  n011 -.->|related| n008
+  n009 -.->|related| n008
+  n009 -.->|related| n012
+  n010 -->|served by| n004
+  n010 -.->|related| n008
+  n010 -.->|related| n007
+  n011 -.->|related| n012
   n011 -.->|related| n007
-  n012 -.->|related| n013
+  n011 -.->|related| n009
+  n011 -.->|related| n008
   n012 -.->|related| n007
-  n012 -.->|related| n010
   n012 -.->|related| n008
-  n014 -->|served by| n002
-  n014 -->|served by| n000
+  n012 -.->|related| n009
+  n013 -->|served by| n002
+  n013 -->|served by| n000
+  n013 -.->|related| n007
+  n013 -.->|related| n008
+  n013 -.->|related| n009
+  n013 -.->|related| n010
+  n013 -.->|related| n011
+  n013 -.->|related| n012
 ```
 
 ## Knowledge & admin
@@ -202,82 +256,106 @@ flowchart LR
   n001("design<br/>cold-start-ingestion")
   n002("design<br/>cross-project-patterns")
   n003("design<br/>graph-aware-retrieval")
-  n004("design<br/>knowledge-freshness")
-  n005("design<br/>knowledge-repo-model")
-  n006("design<br/>knowledge-stack")
-  n007("design<br/>knowledge-write-api")
-  n008("design<br/>managed-repo-action-distribution")
-  n009("design<br/>mcp-agent-interface-design")
-  n010("design<br/>navigation-tree-pattern")
-  n011("design<br/>onboarding")
-  n012("design<br/>template-schema-migration")
-  n013["spec<br/>admin-panel"]
-  n014["spec<br/>cold-start-ingestion"]
-  n015["spec<br/>fleet-patterns"]
-  n016["spec<br/>knowledge-and-admin"]
-  n017["spec<br/>knowledge-api"]
-  n018["spec<br/>knowledge-freshness"]
-  n019["spec<br/>knowledge-schema-migration"]
-  n020["spec<br/>managed-workflows"]
-  n021["spec<br/>onboarding"]
-  n013 -->|served by| n000
-  n000 -.->|related| n007
-  n001 -.->|related| n007
-  n001 -.->|related| n005
-  n002 -.->|related| n007
+  n004("design<br/>knowledge-and-admin")
+  n005("design<br/>knowledge-freshness")
+  n006("design<br/>knowledge-repo-model")
+  n007("design<br/>knowledge-stack")
+  n008("design<br/>knowledge-write-api")
+  n009("design<br/>managed-repo-action-distribution")
+  n010("design<br/>mcp-agent-interface-design")
+  n011("design<br/>navigation-tree-pattern")
+  n012("design<br/>onboarding")
+  n013("design<br/>template-schema-migration")
+  n014["spec<br/>admin-panel"]
+  n015["spec<br/>cold-start-ingestion"]
+  n016["spec<br/>fleet-patterns"]
+  n017["spec<br/>knowledge-and-admin"]
+  n018["spec<br/>knowledge-api"]
+  n019["spec<br/>knowledge-freshness"]
+  n020["spec<br/>knowledge-schema-migration"]
+  n021["spec<br/>managed-workflows"]
+  n022["spec<br/>mcp-agent-interface"]
+  n023["spec<br/>onboarding"]
+  n014 -->|served by| n000
+  n000 -.->|related| n008
+  n001 -.->|related| n008
+  n001 -.->|related| n006
+  n002 -.->|related| n008
+  n002 -.->|related| n006
   n002 -.->|related| n005
-  n002 -.->|related| n004
   n002 -.->|related| n003
-  n002 -.->|related| n009
-  n003 -.->|related| n007
+  n002 -.->|related| n010
+  n003 -.->|related| n008
+  n003 -.->|related| n006
   n003 -.->|related| n005
-  n003 -.->|related| n004
-  n018 -->|served by| n004
-  n004 -.->|related| n005
+  n017 -->|served by| n004
   n004 -.->|related| n007
-  n005 -.->|related| n007
-  n016 -->|served by| n006
-  n006 -.->|related| n005
-  n006 -.->|related| n007
-  n006 -.->|related| n004
+  n004 -.->|related| n000
+  n004 -.->|related| n010
+  n019 -->|served by| n005
+  n005 -.->|related| n006
+  n005 -.->|related| n008
+  n006 -.->|related| n008
   n017 -->|served by| n007
+  n007 -.->|related| n006
+  n007 -.->|related| n008
   n007 -.->|related| n005
-  n008 -.->|related| n001
-  n008 -.->|related| n012
-  n008 -.->|related| n007
-  n009 -.->|related| n007
-  n010 -.->|related| n005
-  n010 -.->|related| n007
-  n021 -->|served by| n011
-  n011 -.->|related| n005
-  n011 -.->|related| n007
-  n012 -.->|related| n007
-  n012 -.->|related| n005
+  n018 -->|served by| n008
+  n008 -.->|related| n006
+  n009 -.->|related| n001
+  n009 -.->|related| n013
+  n009 -.->|related| n008
+  n010 -.->|related| n008
+  n011 -.->|related| n006
+  n011 -.->|related| n008
+  n023 -->|served by| n012
+  n012 -.->|related| n006
   n012 -.->|related| n008
-  n014 -.->|related| n021
-  n014 -.->|related| n017
+  n013 -.->|related| n008
+  n013 -.->|related| n006
+  n013 -.->|related| n009
+  n014 -->|served by| n000
   n014 -.->|related| n018
-  n015 -.->|related| n017
-  n015 -.->|related| n013
   n015 -.->|related| n018
-  n016 -->|served by| n005
-  n016 -->|served by| n007
-  n016 -->|served by| n004
-  n017 -->|served by| n007
+  n015 -.->|related| n019
+  n015 -.->|related| n021
+  n015 -.->|related| n023
+  n016 -.->|related| n018
+  n016 -.->|related| n014
+  n016 -.->|related| n019
+  n017 -->|served by| n006
+  n017 -->|served by| n008
   n017 -->|served by| n005
+  n017 -.->|related| n014
+  n017 -.->|related| n015
+  n017 -.->|related| n016
   n017 -.->|related| n018
   n017 -.->|related| n019
-  n018 -->|served by| n004
-  n018 -.->|related| n017
-  n018 -.->|related| n013
-  n019 -.->|related| n017
-  n019 -.->|related| n021
-  n019 -.->|related| n013
+  n017 -.->|related| n020
+  n017 -.->|related| n021
+  n017 -.->|related| n023
+  n018 -->|served by| n006
+  n018 -->|served by| n007
+  n018 -->|served by| n008
+  n018 -.->|related| n014
+  n018 -.->|related| n019
+  n018 -.->|related| n020
+  n019 -->|served by| n005
   n019 -.->|related| n018
-  n020 -.->|related| n017
-  n020 -.->|related| n021
-  n020 -.->|related| n013
-  n021 -.->|related| n019
+  n019 -.->|related| n014
+  n020 -.->|related| n018
+  n020 -.->|related| n023
+  n020 -.->|related| n014
+  n020 -.->|related| n019
+  n021 -.->|related| n018
+  n021 -.->|related| n023
+  n021 -.->|related| n014
+  n022 -->|served by| n010
+  n022 -.->|related| n014
+  n022 -.->|related| n018
+  n023 -.->|related| n014
+  n023 -.->|related| n018
+  n023 -.->|related| n020
 ```
 
 ## Delivery & infra
@@ -286,16 +364,25 @@ flowchart LR
 flowchart LR
   n000("design<br/>coder-core-modular-monolith")
   n001("design<br/>continuous-deployment")
-  n002("design<br/>tenant-isolation")
-  n003["spec<br/>continuous-deployment"]
-  n004["spec<br/>delivery-and-infra"]
-  n005["spec<br/>tenant-isolation"]
+  n002("design<br/>delivery-and-infra")
+  n003("design<br/>tenant-isolation")
+  n004["spec<br/>coder-core-modular-monolith"]
+  n005["spec<br/>continuous-deployment"]
+  n006["spec<br/>delivery-and-infra"]
+  n007["spec<br/>tenant-isolation"]
+  n006 -->|served by| n000
+  n000 -.->|related| n003
+  n005 -->|served by| n001
+  n006 -->|served by| n002
+  n002 -.->|related| n000
+  n002 -.->|related| n001
+  n007 -->|served by| n003
   n004 -->|served by| n000
-  n000 -.->|related| n002
-  n003 -->|served by| n001
-  n005 -->|served by| n002
-  n004 -->|served by| n000
-  n005 -->|served by| n002
+  n004 -.->|related| n005
+  n004 -.->|related| n007
+  n006 -->|served by| n000
+  n006 -.->|related| n005
+  n006 -.->|related| n007
 ```
 
 ## Other

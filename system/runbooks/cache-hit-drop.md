@@ -17,9 +17,9 @@ Operational guide for when a project's prompt-cache hit ratio falls
 below the configured floor. The cache mechanism is defined in spec
 [0029-prompt-caching](../product-specs/wip/0029-prompt-caching.md) and
 the populate + read + gate behaviours live in
-[task-orchestration](../product-specs/active/task-orchestration.md).
+[task-orchestration](../product-specs/active/pipeline/task-orchestration.md).
 Telemetry + alert wiring lives in
-[observability](../product-specs/active/observability.md).
+[observability](../product-specs/active/pipeline/observability.md).
 
 ## When to run this
 

@@ -48,8 +48,16 @@ path and just burn turns.
 These are the principles the active design corpus is built on. Match
 them. Reviewers and the audit pipeline both check against this shape.
 
-1. **Tight.** Active designs run 30–80 lines of body. If you're past
-   100, you're either drafting two designs in one or padding.
+1. **Tight by purpose, not by line count.** Active designs target one
+   component each, current state only. Length follows content
+   discipline: every section earns its place; rollout / history /
+   decisions live in `## Evolution` (terse) or in ADRs, never in the
+   body. Smell test at ~200 body lines: look hard for fused topics,
+   padding, or rollout narrative that belongs elsewhere. Past ~300 is
+   almost certainly two designs in one. (Earlier guidance was 30–80
+   lines; that number was sized for the Architect's per-message *output*
+   budget — see [`tasks/design.md`](./tasks/design.md) §Output verbosity
+   — not for reading load on consumers.)
 2. **One Mermaid that adds information.** A diagram that just lists
    the components in boxes is dead weight. The diagram should show
    data flow, sequence, or boundary that the prose can't convey
@@ -87,6 +95,11 @@ them. Reviewers and the audit pipeline both check against this shape.
 - An ADR titled *"Use FastAPI"* with rationale *"FastAPI is good"*.
   Either the choice is in-band (no ADR needed) or the rationale is
   shallow (do the homework first).
+- A design whose body opens with `## Context` / `## Decision` /
+  `## Implementation` / `## Rollout` — that's an ADR template
+  applied to the wrong artifact. The canonical opening for a
+  design body is `## What it does today`; ADR-shaped narrative
+  goes in the `adrs` array.
 - A design that contradicts an active design without superseding it.
   ADRs supersede; designs don't drift silently.
 

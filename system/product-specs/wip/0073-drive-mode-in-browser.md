@@ -20,7 +20,7 @@ parent: ~
 
 ## Problem
 
-The active design [`impersonation.md`](../../designs/active/impersonation.md)
+The active design [`impersonation.md`](../../designs/active/tenancy/impersonation.md)
 describes a system where the operator can take over any role in any
 project. In practice today, taking over a role requires the
 `coder impersonate <role> --project=X` CLI plus a local Claude Code
@@ -178,4 +178,4 @@ Out:
 - ADR: [0031](../../adrs/0031-canonical-project-state-for-operator-surfaces.md)
 - Design: [0073](../../designs/wip/0073-drive-mode-in-browser.md)
 - Depends on: [0069](./0069-canonical-project-state.md)
-- Related: [impersonation](../active/impersonation.md), [admin-panel](../active/admin-panel.md), [mcp-agent-interface](../active/mcp-agent-interface.md)
+- Related: [impersonation](../active/tenancy/impersonation.md), [admin-panel](../active/knowledge/admin-panel.md), [mcp-agent-interface](../active/knowledge/mcp-agent-interface.md)

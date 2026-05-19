@@ -9,7 +9,7 @@ updated: 2026-05-03
 last_verified_at: 2026-05-03
 summary: "How tasks flow reliably through a project's pipeline, stay observable, and recover when stalled."
 served_by_designs: [worker-communication, observability-and-cost-tracking, escalations, self-healing, branch-cleanup]
-related_specs: [worker-roles, tenancy-and-access]
+related_specs: [admin-panel, audit-log, branch-cleanup, escalations, multi-tenancy, observability, self-healing, task-orchestration, tenancy-and-access, worker-roles]
 parent: ~
 ---
 
@@ -29,30 +29,30 @@ paged when automation can't continue.
 
 ## Components
 
-- [task-orchestration](./task-orchestration.md) — task lifecycle
+- [task-orchestration](./pipeline/task-orchestration.md) — task lifecycle
   state machine, dispatcher leasing, stage transitions.
-- [observability](./observability.md) — per-task telemetry, token
+- [observability](./pipeline/observability.md) — per-task telemetry, token
   costs, pipeline metrics surfaced to the admin panel.
-- [self-healing](./self-healing.md) — reaper that re-queues stuck
+- [self-healing](./pipeline/self-healing.md) — reaper that re-queues stuck
   pipelines and tasks past their timeout.
-- [escalations](./escalations.md) — three-rung on-call ladder
+- [escalations](./pipeline/escalations.md) — three-rung on-call ladder
   (developer → on-call → user) with quiet hours and consolidation.
-- [branch-cleanup](./branch-cleanup.md) — automatic GC of stale
+- [branch-cleanup](./pipeline/branch-cleanup.md) — automatic GC of stale
   feature branches the Developer worker created.
 
 ## Cross-cutting concerns
 
 - **Audit trail**: every state transition surfaces through
-  [audit-log](./audit-log.md) (in [tenancy-and-access](./tenancy-and-access.md)).
+  [audit-log](./tenancy/audit-log.md) (in [tenancy-and-access](./tenancy-and-access.md)).
 - **Tenant isolation**: pipeline state is project-scoped; see
-  [multi-tenancy](./multi-tenancy.md).
-- **Visibility**: the [admin-panel](./admin-panel.md) is the human
+  [multi-tenancy](./tenancy/multi-tenancy.md).
+- **Visibility**: the [admin-panel](./knowledge/admin-panel.md) is the human
   surface for everything in this category.
 
 ## Links
 
-- Designs: [worker-communication](../../designs/active/worker-communication.md),
-  [observability-and-cost-tracking](../../designs/active/observability-and-cost-tracking.md),
-  [self-healing](../../designs/active/self-healing.md),
-  [escalations](../../designs/active/escalations.md),
-  [branch-cleanup](../../designs/active/branch-cleanup.md)
+- Designs: [worker-communication](../../designs/active/pipeline/worker-communication.md),
+  [observability-and-cost-tracking](../../designs/active/pipeline/observability-and-cost-tracking.md),
+  [self-healing](../../designs/active/pipeline/self-healing.md),
+  [escalations](../../designs/active/pipeline/escalations.md),
+  [branch-cleanup](../../designs/active/pipeline/branch-cleanup.md)

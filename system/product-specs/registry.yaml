@@ -4,7 +4,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/admin-panel.md
+  file: active/knowledge/admin-panel.md
   served_by_designs:
   - admin-panel
   related_specs:
@@ -15,7 +15,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/audit-log.md
+  file: active/tenancy/audit-log.md
   served_by_designs:
   - audit-log
   related_specs:
@@ -30,7 +30,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/architect-worker.md
+  file: active/workers/architect-worker.md
   served_by_designs:
   - architect-worker
   parent: worker-roles
@@ -39,7 +39,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/branch-cleanup.md
+  file: active/pipeline/branch-cleanup.md
   served_by_designs:
   - branch-cleanup
   related_specs:
@@ -47,12 +47,27 @@ specs:
   - task-orchestration
   - observability
   parent: pipeline-operations
+- id: coder-core-modular-monolith
+  title: coder-core modular monolith
+  status: active
+  owner: ro
+  folder: active
+  file: active/delivery/coder-core-modular-monolith.md
+  served_by_designs:
+  - coder-core-modular-monolith
+  related_specs:
+  - audit-log
+  - continuous-deployment
+  - knowledge-api
+  - task-orchestration
+  - tenant-isolation
+  parent: delivery-and-infra
 - id: continuous-deployment
   title: Continuous Deployment
   status: active
   owner: ro
   folder: active
-  file: active/continuous-deployment.md
+  file: active/delivery/continuous-deployment.md
   served_by_designs:
   - continuous-deployment
   parent: delivery-and-infra
@@ -61,7 +76,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/developer-worker.md
+  file: active/workers/developer-worker.md
   served_by_designs:
   - developer-worker
   parent: worker-roles
@@ -70,7 +85,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/escalations.md
+  file: active/pipeline/escalations.md
   served_by_designs:
   - escalations
   related_specs:
@@ -85,7 +100,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/impersonation.md
+  file: active/tenancy/impersonation.md
   served_by_designs:
   - impersonation
   related_specs:
@@ -96,7 +111,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/knowledge-api.md
+  file: active/knowledge/knowledge-api.md
   served_by_designs:
   - knowledge-write-api
   - knowledge-repo-model
@@ -108,7 +123,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/knowledge-freshness.md
+  file: active/knowledge/knowledge-freshness.md
   served_by_designs:
   - knowledge-freshness
   related_specs:
@@ -123,7 +138,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/multi-tenancy.md
+  file: active/tenancy/multi-tenancy.md
   served_by_designs:
   - multi-tenancy
   parent: tenancy-and-access
@@ -132,7 +147,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/observability.md
+  file: active/pipeline/observability.md
   served_by_designs:
   - observability-and-cost-tracking
   related_specs:
@@ -143,7 +158,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/onboarding.md
+  file: active/knowledge/onboarding.md
   served_by_designs:
   - onboarding
   parent: knowledge-and-admin
@@ -152,7 +167,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/pm-worker.md
+  file: active/workers/pm-worker.md
   served_by_designs:
   - pm-worker
   parent: worker-roles
@@ -161,7 +176,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/reviewer-worker.md
+  file: active/workers/reviewer-worker.md
   served_by_designs:
   - reviewer-worker
   parent: worker-roles
@@ -170,7 +185,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/self-healing.md
+  file: active/pipeline/self-healing.md
   served_by_designs:
   - self-healing
   related_specs:
@@ -185,16 +200,33 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/service-accounts.md
+  file: active/tenancy/service-accounts.md
   served_by_designs:
   - service-accounts
   parent: tenancy-and-access
+- id: spec-lifecycle-coordinator
+  title: Spec-lifecycle coordinator
+  status: active
+  owner: ro
+  folder: active
+  file: active/pipeline/spec-lifecycle-coordinator.md
+  served_by_designs:
+  - '0076'
+  - '0078'
+  related_specs:
+  - admin-panel
+  - architect-worker
+  - knowledge-api
+  - pm-worker
+  - task-orchestration
+  - team-manager-worker
+  parent: pipeline-operations
 - id: task-orchestration
   title: Task Orchestration
   status: active
   owner: ro
   folder: active
-  file: active/task-orchestration.md
+  file: active/pipeline/task-orchestration.md
   served_by_designs:
   - worker-communication
   related_specs:
@@ -205,7 +237,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/team-manager-worker.md
+  file: active/workers/team-manager-worker.md
   served_by_designs:
   - team-manager-worker
   parent: worker-roles
@@ -214,7 +246,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/tenant-isolation.md
+  file: active/delivery/tenant-isolation.md
   served_by_designs:
   - tenant-isolation
   related_specs:
@@ -309,7 +341,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/secret-rotation.md
+  file: active/tenancy/secret-rotation.md
   related_specs:
   - service-accounts
   - audit-log
@@ -322,7 +354,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/cold-start-ingestion.md
+  file: active/knowledge/cold-start-ingestion.md
   related_specs:
   - onboarding
   - architect-worker
@@ -333,7 +365,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/knowledge-schema-migration.md
+  file: active/knowledge/knowledge-schema-migration.md
   related_specs:
   - knowledge-api
   - onboarding
@@ -345,7 +377,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/fleet-patterns.md
+  file: active/knowledge/fleet-patterns.md
   related_specs:
   - knowledge-api
   - admin-panel
@@ -359,21 +391,25 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/mcp-agent-interface.md
+  file: active/knowledge/mcp-agent-interface.md
+  served_by_designs:
+  - mcp-agent-interface-design
   related_specs:
-  - impersonation
-  - service-accounts
-  - audit-log
   - admin-panel
-  - multi-tenancy
-  - task-orchestration
+  - audit-log
+  - impersonation
   - knowledge-api
+  - multi-tenancy
+  - oauth-mcp
+  - service-accounts
+  - task-orchestration
+  parent: knowledge-and-admin
 - id: oauth-mcp
   title: OAuth 2.1 for MCP clients
   status: active
   owner: ro
   folder: active
-  file: active/oauth-mcp.md
+  file: active/tenancy/oauth-mcp.md
   served_by_designs:
   - '0050'
   related_specs:
@@ -385,7 +421,7 @@ specs:
   status: active
   owner: ro
   folder: active
-  file: active/managed-workflows.md
+  file: active/knowledge/managed-workflows.md
   related_specs:
   - knowledge-api
   - onboarding
@@ -473,13 +509,6 @@ specs:
   folder: wip
   file: wip/0075-coder-studio-b2c-product-portfolio-operator-contract.md
   parent: knowledge-and-admin
-- id: '0076'
-  title: Spec-bound architect dispatch from admin UI
-  status: active
-  owner: ro
-  folder: active
-  file: active/0076-spec-bound-architect-dispatch-from-admin-ui.md
-  parent: pipeline-operations
 - id: '0077'
   title: "Coder Studio \u2014 Founder role Phase A"
   status: wip
@@ -487,13 +516,6 @@ specs:
   folder: wip
   file: wip/0077-coder-studio-founder-role-phase-a.md
   parent: knowledge-and-admin
-- id: 0078
-  title: Spec-run lifecycle auto-bootstrap for fresh WIP specs
-  status: active
-  owner: ro
-  folder: active
-  file: active/0078-spec-run-lifecycle-auto-bootstrap-for-fresh-wip-specs.md
-  parent: pipeline-operations
 - id: 0079
   title: "Coder Studio \u2014 coder-product-template repo contract"
   status: wip
@@ -551,3 +573,66 @@ specs:
   folder: wip
   file: wip/0093-architect-broken-cross-link-recovery.md
   parent: pipeline-operations
+- id: '0095'
+  title: Cache-hit and cost-regression observability is wrong or absent
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0095-cache-and-cost-observability-correctness.md
+  parent: pipeline-operations
+- id: 0096
+  title: Timed-out task stall visibility in admin panel
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0096-timed-out-task-stall-visibility-in-admin-panel.md
+  parent: pipeline-operations
+- id: 0097
+  title: Worker knowledge-pull visibility on task detail
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0097-worker-knowledge-pull-visibility-on-task-detail.md
+  parent: pipeline-operations
+- id: 0098
+  title: Worker Knowledge Read Log in Task Detail
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0098-worker-knowledge-read-log-in-task-detail.md
+  parent: knowledge-and-admin
+- id: 0099
+  title: Worker Knowledge-Read Transparency
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0099-worker-knowledge-read-transparency.md
+  parent: knowledge-and-admin
+- id: '0100'
+  title: Worker knowledge reads inline on task detail
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0100-worker-knowledge-reads-inline-on-task-detail.md
+  parent: knowledge-and-admin
+- id: '0101'
+  title: Task Knowledge-Read Trace
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0101-task-knowledge-read-trace.md
+  parent: knowledge-and-admin
+- id: '0102'
+  title: Knowledge-read trace on task detail
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0102-knowledge-read-trace-on-task-detail.md
+  parent: knowledge-and-admin
+- id: '0103'
+  title: Knowledge reads panel on task detail
+  status: wip
+  owner: ro
+  folder: wip
+  file: wip/0103-knowledge-reads-panel-on-task-detail.md
+  parent: knowledge-and-admin

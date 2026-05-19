@@ -69,41 +69,78 @@ Sonnet 4.6's per-message output cap is ~32K tokens, including
 extended-thinking blocks. When your total output (thinking + text)
 exceeds it, Claude CLI splits the response into multiple assistant
 turns — task latency doubles and the dispatched ``result`` field
-captures only the last fragment. **Aim for total output under 25K
-tokens.** Concretely:
+captures only the last fragment. **Hard ceiling: total output ≤ 25K
+tokens.**
 
-- Body 30–80 lines, not 200. Long bodies are usually two designs
-  fused or one design padded with restated context.
-- One Mermaid that *adds information* (data flow, sequence,
+Inside that budget, length follows content discipline — not an
+arbitrary line cap:
+
+- **One component per design.** If you find yourself writing about two
+  distinct components, split. This is the most common cause of bloat,
+  not "too much detail."
+- **Current state only.** Rollout / history / decisions live in
+  `## Evolution` (terse) or in ADRs. The body describes what runs
+  *now*; readers consult git or ADRs for *why*.
+- **Every section earns its place.** A `## Data flow` that just
+  restates `## Architecture` should be dropped. A `## Parts` list
+  that just enumerates the diagram boxes is dead weight.
+- **One Mermaid that adds information** (data flow, sequence,
   boundary). Three sprawling diagrams of boxes and arrows are not
   three times better.
-- Each section is paragraph-length, not page-length. If a section is
-  getting long, summarize and link to the relevant active design or
-  ADR.
-- ADRs only when the rationale doesn't fit in one in-band sentence.
+- **ADRs only when the rationale doesn't fit in one in-band sentence.**
   If you're drafting an ADR per design, recalibrate.
+- **Smell test: ~200 body lines.** Past that, look hard for fused
+  topics or padding. Past ~300 is almost certainly two designs in one.
+  A genuinely complex component (multiple endpoints + invariants +
+  edge cases) can sit in the 100–200 range and still be tight.
 
 ## Principles (the contract a good design satisfies)
 
 These are the principles your role doc names, restated as a checklist
 for *this* run. Hit every box.
 
-- [ ] Body 30–80 lines. Past 100 → split or trim.
+- [ ] One component, current state only. Past ~200 body lines → look hard for a split or for content belonging in ADRs / `## Evolution`.
+- [ ] Body sections (in order): `## What it does today` · `## Architecture` (with Mermaid) · `### Parts` · `### Data flow` · `### Invariants` · `## Interfaces` · `## Where in code` · `## Evolution` (1–3 lines max) · `## Links`. **Not** `## Context` / `## Goals` / `## Rollout` / `## Open questions` — those belong in ADRs or git history. **Anti-example.** If your design body opens with `## Context` / `## Decision` / `## Implementation` / `## Rollout`, you have written an ADR-shaped document, not a design. ADRs live in the separate `adrs` array; the design `body` always opens with `## What it does today`.
 - [ ] One Mermaid that shows data flow / sequence / boundary, not just
       a box-and-line component list.
+- [ ] **`## Where in code` lists 3–6 symbol anchors** of the form
+      `` `path` — `Symbol` (note) `` — **never line numbers**
+      (lines shift on every refactor; symbols only change on rename).
+      `scripts/validate.py` rejects `path.ext:N` patterns in this section.
+- [ ] **`target_slug` is set** to a meaningful kebab-case slug (3–60
+      chars, derived from the title) — *not* a numeric placeholder.
+      Per ADR 0026 this is what the ship workflow uses to route the
+      active file. Missing-slug WIPs get the 2026-05-06 cleanup
+      treatment after the fact; set it correctly at draft time.
 - [ ] `affects_services` and `affects_repos` are concrete (running
       services + existing repos). Empty arrays are a *design smell*,
       not the default.
 - [ ] `implements_specs` resolves to at least one spec id from the
       preloaded product-spec index.
 - [ ] `parent:` is the slug of one design category from the preloaded
-      designs index.
+      designs index. **The ship workflow uses this to route the active
+      file** into `active/<category>/<slug>.md` (per design 0095
+      Phase 7); leaves only land at the right path when `parent:` is
+      correctly set.
+- [ ] **Body cross-link paths honour the category-folder layout:**
+      sibling in the same category → `./<slug>.md`; cross-category →
+      `../<other-cat>/<slug>.md`; category rollup → `../<rollup>.md`;
+      ADRs → `../../../adrs/<id>-<slug>.md`.
 - [ ] At least one **edge case / failure mode** in the body, not just
       the happy path.
-- [ ] Rollout plan names the actual sequence (flag, soak, ramp,
-      verify) — not just *"deploy gradually"*.
+- [ ] **If your task updates an existing active design**, apply the
+      Phase-9 lean-up convention: trim the touched leaf toward the
+      discipline (one component, current state only, history out of
+      body) in the same change. Don't drift past 200 body lines.
 - [ ] ADR(s) drafted **only** for genuinely non-obvious decisions
       (3+ reasonable options, rationale wouldn't fit in-band).
+- [ ] **Source-grounded.** Before drafting, at least one
+      `gh api search/code?q=...+repo:{org}/coder-core` call against
+      the symbols, endpoints, or surfaces named in the spec. A
+      design that names no existing function, endpoint, table, or
+      job is almost always reinventing rather than fitting — and
+      the rebuild cost compounds across the Team Manager and
+      Developer stages.
 
 ## Output format
 
@@ -134,7 +171,7 @@ The canonical (nested) shape:
           "affects_repos": ["coder-core"],
           "parent": "<category-id-from-designs-INDEX>"
         },
-        "body": "# Title\n\n## Context\n...\n\n## Goals / non-goals\n...\n\n## Design\n\n```mermaid\nflowchart TB\n  A --> B\n```\n\n### Components\n...\n\n### Data flow\n...\n\n### Edge cases\n...\n\n## Open questions\n...\n\n## Rollout\n...\n\n## Links\n..."
+        "body": "# Title\n\n## What it does today\n<one paragraph, current state only>\n\n## Architecture\n\n```mermaid\nflowchart TB\n  A --> B\n```\n\n### Parts\n<3–5 bullets: concrete modules / endpoints / tables / jobs>\n\n### Data flow\n<2–4 sentences, happy path as it runs now>\n\n### Invariants\n<3–6 bullets: hard rules; edge cases handled>\n\n## Interfaces\n<table: surface | effect>\n\n## Where in code\n- `path/to/module.py` — `SymbolName` (note)\n- ... (3–6 symbol anchors total)\n\n## Evolution\n<1–3 lines: load-bearing prior WIPs / ADRs only>\n\n## Links\n- Spec: ...\n- ADRs: ...\n- Designs: ...\n- Repos: ..."
       },
       "adrs": []
     }
@@ -171,6 +208,15 @@ ADRs go in the `adrs` array (omit when none warranted):
         }
       ]
     }
+
+**ADR `frontmatter` must include all of:** `id` (4-digit zero-padded
+string), `title`, `type: "adr"`, `status` (`proposed` for fresh
+drafts), `date` (`YYYY-MM-DD`), `deciders` (array of usernames),
+`supersedes` (null or ADR id), `superseded_by` (null or ADR id), and
+`relates_to_designs` (array of design ids). Omitting any of these
+fails the ADR schema. The example block above shows the canonical
+shape; do not strip fields you think look optional — `null` is
+right for `supersedes` / `superseded_by` on a fresh ADR.
 
 ### Schema-enforced fields
 

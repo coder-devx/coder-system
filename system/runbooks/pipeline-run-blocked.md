@@ -169,7 +169,7 @@ gate problem — it's an orphan or a hung worker.
   Approve.** The `advance_step` write succeeded but
   `on_spec_approved` / `on_design_approved` didn't fire —
   usually a disabled chain hook. Check
-  [task-orchestration](../product-specs/active/task-orchestration.md)'s
+  [task-orchestration](../product-specs/active/pipeline/task-orchestration.md)'s
   pipeline-chaining section and the worker logs for the approve
   call.
 - **Request-changes isn't respawning the worker.** The
@@ -183,9 +183,9 @@ gate problem — it's an orphan or a hung worker.
 - Spec: [0026 — pipeline run dashboard](../product-specs/wip/0026-pipeline-run-dashboard.md)
 - Design: [0026 — pipeline run dashboard](../designs/wip/0026-pipeline-run-dashboard.md)
 - Related specs:
-  [task-orchestration](../product-specs/active/task-orchestration.md)
+  [task-orchestration](../product-specs/active/pipeline/task-orchestration.md)
   (pipeline chaining + approval endpoints);
-  [admin-panel](../product-specs/active/admin-panel.md) (Runs list
+  [admin-panel](../product-specs/active/knowledge/admin-panel.md) (Runs list
   + RunDetail pages).
 - Adjacent runbooks:
   [ship-wip-into-active](./ship-wip-into-active.md) — Outcome E's

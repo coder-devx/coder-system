@@ -9,7 +9,7 @@ updated: 2026-05-06
 last_verified_at: 2026-05-06
 summary: "How a project's knowledge is read, written, kept current, and surfaced to operators."
 served_by_designs: [knowledge-repo-model, knowledge-write-api, knowledge-freshness]
-related_specs: [worker-roles, tenancy-and-access, pipeline-operations]
+related_specs: [admin-panel, audit-log, cold-start-ingestion, fleet-patterns, knowledge-api, knowledge-freshness, knowledge-schema-migration, managed-workflows, onboarding, pipeline-operations, tenancy-and-access, worker-roles]
 parent: ~
 ---
 
@@ -30,20 +30,28 @@ of knowledge repos is kept in sync with expected workflow primitives.
 
 ## Components
 
-- [knowledge-api](./knowledge-api.md) — read-through layer over the
+- [knowledge-api](./knowledge/knowledge-api.md) — read-through layer over the
   knowledge repo with a per-project cache. Files, registries, graph
   queries.
-- [knowledge-freshness](./knowledge-freshness.md) — automatic
+- [knowledge-freshness](./knowledge/knowledge-freshness.md) — automatic
   freshness audit that flags stale artifacts and schedules
   Architect-led rewrites.
-- [admin-panel](./admin-panel.md) — user-facing SPA: pipeline view,
+- [admin-panel](./knowledge/admin-panel.md) — user-facing SPA: pipeline view,
   knowledge browser, plan review, metrics dashboard, drive-mode
   override.
-- [onboarding](./onboarding.md) — how a new project gets wired into
+- [onboarding](./knowledge/onboarding.md) — how a new project gets wired into
   Coder for the first time.
-- [managed-workflows](./managed-workflows.md) — shared primitive for
+- [managed-workflows](./knowledge/managed-workflows.md) — shared primitive for
   installing, verifying, and receiving callbacks from GitHub Action
   workflows across the fleet of managed knowledge repos.
+- [mcp-agent-interface](./knowledge/mcp-agent-interface.md) — `/mcp`
+  endpoint that lets external MCP-speaking agents drive Coder over
+  streamable HTTP, with bearer auth + admin / project / broker JWT
+  resolution, caller-filtered tool surface, and audit parity with
+  the REST path. The matching browser-OAuth auth-server layer for
+  clients that can't use bearer headers ships separately as
+  [oauth-mcp](./tenancy/oauth-mcp.md) (in tenancy because it's an
+  auth-server, not a tool surface).
 
 ## Cross-cutting concerns
 
@@ -54,13 +62,13 @@ of knowledge repos is kept in sync with expected workflow primitives.
   Knowledge API write path or the dispatcher's
   `_commit_artifact_with_registry` helper (see design 0057).
 - **Audit**: every knowledge write emits a `knowledge.create` /
-  `knowledge.update` event in [audit-log](./audit-log.md).
+  `knowledge.update` event in [audit-log](./tenancy/audit-log.md).
 - **Pipeline integration**: PM acceptance promotes specs from `wip/`
   to `active/`; design 0057 establishes the per-role/per-mode prompt
   layout that drives this.
 
 ## Links
 
-- Designs: [knowledge-repo-model](../../designs/active/knowledge-repo-model.md),
-  [knowledge-write-api](../../designs/active/knowledge-write-api.md),
-  [knowledge-freshness](../../designs/active/knowledge-freshness.md)
+- Designs: [knowledge-repo-model](../../designs/active/knowledge/knowledge-repo-model.md),
+  [knowledge-write-api](../../designs/active/knowledge/knowledge-write-api.md),
+  [knowledge-freshness](../../designs/active/knowledge/knowledge-freshness.md)
