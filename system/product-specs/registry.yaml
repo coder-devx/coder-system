@@ -212,7 +212,7 @@ specs:
   file: active/pipeline/spec-lifecycle-coordinator.md
   served_by_designs:
   - '0076'
-  - '0078'
+  - 0078
   related_specs:
   - admin-panel
   - architect-worker
@@ -551,13 +551,6 @@ specs:
   folder: wip
   file: wip/0090-deploy-chain-resilience-to-test-flake.md
   parent: pipeline-operations
-- id: 0091
-  title: Diagnose and fix the caplog inter-test pollution affecting 4 tests
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0091-conftest-log-pollution-root-cause.md
-  parent: pipeline-operations
 - id: 0092
   title: PM and other stage=None tasks must be retriable via override
   status: wip
@@ -573,7 +566,7 @@ specs:
   folder: wip
   file: wip/0093-architect-broken-cross-link-recovery.md
   parent: pipeline-operations
-- id: '0095'
+- id: 0095
   title: Cache-hit and cost-regression observability is wrong or absent
   status: wip
   owner: ro
@@ -636,3 +629,12 @@ specs:
   folder: deprecated
   file: deprecated/0103-knowledge-reads-panel-on-task-detail.md
   parent: knowledge-and-admin
+- id: test-harness-reliability
+  title: Test harness reliability
+  status: active
+  owner: ro
+  folder: active
+  file: active/delivery/test-harness-reliability.md
+  related_specs:
+  - continuous-deployment
+  - tenant-isolation
