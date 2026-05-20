@@ -67,6 +67,7 @@ in each component's `## Evolution` section and in git.
 | [0093](./wip/0093-architect-broken-cross-link-recovery.md) | Architect broken_cross_link should surface the specific field/target instead of silent-dropping | ro | — |
 | [0095](./wip/0095-cache-and-cost-observability-correctness.md) | Cache-hit and cost-regression observability is wrong or absent | ro | — |
 | [0104](./wip/0104-spec-run-cancel-and-deprecation-reconciler.md) | Spec-run cancel verb + auto-cancel on WIP deprecation | ro | — |
+| [0105](./wip/0105-spec-ship-also-folds-paired-design-into-active.md) | Spec ship also folds the paired design into active/ | ro | — |
 
 ## Deprecated
 
