@@ -509,13 +509,6 @@ specs:
   folder: wip
   file: wip/0083-plan-unblock-checks-retry-chain.md
   parent: pipeline-operations
-- id: 0089
-  title: Branch-protection enforcement on coder-core/main blocks all direct pushes
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0089-branch-protection-enforcement-on-coder-core-main.md
-  parent: tenancy-and-access
 - id: 0090
   title: Deploy chain must not be hostage to a single flaky test
   status: wip
@@ -531,7 +524,8 @@ specs:
   file: wip/0092-pm-retry-via-override.md
   parent: pipeline-operations
 - id: 0093
-  title: Architect broken_cross_link should surface the specific field/target instead of silent-dropping
+  title: Architect broken_cross_link should surface the specific field/target instead
+    of silent-dropping
   status: wip
   owner: ro
   folder: wip
@@ -665,3 +659,14 @@ specs:
   folder: wip
   file: wip/0104-spec-run-cancel-and-deprecation-reconciler.md
   parent: pipeline-operations
+- id: branch-protection
+  title: Branch protection enforcement
+  status: active
+  owner: ro
+  folder: active
+  file: active/delivery/branch-protection.md
+  related_specs:
+  - continuous-deployment
+  - developer-worker
+  - audit-log
+  - service-accounts
