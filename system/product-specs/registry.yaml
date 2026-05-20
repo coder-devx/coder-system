@@ -538,13 +538,6 @@ specs:
   folder: wip
   file: wip/0095-cache-and-cost-observability-correctness.md
   parent: pipeline-operations
-- id: 0096
-  title: Timed-out task stall visibility in admin panel
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0096-timed-out-task-stall-visibility-in-admin-panel.md
-  parent: pipeline-operations
 - id: 0097
   title: Worker knowledge-pull visibility on task detail
   status: deprecated

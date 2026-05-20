@@ -60,6 +60,18 @@ and `/pipeline-runs` endpoints in `coder-core`.
   "recovered after N transient retries" without a log dive. The retry
   lives in the worker per ADR 0013 — no dispatcher-level wrapper.
 
+- **Timeout-stall stamps.** When any system path (worker subprocess
+  timeout, self-healing `zombie_executing` remediator, or platform
+  error) transitions a task to `timed_out`, the orchestrator stamps
+  three nullable integer columns on the `tasks` row: `timeout_stage`
+  (the stage the task was in at timeout), `timeout_total_elapsed_s`
+  (seconds from `tasks.started_at` to timeout), and
+  `timeout_stage_elapsed_s` (seconds from the final
+  `task_stage_runs.recorded_at` to timeout). All three are `null` when
+  `status != timed_out`. Every code path that writes `timed_out` stamps
+  these fields so no task reaches that terminal state without
+  stall-stage context.
+
 - **Human override + retry.** Operators can pause, resume, retry,
   skip to a stage, or reject any task; overrides land in the message
   thread for audit. One-click retry clones a terminal task into a
@@ -142,6 +154,10 @@ and `/pipeline-runs` endpoints in `coder-core`.
   PM `draft:` prompts auto-create a `pipeline_run`. Optional `spec_id`
   binds an architect task to a WIP spec (see [admin-panel](../knowledge/admin-panel.md)).
 - `GET /v1/projects/{id}/tasks?stage=&status=&role=` — list with filters.
+- `GET /v1/projects/{id}/tasks/{tid}` — individual task detail; includes
+  `timeout_stage` (string | null), `timeout_total_elapsed_s` (int | null),
+  and `timeout_stage_elapsed_s` (int | null), populated only when
+  `status = timed_out`.
 - `POST .../tasks/{task_id}/override` — pause / resume / retry /
   skip_to_stage / reject.
 - `POST .../tasks/{task_id}/retry` — clone a terminal task into a
@@ -150,11 +166,6 @@ and `/pipeline-runs` endpoints in `coder-core`.
   conversation; SSE `message_created` events.
 - `GET .../tasks/{task_id}/stage-runs` — archived per-dispatch
   snapshots, oldest-first; filters on `stage` and `status`.
-- `GET .../tasks/{task_id}/tool-uses` — paginated list of
-  `task_tool_uses` rows (recorded worker Bash tool invocations).
-  Project-scoped; returns 404 when `task_id` belongs to a different
-  project (tenant isolation, asserted by integration test). Primary
-  consumer: `coder-admin` knowledge-reads panel (spec 0099).
 - `GET .../tasks/{task_id}/pr` — PR metadata + unified diff + reviewer
   verdict for the inline PR viewer.
 - `POST .../tasks/{task_id}/gate-replay` — operator submits a
@@ -175,8 +186,7 @@ entry points) lives in its own component — see
 
 - Postgres (`tasks`, `task_messages`, `task_logs`, `pipeline_runs`,
   `knowledge_reviews`, `task_stage_runs`, `pipeline_run_contexts`,
-  `adr_id_reservations`, `task_tool_uses`) — state of record.
-  (`spec_runs` belongs to
+  `adr_id_reservations`) — state of record. (`spec_runs` belongs to
   [spec-lifecycle-coordinator](./spec-lifecycle-coordinator.md).)
 - Developer, Reviewer, PM, Architect, Team Manager workers — the
   stages the orchestrator drives.
@@ -198,9 +208,10 @@ entry points) lives in its own component — see
   (specs 0056, 0085). The per-spec lifecycle layer (specs 0068, 0078)
   spun out into its own component — see
   [spec-lifecycle-coordinator](./spec-lifecycle-coordinator.md).
-- 2026-05-20 — knowledge-reads transparency (spec 0099):
-  `task_tool_uses` endpoint exposed; project-scoped tenant isolation
-  with integration test.
+- 2026-05-20 — timeout-stall stamps: `timeout_stage`,
+  `timeout_total_elapsed_s`, `timeout_stage_elapsed_s` written on
+  `tasks` at every `timed_out` transition; exposed on
+  `GET .../tasks/{tid}` (spec 0096).
 
 ## Links
 
