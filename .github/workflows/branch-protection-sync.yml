@@ -1,0 +1,139 @@
+# Spec 0089 AC4: version-controlled branch-protection enforcement.
+
+name: branch-protection-sync
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  apply:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check token is provisioned
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::BRANCH_PROTECTION_ADMIN_TOKEN not provisioned"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_ADMIN_TOKEN }}
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Apply branch protection
+        env:
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_ADMIN_TOKEN }}
+        run: |
+          python3 -c '
+          import yaml, sys, json
+
+          with open(".github/branch-protection.yml") as f:
+              config = yaml.safe_load(f)
+
+          protection = config["protection"]
+          with open("/tmp/protection.json", "w") as f:
+              json.dump(protection, f)
+
+          for repo in config["repos"]:
+              owner = repo["owner"]
+              name = repo["name"]
+              branch = repo["branch"]
+              print(f"Applying protection to {owner}/{name} branch {branch}")
+          '
+
+          REPOS=$(python3 -c '
+          import yaml, json
+          with open(".github/branch-protection.yml") as f:
+              config = yaml.safe_load(f)
+          for repo in config["repos"]:
+              print(f"{repo[\"owner\"]} {repo[\"name\"]} {repo[\"branch\"]}")
+          ')
+
+          while IFS=" " read -r owner name branch; do
+            echo "Applying to ${owner}/${name}/${branch}"
+            gh api "repos/${owner}/${name}/branches/${branch}/protection" \
+              --method PUT --input /tmp/protection.json
+          done <<< "$REPOS"
+
+  drift-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check token is provisioned
+        id: check-token
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::notice::BRANCH_PROTECTION_ADMIN_TOKEN not provisioned — skipping drift check"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_ADMIN_TOKEN }}
+
+      - name: Install PyYAML
+        if: steps.check-token.outputs.skip == 'false'
+        run: pip install pyyaml
+
+      - name: Check for drift
+        if: steps.check-token.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_ADMIN_TOKEN }}
+        run: |
+          python3 -c '
+          import yaml
+          with open(".github/branch-protection.yml") as f:
+              config = yaml.safe_load(f)
+          p = config["protection"]
+          print(config["repos"][0]["owner"],
+                config["protection"]["required_pull_request_reviews"]["required_approving_review_count"],
+                str(config["protection"]["enforce_admins"]).lower())
+          ' > /dev/null
+
+          YAML_APPROVALS=$(python3 -c '
+          import yaml
+          with open(".github/branch-protection.yml") as f:
+              config = yaml.safe_load(f)
+          print(config["protection"]["required_pull_request_reviews"]["required_approving_review_count"])
+          ')
+
+          YAML_ENFORCE_ADMINS=$(python3 -c '
+          import yaml
+          with open(".github/branch-protection.yml") as f:
+              config = yaml.safe_load(f)
+          print(str(config["protection"]["enforce_admins"]).lower())
+          ')
+
+          REPOS=$(python3 -c '
+          import yaml
+          with open(".github/branch-protection.yml") as f:
+              config = yaml.safe_load(f)
+          for repo in config["repos"]:
+              print(f"{repo[\"owner\"]} {repo[\"name\"]} {repo[\"branch\"]}")
+          ')
+
+          while IFS=" " read -r owner name branch; do
+            LIVE=$(gh api "repos/${owner}/${name}/branches/${branch}/protection" 2>/dev/null) || {
+              echo "::warning::Could not fetch protection for ${owner}/${name}/${branch} — skipping"
+              continue
+            }
+
+            LIVE_ENFORCE=$(echo "$LIVE" | jq -r '.enforce_admins.enabled')
+            LIVE_APPROVALS=$(echo "$LIVE" | jq -r '.required_pull_request_reviews.required_approving_review_count')
+
+            if [ "$LIVE_ENFORCE" != "$YAML_ENFORCE_ADMINS" ]; then
+              echo "::warning::Branch protection drift: ${name}/${branch} — enforce_admins is ${LIVE_ENFORCE}, config expects ${YAML_ENFORCE_ADMINS}"
+            fi
+
+            if [ "$LIVE_APPROVALS" != "$YAML_APPROVALS" ]; then
+              echo "::warning::Branch protection drift: ${name}/${branch} — required_approving_review_count is ${LIVE_APPROVALS}, config expects ${YAML_APPROVALS}"
+            fi
+          done <<< "$REPOS"
