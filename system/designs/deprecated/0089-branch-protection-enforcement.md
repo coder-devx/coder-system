@@ -2,13 +2,12 @@
 id: 0089
 title: Branch Protection Enforcement for Orchestrator-Managed Repos
 type: design
-status: wip
+status: deprecated
 owner: ro
 created: '2026-05-13'
 updated: '2026-05-13'
 last_verified_at: '2026-05-13'
-implements_specs:
-- 0089
+implements_specs: []
 decided_by: []
 related_designs:
 - continuous-deployment
@@ -22,6 +21,13 @@ affects_repos:
 - coder-system
 - coder-product-template
 parent: tenancy-and-access
+deprecated_at: '2026-05-20'
+deprecated_reason: >-
+  Spec 0089 shipped to active subject-slug 'branch-protection' on
+  2026-05-20 (coder-system commit 6877027). The design was a WIP
+  draft alongside the WIP spec; per AGENTS rule, when the spec
+  ships without a paired design ship, the design is deprecated
+  pending a fresh authoring against the active component.
 ---
 
 # Branch Protection Enforcement for Orchestrator-Managed Repos

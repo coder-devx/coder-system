@@ -13,6 +13,7 @@ in each component's `## Evolution` section and in git.
 | [architect-worker](./active/workers/architect-worker.md) | Architect Worker | ro | architect-worker |
 | [audit-log](./active/tenancy/audit-log.md) | Audit log | ro | audit-log |
 | [branch-cleanup](./active/pipeline/branch-cleanup.md) | Branch cleanup | ro | branch-cleanup |
+| [branch-protection](./active/delivery/branch-protection.md) | Branch protection enforcement | ro | — |
 | [coder-core-modular-monolith](./active/delivery/coder-core-modular-monolith.md) | coder-core modular monolith | ro | coder-core-modular-monolith |
 | [coder-product-template](./active/knowledge/coder-product-template.md) | Coder Studio — coder-product-template contract | ro | — |
 | [coder-studio-founder](./active/knowledge/coder-studio-founder.md) | Coder Studio — Founder Role Phase A | ro | — |
@@ -61,7 +62,6 @@ in each component's `## Evolution` section and in git.
 | [0073](./wip/0073-drive-mode-in-browser.md) | Drive mode — operator role takeover in the browser | ro | [0073](../designs/wip/0073-drive-mode-in-browser.md) |
 | [0074](./wip/0074-spec-compose-write-endpoint.md) | SpecCompose write endpoint and draft hand-off to Now | ro | — |
 | [0083](./wip/0083-plan-unblock-checks-retry-chain.md) | Plan-unblock check accounts for retry chain, not just original task's stage | ro | — |
-| [0089](./wip/0089-branch-protection-enforcement-on-coder-core-main.md) | Branch-protection enforcement on coder-core/main blocks all direct pushes | ro | — |
 | [0090](./wip/0090-deploy-chain-resilience-to-test-flake.md) | Deploy chain must not be hostage to a single flaky test | ro | — |
 | [0092](./wip/0092-pm-retry-via-override.md) | PM and other stage=None tasks must be retriable via override | ro | — |
 | [0093](./wip/0093-architect-broken-cross-link-recovery.md) | Architect broken_cross_link should surface the specific field/target instead of silent-dropping | ro | — |

@@ -79,7 +79,6 @@ Logical components of the Coder system as it exists today.
 | [0086](./wip/0086-adr-collision-failure-kind-tagging.md) | ADR Collision failure_kind Tagging | ro | — | — |
 | [0087](./wip/0087-lint-pre-flight-hard-gate.md) | Lint pre-flight hard gate | ro | — | — |
 | [0088](./wip/0088-worker-prod-credentials-isolation.md) | Worker Prod-Credentials Isolation | ro | — | — |
-| [0089](./wip/0089-branch-protection-enforcement.md) | Branch Protection Enforcement for Orchestrator-Managed Repos | ro | — | — |
 | [0090](./wip/0090-deploy-chain-flake-resilience.md) | Deploy-chain flake resilience | ro | — | — |
 | [0092](./wip/0092-pm-retry-via-override.md) | PM retry via override | ro | — | — |
 | [0093](./wip/0093-broken-cross-link-failure-detail.md) | broken_cross_link Failure Detail | ro | — | — |
@@ -96,6 +95,7 @@ Logical components of the Coder system as it exists today.
 | [0077](./deprecated/0077-coder-studio-founder-role-phase-a.md) | Coder Studio — Founder Role Phase A | — | — |
 | [0079](./deprecated/0079-coder-product-template-repo-contract.md) | Coder Product Template Repo Contract | — | — |
 | [0080](./deprecated/0080-studio-stripe-posthog-integration.md) | Studio Stripe Connect and PostHog Integration | — | — |
+| [0089](./deprecated/0089-branch-protection-enforcement.md) | Branch Protection Enforcement for Orchestrator-Managed Repos | — | — |
 | [0091](./deprecated/0091-caplog-inter-test-pollution-bisect-fix-and-harness-regression.md) | Caplog inter-test pollution: bisect, fix, and harness regression | — | — |
 | [0097](./deprecated/0097-worker-knowledge-pull-visibility.md) | Worker knowledge-pull visibility | — | — |
 | [0098](./deprecated/0098-task-knowledge-reads-panel.md) | Task Knowledge Reads Panel | — | — |

@@ -377,24 +377,26 @@ flowchart LR
   n001("design<br/>continuous-deployment")
   n002("design<br/>delivery-and-infra")
   n003("design<br/>tenant-isolation")
-  n004["spec<br/>coder-core-modular-monolith"]
-  n005["spec<br/>continuous-deployment"]
-  n006["spec<br/>delivery-and-infra"]
-  n007["spec<br/>tenant-isolation"]
-  n008["spec<br/>test-harness-reliability"]
-  n006 -->|served by| n000
+  n004["spec<br/>branch-protection"]
+  n005["spec<br/>coder-core-modular-monolith"]
+  n006["spec<br/>continuous-deployment"]
+  n007["spec<br/>delivery-and-infra"]
+  n008["spec<br/>tenant-isolation"]
+  n009["spec<br/>test-harness-reliability"]
+  n007 -->|served by| n000
   n000 -.->|related| n003
-  n005 -->|served by| n001
-  n006 -->|served by| n002
+  n006 -->|served by| n001
+  n007 -->|served by| n002
   n002 -.->|related| n000
   n002 -.->|related| n001
-  n007 -->|served by| n003
-  n004 -->|served by| n000
-  n004 -.->|related| n005
-  n004 -.->|related| n007
-  n006 -->|served by| n000
-  n008 -.->|related| n005
-  n008 -.->|related| n007
+  n008 -->|served by| n003
+  n004 -.->|related| n006
+  n005 -->|served by| n000
+  n005 -.->|related| n006
+  n005 -.->|related| n008
+  n007 -->|served by| n000
+  n009 -.->|related| n006
+  n009 -.->|related| n008
 ```
 
 ## Other

@@ -106,6 +106,7 @@ How code reaches production and how the system itself stays maintainable.
 - Spec: [delivery-and-infra](./product-specs/active/delivery-and-infra.md)
 - Design: [delivery-and-infra](./designs/active/delivery-and-infra.md)
 
+- [branch-protection](./product-specs/active/delivery/branch-protection.md) (spec) — Enforces PR-only writes to main across orchestrator-managed repos via GitHub branch protection, version-controlled config, and a CI regression test.
 - [coder-core-modular-monolith](./product-specs/active/delivery/coder-core-modular-monolith.md) (spec) · [coder-core-modular-monolith](./designs/active/delivery/coder-core-modular-monolith.md) (design) — coder-core stays a single deployable with explicit internal boundaries so out-of-process extraction is one-file work later.
 - [continuous-deployment](./product-specs/active/delivery/continuous-deployment.md) (spec) · [continuous-deployment](./designs/active/delivery/continuous-deployment.md) (design) — Push-to-main CD with health checks.
 - [tenant-isolation](./product-specs/active/delivery/tenant-isolation.md) (spec) · [tenant-isolation](./designs/active/delivery/tenant-isolation.md) (design) — Test-suite harness for the multi-tenancy contract.
