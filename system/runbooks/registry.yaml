@@ -17,6 +17,11 @@ runbooks:
   status: active
   owner: ro
   file: branch-gc.md
+- id: github-branch-protection
+  title: GitHub branch protection — enforce, verify, and restore
+  status: active
+  owner: ro
+  file: github-branch-protection.md
 - id: cache-hit-drop
   title: Cache-hit ratio dropped overnight — diagnose and remediate
   status: active

@@ -20,3 +20,28 @@ jobs:
 
       - name: Validate knowledge repo
         run: python3 scripts/validate.py
+
+  # Spec 0089 AC2: verify worker bot cannot push directly to coder-system/main.
+  branch-protection-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify worker bot push to main is rejected
+        env:
+          WORKER_BOT_TOKEN: ${{ secrets.WORKER_BOT_TOKEN }}
+        run: |
+          if [ -z "$WORKER_BOT_TOKEN" ]; then
+            echo "::notice::WORKER_BOT_TOKEN not provisioned; skipped. See system/runbooks/github-branch-protection.md"
+            exit 0
+          fi
+          printf 'machine github.com login x-access-token password %s\n' "$WORKER_BOT_TOKEN" > ~/.netrc
+          chmod 600 ~/.netrc
+          git clone --depth=1 https://github.com/coder-devx/coder-system.git /tmp/bp-probe
+          cd /tmp/bp-probe
+          git config user.email "ci-probe@example.com"
+          git config user.name "CI probe"
+          git commit --allow-empty -m "chore: branch-protection regression probe [skip ci]"
+          if git push origin HEAD:refs/heads/main 2>&1; then
+            echo "::error::REGRESSION: worker bot pushed directly to coder-system/main — branch protection NOT enforced!"
+            exit 1
+          fi
+          echo "OK: direct push to coder-system/main rejected (branch protection active)"
