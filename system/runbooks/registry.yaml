@@ -168,6 +168,11 @@ runbooks:
   status: active
   owner: ro
   file: zombie-task-recovery.md
+- id: github-branch-protection
+  title: GitHub branch-protection — provision, verify, and restore
+  status: active
+  owner: ro
+  file: github-branch-protection.md
 - id: template-migration
   title: Template schema migration — authoring, rollout, and rollback
   status: active
