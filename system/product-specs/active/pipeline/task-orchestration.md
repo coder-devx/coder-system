@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-11
-updated: 2026-05-17
-last_verified_at: 2026-05-17
+updated: 2026-05-20
+last_verified_at: 2026-05-20
 summary: Task lifecycle, dispatcher, and stage transitions.
 served_by_designs: [worker-communication]
 related_specs: [admin-panel, architect-worker, audit-log, developer-worker, escalations, knowledge-api, observability, pm-worker, reviewer-worker, self-healing, team-manager-worker]
@@ -150,6 +150,11 @@ and `/pipeline-runs` endpoints in `coder-core`.
   conversation; SSE `message_created` events.
 - `GET .../tasks/{task_id}/stage-runs` — archived per-dispatch
   snapshots, oldest-first; filters on `stage` and `status`.
+- `GET .../tasks/{task_id}/tool-uses` — paginated list of
+  `task_tool_uses` rows (recorded worker Bash tool invocations).
+  Project-scoped; returns 404 when `task_id` belongs to a different
+  project (tenant isolation, asserted by integration test). Primary
+  consumer: `coder-admin` knowledge-reads panel (spec 0099).
 - `GET .../tasks/{task_id}/pr` — PR metadata + unified diff + reviewer
   verdict for the inline PR viewer.
 - `POST .../tasks/{task_id}/gate-replay` — operator submits a
@@ -170,7 +175,8 @@ entry points) lives in its own component — see
 
 - Postgres (`tasks`, `task_messages`, `task_logs`, `pipeline_runs`,
   `knowledge_reviews`, `task_stage_runs`, `pipeline_run_contexts`,
-  `adr_id_reservations`) — state of record. (`spec_runs` belongs to
+  `adr_id_reservations`, `task_tool_uses`) — state of record.
+  (`spec_runs` belongs to
   [spec-lifecycle-coordinator](./spec-lifecycle-coordinator.md).)
 - Developer, Reviewer, PM, Architect, Team Manager workers — the
   stages the orchestrator drives.
@@ -192,6 +198,9 @@ entry points) lives in its own component — see
   (specs 0056, 0085). The per-spec lifecycle layer (specs 0068, 0078)
   spun out into its own component — see
   [spec-lifecycle-coordinator](./spec-lifecycle-coordinator.md).
+- 2026-05-20 — knowledge-reads transparency (spec 0099):
+  `task_tool_uses` endpoint exposed; project-scoped tenant isolation
+  with integration test.
 
 ## Links
 

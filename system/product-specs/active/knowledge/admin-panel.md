@@ -5,8 +5,8 @@ type: spec
 status: active
 owner: ro
 created: 2026-04-09
-updated: 2026-05-19
-last_verified_at: 2026-05-19
+updated: 2026-05-20
+last_verified_at: 2026-05-20
 summary: User-facing SPA for status, debug, override.
 served_by_designs: [system-overview]
 related_specs: [audit-log, studio-b2c-portfolio]
@@ -185,6 +185,24 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `0 performance`; non-zero counts use a distinct colour to draw
   operator attention. Behind `VITE_REVIEWER_FINDINGS_ENABLED`
   (default on).
+- **Knowledge-reads panel.** TaskDetail for PM, Architect, and
+  Reviewer tasks carries a collapsible "Knowledge reads" panel below
+  task metadata and above the transcript download link. Lists each
+  `gh api repos/.../contents/...` call the worker made: path, HTTP
+  status, byte size, and timestamp. Each path that resolves to a known
+  artifact (`{type, id}`) renders as a clickable deep-link to
+  `/projects/{project_id}/{type}/{artifact_id}`; unresolvable paths
+  render as plain text. Zero-read tasks show an explicit "No knowledge
+  reads recorded" message rather than an empty section.
+  Collapsed/expanded state persists per task in `sessionStorage` under
+  key `kr-expanded-{taskId}`; defaults to expanded. The pipeline task
+  list shows a knowledge-read count badge ("3 reads" / "0 reads") on
+  PM, Architect, and Reviewer task rows; badge suppressed for legacy
+  tasks predating capture (count `null`). Backed by
+  `GET /tasks/{task_id}/tool-uses` with client-side filtering — no new
+  backend endpoint. Covered by RTL tests asserting correct render for
+  multiple reads and for zero reads. Behind
+  `VITE_KNOWLEDGE_READS_ENABLED` (default on).
 - **`b2c_product` project kind.** The project list and project switcher
   render a type badge distinguishing `internal_tool` (existing,
   retroactively badged) from `b2c_product` (Studio). A `b2c_product`
@@ -245,7 +263,7 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   `VITE_RUN_TIMELINE_ENABLED`, `VITE_PR_VIEWER_ENABLED`,
   `VITE_KNOWLEDGE_EDITOR_ENABLED`, `VITE_COMMAND_PALETTE_ENABLED`,
   `VITE_CI_FIX_LOOP_ENABLED`, `VITE_REVIEWER_FINDINGS_ENABLED`,
-  `VITE_STUDIO_ENABLED`.
+  `VITE_STUDIO_ENABLED`, `VITE_KNOWLEDGE_READS_ENABLED`.
 
 ## Dependencies
 
@@ -276,6 +294,12 @@ email allowlist; sessions carry an admin JWT with cross-project access.
   (Idea Queue / Portfolio / per-product detail), and Studio-flavoured
   project-detail replacement behind `VITE_STUDIO_ENABLED`. Full
   Studio contract: see [studio-b2c-portfolio](../studio-b2c-portfolio.md).
+- 2026-05-20 — Knowledge-reads transparency (spec 0099): collapsible
+  "Knowledge reads" panel on TaskDetail surfacing `gh api` artifact
+  fetch history (path, status, size, timestamp); knowledge-read count
+  badge on pipeline task list rows for PM/Architect/Reviewer tasks;
+  deep-links to artifact pages in the knowledge browser. Behind
+  `VITE_KNOWLEDGE_READS_ENABLED`.
 
 ## Links
 
