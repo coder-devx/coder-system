@@ -11,8 +11,10 @@ jobs:
   apply:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    # BRANCH_PROTECTION_ADMIN_TOKEN: fine-grained PAT, administration:write on all three repos.
+    # Operator provisions this; see system/runbooks/github-branch-protection.md.
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Check token is provisioned
         run: |
@@ -65,7 +67,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Check token is provisioned
         id: check-token
