@@ -84,8 +84,6 @@ Logical components of the Coder system as it exists today.
 | [0093](./wip/0093-broken-cross-link-failure-detail.md) | broken_cross_link Failure Detail | ro | — | — |
 | [0094](./wip/0094-reviewer-security-and-performance-analysis.md) | Reviewer Security and Performance Analysis | ro | — | — |
 | [0095](./wip/0095-role-scoped-knowledge-layout-and-cached-workspace-context.md) | Role-Scoped Knowledge Layout and Cached Workspace Context | ro | — | — |
-| [0096](./wip/0096-timeout-stall-visibility.md) | Timeout stall visibility | ro | — | — |
-| [0099](./wip/0099-worker-knowledge-read-transparency.md) | Worker Knowledge-Read Transparency | ro | — | — |
 
 ## Deprecated
 
@@ -97,8 +95,10 @@ Logical components of the Coder system as it exists today.
 | [0080](./deprecated/0080-studio-stripe-posthog-integration.md) | Studio Stripe Connect and PostHog Integration | — | — |
 | [0089](./deprecated/0089-branch-protection-enforcement.md) | Branch Protection Enforcement for Orchestrator-Managed Repos | — | — |
 | [0091](./deprecated/0091-caplog-inter-test-pollution-bisect-fix-and-harness-regression.md) | Caplog inter-test pollution: bisect, fix, and harness regression | — | — |
+| [0096](./deprecated/0096-timeout-stall-visibility.md) | Timeout stall visibility | — | — |
 | [0097](./deprecated/0097-worker-knowledge-pull-visibility.md) | Worker knowledge-pull visibility | — | — |
 | [0098](./deprecated/0098-task-knowledge-reads-panel.md) | Task Knowledge Reads Panel | — | — |
+| [0099](./deprecated/0099-worker-knowledge-read-transparency.md) | Worker Knowledge-Read Transparency | — | — |
 | [0100](./deprecated/0100-worker-knowledge-reads-inline-on-task-detail.md) | Worker Knowledge Reads Inline on Task Detail | — | — |
 | [0101](./deprecated/0101-task-knowledge-read-trace.md) | Task Knowledge-Read Trace | — | — |
 | [0102](./deprecated/0102-knowledge-read-trace-on-task-detail.md) | Knowledge-read trace on task detail | — | — |

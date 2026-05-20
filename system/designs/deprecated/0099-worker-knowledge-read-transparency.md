@@ -2,13 +2,12 @@
 id: 0099
 title: Worker Knowledge-Read Transparency
 type: design
-status: wip
+status: deprecated
 owner: ro
 created: '2026-05-18'
 updated: '2026-05-18'
 last_verified_at: '2026-05-18'
-implements_specs:
-- 0099
+implements_specs: []
 decided_by: []
 related_designs:
 - admin-panel
@@ -20,6 +19,14 @@ affects_repos:
 - coder-core
 - coder-admin
 parent: knowledge-and-admin
+deprecated_at: '2026-05-20'
+deprecated_reason: >-
+  Spec 0099 shipped to active 2026-05-20; design was a WIP draft and
+  never got paired-shipped. Active component absorbed the design intent:
+  worker-knowledge-read-transparency (folded into
+  active/knowledge/admin-panel.md +
+  active/pipeline/task-orchestration.md via spec 0099 ship 2026-05-20,
+  commit 7aca6b9c). Re-author against the active surface if needed.
 ---
 
 # Worker Knowledge-Read Transparency

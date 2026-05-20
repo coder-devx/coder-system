@@ -906,10 +906,10 @@ designs:
   target_slug: role-scoped-knowledge-layout
 - id: 0096
   title: Timeout stall visibility
-  status: wip
+  status: deprecated
   owner: ro
-  folder: wip
-  file: wip/0096-timeout-stall-visibility.md
+  folder: deprecated
+  file: deprecated/0096-timeout-stall-visibility.md
   parent: pipeline-operations
   target_slug: timeout-stall-visibility
 - id: 0097
@@ -930,10 +930,10 @@ designs:
   target_slug: task-knowledge-reads-panel
 - id: 0099
   title: Worker Knowledge-Read Transparency
-  status: wip
+  status: deprecated
   owner: ro
-  folder: wip
-  file: wip/0099-worker-knowledge-read-transparency.md
+  folder: deprecated
+  file: deprecated/0099-worker-knowledge-read-transparency.md
   parent: knowledge-and-admin
   target_slug: worker-knowledge-read-transparency
 - id: '0100'

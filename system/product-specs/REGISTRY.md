@@ -66,8 +66,6 @@ in each component's `## Evolution` section and in git.
 | [0092](./wip/0092-pm-retry-via-override.md) | PM and other stage=None tasks must be retriable via override | ro | — |
 | [0093](./wip/0093-architect-broken-cross-link-recovery.md) | Architect broken_cross_link should surface the specific field/target instead of silent-dropping | ro | — |
 | [0095](./wip/0095-cache-and-cost-observability-correctness.md) | Cache-hit and cost-regression observability is wrong or absent | ro | — |
-| [0096](./wip/0096-timed-out-task-stall-visibility-in-admin-panel.md) | Timed-out task stall visibility in admin panel | ro | — |
-| [0099](./wip/0099-worker-knowledge-read-transparency.md) | Worker Knowledge-Read Transparency | ro | — |
 | [0104](./wip/0104-spec-run-cancel-and-deprecation-reconciler.md) | Spec-run cancel verb + auto-cancel on WIP deprecation | ro | — |
 
 ## Deprecated

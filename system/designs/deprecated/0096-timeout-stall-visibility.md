@@ -2,13 +2,12 @@
 id: 0096
 title: Timeout stall visibility
 type: design
-status: wip
+status: deprecated
 owner: ro
 created: '2026-05-18'
 updated: '2026-05-18'
 last_verified_at: '2026-05-18'
-implements_specs:
-- 0096
+implements_specs: []
 decided_by: []
 related_designs:
 - task-lifecycle
@@ -21,6 +20,14 @@ affects_repos:
 - coder-core
 - coder-admin
 parent: pipeline-operations
+deprecated_at: '2026-05-20'
+deprecated_reason: >-
+  Spec 0096 shipped to active 2026-05-20; design was a WIP draft and
+  never got paired-shipped. Active component absorbed the design intent:
+  timed-out-task-stall-visibility (folded into
+  active/knowledge/admin-panel.md +
+  active/pipeline/task-orchestration.md via spec 0096 ship 2026-05-20,
+  commit 10d0710d). Re-author against the active surface if needed.
 ---
 
 # Timeout stall visibility
