@@ -34,7 +34,7 @@ How tasks flow reliably through a project's pipeline, stay observable, and recov
 - [task-lifecycle](./designs/active/pipeline/task-lifecycle.md) (design) — Orthogonal status × stage machine; admin override actions (retry / resume / skip_to_stage / pause / reject).
 - [task-orchestration](./product-specs/active/pipeline/task-orchestration.md) (spec) — Task lifecycle, dispatcher, and stage transitions.
 - [token-budgets-and-cost-gates](./designs/active/pipeline/token-budgets-and-cost-gates.md) (design) — Per-project monthly token budgets enforced by pre-dispatch gate + post-completion rollup.
-- [worker-communication](./designs/active/pipeline/worker-communication.md) (design) — Task-state machine, dispatcher protocol, and SSE streaming.
+- [worker-communication](./designs/active/pipeline/worker-communication.md) (design) — Task-state machine, dispatcher protocol, SSE streaming, timeout-stall stamping, and per-task tool-use surfacing.
 - [worker-dispatch-durability](./designs/active/pipeline/worker-dispatch-durability.md) (design) — Move worker subprocesses out of the HTTP service for durability.
 
 ## Worker roles
@@ -76,8 +76,8 @@ How a project's knowledge is read, written, kept current, and surfaced to operat
 - Design: [knowledge-and-admin](./designs/active/knowledge-and-admin.md)
 
 - [admin-panel](./product-specs/active/knowledge/admin-panel.md) (spec) · [admin-panel](./designs/active/knowledge/admin-panel.md) (design) — User-facing SPA for status, debug, override.
-- [coder-product-template](./product-specs/active/knowledge/coder-product-template.md) (spec) — Operator-observable contract for the coder-product-template scaffold: page set, perf budget, integration wiring, and visual identity.
-- [coder-studio-founder](./product-specs/active/knowledge/coder-studio-founder.md) (spec) — Founder Cloud Run Job — idea cycles, portfolio reviews, pause/resume, and Phase A calibration dogfood.
+- [coder-product-template](./product-specs/active/knowledge/coder-product-template.md) (spec) · [coder-product-template](./designs/active/knowledge/coder-product-template.md) (design) — Operator-observable contract for the coder-product-template scaffold: page set, perf budget, integration wiring, and visual identity.
+- [coder-studio-founder](./product-specs/active/knowledge/coder-studio-founder.md) (spec) · [coder-studio-founder](./designs/active/knowledge/coder-studio-founder.md) (design) — Founder Cloud Run Job — idea cycles, portfolio reviews, pause/resume, and Phase A calibration dogfood.
 - [cold-start-ingestion](./product-specs/active/knowledge/cold-start-ingestion.md) (spec) · [cold-start-ingestion](./designs/active/knowledge/cold-start-ingestion.md) (design) — Bootstrap a new project's knowledge from existing repos.
 - [cross-project-patterns](./designs/active/knowledge/cross-project-patterns.md) (design) — Surface recurring failure patterns across projects.
 - [fleet-patterns](./product-specs/active/knowledge/fleet-patterns.md) (spec) — Surface recurring failure patterns across managed projects.
@@ -94,9 +94,9 @@ How a project's knowledge is read, written, kept current, and surfaced to operat
 - [mcp-agent-interface](./product-specs/active/knowledge/mcp-agent-interface.md) (spec) — Let external agents connect, impersonate, and drive Coder via MCP.
 - [mcp-agent-interface-design](./designs/active/knowledge/mcp-agent-interface-design.md) (design) — MCP surface — let external agents connect, impersonate, and drive Coder.
 - [onboarding](./product-specs/active/knowledge/onboarding.md) (spec) · [onboarding](./designs/active/knowledge/onboarding.md) (design) — How a new project gets wired into Coder.
-- [studio](./product-specs/active/knowledge/studio.md) (spec) — B2C product portfolio built and operated autonomously by the Coder fleet.
-- [studio-b2c-portfolio](./product-specs/active/studio-b2c-portfolio.md) (spec) — B2C product portfolio: project kind, Studio sidebar, Founder job, kill workflow, scaffold, and Stripe/PostHog wiring.
-- [studio-product-integrations](./product-specs/active/knowledge/studio-product-integrations.md) (spec) — Stripe Connect Express OAuth, webhook MRR pipeline, and PostHog funnel polling for b2c_product projects in coder-core.
+- [studio](./product-specs/active/knowledge/studio.md) (spec) · [studio](./designs/active/knowledge/studio.md) (design) — B2C product portfolio built and operated autonomously by the Coder fleet.
+- [studio-b2c-portfolio](./product-specs/active/studio-b2c-portfolio.md) (spec) · [studio-b2c-portfolio](./designs/active/studio-b2c-portfolio.md) (design) — B2C product portfolio: project kind, Studio sidebar, Founder job, kill workflow, scaffold, and Stripe/PostHog wiring.
+- [studio-product-integrations](./product-specs/active/knowledge/studio-product-integrations.md) (spec) · [studio-product-integrations](./designs/active/knowledge/studio-product-integrations.md) (design) — Stripe Connect Express OAuth, webhook MRR pipeline, and PostHog funnel polling for b2c_product projects in coder-core.
 - [template-schema-migration](./designs/active/knowledge/template-schema-migration.md) (design) — Migrate managed-project knowledge repos when the template schema changes.
 
 ## Delivery & infra
@@ -106,8 +106,8 @@ How code reaches production and how the system itself stays maintainable.
 - Spec: [delivery-and-infra](./product-specs/active/delivery-and-infra.md)
 - Design: [delivery-and-infra](./designs/active/delivery-and-infra.md)
 
-- [branch-protection](./product-specs/active/delivery/branch-protection.md) (spec) — Enforces PR-only writes to main across orchestrator-managed repos via GitHub branch protection, version-controlled config, and a CI regression test.
+- [branch-protection](./product-specs/active/delivery/branch-protection.md) (spec) · [branch-protection](./designs/active/delivery/branch-protection.md) (design) — Enforces PR-only writes to main across orchestrator-managed repos via GitHub branch protection, version-controlled config, and a CI regression test.
 - [coder-core-modular-monolith](./product-specs/active/delivery/coder-core-modular-monolith.md) (spec) · [coder-core-modular-monolith](./designs/active/delivery/coder-core-modular-monolith.md) (design) — coder-core stays a single deployable with explicit internal boundaries so out-of-process extraction is one-file work later.
 - [continuous-deployment](./product-specs/active/delivery/continuous-deployment.md) (spec) · [continuous-deployment](./designs/active/delivery/continuous-deployment.md) (design) — Push-to-main CD with health checks.
 - [tenant-isolation](./product-specs/active/delivery/tenant-isolation.md) (spec) · [tenant-isolation](./designs/active/delivery/tenant-isolation.md) (design) — Test-suite harness for the multi-tenancy contract.
-- [test-harness-reliability](./product-specs/active/delivery/test-harness-reliability.md) (spec) — Caplog pollution diagnosis tooling and regression guards for the coder-core test suite.
+- [test-harness-reliability](./product-specs/active/delivery/test-harness-reliability.md) (spec) · [test-harness-reliability](./designs/active/delivery/test-harness-reliability.md) (design) — Caplog pollution diagnosis tooling and regression guards for the coder-core test suite.

@@ -5,12 +5,12 @@ type: design
 status: active
 owner: ro
 created: 2026-04-08
-updated: 2026-04-19
-last_verified_at: 2026-04-19
+updated: 2026-05-20
+last_verified_at: 2026-05-20
 summary: Big-picture engineering view of the Coder system.
 implements_specs: []
-decided_by: ["0001", "0005", "0006", "0007", "0008"]
-related_designs: [worker-roles, impersonation, knowledge-repo-model, audit-log]
+decided_by: ["0001", "0005", "0006", "0007", "0008", "0032", "0033"]
+related_designs: [worker-roles, impersonation, knowledge-repo-model, audit-log, studio-b2c-portfolio]
 affects_services: [coder-core, coder-admin]
 affects_repos: [coder-core, coder-admin, coder-system]
 parent: ~
@@ -66,6 +66,13 @@ flowchart TB
   `coder-system`-shaped repo, served via the Knowledge API.
 - **Stores** — Postgres for pipeline state and tenant data; GCP Secret
   Manager keyed by `coder/{project}/...`; GitHub for knowledge repos.
+- **Project kind** — `projects.project_kind ENUM('internal_tool', 'b2c_product')`
+  is the polymorphic seam (ADRs 0032, 0033). `b2c_product` projects
+  add Studio mode in coder-admin (ADR 0034), a Founder recurring job
+  (ADR 0035), Stripe Connect + PostHog wiring, and a Designer
+  launch-gate. See
+  [studio-b2c-portfolio](./studio-b2c-portfolio.md) for the
+  engineering shape of the Studio.
 
 ### Data flow
 

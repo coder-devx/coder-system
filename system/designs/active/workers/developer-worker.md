@@ -5,12 +5,12 @@ type: design
 status: active
 owner: ro
 created: 2026-05-03
-updated: 2026-05-03
-last_verified_at: 2026-05-03
+updated: 2026-05-20
+last_verified_at: 2026-05-20
 summary: Developer worker engineering view — implement.
 implements_specs: [developer-worker]
-decided_by: []
-related_designs: [worker-roles, worker-communication, branch-cleanup, pm-worker, architect-worker, team-manager-worker]
+decided_by: ['0038']
+related_designs: [worker-roles, worker-communication, branch-cleanup, pm-worker, architect-worker, team-manager-worker, audit-log, tenant-isolation]
 affects_services: [coder-core]
 affects_repos: [coder-core, coder-system]
 parent: worker-roles
@@ -88,6 +88,41 @@ flowchart TB
   `WorkerDispatcher` protocol (`coder_core/contracts.py`) is the
   extraction seam — see
   [coder-core-modular-monolith](../delivery/coder-core-modular-monolith.md).
+- **Prod-creds isolation env construction.**
+  `workers/_db_env.py::strip_prod_db_env(env)` pops a fixed
+  deny-list from the inherited env before subprocess spawn:
+  `CLOUD_SQL_INSTANCE`, `CLOUD_SQL_USER`, `CLOUD_SQL_DATABASE`,
+  `DATABASE_URL`, `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`.
+  Returns the list of actually-stripped keys (empty when the worker
+  runs in a dev env where prod creds were never present). The
+  deny-list-over-allow-list call is per
+  ADR [0038](../../../adrs/0038-deny-list-strip-over-allow-list-for-worker-subprocess-db-credentials.md);
+  shared across every role worker, not just developer. Gated by
+  `CODER_WORKER_PROD_DB_CREDS_STRIP_ENABLED` (defaults `true`;
+  short-circuits to no-op for local dev without a code change).
+- **Ephemeral test DB injection.**
+  `workers/_test_db.py::provision_test_db(needs_postgres=False)` is
+  an async context manager that yields a DSN the subprocess sees as
+  `DATABASE_URL`. Default path yields
+  `sqlite+aiosqlite:///:memory:` (zero setup overhead; existing
+  PG-only migration branches guard with
+  `if bind.dialect.name != "postgresql"` so they no-op cleanly).
+  Opt-in `needs_postgres=True` (resolved from
+  `task.metadata["needs_postgres_test_db"]`, set by the Team
+  Manager when the plan mentions PG-only features such as
+  `CREATE INDEX CONCURRENTLY` or partial indexes) boots a
+  throwaway `postgres:15` container via `subprocess.Popen` on a
+  random free port, waits ≤30s for connect, yields the DSN, and
+  tears down unconditionally in `__aexit__`. Boot timeout raises
+  `TestDBProvisionError`, surfaced by the harness as
+  `failure_kind="infrastructure"`.
+- **Audit event per dispatch.**
+  `coder_core.audit.Actions.worker_prod_creds_stripped` is the
+  fixed action constant (`"worker.prod_creds_stripped"`) emitted
+  via `record_audit_event` once per worker turn. The `after`
+  JSONB carries `{task_id, stripped_keys}` so operators can grep
+  by action prefix or filter to a single task. See
+  [audit-log](../tenancy/audit-log.md).
 
 ### Data flow
 
@@ -119,6 +154,12 @@ flowchart TB
   uses that column to map remote branches back to task rows.
 - **Concurrent leases are race-free.** `FOR UPDATE SKIP LOCKED` on
   the task queue guarantees no two workers claim the same row.
+- **Prod DB unreachable from the subprocess.** Every spawn passes
+  through `strip_prod_db_env` before `provision_test_db` overrides
+  `DATABASE_URL` to a per-turn ephemeral DSN. A `worker.prod_creds_stripped`
+  audit event lands for every dispatch; an in-CI regression replay
+  authors a synthetic migration and asserts the prod DB stays
+  untouched after the turn.
 
 ## Interfaces
 
@@ -152,6 +193,10 @@ flowchart TB
 - [design 0057](./role-prompt-knowledge-layout.md) — system prompt
   assembled from common preamble + role + task-mode files in the
   knowledge repo; mode hardcoded to `"implement"` for this worker.
+- 0088 — Prod-creds isolation: `_db_env.strip_prod_db_env` deny-list
+  + `_test_db.provision_test_db` ephemeral DSN + per-turn
+  `worker.prod_creds_stripped` audit event (ADR 0038). Responds to
+  the 2026-05-12 prod-DB incident.
 
 ## Links
 
@@ -162,5 +207,6 @@ flowchart TB
   [worker-communication](../pipeline/worker-communication.md),
   [branch-cleanup](../pipeline/branch-cleanup.md)
 - ADRs: [0013](../../../adrs/0013-worker-level-transient-retry.md),
-  [0016](../../../adrs/0016-bot-identity-via-user-type.md)
+  [0016](../../../adrs/0016-bot-identity-via-user-type.md),
+  [0038](../../../adrs/0038-deny-list-strip-over-allow-list-for-worker-subprocess-db-credentials.md)
 - Services: `coder-core`

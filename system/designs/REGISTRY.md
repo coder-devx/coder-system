@@ -13,7 +13,10 @@ Logical components of the Coder system as it exists today.
 | [audit-log](./active/tenancy/audit-log.md) | Audit log | ro | audit-log | — |
 | [automated-secret-rotation](./active/tenancy/automated-secret-rotation.md) | Automated secret rotation | ro | — | — |
 | [branch-cleanup](./active/pipeline/branch-cleanup.md) | Branch cleanup | ro | branch-cleanup | — |
+| [branch-protection](./active/delivery/branch-protection.md) | Branch protection enforcement | ro | branch-protection | — |
 | [coder-core-modular-monolith](./active/delivery/coder-core-modular-monolith.md) | coder-core modular monolith hardening | ro | [delivery-and-infra](../product-specs/active/delivery-and-infra.md) | — |
+| [coder-product-template](./active/knowledge/coder-product-template.md) | Coder Studio — coder-product-template | ro | coder-product-template | [0032](../adrs/0032-extend-coder-core-rather-than-spin-up-a-sibling-service.md), [0036](../adrs/0036-renovate-style-pr-template-sync.md) |
+| [coder-studio-founder](./active/knowledge/coder-studio-founder.md) | Coder Studio — Founder role (Phase A) | ro | coder-studio-founder | [0035](../adrs/0035-founder-as-a-recurring-job-over-a-normal-dispatcher-task.md) |
 | [cold-start-ingestion](./active/knowledge/cold-start-ingestion.md) | Cold-start knowledge ingestion | ro | — | — |
 | [confidence-auto-approval](./active/pipeline/confidence-auto-approval.md) | Confidence-scored auto-approval | ro | — | — |
 | [continuous-deployment](./active/delivery/continuous-deployment.md) | Continuous Deployment | ro | continuous-deployment | — |
@@ -48,12 +51,16 @@ Logical components of the Coder system as it exists today.
 | [self-healing](./active/pipeline/self-healing.md) | Self-healing stuck pipelines | ro | self-healing | — |
 | [service-accounts](./active/tenancy/service-accounts.md) | Service Accounts | ro | service-accounts | [0006](../adrs/0006-per-role-service-accounts.md) |
 | [stuck-pipeline-slack-paging](./active/pipeline/stuck-pipeline-slack-paging.md) | Enable stuck-pipeline Slack paging at 15-minute threshold | ro | — | — |
+| [studio](./active/knowledge/studio.md) | Studio | ro | studio | — |
+| [studio-b2c-portfolio](./active/studio-b2c-portfolio.md) | Studio — B2C product portfolio | ro | [studio-b2c-portfolio](../product-specs/active/studio-b2c-portfolio.md) | [0009](../adrs/0009-per-managed-project-cloud-account-and-github-org.md), [0032](../adrs/0032-extend-coder-core-rather-than-spin-up-a-sibling-service.md), [0033](../adrs/0033-polymorphic-project-kind-over-a-separate-product-entity.md), [0034](../adrs/0034-studio-mode-in-coder-admin-over-a-separate-studio-spa.md), [0035](../adrs/0035-founder-as-a-recurring-job-over-a-normal-dispatcher-task.md) |
+| [studio-product-integrations](./active/knowledge/studio-product-integrations.md) | Studio product integrations | ro | studio-product-integrations | [0009](../adrs/0009-per-managed-project-cloud-account-and-github-org.md) |
 | [system-overview](./active/system-overview.md) | System Overview | ro | — | [0001](../adrs/0001-knowledge-repo-layout.md), [0005](../adrs/0005-multi-tenant-coder-core.md), [0006](../adrs/0006-per-role-service-accounts.md), [0007](../adrs/0007-reviewer-separated-from-pm.md), [0008](../adrs/0008-ci-validation-of-knowledge-repo.md) |
 | [task-lifecycle](./active/pipeline/task-lifecycle.md) | Task lifecycle and overrides | ro | [pipeline-operations](../product-specs/active/pipeline-operations.md) | — |
 | [team-manager-worker](./active/workers/team-manager-worker.md) | Team Manager Worker | ro | team-manager-worker | — |
 | [template-schema-migration](./active/knowledge/template-schema-migration.md) | Template schema migration | ro | — | [0019](../adrs/0019-alias-tolerance-fleet-completion-gate.md), [0020](../adrs/0020-worker-dispatched-migration-runner.md), [0021](../adrs/0021-deprecate-then-remove-two-migrations.md) |
 | [tenancy-and-access](./active/tenancy-and-access.md) | Tenancy & access | ro | [tenancy-and-access](../product-specs/active/tenancy-and-access.md) | — |
 | [tenant-isolation](./active/delivery/tenant-isolation.md) | Tenant isolation test harness | ro | tenant-isolation | — |
+| [test-harness-reliability](./active/delivery/test-harness-reliability.md) | Test harness reliability | ro | test-harness-reliability | [0011](../adrs/0011-orphan-dispatch-reaper.md) |
 | [token-budgets-and-cost-gates](./active/pipeline/token-budgets-and-cost-gates.md) | Per-project token budgets & cost gates | ro | — | — |
 | [worker-auth-env](./active/workers/worker-auth-env.md) | Worker auth env wiring | ro | [worker-roles](../product-specs/active/worker-roles.md) | — |
 | [worker-communication](./active/pipeline/worker-communication.md) | Worker Communication | ro | task-orchestration | — |
@@ -78,27 +85,17 @@ Logical components of the Coder system as it exists today.
 | [0085](./wip/0085-adr-id-allocation-race-claim-on-dispatch.md) | ADR ID Allocation Race — Claim-on-Dispatch | ro | — | — |
 | [0086](./wip/0086-adr-collision-failure-kind-tagging.md) | ADR Collision failure_kind Tagging | ro | — | — |
 | [0087](./wip/0087-lint-pre-flight-hard-gate.md) | Lint pre-flight hard gate | ro | — | — |
-| [0088](./wip/0088-worker-prod-credentials-isolation.md) | Worker Prod-Credentials Isolation | ro | — | — |
 | [0090](./wip/0090-deploy-chain-flake-resilience.md) | Deploy-chain flake resilience | ro | — | — |
 | [0092](./wip/0092-pm-retry-via-override.md) | PM retry via override | ro | — | — |
 | [0093](./wip/0093-broken-cross-link-failure-detail.md) | broken_cross_link Failure Detail | ro | — | — |
-| [0094](./wip/0094-reviewer-security-and-performance-analysis.md) | Reviewer Security and Performance Analysis | ro | — | — |
 | [0095](./wip/0095-role-scoped-knowledge-layout-and-cached-workspace-context.md) | Role-Scoped Knowledge Layout and Cached Workspace Context | ro | — | — |
 
 ## Deprecated
 
 | ID | Title | Deprecated at | Reason |
 |---|---|---|---|
-| [0075](./deprecated/0075-studio-architecture.md) | Studio Architecture | — | — |
-| [0077](./deprecated/0077-coder-studio-founder-role-phase-a.md) | Coder Studio — Founder Role Phase A | — | — |
-| [0079](./deprecated/0079-coder-product-template-repo-contract.md) | Coder Product Template Repo Contract | — | — |
-| [0080](./deprecated/0080-studio-stripe-posthog-integration.md) | Studio Stripe Connect and PostHog Integration | — | — |
-| [0089](./deprecated/0089-branch-protection-enforcement.md) | Branch Protection Enforcement for Orchestrator-Managed Repos | — | — |
-| [0091](./deprecated/0091-caplog-inter-test-pollution-bisect-fix-and-harness-regression.md) | Caplog inter-test pollution: bisect, fix, and harness regression | — | — |
-| [0096](./deprecated/0096-timeout-stall-visibility.md) | Timeout stall visibility | — | — |
 | [0097](./deprecated/0097-worker-knowledge-pull-visibility.md) | Worker knowledge-pull visibility | — | — |
 | [0098](./deprecated/0098-task-knowledge-reads-panel.md) | Task Knowledge Reads Panel | — | — |
-| [0099](./deprecated/0099-worker-knowledge-read-transparency.md) | Worker Knowledge-Read Transparency | — | — |
 | [0100](./deprecated/0100-worker-knowledge-reads-inline-on-task-detail.md) | Worker Knowledge Reads Inline on Task Detail | — | — |
 | [0101](./deprecated/0101-task-knowledge-read-trace.md) | Task Knowledge-Read Trace | — | — |
 | [0102](./deprecated/0102-knowledge-read-trace-on-task-detail.md) | Knowledge-read trace on task detail | — | — |

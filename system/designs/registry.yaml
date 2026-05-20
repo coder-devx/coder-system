@@ -736,38 +736,148 @@ designs:
   - coder-core
   - coder-admin
   parent: ~
-- id: '0075'
-  title: Studio Architecture
-  status: deprecated
+- id: studio
+  title: Studio
+  status: active
   owner: ro
-  folder: deprecated
-  file: deprecated/0075-studio-architecture.md
-  parent: system-overview
-  target_slug: studio-architecture
-- id: '0077'
-  title: Coder Studio — Founder Role Phase A
-  status: deprecated
-  owner: ro
-  folder: deprecated
-  file: deprecated/0077-coder-studio-founder-role-phase-a.md
+  folder: active
+  file: active/knowledge/studio.md
+  implements_specs:
+  - studio
+  related_designs:
+  - studio-b2c-portfolio
+  - coder-studio-founder
+  - coder-product-template
+  - studio-product-integrations
+  - admin-panel
+  - worker-roles
+  affects_services:
+  - coder-core
+  - coder-admin
   parent: knowledge-and-admin
-  target_slug: studio-founder-phase-a
-- id: '0079'
-  title: Coder Product Template Repo Contract
-  status: deprecated
+- id: studio-b2c-portfolio
+  title: "Studio — B2C product portfolio"
+  status: active
   owner: ro
-  folder: deprecated
-  file: deprecated/0079-coder-product-template-repo-contract.md
-  parent: system-overview
-  target_slug: coder-product-template-contract
-- id: '0080'
-  title: Studio Stripe Connect and PostHog Integration
-  status: deprecated
-  owner: ro
-  folder: deprecated
-  file: deprecated/0080-studio-stripe-posthog-integration.md
+  folder: active
+  file: active/studio-b2c-portfolio.md
+  implements_specs:
+  - studio-b2c-portfolio
+  decided_by:
+  - '0009'
+  - '0032'
+  - '0033'
+  - '0034'
+  - '0035'
+  related_designs:
+  - studio
+  - coder-studio-founder
+  - coder-product-template
+  - studio-product-integrations
+  - admin-panel
+  - worker-roles
+  - worker-dispatch-durability
+  - audit-log
+  - stuck-pipeline-slack-paging
+  affects_services:
+  - coder-core
+  - coder-admin
   parent: knowledge-and-admin
-  target_slug: studio-stripe-posthog-integration
+- id: coder-studio-founder
+  title: "Coder Studio — Founder role (Phase A)"
+  status: active
+  owner: ro
+  folder: active
+  file: active/knowledge/coder-studio-founder.md
+  implements_specs:
+  - coder-studio-founder
+  decided_by:
+  - '0035'
+  related_designs:
+  - studio
+  - studio-b2c-portfolio
+  - admin-panel
+  - self-healing
+  - worker-dispatch-durability
+  - audit-log
+  affects_services:
+  - coder-core
+  - coder-admin
+  parent: knowledge-and-admin
+- id: coder-product-template
+  title: "Coder Studio — coder-product-template"
+  status: active
+  owner: ro
+  folder: active
+  file: active/knowledge/coder-product-template.md
+  implements_specs:
+  - coder-product-template
+  decided_by:
+  - '0032'
+  - '0036'
+  related_designs:
+  - studio
+  - studio-b2c-portfolio
+  - studio-product-integrations
+  - admin-panel
+  affects_services:
+  - coder-core
+  parent: knowledge-and-admin
+- id: studio-product-integrations
+  title: Studio product integrations
+  status: active
+  owner: ro
+  folder: active
+  file: active/knowledge/studio-product-integrations.md
+  implements_specs:
+  - studio-product-integrations
+  decided_by:
+  - '0009'
+  related_designs:
+  - studio
+  - studio-b2c-portfolio
+  - automated-secret-rotation
+  - admin-panel
+  - observability-and-cost-tracking
+  - audit-log
+  affects_services:
+  - coder-core
+  - coder-admin
+  parent: knowledge-and-admin
+- id: branch-protection
+  title: Branch protection enforcement
+  status: active
+  owner: ro
+  folder: active
+  file: active/delivery/branch-protection.md
+  implements_specs:
+  - branch-protection
+  related_designs:
+  - continuous-deployment
+  - developer-worker
+  - audit-log
+  - service-accounts
+  affects_services:
+  - coder-core
+  parent: delivery-and-infra
+- id: test-harness-reliability
+  title: Test harness reliability
+  status: active
+  owner: ro
+  folder: active
+  file: active/delivery/test-harness-reliability.md
+  implements_specs:
+  - test-harness-reliability
+  decided_by:
+  - '0011'
+  related_designs:
+  - continuous-deployment
+  - tenant-isolation
+  - post-pr-ci-fix-loop
+  - developer-worker
+  affects_services:
+  - coder-core
+  parent: delivery-and-infra
 - id: 0085
   title: ADR ID Allocation Race — Claim-on-Dispatch
   status: wip
@@ -824,14 +934,6 @@ designs:
   file: wip/0087-lint-pre-flight-hard-gate.md
   parent: pipeline-operations
   target_slug: lint-preflight-hard-gate
-- id: 0088
-  title: Worker Prod-Credentials Isolation
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0088-worker-prod-credentials-isolation.md
-  parent: tenancy-and-access
-  target_slug: worker-prod-creds-isolation
 - id: 0090
   title: Deploy-chain flake resilience
   status: wip
@@ -840,22 +942,6 @@ designs:
   file: wip/0090-deploy-chain-flake-resilience.md
   parent: pipeline-operations
   target_slug: deploy-chain-flake-resilience
-- id: 0091
-  title: 'Caplog inter-test pollution: bisect, fix, and harness regression'
-  status: deprecated
-  owner: ro
-  folder: deprecated
-  file: deprecated/0091-caplog-inter-test-pollution-bisect-fix-and-harness-regression.md
-  parent: pipeline-operations
-  target_slug: caplog-pollution-root-cause-fix
-- id: 0089
-  title: Branch Protection Enforcement for Orchestrator-Managed Repos
-  status: deprecated
-  owner: ro
-  folder: deprecated
-  file: deprecated/0089-branch-protection-enforcement.md
-  parent: tenancy-and-access
-  target_slug: branch-protection-enforcement
 - id: 0093
   title: broken_cross_link Failure Detail
   status: wip
@@ -872,14 +958,6 @@ designs:
   file: wip/0092-pm-retry-via-override.md
   parent: pipeline-operations
   target_slug: pm-retry-via-override
-- id: 0094
-  title: Reviewer Security and Performance Analysis
-  status: wip
-  owner: ro
-  folder: wip
-  file: wip/0094-reviewer-security-and-performance-analysis.md
-  parent: worker-roles
-  target_slug: reviewer-security-performance-analysis
 - id: '0076'
   title: Spec-bound Architect Dispatch
   status: wip
@@ -904,14 +982,6 @@ designs:
   file: wip/0095-role-scoped-knowledge-layout-and-cached-workspace-context.md
   parent: worker-roles
   target_slug: role-scoped-knowledge-layout
-- id: 0096
-  title: Timeout stall visibility
-  status: deprecated
-  owner: ro
-  folder: deprecated
-  file: deprecated/0096-timeout-stall-visibility.md
-  parent: pipeline-operations
-  target_slug: timeout-stall-visibility
 - id: 0097
   title: Worker knowledge-pull visibility
   status: deprecated
@@ -928,14 +998,6 @@ designs:
   file: deprecated/0098-task-knowledge-reads-panel.md
   parent: knowledge-and-admin
   target_slug: task-knowledge-reads-panel
-- id: 0099
-  title: Worker Knowledge-Read Transparency
-  status: deprecated
-  owner: ro
-  folder: deprecated
-  file: deprecated/0099-worker-knowledge-read-transparency.md
-  parent: knowledge-and-admin
-  target_slug: worker-knowledge-read-transparency
 - id: '0100'
   title: Worker Knowledge Reads Inline on Task Detail
   status: deprecated

@@ -9,7 +9,7 @@ deciders:
 supersedes: null
 superseded_by: null
 relates_to_designs:
-- 0094
+- reviewer-worker
 ---
 
 # ADR 0039 — Enable compliance gate for normal reviewer runs over free-text VERDICT protocol

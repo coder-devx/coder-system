@@ -5,11 +5,11 @@ type: design
 status: active
 owner: ro
 created: 2026-05-03
-updated: 2026-05-03
-last_verified_at: 2026-05-03
-summary: Engineering shape of the admin SPA — pages, data flows, auth.
+updated: 2026-05-20
+last_verified_at: 2026-05-20
+summary: Engineering shape of the admin SPA — pages, data flows, auth, timeout-stall callout, knowledge-reads panel.
 implements_specs: [admin-panel]
-decided_by: []
+decided_by: ['0041']
 related_designs: [system-overview, audit-log, escalations, tenant-isolation, knowledge-write-api, observability-and-cost-tracking, worker-communication]
 affects_services: [coder-admin, coder-core]
 affects_repos: [coder-admin, coder-core]
@@ -88,7 +88,36 @@ flowchart TB
   streamed `task_logs`, branch / PR / commit links, and pause /
   resume / retry / skip / reject overrides. Mutations call back to
   the orchestrator and are immediately reflected via the next SSE
-  event — there's no client-side optimistic state.
+  event — there's no client-side optimistic state. Timed-out rows
+  carry a secondary stage label in the status column when
+  `timeout_stage` is non-null; PM, Architect, and Reviewer task rows
+  render a `N reads` knowledge-read count badge when
+  `knowledge_read_count > 0` (badge suppressed for legacy NULL).
+- **Task detail — `pages/TaskDetail.tsx`.** Renders the structured
+  callouts above the messages panel:
+  - **`TimeoutCallout`** when `status === 'timed_out'` — shows
+    `timeout_stage`, `timeout_total_elapsed_s`,
+    `timeout_stage_elapsed_s` from the task payload plus a
+    "Jump to transcript" anchor that scrolls to the final pre-timeout
+    message.
+  - **`WorkerKnowledgeReadsPanel`** — collapsible panel listing every
+    `gh api repos/.../contents/...` Bash call: path, HTTP status,
+    byte size, timestamp. Lazy-loads via
+    `GET /tasks/{id}/tool-uses` on first expand; filters client-side
+    on `tool_name === 'Bash'` and a `repos/{org}/{repo}/contents/`
+    path. Resolvable paths (parseable as `{type, id}`) render as
+    deep links into the knowledge browser; unresolvable as plain
+    text. Zero-read tasks render an explicit "No knowledge reads
+    recorded" message rather than an empty section. Collapse state
+    persists per task in `sessionStorage` under
+    `kr-expanded-{taskId}` (default expanded). Behind
+    `VITE_KNOWLEDGE_READS_ENABLED`.
+  - **`SecurityFindingsChip` / `PerformanceFindingsChip`** —
+    rendered alongside the verdict chip for reviewer tasks when
+    `security_finding_count` / `performance_finding_count` is
+    non-null. Zero counts green; non-zero security amber. Behind
+    `VITE_REVIEWER_FINDINGS_ENABLED`. See
+    [reviewer-worker](../workers/reviewer-worker.md).
 - **Ship-gate panel — `pages/ShipGate.tsx`.** Two-column render
   when `wips_pending_merge` is stamped on a pipeline run: left
   column is the architect-drafted `merges[]` (per-file diff +
@@ -153,6 +182,13 @@ flowchart TB
 - 0044 — ship-gate two-column panel; merge POST.
 - coder-core-modular-monolith — admin panel kept as the thin
   external surface while core's internal modules were re-shaped.
+- 2026-05-20 — Timeout-stall visibility (spec 0096): `TimeoutCallout`
+  on TaskDetail + pipeline-list stage annotation, backed by the
+  three timeout columns on `tasks`.
+- 2026-05-20 — Knowledge-reads transparency (spec 0099):
+  `WorkerKnowledgeReadsPanel`, pipeline-list `N reads` badge,
+  per-path deep-links into the knowledge browser; backed by
+  `task_tool_uses` via `GET /tasks/{id}/tool-uses` (ADR 0041).
 
 ## Links
 

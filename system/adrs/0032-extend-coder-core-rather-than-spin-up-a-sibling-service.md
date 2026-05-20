@@ -9,7 +9,7 @@ deciders:
 supersedes: null
 superseded_by: null
 relates_to_designs:
-- '0075'
+- studio-b2c-portfolio
 ---
 
 # ADR 0032 — Extend coder-core rather than spin up a sibling service

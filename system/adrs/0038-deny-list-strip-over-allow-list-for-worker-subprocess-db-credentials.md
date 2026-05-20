@@ -9,7 +9,7 @@ deciders:
 supersedes: null
 superseded_by: null
 relates_to_designs:
-- 0088
+- developer-worker
 ---
 
 # ADR 0038 — Deny-list strip over allow-list for worker subprocess DB credentials

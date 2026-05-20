@@ -5,14 +5,14 @@ type: design
 status: active
 owner: ro
 created: 2026-05-03
-updated: 2026-05-03
-last_verified_at: 2026-05-03
+updated: 2026-05-20
+last_verified_at: 2026-05-20
 summary: Reviewer worker engineering view — review.
 implements_specs: [reviewer-worker]
-decided_by: []
-related_designs: [worker-roles, worker-communication, developer-worker, knowledge-write-api]
-affects_services: [coder-core]
-affects_repos: [coder-core, coder-system]
+decided_by: ['0039']
+related_designs: [worker-roles, worker-communication, developer-worker, knowledge-write-api, observability-and-cost-tracking, admin-panel]
+affects_services: [coder-core, coder-admin]
+affects_repos: [coder-core, coder-admin, coder-system]
 parent: worker-roles
 ---
 
@@ -69,24 +69,46 @@ flowchart TB
   Phase 4 writes `tasks.review_verdict` (`"approve"` |
   `"request_changes"`), `tasks.review_url` (GitHub review
   permalink), and `tasks.review_body` (full prose verdict).
-- **Compliance gate (ship-mode only)** — `workers/_compliance.py`
-  detects ship-mode by inspecting the prompt for the
-  `"# Ship review"` prefix. When matched it loads
-  `workers/schemas/reviewer_ship.json` (per
-  [0044-knowledge-ship-draft](../wip/0044-knowledge-ship-draft.md))
-  and runs `validate_and_retry`. Schema requires the envelope to
-  carry: `verdict`, `review_url`, and a `ship_attestation` block
-  pairing every acceptance criterion of the shipping WIP with
-  either a target `active/` artifact + section or an explicit drop
-  reason. An `approve` verdict without a compliant attestation is
-  rejected by the schema — the gate re-prompts up to
-  `worker_output_compliance_budget`. **Non-ship reviews skip the
-  gate entirely** (the reviewer has no schema to enforce on a
-  free-form approve / request-changes verdict).
+- **Compliance gate (ship-mode and non-ship)** —
+  `workers/_compliance.py::resolve_schema_name` routes by mode.
+  Ship-mode (prompt prefix `"# Ship review"`) loads
+  `workers/schemas/reviewer_ship.json`; non-ship reviewer runs
+  load `workers/schemas/reviewer.json`. Both paths run
+  `validate_and_retry`. The ship-mode schema requires `verdict`,
+  `review_url`, and a `ship_attestation` block pairing every AC
+  of the shipping WIP with either a target `active/`
+  artifact + section or an explicit drop reason. The non-ship
+  reviewer schema requires `verdict`, `review_url`,
+  `security_findings` (array), and `performance_findings`
+  (array) — finding objects carry
+  `{category, severity: critical|high|medium|low|info, file, line?, description}`.
+  A schema-level `if/then` rejects `verdict: "approve"` when any
+  `security_findings` entry carries `severity: "critical"`. The
+  gate re-prompts up to `worker_output_compliance_budget`;
+  budget exhaustion lands `failure_kind="schema"` with the raw
+  output in `raw_output_held`. ADR
+  [0039](../../../adrs/0039-enable-compliance-gate-for-normal-reviewer-runs-over-free-text-verdict-protocol.md)
+  documents why the gate now covers normal runs.
 - **Transient retry** — same wrapper as the developer worker; ADR
   [0013](../../../adrs/0013-worker-level-transient-retry.md).
 - **Dispatcher registration.** `_RUNNERS["reviewer"] =
   run_reviewer_task` alongside the other roles.
+- **Findings persistence.** After the compliance gate passes, the
+  dispatcher reviewer branch JSON-parses `result.result` and writes
+  `len(security_findings)` to `tasks.security_finding_count` and
+  `len(performance_findings)` to `tasks.performance_finding_count`
+  (both nullable INTEGER columns, added by a single ADR-0021
+  deprecate-then-remove migration). Pre-existing reviewer rows keep
+  `NULL`; the admin panel chips render only when non-null. Each
+  finding posts to GitHub as an inline `[security][{severity}]` or
+  `[performance]` PR comment on the offending line, distinct from
+  convention comments.
+- **Admin chips (`coder-admin`).** `TaskDetail.tsx` renders
+  `SecurityFindingsChip` and `PerformanceFindingsChip` alongside
+  the verdict chip for `role=reviewer` tasks. Zero counts render
+  green; any non-zero security count renders amber (critical
+  findings would have already forced `request-changes`). Behind
+  `VITE_REVIEWER_FINDINGS_ENABLED`.
 
 ### Data flow
 
@@ -119,6 +141,10 @@ flowchart TB
   of the shipping WIP must map to either a destination
   artifact + section or an explicit drop reason; an `approve` that
   fails this rule is rejected by the schema, not by a reviewer.
+- **Critical security findings block approve.** The non-ship
+  schema's `if/then` clause rejects `verdict: "approve"` when any
+  `security_findings` entry has `severity: "critical"` — the
+  schema, not the reviewer, enforces AC3 of spec 0094.
 - **Workspace cleanup is unconditional.** Same `try/finally`
   pattern as the developer worker.
 
@@ -153,6 +179,12 @@ flowchart TB
 - [design 0057](./role-prompt-knowledge-layout.md) — prompt assembly
   from common preamble + role + task-mode files; mode hardcoded to
   `"review"` for this worker.
+- 0094 — Structured security and performance analysis pass on
+  every reviewer run; `reviewer.json` schema with critical-blocks-approve
+  `if/then` clause; `security_finding_count` /
+  `performance_finding_count` columns; admin chips in
+  TaskDetail. ADR 0039 turns the compliance gate on for normal
+  reviewer runs.
 
 ## Links
 
@@ -163,5 +195,6 @@ flowchart TB
   [developer-worker](./developer-worker.md),
   [knowledge-write-api](../knowledge/knowledge-write-api.md)
 - ADRs: [0007](../../../adrs/0007-reviewer-separated-from-pm.md),
-  [0013](../../../adrs/0013-worker-level-transient-retry.md)
-- Services: `coder-core`
+  [0013](../../../adrs/0013-worker-level-transient-retry.md),
+  [0039](../../../adrs/0039-enable-compliance-gate-for-normal-reviewer-runs-over-free-text-verdict-protocol.md)
+- Services: `coder-core`, `coder-admin`

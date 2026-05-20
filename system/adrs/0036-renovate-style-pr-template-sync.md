@@ -9,7 +9,7 @@ deciders:
 supersedes: null
 superseded_by: null
 relates_to_designs:
-- '0079'
+- coder-product-template
 ---
 
 # ADR 0036 — Renovate-style automated PRs for template sync over git subtree or manual versioning

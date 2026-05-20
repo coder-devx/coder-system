@@ -9,7 +9,8 @@ deciders:
 supersedes: null
 superseded_by: null
 relates_to_designs:
-- '0075'
+- coder-studio-founder
+- studio-b2c-portfolio
 ---
 
 # ADR 0035 — Founder as a recurring job over a normal dispatcher task
